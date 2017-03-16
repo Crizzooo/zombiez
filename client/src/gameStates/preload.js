@@ -35,7 +35,7 @@ const preload = () => {
 }
 const create = () => {
   //launch next game state;
-  PB.game.state.start('zombieGameState', true, false, 'Launching Zombie Game State!');
+  PB.game.state.start('ZombieGameState', true, false, 'Launching Zombie Game State!');
 }
 const update = () => {
 

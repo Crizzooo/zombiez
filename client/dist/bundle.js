@@ -11581,8 +11581,7 @@ var BootState = {
 exports.default = BootState;
 
 /***/ }),
-/* 146 */,
-/* 147 */
+/* 146 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -11626,7 +11625,7 @@ var preload = function preload() {
 };
 var create = function create() {
   //launch next game state;
-  PB.game.state.start('zombieGameState', true, false, 'Launching Zombie Game State!');
+  PB.game.state.start('ZombieGameState', true, false, 'Launching Zombie Game State!');
 };
 var update = function update() {};
 
@@ -11638,6 +11637,50 @@ var PreloadState = {
 };
 
 exports.default = PreloadState;
+
+/***/ }),
+/* 147 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var R = __webpack_require__(158);
+var throttle = __webpack_require__(311);
+
+var init = function init(msg) {
+  //set constants for game
+  PB.customParams.RUNNING_SPEED = 180;
+  PB.customParams.JUMPING_SPEED = 100;
+
+  //initiate physics
+  PB.game.physics.arcade.gravity.y = GRAVITY;
+
+  //cursor keys
+  //PB.game.cursors created in boot state file
+};
+
+var preload = function preload() {
+  //load assets that are specific for this mini game
+};
+
+var create = function create() {
+  //create game set up
+  loadLevel();
+};
+
+var update = function update() {
+  //NOTE: Collision between SpriteA and SpriteB - callback takes in SpriteA and SpriteB
+};
+
+var loadLevel = function loadLevel() {
+  PB.gameBackground = PB.game.add.sprite(PB.game.world.centerX, PB.game.world.centerY, 'snowLandscape');
+  PB.gameBackground.scale.setTo(0.9, 0.9);
+  PB.gameBackground.anchor.setTo(0.5);
+
+  //resize the world to fit the layer
+  PB.game.world.resize(570, 550);
+};
 
 /***/ }),
 /* 148 */
@@ -18725,11 +18768,11 @@ var _boot = __webpack_require__(145);
 
 var _boot2 = _interopRequireDefault(_boot);
 
-var _preload = __webpack_require__(147);
+var _preload = __webpack_require__(146);
 
 var _preload2 = _interopRequireDefault(_preload);
 
-var _zombieGameState = __webpack_require__(630);
+var _zombieGameState = __webpack_require__(147);
 
 var _zombieGameState2 = _interopRequireDefault(_zombieGameState);
 
@@ -20124,11 +20167,11 @@ var _boot = __webpack_require__(145);
 
 var _boot2 = _interopRequireDefault(_boot);
 
-var _preload = __webpack_require__(147);
+var _preload = __webpack_require__(146);
 
 var _preload2 = _interopRequireDefault(_preload);
 
-var _zombieGameState = __webpack_require__(630);
+var _zombieGameState = __webpack_require__(147);
 
 var _zombieGameState2 = _interopRequireDefault(_zombieGameState);
 
@@ -44558,50 +44601,6 @@ _reactDom2.default.render(_react2.default.createElement(
     _react2.default.createElement(_reactRouter.Route, { path: '/', component: _layout2.default, onEnter: getPlayers })
   )
 ), document.getElementById('root'));
-
-/***/ }),
-/* 630 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-var R = __webpack_require__(158);
-var throttle = __webpack_require__(311);
-
-var init = function init(msg) {
-  //set constants for game
-  PB.customParams.RUNNING_SPEED = 180;
-  PB.customParams.JUMPING_SPEED = 100;
-
-  //initiate physics
-  PB.game.physics.arcade.gravity.y = GRAVITY;
-
-  //cursor keys
-  //PB.game.cursors created in boot state file
-};
-
-var preload = function preload() {
-  //load assets that are specific for this mini game
-};
-
-var create = function create() {
-  //create game set up
-  loadLevel();
-};
-
-var update = function update() {
-  //NOTE: Collision between SpriteA and SpriteB - callback takes in SpriteA and SpriteB
-};
-
-var loadLevel = function loadLevel() {
-  PB.gameBackground = PB.game.add.sprite(PB.game.world.centerX, PB.game.world.centerY, 'snowLandscape');
-  PB.gameBackground.scale.setTo(0.9, 0.9);
-  PB.gameBackground.anchor.setTo(0.5);
-
-  //resize the world to fit the layer
-  PB.game.world.resize(570, 550);
-};
 
 /***/ })
 /******/ ]);
