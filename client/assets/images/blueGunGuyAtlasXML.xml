@@ -1,0 +1,22 @@
+<TextureAtlas imagePath="blueGunGuyAtlas.png">
+	<SubTexture name="blueGunGuy_01.png" x="54" y="74" width="14" height="23"/>
+	<SubTexture name="blueGunGuy_02.png" x="37" y="48" width="16" height="24"/>
+	<SubTexture name="blueGunGuy_03.png" x="36" y="74" width="16" height="24"/>
+	<SubTexture name="blueGunGuy_04.png" x="36" y="100" width="16" height="22"/>
+	<SubTexture name="blueGunGuy_05.png" x="0" y="49" width="17" height="24"/>
+	<SubTexture name="blueGunGuy_06.png" x="0" y="0" width="18" height="24"/>
+	<SubTexture name="blueGunGuy_07.png" x="20" y="24" width="16" height="22"/>
+	<SubTexture name="blueGunGuy_08.png" x="18" y="75" width="16" height="21"/>
+	<SubTexture name="blueGunGuy_09.png" x="0" y="98" width="16" height="24"/>
+	<SubTexture name="blueGunGuy_10.png" x="18" y="98" width="16" height="23"/>
+	<SubTexture name="blueGunGuy_11.png" x="0" y="75" width="16" height="21"/>
+	<SubTexture name="blueGunGuy_12.png" x="20" y="0" width="16" height="22"/>
+	<SubTexture name="blueGunGuy_13.png" x="19" y="49" width="16" height="23"/>
+	<SubTexture name="blueGunGuy_14.png" x="0" y="26" width="18" height="21"/>
+	<SubTexture name="blueGunGuy_15.png" x="54" y="99" width="13" height="19"/>
+	<SubTexture name="blueGunGuy_16.png" x="38" y="25" width="14" height="20"/>
+	<SubTexture name="blueGunGuy_17.png" x="38" y="10" width="15" height="13"/>
+	<SubTexture name="blueGunGuy_18.png" x="38" y="0" width="15" height="8"/>
+	<SubTexture name="blueGunGuy_19.png" x="54" y="25" width="13" height="19"/>
+	<SubTexture name="blueGunGuy_20.png" x="55" y="46" width="13" height="18"/>
+</TextureAtlas>

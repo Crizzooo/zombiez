@@ -1,0 +1,118 @@
+/* Variables */
+* {
+  box-sizing: border-box; }
+
+body {
+  margin: 0;
+  padding: 0;
+  font-family: sans-serif; }
+
+html,
+body {
+  height: 100%; }
+
+.App {
+  text-align: center;
+  padding: 15px; }
+
+.App-header {
+  color: white; }
+
+.App-intro {
+  font-size: large; }
+
+.table {
+  margin-bottom: 10px;
+  height: 40%; }
+
+/* Main Container Styles */
+.mainContainer {
+  margin-top: 20px;
+  height: 650px; }
+
+#mainRow {
+  height: 85%; }
+
+.leaderboard {
+  height: 100%;
+  box-sizing: border-box; }
+
+#buttonHolder {
+  height: 5%; }
+
+.gameContainer {
+  height: 100%;
+  padding: 0px;
+  background-color: black;
+  box-sizing: border-box; }
+
+.playButton {
+  height: 40px;
+  margin: calc( (100% / 2) - 40px) auto;
+  display: block;
+  box-sizing: border-box;
+  padding: 5px; }
+
+#game {
+  padding: 0;
+  height: 100%;
+  width: 100%; }
+
+canvas {
+  margin: 0; }
+
+.playBtnText {
+  font-size: 1em; }
+
+/* Chat App Styles */
+/* TODO: Resize Leaderboard Components by wrapping in Div with same VH as gameContainer
+Then, give all components a relative height */
+.chatContainer {
+  height: 50%;
+  margin-top: 10px; }
+
+.chatComponents {
+  box-sizing: border-box;
+  border-radius: 10px;
+  height: 100%;
+  margin: 5px; }
+
+.messageForm {
+  padding: 3px;
+  border: 1px dashed rgba(0, 0, 0, 0.2);
+  height: 100%; }
+
+#messageDisplay {
+  padding: 5px;
+  height: 79%;
+  border-radius: 10px;
+  background-color: rgba(172, 172, 172, 0.18);
+  overflow-y: auto;
+  text-wrap: normal; }
+
+.messageList {
+  padding: 0px;
+  margin-bottom: 0.5rem; }
+
+.messageText {
+  margin-bottom: 0px; }
+
+#createMessage {
+  border: 0;
+  padding: 10px;
+  width: 75%;
+  margin-right: 0.5%; }
+
+#chatForm {
+  height: 100%; }
+
+#sendMessage {
+  width: 24%;
+  padding: 10px; }
+
+.wrap {
+  min-height: 45vh; }
+
+.chatFooter {
+  margin-top: 5px;
+  height: 18%; }

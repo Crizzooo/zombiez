@@ -1,0 +1,22 @@
+<TextureAtlas imagePath="pinkGunGuyAtlas.png">
+	<SubTexture name="pinkGunGuy_01.png" x="54" y="74" width="14" height="23"/>
+	<SubTexture name="pinkGunGuy_02.png" x="37" y="48" width="16" height="24"/>
+	<SubTexture name="pinkGunGuy_03.png" x="36" y="74" width="16" height="24"/>
+	<SubTexture name="pinkGunGuy_04.png" x="36" y="100" width="16" height="22"/>
+	<SubTexture name="pinkGunGuy_05.png" x="0" y="49" width="17" height="24"/>
+	<SubTexture name="pinkGunGuy_06.png" x="0" y="0" width="18" height="24"/>
+	<SubTexture name="pinkGunGuy_07.png" x="20" y="24" width="16" height="22"/>
+	<SubTexture name="pinkGunGuy_08.png" x="18" y="75" width="16" height="21"/>
+	<SubTexture name="pinkGunGuy_09.png" x="0" y="98" width="16" height="24"/>
+	<SubTexture name="pinkGunGuy_10.png" x="18" y="98" width="16" height="23"/>
+	<SubTexture name="pinkGunGuy_11.png" x="0" y="75" width="16" height="21"/>
+	<SubTexture name="pinkGunGuy_12.png" x="20" y="0" width="16" height="22"/>
+	<SubTexture name="pinkGunGuy_13.png" x="19" y="49" width="16" height="23"/>
+	<SubTexture name="pinkGunGuy_14.png" x="0" y="26" width="18" height="21"/>
+	<SubTexture name="pinkGunGuy_15.png" x="54" y="99" width="13" height="19"/>
+	<SubTexture name="pinkGunGuy_16.png" x="38" y="25" width="14" height="20"/>
+	<SubTexture name="pinkGunGuy_17.png" x="38" y="10" width="15" height="13"/>
+	<SubTexture name="pinkGunGuy_18.png" x="38" y="0" width="15" height="8"/>
+	<SubTexture name="pinkGunGuy_19.png" x="54" y="25" width="13" height="19"/>
+	<SubTexture name="pinkGunGuy_20.png" x="55" y="46" width="13" height="18"/>
+</TextureAtlas>
