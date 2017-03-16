@@ -11585,8 +11585,7 @@ var BootState = {
 exports.default = BootState;
 
 /***/ }),
-/* 146 */,
-/* 147 */
+/* 146 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -11633,6 +11632,156 @@ var PreloadState = {
 };
 
 exports.default = PreloadState;
+
+/***/ }),
+/* 147 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+var R = __webpack_require__(158);
+var throttle = __webpack_require__(311);
+
+var throttledServerUpdate = throttle(sendPlayerToServer, 16);
+window.socket.on('serverUpdate', updateClients);
+
+ZG.playerSprites = [];
+var init = function init() {
+  //set constants for game
+  ZG.RUNNING_SPEED = 180;
+
+  //cursor keys
+  //ZG.game.cursors created in boot state file
+};
+
+var preload = function preload() {
+  //load assets that are specific for this mini game
+};
+
+var create = function create() {
+  //create game set up
+  loadLevel();
+};
+
+var update = function update() {
+  //NOTE: Collision between SpriteA and SpriteB - callback takes in SpriteA and SpriteB
+
+  handleInput();
+
+  //every 20ms send package to server with position
+  throttledServerUpdate();
+};
+
+var loadLevel = function loadLevel() {
+  // ZG.gameBackground = ZG.game.add.sprite(ZG.game.world.centerX, ZG.game.world.centerY, 'snowLandscape');
+  // ZG.gameBackground.scale.setTo(0.9, 0.9);
+  // ZG.gameBackground.anchor.setTo(0.5);
+
+
+  //resize the world to fit the layer
+  ZG.game.world.resize(570, 550);
+
+  //for each player in lobby, create a player sprite
+  ZG.players.map(function (playerObj, index) {
+    console.log('player created for: ', playerObj);
+    var spriteKey = index % 2 === 0 ? 'blueGunGuy' : 'greenGunGuy';
+    var playerSprite = ZG.game.add.sprite(ZG.game.world.centerX + 15 * index, ZG.game.world.centerY + 15 * index, spriteKey);
+
+    ZG.game.physics.arcade.enable(playerSprite);
+    //determine if client is currently a player, and assign his sprite to currentPlayer object
+    console.log('My socket id: ', socket.id);
+    if (socket.id === playerObj.socketId) {
+      ZG.currentPlayer = playerSprite;
+      console.log('current player assigned:', playerSprite);
+    }
+    ZG.playerSprites.push({ socketId: playerObj.socketId, sprite: playerSprite });
+  });
+};
+
+var ZombieGameState = {
+  init: init,
+  preload: preload,
+  create: create,
+  update: update
+};
+exports.default = ZombieGameState;
+
+
+function handleInput() {
+  // console.log('CP: 'ZG.currentPlayer)
+  if (ZG.currentPlayer) {
+    ZG.currentPlayer.body.velocity.x = 0;
+    ZG.currentPlayer.body.velocity.y = 0;
+    if (ZG.game.cursors.left.isDown) {
+      ZG.currentPlayer.body.velocity.x = -ZG.RUNNING_SPEED;
+    }
+    if (ZG.game.cursors.right.isDown) {
+      ZG.currentPlayer.body.velocity.x = ZG.RUNNING_SPEED;
+    }
+    if (ZG.game.cursors.up.isDown) {
+      ZG.currentPlayer.body.velocity.y = -ZG.RUNNING_SPEED;
+    }
+    if (ZG.game.cursors.down.isDown) {
+      ZG.currentPlayer.body.velocity.y = ZG.RUNNING_SPEED;
+    }
+  }
+}
+var date;
+var emitPing = function emitPing() {
+  console.log('emit ping called');
+  window.socket.emit('pingTest');
+  date = new Date();
+};
+
+function sendPlayerToServer() {
+  var x = ZG.currentPlayer.body.x;
+  var y = ZG.currentPlayer.body.y;
+  var gameTime = new Date() - ZG.startDate;
+  var playerId = socket.id;
+  console.log('Are we sending a socket:', socket);
+
+  var clientState = {
+    x: x,
+    y: y,
+    gameTime: gameTime,
+    playerId: playerId
+  };
+
+  socket.emit('clientUpdate', clientState);
+}
+
+function updateClients(serverState) {
+  R.forEachObjIndexed(updatePlayer, serverState);
+  // console.log('state from server:', serverState);
+}
+
+function updatePlayer(playerState) {
+
+  console.log('should be id', playerState);
+
+  console.log('filtering: ', ZG.playerSprites);
+  console.log('looking for id:', playerState.id);
+  var playerToMove = ZG.playerSprites.filter(function (playerSprite) {
+    console.log('examining sprite: ', playerSprite);
+    console.log('returning: ', playerSprite.socketId == playerState.id);
+    return playerSprite.socketId == playerState.id;
+  })[0];
+
+  console.log('Player To Move: ', playerToMove);
+
+  // let playerToMove = R.find(R.propEq('id', playerState.id))(ZG.playerSprites);
+
+  if (playerToMove && playerToMove.socketId != window.socket.id) {
+    playerToMove.sprite.x = playerState.x;
+    playerToMove.sprite.y = playerState.y;
+  }
+}
+
+function findPlayer(id) {}
 
 /***/ }),
 /* 148 */
@@ -18720,11 +18869,11 @@ var _boot = __webpack_require__(145);
 
 var _boot2 = _interopRequireDefault(_boot);
 
-var _preload = __webpack_require__(147);
+var _preload = __webpack_require__(146);
 
 var _preload2 = _interopRequireDefault(_preload);
 
-var _zombieGameState = __webpack_require__(630);
+var _zombieGameState = __webpack_require__(147);
 
 var _zombieGameState2 = _interopRequireDefault(_zombieGameState);
 
@@ -18738,7 +18887,7 @@ var attachFunctions = function attachFunctions(socket) {
   socket.on('turnOnGameComponent', dispatchGameTrue);
   socket.on('startGame', startClientGame);
   socket.on('updateLeaderboard', dispatchScoreUpdate);
-  // socket.on('GameStateChange', dispatchNewGameState);
+  socket.on('GameStateChange', dispatchNewGameState);
 };
 
 function dispatchPlayerUpdates(players) {
@@ -18760,8 +18909,9 @@ function dispatchGameTrue() {
   _store2.default.dispatch((0, _playersReducer.changeGamePlaying)(true));
 }
 
-function startClientGame(players) {
+function startClientGame(players, startDate) {
   console.log('Sockets are starting games with Players:', ZG.players);
+  ZG.startDate = startDate;
   ZG.game = new Phaser.Game('100%', '100%', Phaser.AUTO, 'game');
   ZG.game.state.add('Boot', _boot2.default);
   ZG.game.state.add('Preload', _preload2.default);
@@ -20119,11 +20269,11 @@ var _boot = __webpack_require__(145);
 
 var _boot2 = _interopRequireDefault(_boot);
 
-var _preload = __webpack_require__(147);
+var _preload = __webpack_require__(146);
 
 var _preload2 = _interopRequireDefault(_preload);
 
-var _zombieGameState = __webpack_require__(630);
+var _zombieGameState = __webpack_require__(147);
 
 var _zombieGameState2 = _interopRequireDefault(_zombieGameState);
 
@@ -44553,92 +44703,6 @@ _reactDom2.default.render(_react2.default.createElement(
     _react2.default.createElement(_reactRouter.Route, { path: '/', component: _layout2.default, onEnter: getPlayers })
   )
 ), document.getElementById('root'));
-
-/***/ }),
-/* 630 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-var R = __webpack_require__(158);
-var throttle = __webpack_require__(311);
-
-var init = function init() {
-  //set constants for game
-  ZG.RUNNING_SPEED = 180;
-
-  //cursor keys
-  //ZG.game.cursors created in boot state file
-};
-
-var preload = function preload() {
-  //load assets that are specific for this mini game
-};
-
-var create = function create() {
-  //create game set up
-  loadLevel();
-};
-
-var update = function update() {
-  //NOTE: Collision between SpriteA and SpriteB - callback takes in SpriteA and SpriteB
-
-  handleInput();
-};
-
-var loadLevel = function loadLevel() {
-  // ZG.gameBackground = ZG.game.add.sprite(ZG.game.world.centerX, ZG.game.world.centerY, 'snowLandscape');
-  // ZG.gameBackground.scale.setTo(0.9, 0.9);
-  // ZG.gameBackground.anchor.setTo(0.5);
-
-
-  //resize the world to fit the layer
-  ZG.game.world.resize(570, 550);
-
-  //for each player in lobby, create a player sprite
-  ZG.playerSprites = ZG.players.map(function (playerObj, index) {
-    console.log('player created for: ', playerObj);
-    var spriteKey = index % 2 === 0 ? 'blueGunGuy' : 'greenGunGuy';
-    var playerSprite = ZG.game.add.sprite(ZG.game.world.centerX + 15 * index, ZG.game.world.centerY + 15 * index, spriteKey);
-    ZG.game.physics.arcade.enable(playerSprite);
-    //determine if client is currently a player, and assign his sprite to currentPlayer object
-    if (socket.id === playerObj.socketId) {
-      ZG.currentPlayer = playerSprite;
-    }
-  });
-};
-
-var ZombieGameState = {
-  init: init,
-  preload: preload,
-  create: create,
-  update: update
-};
-exports.default = ZombieGameState;
-
-
-function handleInput() {
-  if (ZG.currentPlayer) {
-    ZG.currentPlayer.body.velocity.x = 0;
-    ZG.currentPlayer.body.velocity.y = 0;
-    if (ZG.game.cursors.left.isDown) {
-      ZG.currentPlayer.body.velocity.x = -ZG.RUNNING_SPEED;
-    }
-    if (ZG.game.cursors.right.isDown) {
-      ZG.currentPlayer.body.velocity.x = ZG.RUNNING_SPEED;
-    }
-    if (ZG.game.cursors.up.isDown) {
-      ZG.currentPlayer.body.velocity.y = -ZG.RUNNING_SPEED;
-    }
-    if (ZG.game.cursors.down.isDown) {
-      ZG.currentPlayer.body.velocity.y = ZG.RUNNING_SPEED;
-    }
-  }
-}
 
 /***/ })
 /******/ ]);

@@ -17,7 +17,7 @@ const attachFunctions = (socket) => {
   socket.on('turnOnGameComponent', dispatchGameTrue);
   socket.on('startGame', startClientGame);
   socket.on('updateLeaderboard', dispatchScoreUpdate);
-  // socket.on('GameStateChange', dispatchNewGameState);
+  socket.on('GameStateChange', dispatchNewGameState);
 };
 
 function dispatchPlayerUpdates(players) {
@@ -39,8 +39,9 @@ function dispatchGameTrue(){
   store.dispatch(changeGamePlaying(true));
 }
 
-function startClientGame(players) {
+function startClientGame(players, startDate) {
   console.log('Sockets are starting games with Players:', ZG.players);
+  ZG.startDate = startDate;
   ZG.game = new Phaser.Game('100%', '100%', Phaser.AUTO, 'game');
   ZG.game.state.add('Boot', BootState);
   ZG.game.state.add('Preload', PreloadState);

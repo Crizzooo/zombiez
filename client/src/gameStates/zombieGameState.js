@@ -1,7 +1,10 @@
 const R = require('ramda');
 const throttle = require('lodash.throttle');
 
+const throttledServerUpdate = throttle(sendPlayerToServer, 16);
+window.socket.on('serverUpdate', updateClients);
 
+ZG.playerSprites = [];
 const init = () => {
   //set constants for game
   ZG.RUNNING_SPEED = 180;
@@ -20,12 +23,14 @@ const create = () => {
 }
 
 
+
 const update = () => {
   //NOTE: Collision between SpriteA and SpriteB - callback takes in SpriteA and SpriteB
 
   handleInput();
 
-
+  //every 20ms send package to server with position
+  throttledServerUpdate();
 }
 
 
@@ -40,15 +45,19 @@ const loadLevel = () => {
 
 
   //for each player in lobby, create a player sprite
-  ZG.playerSprites = ZG.players.map( (playerObj, index) => {
+  ZG.players.map( (playerObj, index) => {
     console.log('player created for: ', playerObj);
     let spriteKey = index % 2 === 0 ? 'blueGunGuy' : 'greenGunGuy';
     let playerSprite = ZG.game.add.sprite(ZG.game.world.centerX + 15*index, ZG.game.world.centerY + 15*index, spriteKey);
+
     ZG.game.physics.arcade.enable(playerSprite);
     //determine if client is currently a player, and assign his sprite to currentPlayer object
+    console.log('My socket id: ', socket.id);
     if (socket.id === playerObj.socketId) {
       ZG.currentPlayer = playerSprite;
+      console.log('current player assigned:', playerSprite);
     }
+    ZG.playerSprites.push({socketId: playerObj.socketId, sprite: playerSprite});
   });
 };
 
@@ -62,6 +71,7 @@ export default ZombieGameState;
 
 
 function handleInput() {
+  // console.log('CP: 'ZG.currentPlayer)
   if (ZG.currentPlayer){
     ZG.currentPlayer.body.velocity.x = 0;
     ZG.currentPlayer.body.velocity.y = 0;
@@ -78,4 +88,59 @@ function handleInput() {
       ZG.currentPlayer.body.velocity.y = ZG.RUNNING_SPEED;
     }
   }
+
+}
+var date;
+const emitPing = function () {
+  console.log('emit ping called');
+  window.socket.emit('pingTest');
+  date = new Date();
+}
+
+function sendPlayerToServer(){
+  let x = ZG.currentPlayer.body.x;
+  let y = ZG.currentPlayer.body.y;
+  let gameTime = new Date() - ZG.startDate;
+  let playerId = socket.id;
+  console.log('Are we sending a socket:', socket);
+
+  let clientState = {
+    x,
+    y,
+    gameTime,
+    playerId
+  }
+
+  socket.emit('clientUpdate', clientState);
+}
+
+function updateClients(serverState) {
+  R.forEachObjIndexed(updatePlayer, serverState);
+  // console.log('state from server:', serverState);
+}
+
+function updatePlayer(playerState) {
+
+  console.log('should be id', playerState)
+
+  console.log('filtering: ', ZG.playerSprites);
+  console.log('looking for id:', playerState.id);
+  let playerToMove = ZG.playerSprites.filter((playerSprite) => {
+    console.log('examining sprite: ', playerSprite)
+    console.log('returning: ', playerSprite.socketId == playerState.id);
+    return playerSprite.socketId == playerState.id;
+  })[0];
+
+  console.log('Player To Move: ', playerToMove);
+
+  // let playerToMove = R.find(R.propEq('id', playerState.id))(ZG.playerSprites);
+
+  if (playerToMove && playerToMove.socketId != window.socket.id){
+    playerToMove.sprite.x = playerState.x;
+    playerToMove.sprite.y = playerState.y;
+  }
+}
+
+function findPlayer(id) {
+
 }
