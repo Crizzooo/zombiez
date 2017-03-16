@@ -3,9 +3,7 @@ import { loadPlayers, setCurrentPlayer, changeGamePlaying, changePlayerScore } f
 import { loadMessages, addMessage } from './reducers/chatApp-reducer.js';
 import { dispatchGameUpdate } from './reducers/gameState-reducer.js';
 
-import BootState from './gameStates/boot.js';
-import PreloadState from './gameStates/preload.js';
-import ZombieGameState from './gameStates/zombieGameState.js';
+import GenZed from './main.js'
 
 
 
@@ -41,11 +39,16 @@ function dispatchGameTrue(){
 
 function startClientGame(players) {
   console.log('Sockets are starting games with Players:', ZG.players);
-  ZG.game = new Phaser.Game('100%', '100%', Phaser.AUTO, 'game');
-  ZG.game.state.add('Boot', BootState);
-  ZG.game.state.add('Preload', PreloadState);
-  ZG.game.state.add('ZombieGameState', ZombieGameState);
-  ZG.game.state.start('Boot', true, false, players);
+  // ZG.game = new Phaser.Game('100%', '100%', Phaser.AUTO, 'game');
+  // ZG.game.state.add('Boot', BootState);
+  // ZG.game.state.add('Preload', PreloadState);
+  // ZG.game.state.add('ZombieGameState', ZombieGameState);
+  // ZG.game.state.start('Boot', true, false, players);
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+  //Game Starts HERE!
+  ZG.game = new GenZed(640, 480, Phaser.AUTO, 'game');
+  ZG.game.startGame('BootState', true, false, players);
 }
 
 function dispatchNewGameState(playerObjects) {
