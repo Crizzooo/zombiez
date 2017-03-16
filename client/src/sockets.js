@@ -40,12 +40,12 @@ function dispatchGameTrue(){
 }
 
 function startClientGame(players) {
-  console.log('Sockets are starting games with Players:', PB.customParams.players);
-  PB.game = new Phaser.Game('100%', '100%', Phaser.AUTO, 'game');
-  PB.game.state.add('Boot', BootState);
-  PB.game.state.add('Preload', PreloadState);
-  PB.game.state.add('ZombieGameState', ZombieGameState);
-  PB.game.state.start('Boot', true, false, players);
+  console.log('Sockets are starting games with Players:', ZG.players);
+  ZG.game = new Phaser.Game('100%', '100%', Phaser.AUTO, 'game');
+  ZG.game.state.add('Boot', BootState);
+  ZG.game.state.add('Preload', PreloadState);
+  ZG.game.state.add('ZombieGameState', ZombieGameState);
+  ZG.game.state.start('Boot', true, false, players);
 }
 
 function dispatchNewGameState(playerObjects) {

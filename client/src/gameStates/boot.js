@@ -2,28 +2,32 @@
 
 
 
-const init = () => {
-  PB.game.stage.backgroundColor = '#da2dc3';
-  PB.game.scale.scaleMode = Phaser.ScaleManager.RESIZE;
+const init = (players) => {
+  ZG.game.stage.backgroundColor = '#da2dc3';
+  ZG.game.scale.scaleMode = Phaser.ScaleManager.RESIZE;
   //TODO: We may want to revisit these
-  // PB.scale.pageAlignHorizontally = true;
-  // PB.scale.pageAlignVertically = true;
-  PB.game.physics.startSystem(Phaser.Physics.ARCADE);
+  // ZG.scale.pageAlignHorizontally = true;
+  // ZG.scale.pageAlignVertically = true;
+  ZG.game.physics.startSystem(Phaser.Physics.ARCADE);
+
+  ZG.players = players;
 }
 
 const preload = () => {
-  PB.game.load.image('preloadbar', 'assets/images/preloader-bar.png');
+  ZG.game.load.image('preloadbar', 'assets/images/preloader-bar.png');
 }
 
 const create = function() {
-  PB.game.preloadBar = PB.game.add.sprite(PB.game.world.centerX, PB.game.world.centerY, 'preloadbar', 0);
-  PB.game.preloadBar.anchor.setTo(0.5);
-  PB.game.preloadBar.scale.setTo(5);
-  PB.game.cursors = PB.game.input.keyboard.createCursorKeys();
-  PB.game.cursors.spacebar = PB.game.input.keyboard.addKey(Phaser.Keyboard.SPACEBAR);
+  ZG.game.preloadBar = ZG.game.add.sprite(ZG.game.world.centerX, ZG.game.world.centerY, 'preloadbar', 0);
+  ZG.game.preloadBar.anchor.setTo(0.5);
+  ZG.game.preloadBar.scale.setTo(5);
+
+  //Control Mechanics
+  ZG.game.cursors = ZG.game.input.keyboard.createCursorKeys();
+  ZG.game.cursors.spacebar = ZG.game.input.keyboard.addKey(Phaser.Keyboard.SPACEBAR);
 }
 const update = () => {
-  PB.game.state.start('Preload');
+  ZG.game.state.start('Preload');
 }
 
 const BootState = {

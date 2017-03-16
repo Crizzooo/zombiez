@@ -7593,12 +7593,12 @@ exports.default = function () {
 
     case LOAD_PLAYERS:
       newState.allPlayers = action.allPlayers;
-      PB.customParams.players = newState.allPlayers;
+      ZG.players = newState.allPlayers;
       break;
 
     case SET_CURRENT_PLAYER:
       newState.currentPlayer = action.player;
-      PB.customParams.currentPlayer = action.player;
+      ZG.currentPlayer = action.player;
       break;
 
     case SET_GAME_PLAYING_BOOL:
@@ -11547,28 +11547,32 @@ Object.defineProperty(exports, "__esModule", {
 });
 
 
-var init = function init() {
-  PB.game.stage.backgroundColor = '#da2dc3';
-  PB.game.scale.scaleMode = Phaser.ScaleManager.RESIZE;
+var init = function init(players) {
+  ZG.game.stage.backgroundColor = '#da2dc3';
+  ZG.game.scale.scaleMode = Phaser.ScaleManager.RESIZE;
   //TODO: We may want to revisit these
-  // PB.scale.pageAlignHorizontally = true;
-  // PB.scale.pageAlignVertically = true;
-  PB.game.physics.startSystem(Phaser.Physics.ARCADE);
+  // ZG.scale.pageAlignHorizontally = true;
+  // ZG.scale.pageAlignVertically = true;
+  ZG.game.physics.startSystem(Phaser.Physics.ARCADE);
+
+  ZG.players = players;
 };
 
 var preload = function preload() {
-  PB.game.load.image('preloadbar', 'assets/images/preloader-bar.png');
+  ZG.game.load.image('preloadbar', 'assets/images/preloader-bar.png');
 };
 
 var create = function create() {
-  PB.game.preloadBar = PB.game.add.sprite(PB.game.world.centerX, PB.game.world.centerY, 'preloadbar', 0);
-  PB.game.preloadBar.anchor.setTo(0.5);
-  PB.game.preloadBar.scale.setTo(5);
-  PB.game.cursors = PB.game.input.keyboard.createCursorKeys();
-  PB.game.cursors.spacebar = PB.game.input.keyboard.addKey(Phaser.Keyboard.SPACEBAR);
+  ZG.game.preloadBar = ZG.game.add.sprite(ZG.game.world.centerX, ZG.game.world.centerY, 'preloadbar', 0);
+  ZG.game.preloadBar.anchor.setTo(0.5);
+  ZG.game.preloadBar.scale.setTo(5);
+
+  //Control Mechanics
+  ZG.game.cursors = ZG.game.input.keyboard.createCursorKeys();
+  ZG.game.cursors.spacebar = ZG.game.input.keyboard.addKey(Phaser.Keyboard.SPACEBAR);
 };
 var update = function update() {
-  PB.game.state.start('Preload');
+  ZG.game.state.start('Preload');
 };
 
 var BootState = {
@@ -11592,41 +11596,32 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 
-
 var init = function init() {
-  PB.game.stage.backgroundColor = '#7c79fa';
+  ZG.game.stage.backgroundColor = '#7c79fa';
 };
 
 var preload = function preload() {
   //load assets that are used across all games
 
   //Preload Bar
-  PB.game.preloadBar = PB.game.add.sprite(PB.game.world.centerX, PB.game.world.centerY, 'preloadbar', 0);
-  PB.game.preloadBar.anchor.setTo(0.5);
-  PB.game.preloadBar.scale.setTo(5);
+  ZG.game.preloadBar = ZG.game.add.sprite(ZG.game.world.centerX, ZG.game.world.centerY, 'preloadbar', 0);
+  ZG.game.preloadBar.anchor.setTo(0.5);
+  ZG.game.preloadBar.scale.setTo(5);
 
   //Other Sprites
-  PB.game.load.setPreloadSprite(PB.game.preloadBar);
-  PB.game.load.image('iceBall', '../../assets/images/IceBall.png');
-  PB.game.load.image('iceCube', '../../assets/images/iceCubeSprite.png');
-  PB.game.load.image('star', '../../assets/images/starSprite.png');
-  PB.game.load.image('snowLandscape', '../assets/images/snowLandscape.png');
-  PB.game.load.image('smallIceRight', '../assets/images/smallIce1.png');
-  PB.game.load.image('smallIceLeft', '../assets/images/smallIce2.png');
+  ZG.game.load.setPreloadSprite(ZG.game.preloadBar);
 
   //Atlases for Player Character
-  PB.game.load.atlasXML('blueGunGuy', '../../assets/images/blueGunGuyAtlas.png', '../../assets/images/blueGunGuyAtlasXML.xml');
-  PB.game.load.atlasXML('greenGunGuy', '../../assets/images/greenGunGuyAtlas.png', '../../assets/images/greenGunGuyAtlasXML.xml');
-  PB.game.load.atlasXML('greyGunGuy', '../../assets/images/greyGunGuyAtlas.png', '../../assets/images/greyGunGuyAtlasXML.xml');
-  PB.game.load.atlasXML('pinkGunGuy', '../../assets/images/pinkGunGuyAtlas.png', '../../assets/images/pinkGunGuyAtlasXML.xml');
+  ZG.game.load.atlasXML('blueGunGuy', '../../assets/images/blueGunGuyAtlas.png', '../../assets/images/blueGunGuyAtlasXML.xml');
+  ZG.game.load.atlasXML('greenGunGuy', '../../assets/images/greenGunGuyAtlas.png', '../../assets/images/greenGunGuyAtlasXML.xml');
 
   //load level releated assets
-  // PB.game.load.image('gameTiles', '../../assets/images/tiles_spritesheet.png');
-  // PB.game.load.tilemap('level1', '../../assets/levels/level1.json', null, Phaser.Tilemap.TILED_JSON);
+  // ZG.game.load.image('gameTiles', '../../assets/images/tiles_spritesheet.png');
+  // ZG.game.load.tilemap('level1', '../../assets/levels/level1.json', null, Phaser.Tilemap.TILED_JSON);
 };
 var create = function create() {
   //launch next game state;
-  PB.game.state.start('zombieGameState', true, false, 'Launching Zombie Game State!');
+  ZG.game.state.start('ZombieGameState', true, false);
 };
 var update = function update() {};
 
@@ -11741,7 +11736,7 @@ exports.default = function () {
       // PB.customParams.players = newState.allPlayers;
       console.log('Reducer recieved:', action.gameState);
       newState.gameState = action.gameState;
-      PB.customParams.players = action.gameState;
+      ZG.customParams.players = action.gameState;
       break;
 
     default:
@@ -18766,12 +18761,12 @@ function dispatchGameTrue() {
 }
 
 function startClientGame(players) {
-  console.log('Sockets are starting games with Players:', PB.customParams.players);
-  PB.game = new Phaser.Game('100%', '100%', Phaser.AUTO, 'game');
-  PB.game.state.add('Boot', _boot2.default);
-  PB.game.state.add('Preload', _preload2.default);
-  PB.game.state.add('ZombieGameState', _zombieGameState2.default);
-  PB.game.state.start('Boot', true, false, players);
+  console.log('Sockets are starting games with Players:', ZG.players);
+  ZG.game = new Phaser.Game('100%', '100%', Phaser.AUTO, 'game');
+  ZG.game.state.add('Boot', _boot2.default);
+  ZG.game.state.add('Preload', _preload2.default);
+  ZG.game.state.add('ZombieGameState', _zombieGameState2.default);
+  ZG.game.state.start('Boot', true, false, players);
 }
 
 function dispatchNewGameState(playerObjects) {
@@ -44566,19 +44561,18 @@ _reactDom2.default.render(_react2.default.createElement(
 "use strict";
 
 
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
 var R = __webpack_require__(158);
 var throttle = __webpack_require__(311);
 
-var init = function init(msg) {
+var init = function init() {
   //set constants for game
-  PB.customParams.RUNNING_SPEED = 180;
-  PB.customParams.JUMPING_SPEED = 100;
-
-  //initiate physics
-  PB.game.physics.arcade.gravity.y = GRAVITY;
+  ZG.RUNNING_SPEED = 180;
 
   //cursor keys
-  //PB.game.cursors created in boot state file
+  //ZG.game.cursors created in boot state file
 };
 
 var preload = function preload() {
@@ -44592,16 +44586,59 @@ var create = function create() {
 
 var update = function update() {
   //NOTE: Collision between SpriteA and SpriteB - callback takes in SpriteA and SpriteB
+
+  handleInput();
 };
 
 var loadLevel = function loadLevel() {
-  PB.gameBackground = PB.game.add.sprite(PB.game.world.centerX, PB.game.world.centerY, 'snowLandscape');
-  PB.gameBackground.scale.setTo(0.9, 0.9);
-  PB.gameBackground.anchor.setTo(0.5);
+  // ZG.gameBackground = ZG.game.add.sprite(ZG.game.world.centerX, ZG.game.world.centerY, 'snowLandscape');
+  // ZG.gameBackground.scale.setTo(0.9, 0.9);
+  // ZG.gameBackground.anchor.setTo(0.5);
+
 
   //resize the world to fit the layer
-  PB.game.world.resize(570, 550);
+  ZG.game.world.resize(570, 550);
+
+  //for each player in lobby, create a player sprite
+  ZG.playerSprites = ZG.players.map(function (playerObj, index) {
+    console.log('player created for: ', playerObj);
+    var spriteKey = index % 2 === 0 ? 'blueGunGuy' : 'greenGunGuy';
+    var playerSprite = ZG.game.add.sprite(ZG.game.world.centerX + 15 * index, ZG.game.world.centerY + 15 * index, spriteKey);
+    ZG.game.physics.arcade.enable(playerSprite);
+    //determine if client is currently a player, and assign his sprite to currentPlayer object
+    if (socket.id === playerObj.socketId) {
+      ZG.currentPlayer = playerSprite;
+    }
+  });
 };
+
+var ZombieGameState = {
+  init: init,
+  preload: preload,
+  create: create,
+  update: update
+};
+exports.default = ZombieGameState;
+
+
+function handleInput() {
+  if (ZG.currentPlayer) {
+    ZG.currentPlayer.body.velocity.x = 0;
+    ZG.currentPlayer.body.velocity.y = 0;
+    if (ZG.game.cursors.left.isDown) {
+      ZG.currentPlayer.body.velocity.x = -ZG.RUNNING_SPEED;
+    }
+    if (ZG.game.cursors.right.isDown) {
+      ZG.currentPlayer.body.velocity.x = ZG.RUNNING_SPEED;
+    }
+    if (ZG.game.cursors.up.isDown) {
+      ZG.currentPlayer.body.velocity.y = -ZG.RUNNING_SPEED;
+    }
+    if (ZG.game.cursors.down.isDown) {
+      ZG.currentPlayer.body.velocity.y = ZG.RUNNING_SPEED;
+    }
+  }
+}
 
 /***/ })
 /******/ ]);

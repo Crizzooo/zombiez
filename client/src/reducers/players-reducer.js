@@ -19,12 +19,12 @@ export default (state = initialState, action) => {
 
     case LOAD_PLAYERS:
       newState.allPlayers = action.allPlayers;
-      PB.customParams.players = newState.allPlayers;
+      ZG.players = newState.allPlayers;
       break;
 
     case SET_CURRENT_PLAYER:
       newState.currentPlayer = action.player;
-      PB.customParams.currentPlayer = action.player;
+      ZG.currentPlayer = action.player;
       break;
 
     case SET_GAME_PLAYING_BOOL:
