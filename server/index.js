@@ -24,7 +24,7 @@ let players = [];
 let messages = [];
 
 let clientStates = {};
-const throttledStateChange = throttle(emitStateChange, 16);
+const throttledStateChange = throttle(emitStateChange, 32);
 
 //Initiate Socket with all functions for server
 io.on('connection', (socket) => {

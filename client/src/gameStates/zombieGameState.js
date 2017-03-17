@@ -17,7 +17,7 @@ export default class ZombieGameState extends Phaser.State {
     this.cursors = this.input.keyboard.createCursorKeys();
     this.cursors.spacebar = this.input.keyboard.addKey(Phaser.Keyboard.SPACEBAR);
 
-    this.sendToServer = throttle(this.sendPlayerToServer, 16);
+    this.sendToServer = throttle(this.sendPlayerToServer, 32);
   }
 
 
@@ -56,16 +56,17 @@ export default class ZombieGameState extends Phaser.State {
       let playerSprite = this.add.sprite(this.world.centerX + 15*index, this.world.centerY + 15*index, spriteKey);
       console.log('created player at ', this.world.centerX + 15*index);
       console.log('created player at ', this.world.centerY + 15*index);
-
+      playerSprite.anchor.set(0.5);
       this.physics.arcade.enable(playerSprite);
       playerSprite.collideWorldBounds = true;
+      let interpolate = this.add.tween(playerSprite);
       console.log('created sprite: ', playerSprite);
       //determine if client is currently a player, and assign his sprite to currentPlayer object
       if (socket.id === playerObj.socketId) {
         ZG.currentPlayer = playerSprite;
         console.log('current player assigned:', playerSprite);
       }
-      ZG.playerSprites.push({socketId: playerObj.socketId, sprite: playerSprite});
+      ZG.playerSprites.push({socketId: playerObj.socketId, sprite: playerSprite, interpolate});
     });
   };
 
@@ -127,13 +128,24 @@ export default class ZombieGameState extends Phaser.State {
       return playerSprite.socketId == playerState.id;
     })[0];
 
-    // console.log('Player To Move: ', playerToMove);
+    console.log('Player To Move: ', playerToMove);
 
     // let playerToMove = R.find(R.propEq('id', playerState.id))(ZG.playerSprites);
 
     if (playerToMove && playerToMove.socketId != window.socket.id){
-      playerToMove.sprite.x = playerState.x;
-      playerToMove.sprite.y = playerState.y;
+      // playerToMove.sprite.x = playerState.x;
+      // playerToMove.sprite.y = playerState.y;
+
+      // let tween = playerToMove.interpolate;
+      // console.log('TWEEN:', tween);
+      // tween.to({ x: playerState.x, y: playerState.y}, 32, 'linear');
+      // tween.start();
+      let interTween = self.add.tween(playerToMove.sprite);
+      console.log(typeof interTween);
+      // playerToMove.tween.to({ x: playerState.x, y: playerState.y}, 32, 'linear').start();
+      interTween.to({ x: playerState.x, y: playerState.y }, 5, Phaser.Easing.Linear.None, true);
+      console.log('TWEEN?', interTween);
+      interTween.onComplete.addOnce( ()=> console.log('TWEEN HAS COMPLETED... YOU HEAR?'));
     }
   }
 

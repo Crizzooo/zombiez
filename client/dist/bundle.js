@@ -11675,6 +11675,8 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 
+var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
+
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
@@ -11711,7 +11713,7 @@ var ZombieGameState = function (_Phaser$State) {
       this.cursors = this.input.keyboard.createCursorKeys();
       this.cursors.spacebar = this.input.keyboard.addKey(Phaser.Keyboard.SPACEBAR);
 
-      this.sendToServer = throttle(this.sendPlayerToServer, 16);
+      this.sendToServer = throttle(this.sendPlayerToServer, 32);
     }
   }, {
     key: 'preload',
@@ -11755,16 +11757,17 @@ var ZombieGameState = function (_Phaser$State) {
         var playerSprite = _this2.add.sprite(_this2.world.centerX + 15 * index, _this2.world.centerY + 15 * index, spriteKey);
         console.log('created player at ', _this2.world.centerX + 15 * index);
         console.log('created player at ', _this2.world.centerY + 15 * index);
-
+        playerSprite.anchor.set(0.5);
         _this2.physics.arcade.enable(playerSprite);
         playerSprite.collideWorldBounds = true;
+        var interpolate = _this2.add.tween(playerSprite);
         console.log('created sprite: ', playerSprite);
         //determine if client is currently a player, and assign his sprite to currentPlayer object
         if (socket.id === playerObj.socketId) {
           ZG.currentPlayer = playerSprite;
           console.log('current player assigned:', playerSprite);
         }
-        ZG.playerSprites.push({ socketId: playerObj.socketId, sprite: playerSprite });
+        ZG.playerSprites.push({ socketId: playerObj.socketId, sprite: playerSprite, interpolate: interpolate });
       });
     }
   }, {
@@ -11831,13 +11834,26 @@ var ZombieGameState = function (_Phaser$State) {
         return playerSprite.socketId == playerState.id;
       })[0];
 
-      // console.log('Player To Move: ', playerToMove);
+      console.log('Player To Move: ', playerToMove);
 
       // let playerToMove = R.find(R.propEq('id', playerState.id))(ZG.playerSprites);
 
       if (playerToMove && playerToMove.socketId != window.socket.id) {
-        playerToMove.sprite.x = playerState.x;
-        playerToMove.sprite.y = playerState.y;
+        // playerToMove.sprite.x = playerState.x;
+        // playerToMove.sprite.y = playerState.y;
+
+        // let tween = playerToMove.interpolate;
+        // console.log('TWEEN:', tween);
+        // tween.to({ x: playerState.x, y: playerState.y}, 32, 'linear');
+        // tween.start();
+        var interTween = self.add.tween(playerToMove.sprite);
+        console.log(typeof interTween === 'undefined' ? 'undefined' : _typeof(interTween));
+        // playerToMove.tween.to({ x: playerState.x, y: playerState.y}, 32, 'linear').start();
+        interTween.to({ x: playerState.x, y: playerState.y }, 5, Phaser.Easing.Linear.None, true);
+        console.log('TWEEN?', interTween);
+        interTween.onComplete.addOnce(function () {
+          return console.log('TWEEN HAS COMPLETED... YOU HEAR?');
+        });
       }
     }
   }]);
