@@ -7,6 +7,8 @@ import BootState from './gameStates/boot.js';
 import PreloadState from './gameStates/preload.js';
 import ZombieGameState from './gameStates/zombieGameState.js';
 
+import GenZed from './main.js';
+
 
 
 //We attach all functions to a socket in here
@@ -17,7 +19,7 @@ const attachFunctions = (socket) => {
   socket.on('turnOnGameComponent', dispatchGameTrue);
   socket.on('startGame', startClientGame);
   socket.on('updateLeaderboard', dispatchScoreUpdate);
-  socket.on('GameStateChange', dispatchNewGameState);
+  socket.on('serverUpdate', dispatchNewGameState);
 };
 
 function dispatchPlayerUpdates(players) {
@@ -42,11 +44,12 @@ function dispatchGameTrue(){
 function startClientGame(players, startDate) {
   console.log('Sockets are starting games with Players:', ZG.players);
   ZG.startDate = startDate;
-  ZG.game = new Phaser.Game('100%', '100%', Phaser.AUTO, 'game');
-  ZG.game.state.add('Boot', BootState);
-  ZG.game.state.add('Preload', PreloadState);
-  ZG.game.state.add('ZombieGameState', ZombieGameState);
-  ZG.game.state.start('Boot', true, false, players);
+  ZG.game = new GenZed('100%', '100%', Phaser.AUTO, 'game');
+  ZG.game.startGame('BootState', true, false, players);
+  // ZG.game.state.add('Boot', BootState);
+  // ZG.game.state.add('Preload', PreloadState);
+  // ZG.game.state.add('ZombieGameState', ZombieGameState);
+  // ZG.game.state.start('Boot', true, false, players);
 }
 
 function dispatchNewGameState(playerObjects) {

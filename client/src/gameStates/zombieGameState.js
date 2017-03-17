@@ -1,146 +1,140 @@
 const R = require('ramda');
 const throttle = require('lodash.throttle');
 
-const throttledServerUpdate = throttle(sendPlayerToServer, 16);
-window.socket.on('serverUpdate', updateClients);
 
+var self;
 ZG.playerSprites = [];
-const init = () => {
-  //set constants for game
-  ZG.RUNNING_SPEED = 180;
 
-  //cursor keys
-  //ZG.game.cursors created in boot state file
-}
+export default class ZombieGameState extends Phaser.State {
+  init () {
+    //set constants for game
+    self = this;
+    ZG.RUNNING_SPEED = 180;
 
-const preload = () => {
-  //load assets that are specific for this mini game
-}
+    window.socket.on('serverUpdate', this.updateClients);
+    //cursor keys
+    //Control Mechanics
+    this.cursors = this.input.keyboard.createCursorKeys();
+    this.cursors.spacebar = this.input.keyboard.addKey(Phaser.Keyboard.SPACEBAR);
 
-const create = () => {
-  //create game set up
-  loadLevel();
-}
-
+    this.sendToServer = throttle(this.sendPlayerToServer, 16);
+  }
 
 
-const update = () => {
-  //NOTE: Collision between SpriteA and SpriteB - callback takes in SpriteA and SpriteB
+  preload () {
+      //load assets that are specific for this mini game
+  }
 
-  handleInput();
+  create () {
+      //create game set up
+      this.loadLevel();
+  }
 
-  //every 20ms send package to server with position
-  throttledServerUpdate();
-}
+  update () {
+      //NOTE: Collision between SpriteA and SpriteB - callback takes in SpriteA and SpriteB
+      this.handleInput();
+      //every 16ms send package to server with position
+      this.sendToServer();
 
+  }
 
-const loadLevel = () => {
-  // ZG.gameBackground = ZG.game.add.sprite(ZG.game.world.centerX, ZG.game.world.centerY, 'snowLandscape');
-  // ZG.gameBackground.scale.setTo(0.9, 0.9);
-  // ZG.gameBackground.anchor.setTo(0.5);
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+  //Non Phaser Methods
 
+  loadLevel () {
+    // ZG.gameBackground = ZG.game.add.sprite(ZG.game.world.centerX, ZG.game.world.centerY, 'snowLandscape');
+    // ZG.gameBackground.scale.setTo(0.9, 0.9);
+    // ZG.gameBackground.anchor.setTo(0.5);
 
-  //resize the world to fit the layer
-  ZG.game.world.resize(570, 550);
+    //resize the world to fit the layer
+    this.world.resize(500, 500);
 
+    //for each player in lobby, create a player sprite
+    console.log('creating this amount of players: ', this.game.players.length);
+    this.game.players.map( (playerObj, index) => {
+      let spriteKey = index % 2 === 0 ? 'blueGunGuy' : 'greenGunGuy';
+      let playerSprite = this.add.sprite(this.world.centerX + 15*index, this.world.centerY + 15*index, spriteKey);
+      console.log('created player at ', this.world.centerX + 15*index);
+      console.log('created player at ', this.world.centerY + 15*index);
 
-  //for each player in lobby, create a player sprite
-  ZG.players.map( (playerObj, index) => {
-    console.log('player created for: ', playerObj);
-    let spriteKey = index % 2 === 0 ? 'blueGunGuy' : 'greenGunGuy';
-    let playerSprite = ZG.game.add.sprite(ZG.game.world.centerX + 15*index, ZG.game.world.centerY + 15*index, spriteKey);
+      this.physics.arcade.enable(playerSprite);
+      playerSprite.collideWorldBounds = true;
+      console.log('created sprite: ', playerSprite);
+      //determine if client is currently a player, and assign his sprite to currentPlayer object
+      if (socket.id === playerObj.socketId) {
+        ZG.currentPlayer = playerSprite;
+        console.log('current player assigned:', playerSprite);
+      }
+      ZG.playerSprites.push({socketId: playerObj.socketId, sprite: playerSprite});
+    });
+  };
 
-    ZG.game.physics.arcade.enable(playerSprite);
-    //determine if client is currently a player, and assign his sprite to currentPlayer object
-    console.log('My socket id: ', socket.id);
-    if (socket.id === playerObj.socketId) {
-      ZG.currentPlayer = playerSprite;
-      console.log('current player assigned:', playerSprite);
-    }
-    ZG.playerSprites.push({socketId: playerObj.socketId, sprite: playerSprite});
-  });
-};
-
-var ZombieGameState = {
-  init,
-  preload,
-  create,
-  update
-}
-export default ZombieGameState;
-
-
-function handleInput() {
-  // console.log('CP: 'ZG.currentPlayer)
-  if (ZG.currentPlayer){
-    ZG.currentPlayer.body.velocity.x = 0;
-    ZG.currentPlayer.body.velocity.y = 0;
-    if (ZG.game.cursors.left.isDown){
-      ZG.currentPlayer.body.velocity.x = -ZG.RUNNING_SPEED;
-    }
-    if (ZG.game.cursors.right.isDown){
-      ZG.currentPlayer.body.velocity.x = ZG.RUNNING_SPEED;
-    }
-    if (ZG.game.cursors.up.isDown){
-      ZG.currentPlayer.body.velocity.y = -ZG.RUNNING_SPEED;
-    }
-    if (ZG.game.cursors.down.isDown){
-      ZG.currentPlayer.body.velocity.y = ZG.RUNNING_SPEED;
+  handleInput() {
+    if (ZG.currentPlayer){
+      ZG.currentPlayer.body.velocity.x = 0;
+      ZG.currentPlayer.body.velocity.y = 0;
+      if (this.cursors.left.isDown){
+          ZG.currentPlayer.body.velocity.x = -ZG.RUNNING_SPEED;
+      }
+      if (this.cursors.right.isDown){
+          ZG.currentPlayer.body.velocity.x = ZG.RUNNING_SPEED;
+      }
+      if (this.cursors.up.isDown){
+          ZG.currentPlayer.body.velocity.y = -ZG.RUNNING_SPEED;
+      }
+      if (this.cursors.down.isDown){
+          ZG.currentPlayer.body.velocity.y = ZG.RUNNING_SPEED;
+      }
     }
   }
 
-}
-var date;
-const emitPing = function () {
-  console.log('emit ping called');
-  window.socket.emit('pingTest');
-  date = new Date();
-}
+  // throttledServerUpdate() {
+  //   console.log('sending to server');
+  //   return throttle(this.sendPlayerToServer, 16);
+  // }
 
-function sendPlayerToServer(){
-  let x = ZG.currentPlayer.body.x;
-  let y = ZG.currentPlayer.body.y;
-  let gameTime = new Date() - ZG.startDate;
-  let playerId = socket.id;
-  console.log('Are we sending a socket:', socket);
+  sendPlayerToServer(){
+    let x = ZG.currentPlayer.body.x;
+    let y = ZG.currentPlayer.body.y;
+    let gameTime = new Date() - ZG.startDate;
+    let playerId = socket.id;
+    console.log('Are we sending a socket:', socket);
 
-  let clientState = {
-    x,
-    y,
-    gameTime,
-    playerId
+    let clientState = {
+      x,
+      y,
+      gameTime,
+      playerId
+    }
+
+    socket.emit('clientUpdate', clientState);
   }
 
-  socket.emit('clientUpdate', clientState);
-}
-
-function updateClients(serverState) {
-  R.forEachObjIndexed(updatePlayer, serverState);
-  // console.log('state from server:', serverState);
-}
-
-function updatePlayer(playerState) {
-
-  console.log('should be id', playerState)
-
-  console.log('filtering: ', ZG.playerSprites);
-  console.log('looking for id:', playerState.id);
-  let playerToMove = ZG.playerSprites.filter((playerSprite) => {
-    console.log('examining sprite: ', playerSprite)
-    console.log('returning: ', playerSprite.socketId == playerState.id);
-    return playerSprite.socketId == playerState.id;
-  })[0];
-
-  console.log('Player To Move: ', playerToMove);
-
-  // let playerToMove = R.find(R.propEq('id', playerState.id))(ZG.playerSprites);
-
-  if (playerToMove && playerToMove.socketId != window.socket.id){
-    playerToMove.sprite.x = playerState.x;
-    playerToMove.sprite.y = playerState.y;
+  updateClients(serverState) {
+    R.forEachObjIndexed(self.updatePlayer, serverState);
+    // console.log('state from server:', serverState);
   }
-}
 
-function findPlayer(id) {
+  updatePlayer(playerState) {
+
+    // console.log('should be id', playerState)
+
+    // console.log('filtering: ', ZG.playerSprites);
+    // console.log('looking for id:', playerState.id);
+    let playerToMove = ZG.playerSprites.filter((playerSprite) => {
+      // console.log('examining sprite: ', playerSprite)
+      // console.log('returning: ', playerSprite.socketId == playerState.id);
+      return playerSprite.socketId == playerState.id;
+    })[0];
+
+    // console.log('Player To Move: ', playerToMove);
+
+    // let playerToMove = R.find(R.propEq('id', playerState.id))(ZG.playerSprites);
+
+    if (playerToMove && playerToMove.socketId != window.socket.id){
+      playerToMove.sprite.x = playerState.x;
+      playerToMove.sprite.y = playerState.y;
+    }
+  }
 
 }

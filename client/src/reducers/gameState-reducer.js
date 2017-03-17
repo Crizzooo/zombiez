@@ -14,7 +14,7 @@ export default (state = initialState, action) => {
       // PB.customParams.players = newState.allPlayers;
       console.log('Reducer recieved:', action.gameState);
       newState.gameState = action.gameState;
-      ZG.customParams.players = action.gameState;
+      ZG.players = action.gameState;
       break;
 
     default:

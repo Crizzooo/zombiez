@@ -1,47 +1,31 @@
 
-const init = () => {
-  ZG.game.stage.backgroundColor = '#7c79fa';
-}
 
-const preload = () => {
-  //load assets that are used across all games
+export default class Preload extends Phaser.State {
+  init () {
+    this.stage.backgroundColor = '#7c79fa';
+  }
 
-  //Preload Bar
-  ZG.game.preloadBar = ZG.game.add.sprite(ZG.game.world.centerX, ZG.game.world.centerY, 'preloadbar', 0);
-  ZG.game.preloadBar.anchor.setTo(0.5);
-  ZG.game.preloadBar.scale.setTo(5);
+  preload () {
+      //load assets that are used across all games
 
-  //Other Sprites
-  ZG.game.load.setPreloadSprite(ZG.game.preloadBar);
+      //Preload Bar
+      this.preloadBar = this.add.sprite(this.world.centerX, this.world.centerY, 'preloadbar', 0);
+      this.preloadBar.anchor.setTo(0.5);
+      this.preloadBar.scale.setTo(5);
+
+      //Other Sprites
+      this.load.setPreloadSprite(this.preloadBar);
 
 
-  //Atlases for Player Character
-  ZG.game.load.atlasXML('blueGunGuy', '../../assets/images/blueGunGuyAtlas.png', '../../assets/images/blueGunGuyAtlasXML.xml');
-  ZG.game.load.atlasXML('greenGunGuy', '../../assets/images/greenGunGuyAtlas.png', '../../assets/images/greenGunGuyAtlasXML.xml');
+      //Atlases for Player Character
+      this.load.atlasXML('blueGunGuy', '../../assets/images/blueGunGuyAtlas.png', '../../assets/images/blueGunGuyAtlasXML.xml');
+      this.load.atlasXML('greenGunGuy', '../../assets/images/greenGunGuyAtlas.png', '../../assets/images/greenGunGuyAtlasXML.xml');
+  }
 
-  //load level releated assets
-  // ZG.game.load.image('gameTiles', '../../assets/images/tiles_spritesheet.png');
-  // ZG.game.load.tilemap('level1', '../../assets/levels/level1.json', null, Phaser.Tilemap.TILED_JSON);
-}
-const create = () => {
-  //launch next game state;
-  ZG.game.state.start('ZombieGameState', true, false);
-}
-const update = () => {
-
+  create () {
+      this.state.start('ZombieGameState', true, false);
+  }
 }
 
 
 
-
-
-
-
-const PreloadState = {
-  init,
-  preload,
-  create,
-  update
-};
-
-export default PreloadState;

@@ -11543,44 +11543,62 @@ module.exports = function bind(fn, thisArg) {
 
 
 Object.defineProperty(exports, "__esModule", {
-  value: true
+    value: true
 });
 
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-var init = function init(players) {
-  ZG.game.stage.backgroundColor = '#da2dc3';
-  ZG.game.scale.scaleMode = Phaser.ScaleManager.RESIZE;
-  //TODO: We may want to revisit these
-  // ZG.scale.pageAlignHorizontally = true;
-  // ZG.scale.pageAlignVertically = true;
-  ZG.game.physics.startSystem(Phaser.Physics.ARCADE);
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-  ZG.players = players;
-};
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
 
-var preload = function preload() {
-  ZG.game.load.image('preloadbar', 'assets/images/preloader-bar.png');
-};
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
-var create = function create() {
-  ZG.game.preloadBar = ZG.game.add.sprite(ZG.game.world.centerX, ZG.game.world.centerY, 'preloadbar', 0);
-  ZG.game.preloadBar.anchor.setTo(0.5);
-  ZG.game.preloadBar.scale.setTo(5);
+var BootState = function (_Phaser$State) {
+    _inherits(BootState, _Phaser$State);
 
-  //Control Mechanics
-  ZG.game.cursors = ZG.game.input.keyboard.createCursorKeys();
-  ZG.game.cursors.spacebar = ZG.game.input.keyboard.addKey(Phaser.Keyboard.SPACEBAR);
-};
-var update = function update() {
-  ZG.game.state.start('Preload');
-};
+    function BootState() {
+        _classCallCheck(this, BootState);
 
-var BootState = {
-  init: init,
-  preload: preload,
-  create: create,
-  update: update
-};
+        return _possibleConstructorReturn(this, (BootState.__proto__ || Object.getPrototypeOf(BootState)).apply(this, arguments));
+    }
+
+    _createClass(BootState, [{
+        key: 'init',
+        value: function init(players, level_file, next_state, extra_parameters) {
+            //TODO: We may want to revisit these
+            // ZG.scale.pageAlignHorizontally = true;
+            // ZG.scale.pageAlignVertically = true;
+            this.stage.backgroundColor = '#da2dc3';
+            this.scale.scaleMode = Phaser.ScaleManager.RESIZE;
+            this.physics.startSystem(Phaser.Physics.ARCADE);
+
+            // ZG.players = players;
+            this.game.players = players;
+            console.log("ZG Players initiated: ", ZG.players);
+        }
+    }, {
+        key: 'preload',
+        value: function preload() {
+            this.load.image('preloadbar', 'assets/images/preloader-bar.png');
+        }
+    }, {
+        key: 'create',
+        value: function create() {
+            this.preloadBar = this.add.sprite(this.world.centerX, this.world.centerY, 'preloadbar', 0);
+            this.preloadBar.anchor.setTo(0.5);
+            this.preloadBar.scale.setTo(5);
+        }
+    }, {
+        key: 'update',
+        value: function update() {
+            console.log(this.game);
+            this.state.start("PreloadState");
+        }
+    }]);
+
+    return BootState;
+}(Phaser.State);
 
 exports.default = BootState;
 
@@ -11592,46 +11610,59 @@ exports.default = BootState;
 
 
 Object.defineProperty(exports, "__esModule", {
-  value: true
+    value: true
 });
 
-var init = function init() {
-  ZG.game.stage.backgroundColor = '#7c79fa';
-};
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-var preload = function preload() {
-  //load assets that are used across all games
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-  //Preload Bar
-  ZG.game.preloadBar = ZG.game.add.sprite(ZG.game.world.centerX, ZG.game.world.centerY, 'preloadbar', 0);
-  ZG.game.preloadBar.anchor.setTo(0.5);
-  ZG.game.preloadBar.scale.setTo(5);
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
 
-  //Other Sprites
-  ZG.game.load.setPreloadSprite(ZG.game.preloadBar);
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
-  //Atlases for Player Character
-  ZG.game.load.atlasXML('blueGunGuy', '../../assets/images/blueGunGuyAtlas.png', '../../assets/images/blueGunGuyAtlasXML.xml');
-  ZG.game.load.atlasXML('greenGunGuy', '../../assets/images/greenGunGuyAtlas.png', '../../assets/images/greenGunGuyAtlasXML.xml');
+var Preload = function (_Phaser$State) {
+    _inherits(Preload, _Phaser$State);
 
-  //load level releated assets
-  // ZG.game.load.image('gameTiles', '../../assets/images/tiles_spritesheet.png');
-  // ZG.game.load.tilemap('level1', '../../assets/levels/level1.json', null, Phaser.Tilemap.TILED_JSON);
-};
-var create = function create() {
-  //launch next game state;
-  ZG.game.state.start('ZombieGameState', true, false);
-};
-var update = function update() {};
+    function Preload() {
+        _classCallCheck(this, Preload);
 
-var PreloadState = {
-  init: init,
-  preload: preload,
-  create: create,
-  update: update
-};
+        return _possibleConstructorReturn(this, (Preload.__proto__ || Object.getPrototypeOf(Preload)).apply(this, arguments));
+    }
 
-exports.default = PreloadState;
+    _createClass(Preload, [{
+        key: 'init',
+        value: function init() {
+            this.stage.backgroundColor = '#7c79fa';
+        }
+    }, {
+        key: 'preload',
+        value: function preload() {
+            //load assets that are used across all games
+
+            //Preload Bar
+            this.preloadBar = this.add.sprite(this.world.centerX, this.world.centerY, 'preloadbar', 0);
+            this.preloadBar.anchor.setTo(0.5);
+            this.preloadBar.scale.setTo(5);
+
+            //Other Sprites
+            this.load.setPreloadSprite(this.preloadBar);
+
+            //Atlases for Player Character
+            this.load.atlasXML('blueGunGuy', '../../assets/images/blueGunGuyAtlas.png', '../../assets/images/blueGunGuyAtlasXML.xml');
+            this.load.atlasXML('greenGunGuy', '../../assets/images/greenGunGuyAtlas.png', '../../assets/images/greenGunGuyAtlasXML.xml');
+        }
+    }, {
+        key: 'create',
+        value: function create() {
+            this.state.start('ZombieGameState', true, false);
+        }
+    }]);
+
+    return Preload;
+}(Phaser.State);
+
+exports.default = Preload;
 
 /***/ }),
 /* 147 */
@@ -11643,145 +11674,178 @@ exports.default = PreloadState;
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
 var R = __webpack_require__(158);
 var throttle = __webpack_require__(311);
 
-var throttledServerUpdate = throttle(sendPlayerToServer, 16);
-window.socket.on('serverUpdate', updateClients);
-
+var self;
 ZG.playerSprites = [];
-var init = function init() {
-  //set constants for game
-  ZG.RUNNING_SPEED = 180;
 
-  //cursor keys
-  //ZG.game.cursors created in boot state file
-};
+var ZombieGameState = function (_Phaser$State) {
+  _inherits(ZombieGameState, _Phaser$State);
 
-var preload = function preload() {
-  //load assets that are specific for this mini game
-};
+  function ZombieGameState() {
+    _classCallCheck(this, ZombieGameState);
 
-var create = function create() {
-  //create game set up
-  loadLevel();
-};
+    return _possibleConstructorReturn(this, (ZombieGameState.__proto__ || Object.getPrototypeOf(ZombieGameState)).apply(this, arguments));
+  }
 
-var update = function update() {
-  //NOTE: Collision between SpriteA and SpriteB - callback takes in SpriteA and SpriteB
+  _createClass(ZombieGameState, [{
+    key: 'init',
+    value: function init() {
+      //set constants for game
+      self = this;
+      ZG.RUNNING_SPEED = 180;
 
-  handleInput();
+      window.socket.on('serverUpdate', this.updateClients);
+      //cursor keys
+      //Control Mechanics
+      this.cursors = this.input.keyboard.createCursorKeys();
+      this.cursors.spacebar = this.input.keyboard.addKey(Phaser.Keyboard.SPACEBAR);
 
-  //every 20ms send package to server with position
-  throttledServerUpdate();
-};
-
-var loadLevel = function loadLevel() {
-  // ZG.gameBackground = ZG.game.add.sprite(ZG.game.world.centerX, ZG.game.world.centerY, 'snowLandscape');
-  // ZG.gameBackground.scale.setTo(0.9, 0.9);
-  // ZG.gameBackground.anchor.setTo(0.5);
-
-
-  //resize the world to fit the layer
-  ZG.game.world.resize(570, 550);
-
-  //for each player in lobby, create a player sprite
-  ZG.players.map(function (playerObj, index) {
-    console.log('player created for: ', playerObj);
-    var spriteKey = index % 2 === 0 ? 'blueGunGuy' : 'greenGunGuy';
-    var playerSprite = ZG.game.add.sprite(ZG.game.world.centerX + 15 * index, ZG.game.world.centerY + 15 * index, spriteKey);
-
-    ZG.game.physics.arcade.enable(playerSprite);
-    //determine if client is currently a player, and assign his sprite to currentPlayer object
-    console.log('My socket id: ', socket.id);
-    if (socket.id === playerObj.socketId) {
-      ZG.currentPlayer = playerSprite;
-      console.log('current player assigned:', playerSprite);
+      this.sendToServer = throttle(this.sendPlayerToServer, 16);
     }
-    ZG.playerSprites.push({ socketId: playerObj.socketId, sprite: playerSprite });
-  });
-};
+  }, {
+    key: 'preload',
+    value: function preload() {
+      //load assets that are specific for this mini game
+    }
+  }, {
+    key: 'create',
+    value: function create() {
+      //create game set up
+      this.loadLevel();
+    }
+  }, {
+    key: 'update',
+    value: function update() {
+      //NOTE: Collision between SpriteA and SpriteB - callback takes in SpriteA and SpriteB
+      this.handleInput();
+      //every 16ms send package to server with position
+      this.sendToServer();
+    }
 
-var ZombieGameState = {
-  init: init,
-  preload: preload,
-  create: create,
-  update: update
-};
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    //Non Phaser Methods
+
+  }, {
+    key: 'loadLevel',
+    value: function loadLevel() {
+      var _this2 = this;
+
+      // ZG.gameBackground = ZG.game.add.sprite(ZG.game.world.centerX, ZG.game.world.centerY, 'snowLandscape');
+      // ZG.gameBackground.scale.setTo(0.9, 0.9);
+      // ZG.gameBackground.anchor.setTo(0.5);
+
+      //resize the world to fit the layer
+      this.world.resize(500, 500);
+
+      //for each player in lobby, create a player sprite
+      console.log('creating this amount of players: ', this.game.players.length);
+      this.game.players.map(function (playerObj, index) {
+        var spriteKey = index % 2 === 0 ? 'blueGunGuy' : 'greenGunGuy';
+        var playerSprite = _this2.add.sprite(_this2.world.centerX + 15 * index, _this2.world.centerY + 15 * index, spriteKey);
+        console.log('created player at ', _this2.world.centerX + 15 * index);
+        console.log('created player at ', _this2.world.centerY + 15 * index);
+
+        _this2.physics.arcade.enable(playerSprite);
+        playerSprite.collideWorldBounds = true;
+        console.log('created sprite: ', playerSprite);
+        //determine if client is currently a player, and assign his sprite to currentPlayer object
+        if (socket.id === playerObj.socketId) {
+          ZG.currentPlayer = playerSprite;
+          console.log('current player assigned:', playerSprite);
+        }
+        ZG.playerSprites.push({ socketId: playerObj.socketId, sprite: playerSprite });
+      });
+    }
+  }, {
+    key: 'handleInput',
+    value: function handleInput() {
+      if (ZG.currentPlayer) {
+        ZG.currentPlayer.body.velocity.x = 0;
+        ZG.currentPlayer.body.velocity.y = 0;
+        if (this.cursors.left.isDown) {
+          ZG.currentPlayer.body.velocity.x = -ZG.RUNNING_SPEED;
+        }
+        if (this.cursors.right.isDown) {
+          ZG.currentPlayer.body.velocity.x = ZG.RUNNING_SPEED;
+        }
+        if (this.cursors.up.isDown) {
+          ZG.currentPlayer.body.velocity.y = -ZG.RUNNING_SPEED;
+        }
+        if (this.cursors.down.isDown) {
+          ZG.currentPlayer.body.velocity.y = ZG.RUNNING_SPEED;
+        }
+      }
+    }
+
+    // throttledServerUpdate() {
+    //   console.log('sending to server');
+    //   return throttle(this.sendPlayerToServer, 16);
+    // }
+
+  }, {
+    key: 'sendPlayerToServer',
+    value: function sendPlayerToServer() {
+      var x = ZG.currentPlayer.body.x;
+      var y = ZG.currentPlayer.body.y;
+      var gameTime = new Date() - ZG.startDate;
+      var playerId = socket.id;
+      console.log('Are we sending a socket:', socket);
+
+      var clientState = {
+        x: x,
+        y: y,
+        gameTime: gameTime,
+        playerId: playerId
+      };
+
+      socket.emit('clientUpdate', clientState);
+    }
+  }, {
+    key: 'updateClients',
+    value: function updateClients(serverState) {
+      R.forEachObjIndexed(self.updatePlayer, serverState);
+      // console.log('state from server:', serverState);
+    }
+  }, {
+    key: 'updatePlayer',
+    value: function updatePlayer(playerState) {
+
+      // console.log('should be id', playerState)
+
+      // console.log('filtering: ', ZG.playerSprites);
+      // console.log('looking for id:', playerState.id);
+      var playerToMove = ZG.playerSprites.filter(function (playerSprite) {
+        // console.log('examining sprite: ', playerSprite)
+        // console.log('returning: ', playerSprite.socketId == playerState.id);
+        return playerSprite.socketId == playerState.id;
+      })[0];
+
+      // console.log('Player To Move: ', playerToMove);
+
+      // let playerToMove = R.find(R.propEq('id', playerState.id))(ZG.playerSprites);
+
+      if (playerToMove && playerToMove.socketId != window.socket.id) {
+        playerToMove.sprite.x = playerState.x;
+        playerToMove.sprite.y = playerState.y;
+      }
+    }
+  }]);
+
+  return ZombieGameState;
+}(Phaser.State);
+
 exports.default = ZombieGameState;
-
-
-function handleInput() {
-  // console.log('CP: 'ZG.currentPlayer)
-  if (ZG.currentPlayer) {
-    ZG.currentPlayer.body.velocity.x = 0;
-    ZG.currentPlayer.body.velocity.y = 0;
-    if (ZG.game.cursors.left.isDown) {
-      ZG.currentPlayer.body.velocity.x = -ZG.RUNNING_SPEED;
-    }
-    if (ZG.game.cursors.right.isDown) {
-      ZG.currentPlayer.body.velocity.x = ZG.RUNNING_SPEED;
-    }
-    if (ZG.game.cursors.up.isDown) {
-      ZG.currentPlayer.body.velocity.y = -ZG.RUNNING_SPEED;
-    }
-    if (ZG.game.cursors.down.isDown) {
-      ZG.currentPlayer.body.velocity.y = ZG.RUNNING_SPEED;
-    }
-  }
-}
-var date;
-var emitPing = function emitPing() {
-  console.log('emit ping called');
-  window.socket.emit('pingTest');
-  date = new Date();
-};
-
-function sendPlayerToServer() {
-  var x = ZG.currentPlayer.body.x;
-  var y = ZG.currentPlayer.body.y;
-  var gameTime = new Date() - ZG.startDate;
-  var playerId = socket.id;
-  console.log('Are we sending a socket:', socket);
-
-  var clientState = {
-    x: x,
-    y: y,
-    gameTime: gameTime,
-    playerId: playerId
-  };
-
-  socket.emit('clientUpdate', clientState);
-}
-
-function updateClients(serverState) {
-  R.forEachObjIndexed(updatePlayer, serverState);
-  // console.log('state from server:', serverState);
-}
-
-function updatePlayer(playerState) {
-
-  console.log('should be id', playerState);
-
-  console.log('filtering: ', ZG.playerSprites);
-  console.log('looking for id:', playerState.id);
-  var playerToMove = ZG.playerSprites.filter(function (playerSprite) {
-    console.log('examining sprite: ', playerSprite);
-    console.log('returning: ', playerSprite.socketId == playerState.id);
-    return playerSprite.socketId == playerState.id;
-  })[0];
-
-  console.log('Player To Move: ', playerToMove);
-
-  // let playerToMove = R.find(R.propEq('id', playerState.id))(ZG.playerSprites);
-
-  if (playerToMove && playerToMove.socketId != window.socket.id) {
-    playerToMove.sprite.x = playerState.x;
-    playerToMove.sprite.y = playerState.y;
-  }
-}
-
-function findPlayer(id) {}
 
 /***/ }),
 /* 148 */
@@ -11885,7 +11949,7 @@ exports.default = function () {
       // PB.customParams.players = newState.allPlayers;
       console.log('Reducer recieved:', action.gameState);
       newState.gameState = action.gameState;
-      ZG.customParams.players = action.gameState;
+      ZG.players = action.gameState;
       break;
 
     default:
@@ -18877,6 +18941,10 @@ var _zombieGameState = __webpack_require__(147);
 
 var _zombieGameState2 = _interopRequireDefault(_zombieGameState);
 
+var _main = __webpack_require__(630);
+
+var _main2 = _interopRequireDefault(_main);
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 //We attach all functions to a socket in here
@@ -18887,7 +18955,7 @@ var attachFunctions = function attachFunctions(socket) {
   socket.on('turnOnGameComponent', dispatchGameTrue);
   socket.on('startGame', startClientGame);
   socket.on('updateLeaderboard', dispatchScoreUpdate);
-  socket.on('GameStateChange', dispatchNewGameState);
+  socket.on('serverUpdate', dispatchNewGameState);
 };
 
 function dispatchPlayerUpdates(players) {
@@ -18912,11 +18980,12 @@ function dispatchGameTrue() {
 function startClientGame(players, startDate) {
   console.log('Sockets are starting games with Players:', ZG.players);
   ZG.startDate = startDate;
-  ZG.game = new Phaser.Game('100%', '100%', Phaser.AUTO, 'game');
-  ZG.game.state.add('Boot', _boot2.default);
-  ZG.game.state.add('Preload', _preload2.default);
-  ZG.game.state.add('ZombieGameState', _zombieGameState2.default);
-  ZG.game.state.start('Boot', true, false, players);
+  ZG.game = new _main2.default('100%', '100%', Phaser.AUTO, 'game');
+  ZG.game.startGame('BootState', true, false, players);
+  // ZG.game.state.add('Boot', BootState);
+  // ZG.game.state.add('Preload', PreloadState);
+  // ZG.game.state.add('ZombieGameState', ZombieGameState);
+  // ZG.game.state.start('Boot', true, false, players);
 }
 
 function dispatchNewGameState(playerObjects) {
@@ -44703,6 +44772,77 @@ _reactDom2.default.render(_react2.default.createElement(
     _react2.default.createElement(_reactRouter.Route, { path: '/', component: _layout2.default, onEnter: getPlayers })
   )
 ), document.getElementById('root'));
+
+/***/ }),
+/* 630 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _boot = __webpack_require__(145);
+
+var _boot2 = _interopRequireDefault(_boot);
+
+var _preload = __webpack_require__(146);
+
+var _preload2 = _interopRequireDefault(_preload);
+
+var _zombieGameState = __webpack_require__(147);
+
+var _zombieGameState2 = _interopRequireDefault(_zombieGameState);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+/**
+ * GenZed
+ * A top down multiplyer, battle arena shooter, king of hill with zombies
+ * Created by: Charlie Shi, Christopher Rizzo, Ryan Skinner & Jacob Cohen
+ */
+
+var GenZed = function (_Phaser$Game) {
+    _inherits(GenZed, _Phaser$Game);
+
+    function GenZed(widthParam, heightParam, rendererParam, parent) {
+        _classCallCheck(this, GenZed);
+
+        var width = widthParam || '100%';
+        var height = heightParam || '100%';
+        var renderer = rendererParam || Phaser.CANVAS;
+
+        //Add all game states here
+        var _this = _possibleConstructorReturn(this, (GenZed.__proto__ || Object.getPrototypeOf(GenZed)).call(this, width, height, Phaser.CANVAS, parent, null));
+
+        _this.state.add('BootState', new _boot2.default());
+        _this.state.add('PreloadState', new _preload2.default());
+        _this.state.add('ZombieGameState', new _zombieGameState2.default());
+        return _this;
+    }
+
+    _createClass(GenZed, [{
+        key: 'startGame',
+        value: function startGame(key, clearWorld, clearCache, parameter) {
+            //Parameters is players
+            //Method is invoked in sockets.js
+            this.state.start(key, clearWorld, clearCache, parameter);
+        }
+    }]);
+
+    return GenZed;
+}(Phaser.Game);
+
+exports.default = GenZed;
 
 /***/ })
 /******/ ]);
