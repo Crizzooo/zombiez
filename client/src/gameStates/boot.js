@@ -1,34 +1,46 @@
 
 
 export default class BootState extends Phaser.State {
-  init (level_file, next_state, players, extra_parameters) {
-      //TODO: We may want to revisit these
-      // ZG.scale.pageAlignHorizontally = true;
-      // ZG.scale.pageAlignVertically = true;
+  init (levelFile, players, nextState, extraParameters) {
+    //TODO: We may want to revisit these
+    // ZG.scale.pageAlignHorizontally = true;
+    // ZG.scale.pageAlignVertically = true;
 
-      this.stage.backgroundColor = '#da2dc3';
-      this.scale.scaleMode = Phaser.ScaleManager.RESIZE;
-      this.physics.startSystem(Phaser.Physics.ARCADE);
+    this.stage.backgroundColor = '#da2dc3';
+    this.scale.scaleMode = Phaser.ScaleManager.RESIZE;
+    this.physics.startSystem(Phaser.Physics.ARCADE);
 
-      ZG.players = players;
+    //Load Level Data from Level File JSON
+    this.levelFile = levelFile;
+    this.nextState = nextState;
+
+    ZG.players = players;
   }
 
   preload () {
-      this.load.image('preloadbar', 'assets/images/preloader-bar.png');
+    this.load.image('preloadbar', 'assets/images/preloader-bar.png');
+
+    //Load Level Data from Level File JSON
+    this.load.text("level1", this.levelFile);
   }
 
   create () {
-      this.preloadBar = this.add.sprite(this.world.centerX, this.world.centerY, 'preloadbar', 0);
-      this.preloadBar.anchor.setTo(0.5);
-      this.preloadBar.scale.setTo(5);
+    //Create level
+    let levelText, levelData;
+    levelText = this.game.cache.getText("level1");
+    levelData = JSON.parse(levelText);
 
-      //Control Mechanics
-      this.cursors = this.input.keyboard.createCursorKeys();
-      this.cursors.spacebar = this.input.keyboard.addKey(Phaser.Keyboard.SPACEBAR);
-  }
+    //Add loading bar
+    this.preloadBar = this.add.sprite(this.world.centerX, this.world.centerY, 'preloadbar', 0);
+    this.preloadBar.anchor.setTo(0.5);
+    this.preloadBar.scale.setTo(5);
 
-  update () {
-      this.state.start('PreloadState');
+    //Control Mechanics
+    this.cursors = this.input.keyboard.createCursorKeys();
+    this.cursors.spacebar = this.input.keyboard.addKey(Phaser.Keyboard.SPACEBAR);
+
+    //Start next state
+    this.state.start('PreloadState', true, false, levelData);
   }
 }
 

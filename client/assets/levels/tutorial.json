@@ -1,0 +1,17 @@
+{
+  "assets": {
+    "defaultTileset": {"type": "image", "source": "../../assets/images/mapTiles/prisonATerrain.png"},
+    "miscTileset": {"type": "image", "source": "../../assets/images/mapTiles/prisonAMisc.png"},
+
+    "levelTilemap": {"type": "tilemap", "source": "../../assets/maps/tutorial.json"}
+  },
+  "groups": [
+  ],
+  "map": {
+    "key": "levelTilemap",
+    "tilesets": ["defaultTileset", "miscTileset"]
+  },
+  "prefabs": {
+
+  }
+}

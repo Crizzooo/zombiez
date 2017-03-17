@@ -48,7 +48,7 @@ function startClientGame(players) {
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
   //Game Starts HERE!
   ZG.game = new GenZed(640, 480, Phaser.AUTO, 'game');
-  ZG.game.startGame('BootState', true, false, players);
+  ZG.game.startGame('BootState', true, false, "../assets/levels/tutorial.json", players);
 }
 
 function dispatchNewGameState(playerObjects) {

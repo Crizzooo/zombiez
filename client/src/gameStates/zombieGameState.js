@@ -1,13 +1,22 @@
 const R = require('ramda');
 const throttle = require('lodash.throttle');
 
-export default class ZombieGameState extends Phaser.State {
-  init () {
+import TiledState from './tiledState';
+
+export default class ZombieGameState extends TiledState {
+  constructor (game) {
+    super(game);
+  }
+
+  init (levelData) {
     //set constants for game
     ZG.RUNNING_SPEED = 180;
 
-    //cursor keys
-    //this.cursors created in boot state file
+    //TODO: Might not use prototype
+    //TiledState.prototype.init.call(this, levelData);
+    super.init.call(this, levelData)
+
+
   }
 
   preload () {
@@ -15,13 +24,17 @@ export default class ZombieGameState extends Phaser.State {
   }
 
   create () {
-      //create game set up
-      this.loadLevel();
+    //Create game set up
+    //this.loadLevel();
+    //
+    super.create.call(this);
+
+    console.log('this is map', this.map)
   }
 
   update () {
-      //NOTE: Collision between SpriteA and SpriteB - callback takes in SpriteA and SpriteB
-      this.handleInput();
+    //NOTE: Collision between SpriteA and SpriteB - callback takes in SpriteA and SpriteB
+    //this.handleInput();
   }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -35,36 +48,37 @@ export default class ZombieGameState extends Phaser.State {
     //resize the world to fit the layer
     //this.world.resize(570, 550);
 
+
     //for each player in lobby, create a player sprite
-    ZG.playerSprites = ZG.players.map( (playerObj, index) => {
-      console.log('player created for: ', playerObj);
-      let spriteKey = index % 2 === 0 ? 'blueGunGuy' : 'greenGunGuy';
-      let playerSprite = this.add.sprite(this.world.centerX + 15*index, this.world.centerY + 15*index, spriteKey);
-      this.physics.arcade.enable(playerSprite);
-      //determine if client is currently a player, and assign his sprite to currentPlayer object
-      if (socket.id === playerObj.socketId) {
-          ZG.currentPlayer = playerSprite;
-      }
-    });
+    // ZG.playerSprites = ZG.players.map( (playerObj, index) => {
+    //   console.log('player created for: ', playerObj);
+    //   let spriteKey = index % 2 === 0 ? 'blueGunGuy' : 'greenGunGuy';
+    //   let playerSprite = this.add.sprite(this.world.centerX + 15*index, this.world.centerY + 15*index, spriteKey);
+    //   this.physics.arcade.enable(playerSprite);
+    //   //determine if client is currently a player, and assign his sprite to currentPlayer object
+    //   if (socket.id === playerObj.socketId) {
+    //       ZG.currentPlayer = playerSprite;
+    //   }
+    // });
   };
 
   handleInput() {
-    if (ZG.currentPlayer){
-      ZG.currentPlayer.body.velocity.x = 0;
-      ZG.currentPlayer.body.velocity.y = 0;
-      if (this.cursors.left.isDown){
-          ZG.currentPlayer.body.velocity.x = -ZG.RUNNING_SPEED;
-      }
-      if (this.cursors.right.isDown){
-          ZG.currentPlayer.body.velocity.x = ZG.RUNNING_SPEED;
-      }
-      if (this.cursors.up.isDown){
-          ZG.currentPlayer.body.velocity.y = -ZG.RUNNING_SPEED;
-      }
-      if (this.cursors.down.isDown){
-          ZG.currentPlayer.body.velocity.y = ZG.RUNNING_SPEED;
-      }
-    }
+    // if (ZG.currentPlayer){
+    //   ZG.currentPlayer.body.velocity.x = 0;
+    //   ZG.currentPlayer.body.velocity.y = 0;
+    //   if (this.cursors.left.isDown){
+    //       ZG.currentPlayer.body.velocity.x = -ZG.RUNNING_SPEED;
+    //   }
+    //   if (this.cursors.right.isDown){
+    //       ZG.currentPlayer.body.velocity.x = ZG.RUNNING_SPEED;
+    //   }
+    //   if (this.cursors.up.isDown){
+    //       ZG.currentPlayer.body.velocity.y = -ZG.RUNNING_SPEED;
+    //   }
+    //   if (this.cursors.down.isDown){
+    //       ZG.currentPlayer.body.velocity.y = ZG.RUNNING_SPEED;
+    //   }
+    // }
   }
 
 }
