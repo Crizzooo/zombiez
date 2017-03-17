@@ -2,15 +2,8 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="2ed5fd59-3325-4cae-a882-f4e87e7597d8" name="Default" comment="">
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/client/dist/bundle.js" afterPath="$PROJECT_DIR$/client/dist/bundle.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/client/dist/bundle.js.map" afterPath="$PROJECT_DIR$/client/dist/bundle.js.map" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/client/index.html" afterPath="$PROJECT_DIR$/client/index.html" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/client/src/gameStates/boot.js" afterPath="$PROJECT_DIR$/client/src/gameStates/boot.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/client/src/gameStates/preload.js" afterPath="$PROJECT_DIR$/client/src/gameStates/preload.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/client/src/gameStates/tiledState.js" afterPath="$PROJECT_DIR$/client/src/gameStates/tiledState.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/client/src/gameStates/zombieGameState.js" afterPath="$PROJECT_DIR$/client/src/gameStates/zombieGameState.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/client/src/main.js" afterPath="$PROJECT_DIR$/client/src/main.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/client/src/sockets.js" afterPath="$PROJECT_DIR$/client/src/sockets.js" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/client/src/prefabs/Prefab.js" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
     </list>
     <ignored path="$PROJECT_DIR$/.tmp/" />
     <ignored path="$PROJECT_DIR$/temp/" />
@@ -82,12 +75,24 @@
               </provider>
             </entry>
           </file>
-          <file leaf-file-name="tiledState.js" pinned="false" current-in-tab="true">
+          <file leaf-file-name="tiledState.js" pinned="false" current-in-tab="false">
             <entry file="file://$PROJECT_DIR$/client/src/gameStates/tiledState.js">
               <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="578">
-                  <caret line="34" column="13" lean-forward="true" selection-start-line="34" selection-start-column="13" selection-end-line="34" selection-end-column="13" />
+                <state relative-caret-position="408">
+                  <caret line="24" column="27" lean-forward="false" selection-start-line="24" selection-start-column="27" selection-end-line="24" selection-end-column="27" />
                   <folding />
+                </state>
+              </provider>
+            </entry>
+          </file>
+          <file leaf-file-name="Prefab.js" pinned="false" current-in-tab="true">
+            <entry file="file://$PROJECT_DIR$/client/src/prefabs/Prefab.js">
+              <provider selected="true" editor-type-id="text-editor">
+                <state relative-caret-position="272">
+                  <caret line="18" column="1" lean-forward="false" selection-start-line="18" selection-start-column="1" selection-end-line="18" selection-end-column="1" />
+                  <folding>
+                    <element signature="e#0#44#0" expanded="false" />
+                  </folding>
                 </state>
               </provider>
             </entry>
@@ -195,6 +200,7 @@
         <option value="$PROJECT_DIR$/client/src/gameStates/boot.js" />
         <option value="$PROJECT_DIR$/client/src/sockets.js" />
         <option value="$PROJECT_DIR$/client/src/gameStates/tiledState.js" />
+        <option value="$PROJECT_DIR$/client/src/prefabs/Prefab.js" />
       </list>
     </option>
   </component>
@@ -216,10 +222,10 @@
     <handled-path value="$PROJECT_DIR$/node_modules" />
   </component>
   <component name="ProjectFrameBounds">
-    <option name="x" value="36" />
-    <option name="y" value="-1037" />
-    <option name="width" value="1861" />
-    <option name="height" value="1013" />
+    <option name="x" value="38" />
+    <option name="y" value="-1038" />
+    <option name="width" value="1781" />
+    <option name="height" value="1038" />
   </component>
   <component name="ProjectInspectionProfilesVisibleTreeState">
     <entry key="Project Default">
@@ -310,6 +316,28 @@
             </PATH_ELEMENT>
             <PATH_ELEMENT>
               <option name="myItemId" value="src" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+          </PATH>
+          <PATH>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="zombiez" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="zombiez" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="client" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="src" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="prefabs" />
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
           </PATH>
@@ -489,18 +517,18 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1489694112677</updated>
-      <workItem from="1489694114937" duration="13275000" />
+      <workItem from="1489694114937" duration="14039000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="13275000" />
+    <option name="totallyTimeSpent" value="14039000" />
   </component>
   <component name="ToolWindowManager">
-    <frame x="36" y="-1037" width="1861" height="1013" extended-state="0" />
+    <frame x="38" y="-1038" width="1781" height="1038" extended-state="0" />
     <editor active="true" />
     <layout>
-      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.16847827" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
+      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.17613636" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
       <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="-1" side_tool="true" content_ui="tabs" />
       <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="-1" side_tool="false" content_ui="tabs" />
@@ -631,9 +659,19 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/client/src/gameStates/tiledState.js">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="578">
-          <caret line="34" column="13" lean-forward="true" selection-start-line="34" selection-start-column="13" selection-end-line="34" selection-end-column="13" />
+        <state relative-caret-position="408">
+          <caret line="24" column="27" lean-forward="false" selection-start-line="24" selection-start-column="27" selection-end-line="24" selection-end-column="27" />
           <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/client/src/prefabs/Prefab.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="272">
+          <caret line="18" column="1" lean-forward="false" selection-start-line="18" selection-start-column="1" selection-end-line="18" selection-end-column="1" />
+          <folding>
+            <element signature="e#0#44#0" expanded="false" />
+          </folding>
         </state>
       </provider>
     </entry>
