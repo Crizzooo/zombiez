@@ -6,14 +6,18 @@ export default class Prefab extends Phaser.Sprite {
   constructor(game, name, position, properties) {
     super(game.game, position.x, position.y, properties.texture);
 
-    this.game_state = game;
+    this.gameState = game;
 
     this.name = name;
 
-    this.game_state.groups[properties.group].add(this);
+    //Add prefab to its group
+    this.gameState.groups[properties.group].add(this);
     this.frame = +properties.frame;
     this.anchor.setTo(0.5);
 
-    this.game_state.prefabs[name] = this;
+    //Enable physics for each prefab
+    this.physics.arcade.enable(playerSprite);
+
+    this.gameState.prefabs[name] = this;
   }
 }

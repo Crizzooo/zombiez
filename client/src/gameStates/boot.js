@@ -1,30 +1,29 @@
 
 
 export default class BootState extends Phaser.State {
-  init (levelFile, players, nextState, extraParameters) {
+  init(levelFile, players, nextState, extraParameters) {
     //TODO: We may want to revisit these
     // ZG.scale.pageAlignHorizontally = true;
     // ZG.scale.pageAlignVertically = true;
-
-    this.stage.backgroundColor = '#da2dc3';
     //this.scale.scaleMode = Phaser.ScaleManager.RESIZE;
-
 
     //Load Level Data from Level File JSON
     this.levelFile = levelFile;
     this.nextState = nextState;
 
-    ZG.players = players;
+    //TODO: make a decision here
+    //ZG.players = players;
+    this.players = players;
   }
 
-  preload () {
+  preload() {
     this.load.image('preloadbar', 'assets/images/preloader-bar.png');
 
     //Load Level Data from Level File JSON
     this.load.text("level1", this.levelFile);
   }
 
-  create () {
+  create() {
     //Create level
     let levelText, levelData;
     levelText = this.game.cache.getText("level1");
@@ -43,7 +42,6 @@ export default class BootState extends Phaser.State {
     this.state.start('PreloadState', true, false, levelData);
   }
 }
-
 
 
 

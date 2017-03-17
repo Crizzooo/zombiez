@@ -6,6 +6,10 @@
     "levelTilemap": {"type": "tilemap", "source": "../../assets/maps/tutorial.json"}
   },
   "groups": [
+    "players",
+    "enemies",
+    "bullets",
+    "guns"
   ],
   "map": {
     "key": "levelTilemap",

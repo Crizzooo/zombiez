@@ -5,9 +5,15 @@
 //Use this to load map
 //Loads physics engine, scales canvas size etc...
 
+import Player from '../prefabs/player'
+
 export default class TiledState extends Phaser.State {
   constructor (game) {
     super(game);
+
+    this.prefabClasses = {
+      "players": Player.prototype.constructor
+    }
   }
 
   init (levelData) {
@@ -37,22 +43,43 @@ export default class TiledState extends Phaser.State {
   }
 
   create () {
-    let group_name, object_layer, collision_tiles, world_grid, tile_dimensions, prefab_name;
+    let groupName, objectLayer, collisionTiles, worldGrid, tileDimensions, prefabName;
 
     this.layers = {};
+    this.groups = {};
 
     //Go through all map layers
     //Also set collision if collision is true
-    this.map.layers.forEach(function (layer) {
+    this.map.layers.forEach( (layer) => {
       this.layers[layer.name] = this.map.createLayer(layer.name);
+
       if (layer.properties.collision) {
         this.map.setCollisionByExclusion([-1], true, layer.name);
       }
-    }, this);
+    });
 
-    //Not sure if we need this?
-    //this.layers[this.map.layer.name].resizeWorld();
+    //Go through all groups in the level data
+    //Add group to game state
+    this.levelData.groups.forEach( (groupName) => {
+      this.groups[groupName] = this.game.add.group();
+    });
 
+
+
+
+  }
+
+  createPrefab (prefabName, prefabData, position) {
+    let prefab;
+
+    if (this.prefabClasses.hasOwnProperty(prefabData.type)) {
+      prefab = new this.prefabClasses[prefabData.type](this, prefabName, position, prefabData.properties);
+    }
+
+    this.prefabs[prefabName] = prefab;
+
+
+    return prefab;
   }
 
 

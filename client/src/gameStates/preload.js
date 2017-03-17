@@ -1,10 +1,6 @@
 export default class Preload extends Phaser.State {
   init (levelData) {
     this.levelData = levelData;
-
-    console.log('this is', this);
-
-    //this.stage.backgroundColor = '#7c79fa';
   }
 
   preload () {
@@ -42,6 +38,9 @@ export default class Preload extends Phaser.State {
     //Other Sprites
     this.load.setPreloadSprite(this.preloadBar);
 
+    //Loading Player Sprite TODO: Change to JSON data
+    this.load.atlasJSONHash('playerSpriteSheet', '../../assets/images/finalSheet.png', '../../assets/images/finalSheet.json');
+
     //Atlases for Player Character
     this.load.atlasXML('blueGunGuy', '../../assets/images/blueGunGuyAtlas.png', '../../assets/images/blueGunGuyAtlasXML.xml');
     this.load.atlasXML('greenGunGuy', '../../assets/images/greenGunGuyAtlas.png', '../../assets/images/greenGunGuyAtlasXML.xml');
@@ -51,6 +50,3 @@ export default class Preload extends Phaser.State {
       this.state.start('ZombieGameState', true, false, this.levelData);
   }
 }
-
-
-

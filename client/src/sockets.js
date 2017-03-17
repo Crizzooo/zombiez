@@ -39,11 +39,6 @@ function dispatchGameTrue(){
 
 function startClientGame(players) {
   console.log('Sockets are starting games with Players:', ZG.players);
-  // ZG.game = new Phaser.Game('100%', '100%', Phaser.AUTO, 'game');
-  // ZG.game.state.add('Boot', BootState);
-  // ZG.game.state.add('Preload', PreloadState);
-  // ZG.game.state.add('ZombieGameState', ZombieGameState);
-  // ZG.game.state.start('Boot', true, false, players);
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
   //Game Starts HERE!

@@ -11472,16 +11472,15 @@ var BootState = function (_Phaser$State) {
       //TODO: We may want to revisit these
       // ZG.scale.pageAlignHorizontally = true;
       // ZG.scale.pageAlignVertically = true;
-
-      this.stage.backgroundColor = '#da2dc3';
       //this.scale.scaleMode = Phaser.ScaleManager.RESIZE;
-
 
       //Load Level Data from Level File JSON
       this.levelFile = levelFile;
       this.nextState = nextState;
 
-      ZG.players = players;
+      //TODO: make a decision here
+      //ZG.players = players;
+      this.players = players;
     }
   }, {
     key: 'preload',
@@ -11551,10 +11550,6 @@ var Preload = function (_Phaser$State) {
     key: 'init',
     value: function init(levelData) {
       this.levelData = levelData;
-
-      console.log('this is', this);
-
-      //this.stage.backgroundColor = '#7c79fa';
     }
   }, {
     key: 'preload',
@@ -11595,6 +11590,9 @@ var Preload = function (_Phaser$State) {
       //Other Sprites
       this.load.setPreloadSprite(this.preloadBar);
 
+      //Loading Player Sprite TODO: Change to JSON data
+      this.load.atlasJSONHash('playerSpriteSheet', '../../assets/images/finalSheet.png', '../../assets/images/finalSheet.json');
+
       //Atlases for Player Character
       this.load.atlasXML('blueGunGuy', '../../assets/images/blueGunGuyAtlas.png', '../../assets/images/blueGunGuyAtlasXML.xml');
       this.load.atlasXML('greenGunGuy', '../../assets/images/greenGunGuyAtlas.png', '../../assets/images/greenGunGuyAtlasXML.xml');
@@ -11625,6 +11623,10 @@ Object.defineProperty(exports, "__esModule", {
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
 var _get = function get(object, property, receiver) { if (object === null) object = Function.prototype; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { return get(parent, property, receiver); } } else if ("value" in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } };
+
+var _player = __webpack_require__(631);
+
+var _player2 = _interopRequireDefault(_player);
 
 var _tiledState = __webpack_require__(280);
 
@@ -11660,12 +11662,34 @@ var ZombieGameState = function (_TiledState) {
       _get(ZombieGameState.prototype.__proto__ || Object.getPrototypeOf(ZombieGameState.prototype), 'init', this).call(this, levelData);
 
       //Make pixels crisp
-      this.stage.smoothed = false;
+      //this.stage.smoothed = false;
     }
   }, {
     key: 'preload',
     value: function preload() {
-      //load assets that are specific for this mini game
+
+      var playerPrefab = this.createPrefab('player', { type: 'player',
+        initial: 18
+      }, 0, 0);
+
+      var playerSprite = ZG.game.add.sprite(this.game, ZG.game.world.centerX + 15 * index, ZG.game.world.centerY + 15 * index, spriteKey, 18);
+
+      //for each player in lobby, create a player sprite
+      ZG.playerSprites = ZG.players.map(function (playerObj, index) {
+        console.log('player created for: ', playerObj);
+        var spriteKey = index % 2 === 0 ? 'playerSpriteSheet' : 'playerSpriteSheet';
+        var playerSprite = ZG.game.add.sprite(ZG.game.world.centerX + 15 * index, ZG.game.world.centerY + 15 * index, spriteKey, 18);
+
+        playerSprite.animations.add('right', [24, 8, 5, 20, 12, 13], 10, true);
+        playerSprite.animations.add('left', [17, 10, 5, 19, 8, 9], 10, true);
+        playerSprite.animations.add('up', [16, 0, 14, 6, 1], 10, true);
+        playerSprite.animations.add('down', [23, 9, 21, 22, 7, 4], 10, true);
+
+        //determine if client is currently a player, and assign his sprite to currentPlayer object
+        if (socket.id === playerObj.socketId) {
+          ZG.currentPlayer = playerSprite;
+        }
+      });
     }
   }, {
     key: 'create',
@@ -11676,55 +11700,68 @@ var ZombieGameState = function (_TiledState) {
   }, {
     key: 'update',
     value: function update() {}
-    //NOTE: Collision between SpriteA and SpriteB - callback takes in SpriteA and SpriteB
-    //this.handleInput();
-
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     //Non Phaser Methods
 
   }, {
-    key: 'loadLevel',
-    value: function loadLevel() {
-      // ZG.gameBackground = ZG.game.add.sprite(ZG.game.world.centerX, ZG.game.world.centerY, 'snowLandscape');
-      // ZG.gameBackground.scale.setTo(0.9, 0.9);
-      // ZG.gameBackground.anchor.setTo(0.5);
-
-      //resize the world to fit the layer
-      //this.world.resize(570, 550);
-
-
-      //for each player in lobby, create a player sprite
-      // ZG.playerSprites = ZG.players.map( (playerObj, index) => {
-      //   console.log('player created for: ', playerObj);
-      //   let spriteKey = index % 2 === 0 ? 'blueGunGuy' : 'greenGunGuy';
-      //   let playerSprite = this.add.sprite(this.world.centerX + 15*index, this.world.centerY + 15*index, spriteKey);
-      //   this.physics.arcade.enable(playerSprite);
-      //   //determine if client is currently a player, and assign his sprite to currentPlayer object
-      //   if (socket.id === playerObj.socketId) {
-      //       ZG.currentPlayer = playerSprite;
-      //   }
-      // });
-    }
-  }, {
     key: 'handleInput',
     value: function handleInput() {
-      // if (ZG.currentPlayer){
-      //   ZG.currentPlayer.body.velocity.x = 0;
-      //   ZG.currentPlayer.body.velocity.y = 0;
-      //   if (this.cursors.left.isDown){
-      //       ZG.currentPlayer.body.velocity.x = -ZG.RUNNING_SPEED;
-      //   }
-      //   if (this.cursors.right.isDown){
-      //       ZG.currentPlayer.body.velocity.x = ZG.RUNNING_SPEED;
-      //   }
-      //   if (this.cursors.up.isDown){
-      //       ZG.currentPlayer.body.velocity.y = -ZG.RUNNING_SPEED;
-      //   }
-      //   if (this.cursors.down.isDown){
-      //       ZG.currentPlayer.body.velocity.y = ZG.RUNNING_SPEED;
-      //   }
-      // }
+      if (ZG.currentPlayer) {
+        ZG.currentPlayer.body.velocity.x = 0;
+        ZG.currentPlayer.body.velocity.y = 0;
+        // console.log("VELOCITY", ZG.currentPlayer.body.velocity.x, ZG.currentPlayer.body.velocity.y);
+        if (ZG.game.cursors.left.isDown) {
+          // if(playerStatus === '')
+          ZG.currentPlayer.animations.play('right');
+          ZG.currentPlayer.scale.setTo(-1, 1);
+          ZG.currentPlayer.body.velocity.x = -ZG.RUNNING_SPEED;
+
+          switch (ZG.currentPlayer.body.sprite._frame.name) {
+            case 'lookingRightRightLegUp.png':
+              ZG.currentPlayer.body.velocity.y -= 80;
+              break;
+            case 'RightComingDown1.png':
+              ZG.currentPlayer.body.velocity.y += 80;
+              break;
+            case 'movingRight4.png':
+              ZG.currentPlayer.body.velocity.y += 50;
+              break;
+            case 'playerSprites_266 copy.png':
+              ZG.currentPlayer.body.velocity.y -= 50;
+          }
+        }
+        if (ZG.game.cursors.right.isDown) {
+          ZG.currentPlayer.scale.setTo(1, 1);
+          ZG.currentPlayer.animations.play('right');
+          ZG.currentPlayer.body.velocity.x = ZG.RUNNING_SPEED;
+          switch (ZG.currentPlayer.body.sprite._frame.name) {
+            case 'lookingRightRightLegUp.png':
+              ZG.currentPlayer.body.velocity.y -= 80;
+              break;
+            case 'RightComingDown1.png':
+              ZG.currentPlayer.body.velocity.y += 80;
+              break;
+            case 'movingRight4.png':
+              ZG.currentPlayer.body.velocity.y += 50;
+              break;
+            case 'playerSprites_266 copy.png':
+              ZG.currentPlayer.body.velocity.y -= 50;
+          }
+        }
+        if (ZG.game.cursors.up.isDown) {
+          ZG.currentPlayer.body.velocity.y = -ZG.RUNNING_SPEED;
+          ZG.currentPlayer.animations.play('up');
+        }
+        if (ZG.game.cursors.down.isDown) {
+          ZG.currentPlayer.body.velocity.y = ZG.RUNNING_SPEED;
+          ZG.currentPlayer.animations.play('down');
+        }
+        if (ZG.currentPlayer.body.velocity.x === 0 && ZG.currentPlayer.body.velocity.y === 0) {
+          ZG.currentPlayer.animations.stop();
+          ZG.currentPlayer.frame = 18;
+        }
+      }
     }
   }]);
 
@@ -18853,11 +18890,6 @@ function dispatchGameTrue() {
 
 function startClientGame(players) {
   console.log('Sockets are starting games with Players:', ZG.players);
-  // ZG.game = new Phaser.Game('100%', '100%', Phaser.AUTO, 'game');
-  // ZG.game.state.add('Boot', BootState);
-  // ZG.game.state.add('Preload', PreloadState);
-  // ZG.game.state.add('ZombieGameState', ZombieGameState);
-  // ZG.game.state.start('Boot', true, false, players);
 
   ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
   //Game Starts HERE!
@@ -20343,15 +20375,19 @@ Object.defineProperty(exports, "__esModule", {
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
+var _player = __webpack_require__(631);
+
+var _player2 = _interopRequireDefault(_player);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
 
-function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
-
-/**
- * Created by CharlieShi on 3/16/17.
- */
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; } /**
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                * Created by CharlieShi on 3/16/17.
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                */
 
 //Use this to load map
 //Loads physics engine, scales canvas size etc...
@@ -20362,7 +20398,12 @@ var TiledState = function (_Phaser$State) {
   function TiledState(game) {
     _classCallCheck(this, TiledState);
 
-    return _possibleConstructorReturn(this, (TiledState.__proto__ || Object.getPrototypeOf(TiledState)).call(this, game));
+    var _this = _possibleConstructorReturn(this, (TiledState.__proto__ || Object.getPrototypeOf(TiledState)).call(this, game));
+
+    _this.prefabClasses = {
+      "players": _player2.default.prototype.constructor
+    };
+    return _this;
   }
 
   _createClass(TiledState, [{
@@ -20395,26 +20436,46 @@ var TiledState = function (_Phaser$State) {
   }, {
     key: 'create',
     value: function create() {
-      var group_name = void 0,
-          object_layer = void 0,
-          collision_tiles = void 0,
-          world_grid = void 0,
-          tile_dimensions = void 0,
-          prefab_name = void 0;
+      var _this2 = this;
+
+      var groupName = void 0,
+          objectLayer = void 0,
+          collisionTiles = void 0,
+          worldGrid = void 0,
+          tileDimensions = void 0,
+          prefabName = void 0;
 
       this.layers = {};
+      this.groups = {};
 
       //Go through all map layers
       //Also set collision if collision is true
       this.map.layers.forEach(function (layer) {
-        this.layers[layer.name] = this.map.createLayer(layer.name);
-        if (layer.properties.collision) {
-          this.map.setCollisionByExclusion([-1], true, layer.name);
-        }
-      }, this);
+        _this2.layers[layer.name] = _this2.map.createLayer(layer.name);
 
-      //Not sure if we need this?
-      //this.layers[this.map.layer.name].resizeWorld();
+        if (layer.properties.collision) {
+          _this2.map.setCollisionByExclusion([-1], true, layer.name);
+        }
+      });
+
+      //Go through all groups in the level data
+      //Add group to game state
+      this.levelData.groups.forEach(function (groupName) {
+        _this2.groups[groupName] = _this2.game.add.group();
+      });
+    }
+  }, {
+    key: 'createPrefab',
+    value: function createPrefab(prefabName, prefabData, position) {
+      var prefab = void 0;
+
+      if (this.prefabClasses.hasOwnProperty(prefabData.type)) {
+        prefab = new this.prefabClasses[prefabData.type](this, prefabName, position, prefabData.properties);
+      }
+
+      this.prefabs[prefabName] = prefab;
+
+      return prefab;
     }
   }]);
 
@@ -44715,6 +44776,111 @@ _reactDom2.default.render(_react2.default.createElement(
     _react2.default.createElement(_reactRouter.Route, { path: '/', component: _layout2.default, onEnter: getPlayers })
   )
 ), document.getElementById('root'));
+
+/***/ }),
+/* 630 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+/**
+ * Created by CharlieShi on 3/17/17.
+ */
+
+var Prefab = function (_Phaser$Sprite) {
+  _inherits(Prefab, _Phaser$Sprite);
+
+  function Prefab(game, name, position, properties) {
+    _classCallCheck(this, Prefab);
+
+    var _this = _possibleConstructorReturn(this, (Prefab.__proto__ || Object.getPrototypeOf(Prefab)).call(this, game.game, position.x, position.y, properties.texture));
+
+    _this.gameState = game;
+
+    _this.name = name;
+
+    //Add prefab to its group
+    _this.gameState.groups[properties.group].add(_this);
+    _this.frame = +properties.frame;
+    _this.anchor.setTo(0.5);
+
+    //Enable physics for each prefab
+    _this.physics.arcade.enable(playerSprite);
+
+    _this.gameState.prefabs[name] = _this;
+    return _this;
+  }
+
+  return Prefab;
+}(Phaser.Sprite);
+
+exports.default = Prefab;
+
+/***/ }),
+/* 631 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _Prefab2 = __webpack_require__(630);
+
+var _Prefab3 = _interopRequireDefault(_Prefab2);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; } /**
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                * Created by CharlieShi on 3/17/17.
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                */
+
+var Player = function (_Prefab) {
+  _inherits(Player, _Prefab);
+
+  function Player(game, name, position, properties) {
+    _classCallCheck(this, Player);
+
+    var _this = _possibleConstructorReturn(this, (Player.__proto__ || Object.getPrototypeOf(Player)).call(this, game, name, position, properties));
+
+    var spriteKey = index % 2 === 0 ? 'playerSpriteSheet' : 'playerSpriteSheet';
+
+    playerSprite.animations.add('right', [24, 8, 5, 20, 12, 13], 10, true);
+    playerSprite.animations.add('left', [17, 10, 5, 19, 8, 9], 10, true);
+    playerSprite.animations.add('up', [16, 0, 14, 6, 1], 10, true);
+    playerSprite.animations.add('down', [23, 9, 21, 22, 7, 4], 10, true);
+
+    return _this;
+  }
+
+  _createClass(Player, [{
+    key: 'receiveDamage',
+    value: function receiveDamage(damage) {}
+  }]);
+
+  return Player;
+}(_Prefab3.default);
+
+exports.default = Player;
 
 /***/ })
 /******/ ]);
