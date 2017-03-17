@@ -11475,7 +11475,7 @@ var BootState = function (_Phaser$State) {
 
       //TODO: make a decision here
       //ZG.players = players;
-      this.players = players;
+      this.game.players = players;
     }
   }, {
     key: 'preload',
@@ -11633,7 +11633,8 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
 var R = __webpack_require__(157);
 var throttle = __webpack_require__(314);
 
-//import Player from '../prefabs/player'
+var self = void 0;
+ZG.playerSprites = [];
 
 var ZombieGameState = function (_TiledState) {
   _inherits(ZombieGameState, _TiledState);
@@ -11649,17 +11650,27 @@ var ZombieGameState = function (_TiledState) {
     value: function init(levelData) {
       //set constants for game
       this.RUNNING_SPEED = 80;
+      self = this;
 
       //Call super init to load in data;
       _get(ZombieGameState.prototype.__proto__ || Object.getPrototypeOf(ZombieGameState.prototype), 'init', this).call(this, levelData);
 
       //Make pixels crisp
       //this.stage.smoothed = false;
+
+      window.socket.on('serverUpdate', this.updateClients);
+
+      //TODO: determine if we need these or the ones in boot
+      //cursor keys
+      //Control Mechanics
+      //this.cursors = this.input.keyboard.createCursorKeys();
+      //this.cursors.spacebar = this.input.keyboard.addKey(Phaser.Keyboard.SPACEBAR);
+
+      //this.sendToServer = throttle(this.sendPlayerToServer, 16);
     }
   }, {
     key: 'preload',
     value: function preload() {
-
       //TODO: fix spegetti
       //let playerSprite = ZG.game.add.sprite(this.game, ZG.game.world.centerX + 15 * index, ZG.game.world.centerY + 15 * index, spriteKey, 18);
 
@@ -11670,8 +11681,6 @@ var ZombieGameState = function (_TiledState) {
       //     this.currentPlayer = playerPrefab;
       //   }
       // });
-
-
     }
   }, {
     key: 'create',
@@ -11679,7 +11688,8 @@ var ZombieGameState = function (_TiledState) {
       //Create game set up through tiled state by calling super
       _get(ZombieGameState.prototype.__proto__ || Object.getPrototypeOf(ZombieGameState.prototype), 'create', this).call(this);
 
-      var playerPrefab = this.createPrefab('player', { type: 'player',
+      var playerPrefab = this.createPrefab('player', {
+        type: 'player',
         properties: {
           group: 'player',
           initial: 18,
@@ -11687,13 +11697,15 @@ var ZombieGameState = function (_TiledState) {
         }
       }, { x: 225, y: 225 });
 
-      console.log("this is player prefab", playerPrefab);
       this.currentPlayer = playerPrefab;
     }
   }, {
     key: 'update',
     value: function update() {
       this.handleInput();
+
+      //every 16ms send package to server with position
+      //this.sendToServer();
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -11702,16 +11714,11 @@ var ZombieGameState = function (_TiledState) {
   }, {
     key: 'handleInput',
     value: function handleInput() {
-
-      //this.cursors = this.input.keyboard.createCursorKeys();
-      //console.log('this is cursors', this);
-
       if (this.currentPlayer) {
         this.currentPlayer.body.velocity.x = 0;
         this.currentPlayer.body.velocity.y = 0;
-        // console.log("VELOCITY", this.currentPlayer.body.velocity.x, this.currentPlayer.body.velocity.y);
+
         if (this.game.cursors.left.isDown) {
-          // if(playerStatus === '')
           this.currentPlayer.animations.play('right');
           this.currentPlayer.scale.setTo(-1, 1);
           this.currentPlayer.body.velocity.x = -this.RUNNING_SPEED;
@@ -11730,10 +11737,12 @@ var ZombieGameState = function (_TiledState) {
               this.currentPlayer.body.velocity.y -= 50;
           }
         }
+
         if (this.game.cursors.right.isDown) {
           this.currentPlayer.scale.setTo(1, 1);
           this.currentPlayer.animations.play('right');
           this.currentPlayer.body.velocity.x = this.RUNNING_SPEED;
+
           switch (this.currentPlayer.body.sprite._frame.name) {
             case 'lookingRightRightLegUp.png':
               this.currentPlayer.body.velocity.y -= 80;
@@ -11748,20 +11757,131 @@ var ZombieGameState = function (_TiledState) {
               this.currentPlayer.body.velocity.y -= 50;
           }
         }
+
         if (this.game.cursors.up.isDown) {
           this.currentPlayer.body.velocity.y = -this.RUNNING_SPEED;
           this.currentPlayer.animations.play('up');
         }
+
         if (this.game.cursors.down.isDown) {
           this.currentPlayer.body.velocity.y = this.RUNNING_SPEED;
           this.currentPlayer.animations.play('down');
         }
+
         if (this.currentPlayer.body.velocity.x === 0 && this.currentPlayer.body.velocity.y === 0) {
           this.currentPlayer.animations.stop();
           this.currentPlayer.frame = 18;
         }
       }
     }
+
+    // handleInput() {
+    //   if (this.currentPlayer) {
+    //     this.currentPlayer.body.velocity.x = 0;
+    //     this.currentPlayer.body.velocity.y = 0;
+    //     // console.log("VELOCITY", this.currentPlayer.body.velocity.x, this.currentPlayer.body.velocity.y);
+    //     if (this.game.cursors.left.isDown) {
+    //       // if(playerStatus === '')
+    //       this.currentPlayer.animations.play('right');
+    //       this.currentPlayer.scale.setTo(-1, 1);
+    //       this.currentPlayer.body.velocity.x = -this.RUNNING_SPEED;
+    //
+    //       switch (this.currentPlayer.body.sprite._frame.name) {
+    //         case 'lookingRightRightLegUp.png':
+    //           this.currentPlayer.body.velocity.y -= 80;
+    //           break;
+    //         case 'RightComingDown1.png':
+    //           this.currentPlayer.body.velocity.y += 80;
+    //           break;
+    //         case 'movingRight4.png':
+    //           this.currentPlayer.body.velocity.y += 50;
+    //           break;
+    //         case 'playerSprites_266 copy.png':
+    //           this.currentPlayer.body.velocity.y -= 50
+    //       }
+    //
+    //     }
+    //
+    //     if (this.game.cursors.right.isDown) {
+    //       this.currentPlayer.scale.setTo(1, 1);
+    //       this.currentPlayer.animations.play('right');
+    //       this.currentPlayer.body.velocity.x = this.RUNNING_SPEED;
+    //
+    //       switch (this.currentPlayer.body.sprite._frame.name) {
+    //         case 'lookingRightRightLegUp.png':
+    //           this.currentPlayer.body.velocity.y -= 80;
+    //           break;
+    //         case 'RightComingDown1.png':
+    //           this.currentPlayer.body.velocity.y += 80;
+    //           break;
+    //         case 'movingRight4.png':
+    //           this.currentPlayer.body.velocity.y += 50;
+    //           break;
+    //         case 'playerSprites_266 copy.png':
+    //           this.currentPlayer.body.velocity.y -= 50
+    //       }
+    //
+    //       if (this.game.cursors.up.isDown) {
+    //         this.currentPlayer.body.velocity.y = -this.RUNNING_SPEED;
+    //         this.currentPlayer.animations.play('up');
+    //       }
+    //
+    //       if (this.game.cursors.down.isDown) {
+    //         this.currentPlayer.body.velocity.y = this.RUNNING_SPEED;
+    //         this.currentPlayer.animations.play('down');
+    //       }
+    //
+    //       if (this.currentPlayer.body.velocity.x === 0 && this.currentPlayer.body.velocity.y === 0) {
+    //         this.currentPlayer.animations.stop();
+    //         this.currentPlayer.frame = 18;
+    //       }
+    //     }
+    //   }
+    // }
+
+    // sendPlayerToServer(){
+    //   let x = ZG.currentPlayer.body.x;
+    //   let y = ZG.currentPlayer.body.y;
+    //   let gameTime = new Date() - ZG.startDate;
+    //   let playerId = socket.id;
+    //   console.log('Are we sending a socket:', socket);
+    //
+    //   let clientState = {
+    //     x,
+    //     y,
+    //     gameTime,
+    //     playerId
+    //   }
+    //   socket.emit('clientUpdate', clientState);
+    // }
+    //
+    //
+    // updateClients(serverState) {
+    //   R.forEachObjIndexed(self.updatePlayer, serverState);
+    //   // console.log('state from server:', serverState);
+    // }
+    //
+    // updatePlayer(playerState) {
+    //   // console.log('should be id', playerState)
+    //
+    //   // console.log('filtering: ', ZG.playerSprites);
+    //   // console.log('looking for id:', playerState.id);
+    //   let playerToMove = ZG.playerSprites.filter((playerSprite) => {
+    //     // console.log('examining sprite: ', playerSprite)
+    //     // console.log('returning: ', playerSprite.socketId == playerState.id);
+    //     return playerSprite.socketId == playerState.id;
+    //   })[0];
+    //
+    //   // console.log('Player To Move: ', playerToMove);
+    //
+    //   // let playerToMove = R.find(R.propEq('id', playerState.id))(ZG.playerSprites);
+    //
+    //   if (playerToMove && playerToMove.socketId != window.socket.id){
+    //     playerToMove.sprite.x = playerState.x;
+    //     playerToMove.sprite.y = playerState.y;
+    //   }
+    // }
+
   }]);
 
   return ZombieGameState;
@@ -11871,7 +11991,7 @@ exports.default = function () {
       // PB.customParams.players = newState.allPlayers;
       console.log('Reducer recieved:', action.gameState);
       newState.gameState = action.gameState;
-      ZG.customParams.players = action.gameState;
+      ZG.players = action.gameState;
       break;
 
     default:
@@ -18851,6 +18971,18 @@ var _chatAppReducer = __webpack_require__(147);
 
 var _gameStateReducer = __webpack_require__(148);
 
+var _boot = __webpack_require__(144);
+
+var _boot2 = _interopRequireDefault(_boot);
+
+var _preload = __webpack_require__(145);
+
+var _preload2 = _interopRequireDefault(_preload);
+
+var _zombieGameState = __webpack_require__(146);
+
+var _zombieGameState2 = _interopRequireDefault(_zombieGameState);
+
 var _main = __webpack_require__(281);
 
 var _main2 = _interopRequireDefault(_main);
@@ -18865,7 +18997,7 @@ var attachFunctions = function attachFunctions(socket) {
   socket.on('turnOnGameComponent', dispatchGameTrue);
   socket.on('startGame', startClientGame);
   socket.on('updateLeaderboard', dispatchScoreUpdate);
-  // socket.on('GameStateChange', dispatchNewGameState);
+  socket.on('serverUpdate', dispatchNewGameState);
 };
 
 function dispatchPlayerUpdates(players) {
@@ -18887,13 +19019,13 @@ function dispatchGameTrue() {
   _store2.default.dispatch((0, _playersReducer.changeGamePlaying)(true));
 }
 
-function startClientGame(players) {
+function startClientGame(players, startDate) {
   console.log('Sockets are starting games with Players:', ZG.players);
-
   ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
   //Game Starts HERE!
   ZG.game = new _main2.default(300, 300, Phaser.AUTO, 'game');
   ZG.game.startGame('BootState', true, false, "../assets/levels/tutorial.json", players);
+  ZG.startDate = startDate;
 }
 
 function dispatchNewGameState(playerObjects) {
@@ -20542,9 +20674,9 @@ var GenZed = function (_Phaser$Game) {
         //Add all game states here
         var _this = _possibleConstructorReturn(this, (GenZed.__proto__ || Object.getPrototypeOf(GenZed)).call(this, width, height, renderer, parent, null));
 
-        _this.state.add("BootState", new _boot2.default());
-        _this.state.add("PreloadState", new _preload2.default());
-        _this.state.add("ZombieGameState", new _zombieGameState2.default());
+        _this.state.add('BootState', new _boot2.default());
+        _this.state.add('PreloadState', new _preload2.default());
+        _this.state.add('ZombieGameState', new _zombieGameState2.default());
         return _this;
     }
 

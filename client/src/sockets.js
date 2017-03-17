@@ -3,7 +3,11 @@ import { loadPlayers, setCurrentPlayer, changeGamePlaying, changePlayerScore } f
 import { loadMessages, addMessage } from './reducers/chatApp-reducer.js';
 import { dispatchGameUpdate } from './reducers/gameState-reducer.js';
 
-import GenZed from './main.js'
+import BootState from './gameStates/boot.js';
+import PreloadState from './gameStates/preload.js';
+import ZombieGameState from './gameStates/zombieGameState.js';
+
+import GenZed from './main.js';
 
 
 
@@ -15,7 +19,7 @@ const attachFunctions = (socket) => {
   socket.on('turnOnGameComponent', dispatchGameTrue);
   socket.on('startGame', startClientGame);
   socket.on('updateLeaderboard', dispatchScoreUpdate);
-  // socket.on('GameStateChange', dispatchNewGameState);
+  socket.on('serverUpdate', dispatchNewGameState);
 };
 
 function dispatchPlayerUpdates(players) {
@@ -37,13 +41,13 @@ function dispatchGameTrue(){
   store.dispatch(changeGamePlaying(true));
 }
 
-function startClientGame(players) {
+function startClientGame(players, startDate) {
   console.log('Sockets are starting games with Players:', ZG.players);
-
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
   //Game Starts HERE!
   ZG.game = new GenZed(300, 300, Phaser.AUTO, 'game');
   ZG.game.startGame('BootState', true, false, "../assets/levels/tutorial.json", players);
+  ZG.startDate = startDate;
 }
 
 function dispatchNewGameState(playerObjects) {

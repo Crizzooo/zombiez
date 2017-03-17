@@ -23,6 +23,9 @@ const io = require('socket.io')(server);
 let players = [];
 let messages = [];
 
+let clientStates = {};
+const throttledStateChange = throttle(emitStateChange, 16);
+
 //Initiate Socket with all functions for server
 io.on('connection', (socket) => {
   console.log('a user connected with socketID', socket.id);
@@ -34,7 +37,7 @@ io.on('connection', (socket) => {
     //TODO: remove socket from players array
     players = R.filter( (player) => player.socketId !== socket.id, players);
     io.emit('playerUpdate', players);
-  })
+  });
 
   socket.on('playerJoined', (playerObj) => {
     //TODO: Customize Player Obj for server purposes
@@ -68,7 +71,9 @@ io.on('connection', (socket) => {
 
   socket.on('gameIsStarting', (players) => {
     io.emit('turnOnGameComponent');
-    io.emit('startGame', players)
+    clientStates = {};
+    let startDate = new Date();
+    io.emit('startGame', players, startDate);
   })
 
   const throttledStateChange = throttle(emitStateChange, 16);
@@ -106,6 +111,21 @@ io.on('connection', (socket) => {
   socket.on('playerScored', (playerId, score) => {
     io.emit('updateLeaderboard', playerId, score);
   })
+
+  socket.on('clientUpdate', (state) => {
+    console.log('Server recieved: ', state);
+
+    //package client states
+    clientStates[state.playerId] = {
+      x: state.x,
+      y: state.y,
+      gameTime: state.gameTime,
+      id: state.playerId
+    };
+
+    //emit state holding each client state
+    throttledStateChange();
+  });
 })
 
 
@@ -120,8 +140,8 @@ function findPlayer(socketId){
 }
 
 function emitStateChange(){
-  console.log('emitting players:', players);
-  io.emit('GameStateChange', players);
+  console.log('emitting players:', clientStates);
+  io.emit('serverUpdate', clientStates);
 }
 
 

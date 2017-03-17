@@ -8,7 +8,7 @@ export default class BootState extends Phaser.State {
 
     //TODO: make a decision here
     //ZG.players = players;
-    this.players = players;
+    this.game.players = players;
   }
 
   preload() {
@@ -37,6 +37,5 @@ export default class BootState extends Phaser.State {
     this.state.start('PreloadState', true, false, levelData);
   }
 }
-
 
 
