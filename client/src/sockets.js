@@ -43,13 +43,11 @@ function dispatchGameTrue(){
 
 function startClientGame(players, startDate) {
   console.log('Sockets are starting games with Players:', ZG.players);
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+  //Game Starts HERE!
+  ZG.game = new GenZed(300, 300, Phaser.AUTO, 'game');
+  ZG.game.startGame('BootState', true, false, "../assets/levels/tutorial.json", players);
   ZG.startDate = startDate;
-  ZG.game = new GenZed('100%', '100%', Phaser.AUTO, 'game');
-  ZG.game.startGame('BootState', true, false, players);
-  // ZG.game.state.add('Boot', BootState);
-  // ZG.game.state.add('Preload', PreloadState);
-  // ZG.game.state.add('ZombieGameState', ZombieGameState);
-  // ZG.game.state.start('Boot', true, false, players);
 }
 
 function dispatchNewGameState(playerObjects) {
