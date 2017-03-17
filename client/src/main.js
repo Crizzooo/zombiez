@@ -12,9 +12,9 @@ export default class GenZed extends Phaser.Game {
     constructor (widthParam, heightParam, rendererParam, parent) {
         const width = widthParam || '100%';
         const height = heightParam || '100%';
-        const renderer = rendererParam || Phaser.CANVAS;
+        const renderer = rendererParam || Phaser.AUTO;
 
-        super(width, height, Phaser.CANVAS, parent, null);
+        super(width, height, renderer, parent, null);
 
         //Add all game states here
         this.state.add("BootState", new BootState());

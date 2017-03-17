@@ -1,8 +1,8 @@
-
-
 export default class Preload extends Phaser.State {
   init (levelData) {
     this.levelData = levelData;
+
+    console.log('this is', this);
 
     //this.stage.backgroundColor = '#7c79fa';
   }
@@ -19,14 +19,16 @@ export default class Preload extends Phaser.State {
       if (assets.hasOwnProperty(assetKey)) {
         asset = assets[assetKey];
         switch (asset.type) {
-          case "image":
+          case 'image':
             this.load.image(assetKey, asset.source);
             break;
-          case "spritesheet":
+          case 'spritesheet':
             this.load.spritesheet(assetKey, asset.source, asset.frame_width, asset.frame_height, asset.frames, asset.margin, asset.spacing);
             break;
-          case "tilemap":
+          case 'tilemap':
             this.load.tilemap(assetKey, asset.source, null, Phaser.Tilemap.TILED_JSON);
+            break;
+          default:
             break;
         }
       }

@@ -12,10 +12,11 @@ export default class ZombieGameState extends TiledState {
     //set constants for game
     ZG.RUNNING_SPEED = 180;
 
-    //TODO: Might not use prototype
-    //TiledState.prototype.init.call(this, levelData);
+    //Call super init to load in data;
     super.init.call(this, levelData)
 
+    //Make pixels crisp
+    this.stage.smoothed = false;
 
   }
 
@@ -24,12 +25,8 @@ export default class ZombieGameState extends TiledState {
   }
 
   create () {
-    //Create game set up
-    //this.loadLevel();
-    //
+    //Create game set up through tiled state by calling super
     super.create.call(this);
-
-    console.log('this is map', this.map)
   }
 
   update () {

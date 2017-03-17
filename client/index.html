@@ -20,6 +20,9 @@
 
 <body>
   <div id="root"></div>
+
+  <!--<div id="phaser" style = "display: none"></div><div id="game">    <canvas id="pixel" width="384" height="384"></canvas></div>-->
+
   <!--
       This HTML file is a template.
       If you open it directly in the browser, you will see an empty page.
@@ -33,15 +36,16 @@
 
 
 
-  <script src="
-https://cdnjs.cloudflare.com/ajax/libs/socket.io/1.7.3/socket.io.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/1.7.3/socket.io.js"></script>
+
   <script>
-  var socket = io();
-  var ZG = {
-      players: [],
-      currentPlayer: {}
-  };
+    var socket = io();
+    var ZG = {
+        players: [],
+        currentPlayer: {}
+    };
   </script>
+
   <script src="/phaser.min.js" defer></script>
   <script src="/dist/bundle.js" defer></script>
 </body>

@@ -3,24 +3,27 @@
  */
 
 //Use this to load map
+//Loads physics engine, scales canvas size etc...
 
 export default class TiledState extends Phaser.State {
   constructor (game) {
     super(game);
-
-
   }
 
   init (levelData) {
     this.levelData = levelData;
 
-    this.scale.scaleMode = Phaser.ScaleManager.SHOW_ALL;
+    //Scaling the Game Window for a pixelated effect
+    this.game.scale.scaleMode = Phaser.ScaleManager.USER_SCALE;
+    this.game.scale.setUserScale(8, 8, 1000, 1000);
+    this.game.renderer.renderSession.roundPixels = true;
+    Phaser.Canvas.setImageRenderingCrisp(this.game.canvas);
+
     this.scale.pageAlignHorizontally = true;
     this.scale.pageAlignVertically = true;
 
     // start physics system
     this.game.physics.startSystem(Phaser.Physics.ARCADE);
-    this.game.physics.arcade.gravity.y = 0;
 
     //Create tilemap base on level data
     this.map = this.game.add.tilemap(levelData.map.key);
@@ -47,7 +50,8 @@ export default class TiledState extends Phaser.State {
       }
     }, this);
 
-    this.layers[this.map.layer.name].resizeWorld();
+    //Not sure if we need this?
+    //this.layers[this.map.layer.name].resizeWorld();
 
   }
 

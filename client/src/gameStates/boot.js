@@ -7,8 +7,8 @@ export default class BootState extends Phaser.State {
     // ZG.scale.pageAlignVertically = true;
 
     this.stage.backgroundColor = '#da2dc3';
-    this.scale.scaleMode = Phaser.ScaleManager.RESIZE;
-    this.physics.startSystem(Phaser.Physics.ARCADE);
+    //this.scale.scaleMode = Phaser.ScaleManager.RESIZE;
+
 
     //Load Level Data from Level File JSON
     this.levelFile = levelFile;

@@ -11474,8 +11474,8 @@ var BootState = function (_Phaser$State) {
       // ZG.scale.pageAlignVertically = true;
 
       this.stage.backgroundColor = '#da2dc3';
-      this.scale.scaleMode = Phaser.ScaleManager.RESIZE;
-      this.physics.startSystem(Phaser.Physics.ARCADE);
+      //this.scale.scaleMode = Phaser.ScaleManager.RESIZE;
+
 
       //Load Level Data from Level File JSON
       this.levelFile = levelFile;
@@ -11548,14 +11548,16 @@ var Preload = function (_Phaser$State) {
   }
 
   _createClass(Preload, [{
-    key: "init",
+    key: 'init',
     value: function init(levelData) {
       this.levelData = levelData;
+
+      console.log('this is', this);
 
       //this.stage.backgroundColor = '#7c79fa';
     }
   }, {
-    key: "preload",
+    key: 'preload',
     value: function preload() {
       var assets = void 0,
           assetKey = void 0,
@@ -11570,14 +11572,16 @@ var Preload = function (_Phaser$State) {
         if (assets.hasOwnProperty(assetKey)) {
           asset = assets[assetKey];
           switch (asset.type) {
-            case "image":
+            case 'image':
               this.load.image(assetKey, asset.source);
               break;
-            case "spritesheet":
+            case 'spritesheet':
               this.load.spritesheet(assetKey, asset.source, asset.frame_width, asset.frame_height, asset.frames, asset.margin, asset.spacing);
               break;
-            case "tilemap":
+            case 'tilemap':
               this.load.tilemap(assetKey, asset.source, null, Phaser.Tilemap.TILED_JSON);
+              break;
+            default:
               break;
           }
         }
@@ -11596,7 +11600,7 @@ var Preload = function (_Phaser$State) {
       this.load.atlasXML('greenGunGuy', '../../assets/images/greenGunGuyAtlas.png', '../../assets/images/greenGunGuyAtlasXML.xml');
     }
   }, {
-    key: "create",
+    key: 'create',
     value: function create() {
       this.state.start('ZombieGameState', true, false, this.levelData);
     }
@@ -11652,9 +11656,11 @@ var ZombieGameState = function (_TiledState) {
       //set constants for game
       ZG.RUNNING_SPEED = 180;
 
-      //TODO: Might not use prototype
-      //TiledState.prototype.init.call(this, levelData);
+      //Call super init to load in data;
       _get(ZombieGameState.prototype.__proto__ || Object.getPrototypeOf(ZombieGameState.prototype), 'init', this).call(this, levelData);
+
+      //Make pixels crisp
+      this.stage.smoothed = false;
     }
   }, {
     key: 'preload',
@@ -11664,12 +11670,8 @@ var ZombieGameState = function (_TiledState) {
   }, {
     key: 'create',
     value: function create() {
-      //Create game set up
-      //this.loadLevel();
-      //
+      //Create game set up through tiled state by calling super
       _get(ZombieGameState.prototype.__proto__ || Object.getPrototypeOf(ZombieGameState.prototype), 'create', this).call(this);
-
-      console.log('this is map', this.map);
     }
   }, {
     key: 'update',
@@ -18859,7 +18861,7 @@ function startClientGame(players) {
 
   ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
   //Game Starts HERE!
-  ZG.game = new _main2.default(640, 480, Phaser.AUTO, 'game');
+  ZG.game = new _main2.default(300, 300, Phaser.AUTO, 'game');
   ZG.game.startGame('BootState', true, false, "../assets/levels/tutorial.json", players);
 }
 
@@ -20352,6 +20354,7 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
  */
 
 //Use this to load map
+//Loads physics engine, scales canvas size etc...
 
 var TiledState = function (_Phaser$State) {
   _inherits(TiledState, _Phaser$State);
@@ -20367,13 +20370,17 @@ var TiledState = function (_Phaser$State) {
     value: function init(levelData) {
       this.levelData = levelData;
 
-      this.scale.scaleMode = Phaser.ScaleManager.SHOW_ALL;
+      //Scaling the Game Window for a pixelated effect
+      this.game.scale.scaleMode = Phaser.ScaleManager.USER_SCALE;
+      this.game.scale.setUserScale(8, 8, 1000, 1000);
+      this.game.renderer.renderSession.roundPixels = true;
+      Phaser.Canvas.setImageRenderingCrisp(this.game.canvas);
+
       this.scale.pageAlignHorizontally = true;
       this.scale.pageAlignVertically = true;
 
       // start physics system
       this.game.physics.startSystem(Phaser.Physics.ARCADE);
-      this.game.physics.arcade.gravity.y = 0;
 
       //Create tilemap base on level data
       this.map = this.game.add.tilemap(levelData.map.key);
@@ -20406,7 +20413,8 @@ var TiledState = function (_Phaser$State) {
         }
       }, this);
 
-      this.layers[this.map.layer.name].resizeWorld();
+      //Not sure if we need this?
+      //this.layers[this.map.layer.name].resizeWorld();
     }
   }]);
 
@@ -20460,10 +20468,10 @@ var GenZed = function (_Phaser$Game) {
 
         var width = widthParam || '100%';
         var height = heightParam || '100%';
-        var renderer = rendererParam || Phaser.CANVAS;
+        var renderer = rendererParam || Phaser.AUTO;
 
         //Add all game states here
-        var _this = _possibleConstructorReturn(this, (GenZed.__proto__ || Object.getPrototypeOf(GenZed)).call(this, width, height, Phaser.CANVAS, parent, null));
+        var _this = _possibleConstructorReturn(this, (GenZed.__proto__ || Object.getPrototypeOf(GenZed)).call(this, width, height, renderer, parent, null));
 
         _this.state.add("BootState", new _boot2.default());
         _this.state.add("PreloadState", new _preload2.default());
