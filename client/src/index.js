@@ -19,19 +19,14 @@ import attachFunctions from './sockets.js';
 attachFunctions(socket);
 
 
-const getPlayers = () => {
-  console.log('getting Players');
-  socket.emit('getPlayers');
+const getLobby = () => {
+  socket.emit('getLobby');
 }
 
 ReactDOM.render(
   <Provider store={store}>
     <Router history={browserHistory}>
-      <Route path="/" component={Layout} onEnter={getPlayers} >
-       {
-        //  <Route path="/leaderboard" component={Leaderboard} />
-         /* Children Components */
-       }
+      <Route path="/" component={Layout} onEnter={getLobby} >
       </Route>
     </Router>
   </Provider>,

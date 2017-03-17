@@ -23,8 +23,6 @@ class Layout extends Component {
             <GameContainer />
           </div>
         </div>
-        { /* Lobby */ }
-        { /* Footer? */}
       </div>
     );
   }

@@ -19,13 +19,14 @@ export class lobbyControls extends React.Component {
 
   handleSubmit(evt) {
     evt.preventDefault();
-    socket.emit('playerJoined', this.state);
+    console.log('sending this player obj to server', this.state);
+    socket.emit('playerJoinLobby', this.state);
     $('#addPlayerModal').modal('hide');
     $('#playerNameInput').val('');
   }
 
   handleLeaveGame(evt) {
-    socket.emit('playerLeaveGame', this.props.currentPlayer);
+    socket.emit('playerLeaveLobby', this.props.currentLobbyer);
   }
 
   componentDidMount() {
@@ -35,18 +36,18 @@ export class lobbyControls extends React.Component {
   }
 
   render() {
-    console.log('Current Player:', this.props.currentPlayer);
+    console.log('Current Lobbyer:', this.props.currentLobbyer);
 
     return (
       <div id="buttonHolder">
         {
           /* check if current player or not */
-          this.props.players && this.props.players.length < 4 && !this.props.currentPlayer.name ?
+          this.props.lobbyers && this.props.lobbyers.length < 4 && !this.props.currentLobbyer.name ?
             <button type="button" className="btn btn-lg btn-info btn-danger btn-sm btn-block" data-target="#addPlayerModal" data-toggle="modal"><span className="playBtnText">Join Game!</span></button>
             :
             <div>
               <button type="button" className="btn btn-lg btn-info btn-warning btn-sm btn-block" onClick={this.handleLeaveGame}><span className="playBtnText">Leave Game!</span></button>
-              {this.props.players.length === 4 ?
+              {this.props.lobbyers.length === 4 ?
               <h6>Maximum player count reached!</h6>
               :
               null
@@ -81,8 +82,10 @@ export class lobbyControls extends React.Component {
 }
 
 const mapProps = state => ({
-  players: state.players.allPlayers,
-  currentPlayer: state.players.currentPlayer
+  /*players: state.players.allPlayers,
+  currentLobbyer: state.players.currentLobbyer */
+  currentLobbyer: state.lobby.currentLobbyer,
+  lobbyers: state.lobby.lobbyers
 });
 
 export default connect(mapProps)(lobbyControls);

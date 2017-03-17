@@ -5,10 +5,10 @@ import ChatApp from './chatApp.jsx';
 
 function Leaderboard(props) {
   console.log('received props:', props);
-  let players = props.players.sort((a, b) => b.score - a.score);
+  let lobbyers = props.lobbyers ? props.lobbyers.sort((a, b) => b.score - a.score) : [];
   let playerRows = [];
   //loop through player count - create player objects
-  let livePlayers = players.map( (player, index) => {
+  let livePlayers = lobbyers.map( (player, index) => {
     return (<tr key={'player' + (index + 1)}>
       <th scope="row">{1 + index}</th>
       <td>{player.name}</td>
@@ -53,8 +53,11 @@ function Leaderboard(props) {
   )
 }
 
-const mapState = state => ({
-  players: state.players.allPlayers
-})
+const mapState = state => {
+  console.log('state in leaderboard: ', state);
+  return {
+    lobbyers: state.lobby.lobbyers
+  };
+};
 
 export default connect(mapState, null)(Leaderboard)

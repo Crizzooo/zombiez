@@ -89,17 +89,16 @@ export default class ZombieGameState extends Phaser.State {
     }
   }
 
-  // throttledServerUpdate() {
-  //   console.log('sending to server');
-  //   return throttle(this.sendPlayerToServer, 16);
-  // }
-
   sendPlayerToServer(){
     let x = ZG.currentPlayer.body.x;
     let y = ZG.currentPlayer.body.y;
     let gameTime = new Date() - ZG.startDate;
     let playerId = socket.id;
-    console.log('Are we sending a socket:', socket);
+    console.log('NEW DATE: ', new Date());
+    console.log('START DATE: ', ZG.startDate);
+    console.log(typeof ZG.startDate);
+    console.log('GAMETIME TO STRING ', gameTime.toString());
+    console.log('GAMETIME FOR PLAYER: ', parseInt(gameTime, 10));
 
     let clientState = {
       x,
@@ -113,7 +112,6 @@ export default class ZombieGameState extends Phaser.State {
 
   updateClients(serverState) {
     R.forEachObjIndexed(self.updatePlayer, serverState);
-    // console.log('state from server:', serverState);
   }
 
   updatePlayer(playerState) {
@@ -131,21 +129,22 @@ export default class ZombieGameState extends Phaser.State {
     console.log('Player To Move: ', playerToMove);
 
     // let playerToMove = R.find(R.propEq('id', playerState.id))(ZG.playerSprites);
+    if (!playerToMove.lastUpdate){
+      playerToMove.lastUpdate  = 0;
+    }
 
     if (playerToMove && playerToMove.socketId != window.socket.id){
       // playerToMove.sprite.x = playerState.x;
       // playerToMove.sprite.y = playerState.y;
-
-      // let tween = playerToMove.interpolate;
-      // console.log('TWEEN:', tween);
-      // tween.to({ x: playerState.x, y: playerState.y}, 32, 'linear');
-      // tween.start();
+      console.log(' gameTime:', playerState.gameTime)
+      console.log(' last Update:', playerToMove.lastUpdate)
+      var timeToTween = (playerState.gameTime - playerToMove.lastUpdate) / 5;
+      console.log(' timeToTween:', timeToTween);
       let interTween = self.add.tween(playerToMove.sprite);
-      console.log(typeof interTween);
-      // playerToMove.tween.to({ x: playerState.x, y: playerState.y}, 32, 'linear').start();
-      interTween.to({ x: playerState.x, y: playerState.y }, 5, Phaser.Easing.Linear.None, true);
+      interTween.to({ x: playerState.x, y: playerState.y }, timeToTween, Phaser.Easing.Linear.None, true);
       console.log('TWEEN?', interTween);
       interTween.onComplete.addOnce( ()=> console.log('TWEEN HAS COMPLETED... YOU HEAR?'));
+      playerToMove.lastUpdate = new Date() - ZG.startDate;
     }
   }
 

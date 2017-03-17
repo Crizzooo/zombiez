@@ -48,9 +48,9 @@ class gameContainer extends Component {
 
 const mapProps = state => {
   return {
-    players: state.players.allPlayers,
-    gamePlaying: state.players.gamePlaying,
-    currentPlayer: state.players.currentPlayer
+    lobbyers: state.lobby.lobbyers,
+    gamePlaying: state.game.gamePlaying,
+    currentPlayer: state.lobby.currentLobbyer
   };
 };
 

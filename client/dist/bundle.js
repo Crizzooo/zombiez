@@ -11131,12 +11131,12 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
 
 function Leaderboard(props) {
   console.log('received props:', props);
-  var players = props.players.sort(function (a, b) {
+  var lobbyers = props.lobbyers ? props.lobbyers.sort(function (a, b) {
     return b.score - a.score;
-  });
+  }) : [];
   var playerRows = [];
   //loop through player count - create player objects
-  var livePlayers = players.map(function (player, index) {
+  var livePlayers = lobbyers.map(function (player, index) {
     return _react2.default.createElement(
       'tr',
       { key: 'player' + (index + 1) },
@@ -11230,8 +11230,9 @@ function Leaderboard(props) {
 }
 
 var mapState = function mapState(state) {
+  console.log('state in leaderboard: ', state);
   return {
-    players: state.players.allPlayers
+    lobbyers: state.lobby.lobbyers
   };
 };
 
@@ -11248,25 +11249,33 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 
+var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
+
+//reducers
+
+
 var _redux = __webpack_require__(87);
 
 var _reduxDevtoolsExtension = __webpack_require__(615);
-
-var _reduxLogger = __webpack_require__(619);
-
-var _reduxLogger2 = _interopRequireDefault(_reduxLogger);
 
 var _reduxThunk = __webpack_require__(620);
 
 var _reduxThunk2 = _interopRequireDefault(_reduxThunk);
 
-var _rootReducer = __webpack_require__(281);
+var _reduxLogger = __webpack_require__(619);
 
-var _rootReducer2 = _interopRequireDefault(_rootReducer);
+var _reduxLogger2 = _interopRequireDefault(_reduxLogger);
+
+var _index = __webpack_require__(631);
+
+var _index2 = _interopRequireDefault(_index);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-var store = (0, _redux.createStore)(_rootReducer2.default, (0, _reduxDevtoolsExtension.composeWithDevTools)((0, _redux.applyMiddleware)(_reduxThunk2.default, (0, _reduxLogger2.default)({ collapsed: true }))));
+console.log(typeof _index2.default === 'undefined' ? 'undefined' : _typeof(_index2.default));
+console.log('client reducer: ', _index2.default);
+
+var store = (0, _redux.createStore)(_index2.default, (0, _redux.applyMiddleware)(_reduxThunk2.default));
 
 exports.default = store;
 
@@ -11790,12 +11799,6 @@ var ZombieGameState = function (_Phaser$State) {
         }
       }
     }
-
-    // throttledServerUpdate() {
-    //   console.log('sending to server');
-    //   return throttle(this.sendPlayerToServer, 16);
-    // }
-
   }, {
     key: 'sendPlayerToServer',
     value: function sendPlayerToServer() {
@@ -11803,7 +11806,11 @@ var ZombieGameState = function (_Phaser$State) {
       var y = ZG.currentPlayer.body.y;
       var gameTime = new Date() - ZG.startDate;
       var playerId = socket.id;
-      console.log('Are we sending a socket:', socket);
+      console.log('NEW DATE: ', new Date());
+      console.log('START DATE: ', ZG.startDate);
+      console.log(_typeof(ZG.startDate));
+      console.log('GAMETIME TO STRING ', gameTime.toString());
+      console.log('GAMETIME FOR PLAYER: ', parseInt(gameTime, 10));
 
       var clientState = {
         x: x,
@@ -11818,7 +11825,6 @@ var ZombieGameState = function (_Phaser$State) {
     key: 'updateClients',
     value: function updateClients(serverState) {
       R.forEachObjIndexed(self.updatePlayer, serverState);
-      // console.log('state from server:', serverState);
     }
   }, {
     key: 'updatePlayer',
@@ -11837,23 +11843,24 @@ var ZombieGameState = function (_Phaser$State) {
       console.log('Player To Move: ', playerToMove);
 
       // let playerToMove = R.find(R.propEq('id', playerState.id))(ZG.playerSprites);
+      if (!playerToMove.lastUpdate) {
+        playerToMove.lastUpdate = 0;
+      }
 
       if (playerToMove && playerToMove.socketId != window.socket.id) {
         // playerToMove.sprite.x = playerState.x;
         // playerToMove.sprite.y = playerState.y;
-
-        // let tween = playerToMove.interpolate;
-        // console.log('TWEEN:', tween);
-        // tween.to({ x: playerState.x, y: playerState.y}, 32, 'linear');
-        // tween.start();
+        console.log(' gameTime:', playerState.gameTime);
+        console.log(' last Update:', playerToMove.lastUpdate);
+        var timeToTween = (playerState.gameTime - playerToMove.lastUpdate) / 5;
+        console.log(' timeToTween:', timeToTween);
         var interTween = self.add.tween(playerToMove.sprite);
-        console.log(typeof interTween === 'undefined' ? 'undefined' : _typeof(interTween));
-        // playerToMove.tween.to({ x: playerState.x, y: playerState.y}, 32, 'linear').start();
-        interTween.to({ x: playerState.x, y: playerState.y }, 5, Phaser.Easing.Linear.None, true);
+        interTween.to({ x: playerState.x, y: playerState.y }, timeToTween, Phaser.Easing.Linear.None, true);
         console.log('TWEEN?', interTween);
         interTween.onComplete.addOnce(function () {
           return console.log('TWEEN HAS COMPLETED... YOU HEAR?');
         });
+        playerToMove.lastUpdate = new Date() - ZG.startDate;
       }
     }
   }]);
@@ -11946,7 +11953,8 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 var initialState = {
-  gameState: []
+  gameState: [],
+  gamePlaying: false
 };
 
 /* Reducer */
@@ -18933,6 +18941,12 @@ exports.default = (0, _reactRedux.connect)()(Layout);
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
+
+var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
+
+//Import from Lobby Reducer
+
+
 exports.dispatchNewMessage = dispatchNewMessage;
 
 var _store = __webpack_require__(139);
@@ -18961,17 +18975,26 @@ var _main = __webpack_require__(630);
 
 var _main2 = _interopRequireDefault(_main);
 
+var _lobbyReducer = __webpack_require__(633);
+
+var _ramda = __webpack_require__(158);
+
+var _ramda2 = _interopRequireDefault(_ramda);
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+//NOTE: SET UP DISPATCH LOBBY STATE !!!!!!!!!
 
 //We attach all functions to a socket in here
 var attachFunctions = function attachFunctions(socket) {
   socket.on('playerUpdate', dispatchPlayerUpdates);
-  socket.on('currentPlayer', dispatchCurrentPlayer);
+  socket.on('currentPlayer', dispatchCurrentLobbyer);
   socket.on('messagesUpdate', dispatchNewMessage);
   socket.on('turnOnGameComponent', dispatchGameTrue);
   socket.on('startGame', startClientGame);
   socket.on('updateLeaderboard', dispatchScoreUpdate);
   socket.on('serverUpdate', dispatchNewGameState);
+  socket.on('lobbyUpdate', dispatchLobbyState);
 };
 
 function dispatchPlayerUpdates(players) {
@@ -18980,8 +19003,8 @@ function dispatchPlayerUpdates(players) {
   _store2.default.dispatch((0, _playersReducer.loadPlayers)(players));
 }
 
-function dispatchCurrentPlayer(playerObj) {
-  _store2.default.dispatch((0, _playersReducer.setCurrentPlayer)(playerObj));
+function dispatchCurrentLobbyer(lobbyerObj) {
+  _store2.default.dispatch((0, _lobbyReducer.dispatchSetCurrentLobbyer)(lobbyerObj));
 }
 
 //sample function
@@ -18995,7 +19018,10 @@ function dispatchGameTrue() {
 
 function startClientGame(players, startDate) {
   console.log('Sockets are starting games with Players:', ZG.players);
-  ZG.startDate = startDate;
+  console.log('GAME STARTING DATE: ', startDate);
+  console.log('typeof startDate pre parse: ', typeof startDate === 'undefined' ? 'undefined' : _typeof(startDate));
+  ZG.startDate = Date.parse(startDate);
+  console.log('typeafter ', _typeof(Date.parse(startDate)));
   ZG.game = new _main2.default('100%', '100%', Phaser.AUTO, 'game');
   ZG.game.startGame('BootState', true, false, players);
   // ZG.game.state.add('Boot', BootState);
@@ -19011,6 +19037,11 @@ function dispatchNewGameState(playerObjects) {
 
 function dispatchScoreUpdate(playerId, score) {
   _store2.default.dispatch((0, _playersReducer.changePlayerScore)(playerId, score));
+}
+
+function dispatchLobbyState(lobbyersFromServer) {
+  console.log('received from server: ', lobbyersFromServer);
+  _store2.default.dispatch((0, _lobbyReducer.dispatchLobbyUpdate)(lobbyersFromServer));
 }
 
 exports.default = attachFunctions;
@@ -20063,8 +20094,8 @@ var ChatApp = function (_React$Component) {
     value: function handleSubmit(evt) {
       evt.preventDefault();
       console.log('emitted message:', this.state.messageToSend);
-      if (this.props.currentPlayer.name) {
-        socket.emit('newChatMessage', { message: this.state.messageToSend, name: this.props.currentPlayer.name });
+      if (this.props.currentLobbyer.name) {
+        socket.emit('newChatMessage', { message: this.state.messageToSend, name: this.props.currentLobbyer.name });
       } else {
         socket.emit('newChatMessage', { message: this.state.messageToSend, name: 'Spectator' });
       }
@@ -20142,7 +20173,7 @@ var ChatApp = function (_React$Component) {
 var mapState = function mapState(state) {
   return {
     messageObjects: state.chatApp.allMessages,
-    currentPlayer: state.players.currentPlayer
+    currentLobbyer: state.lobby.currentLobbyer
   };
 };
 
@@ -20203,14 +20234,15 @@ var lobbyControls = exports.lobbyControls = function (_React$Component) {
     key: 'handleSubmit',
     value: function handleSubmit(evt) {
       evt.preventDefault();
-      socket.emit('playerJoined', this.state);
+      console.log('sending this player obj to server', this.state);
+      socket.emit('playerJoinLobby', this.state);
       $('#addPlayerModal').modal('hide');
       $('#playerNameInput').val('');
     }
   }, {
     key: 'handleLeaveGame',
     value: function handleLeaveGame(evt) {
-      socket.emit('playerLeaveGame', this.props.currentPlayer);
+      socket.emit('playerLeaveLobby', this.props.currentLobbyer);
     }
   }, {
     key: 'componentDidMount',
@@ -20222,14 +20254,14 @@ var lobbyControls = exports.lobbyControls = function (_React$Component) {
   }, {
     key: 'render',
     value: function render() {
-      console.log('Current Player:', this.props.currentPlayer);
+      console.log('Current Lobbyer:', this.props.currentLobbyer);
 
       return _react2.default.createElement(
         'div',
         { id: 'buttonHolder' },
 
         /* check if current player or not */
-        this.props.players && this.props.players.length < 4 && !this.props.currentPlayer.name ? _react2.default.createElement(
+        this.props.lobbyers && this.props.lobbyers.length < 4 && !this.props.currentLobbyer.name ? _react2.default.createElement(
           'button',
           { type: 'button', className: 'btn btn-lg btn-info btn-danger btn-sm btn-block', 'data-target': '#addPlayerModal', 'data-toggle': 'modal' },
           _react2.default.createElement(
@@ -20249,7 +20281,7 @@ var lobbyControls = exports.lobbyControls = function (_React$Component) {
               'Leave Game!'
             )
           ),
-          this.props.players.length === 4 ? _react2.default.createElement(
+          this.props.lobbyers.length === 4 ? _react2.default.createElement(
             'h6',
             null,
             'Maximum player count reached!'
@@ -20322,8 +20354,10 @@ var lobbyControls = exports.lobbyControls = function (_React$Component) {
 
 var mapProps = function mapProps(state) {
   return {
-    players: state.players.allPlayers,
-    currentPlayer: state.players.currentPlayer
+    /*players: state.players.allPlayers,
+    currentLobbyer: state.players.currentLobbyer */
+    currentLobbyer: state.lobby.currentLobbyer,
+    lobbyers: state.lobby.lobbyers
   };
 };
 
@@ -20447,9 +20481,9 @@ var gameContainer = function (_Component) {
 
 var mapProps = function mapProps(state) {
   return {
-    players: state.players.allPlayers,
-    gamePlaying: state.players.gamePlaying,
-    currentPlayer: state.players.currentPlayer
+    lobbyers: state.lobby.lobbyers,
+    gamePlaying: state.game.gamePlaying,
+    currentPlayer: state.lobby.currentLobbyer
   };
 };
 
@@ -20470,39 +20504,7 @@ var mapDispatch = function mapDispatch(dispatch) {
 exports.default = (0, _reactRedux.connect)(mapProps, mapDispatch)(gameContainer);
 
 /***/ }),
-/* 281 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-
-var _redux = __webpack_require__(87);
-
-var _chatAppReducer = __webpack_require__(148);
-
-var _chatAppReducer2 = _interopRequireDefault(_chatAppReducer);
-
-var _playersReducer = __webpack_require__(91);
-
-var _playersReducer2 = _interopRequireDefault(_playersReducer);
-
-var _gameStateReducer = __webpack_require__(149);
-
-var _gameStateReducer2 = _interopRequireDefault(_gameStateReducer);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-exports.default = (0, _redux.combineReducers)({
-  chatApp: _chatAppReducer2.default,
-  players: _playersReducer2.default,
-  gameState: _gameStateReducer2.default
-});
-
-/***/ }),
+/* 281 */,
 /* 282 */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -44774,9 +44776,8 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 /* Actions to Dispatch */
 
 
-var getPlayers = function getPlayers() {
-  console.log('getting Players');
-  socket.emit('getPlayers');
+var getLobby = function getLobby() {
+  socket.emit('getLobby');
 };
 
 _reactDom2.default.render(_react2.default.createElement(
@@ -44785,7 +44786,7 @@ _reactDom2.default.render(_react2.default.createElement(
   _react2.default.createElement(
     _reactRouter.Router,
     { history: _reactRouter.browserHistory },
-    _react2.default.createElement(_reactRouter.Route, { path: '/', component: _layout2.default, onEnter: getPlayers })
+    _react2.default.createElement(_reactRouter.Route, { path: '/', component: _layout2.default, onEnter: getLobby })
   )
 ), document.getElementById('root'));
 
@@ -44859,6 +44860,102 @@ var GenZed = function (_Phaser$Game) {
 }(Phaser.Game);
 
 exports.default = GenZed;
+
+/***/ }),
+/* 631 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _redux = __webpack_require__(87);
+
+var _chatAppReducer = __webpack_require__(148);
+
+var _chatAppReducer2 = _interopRequireDefault(_chatAppReducer);
+
+var _playersReducer = __webpack_require__(91);
+
+var _playersReducer2 = _interopRequireDefault(_playersReducer);
+
+var _gameStateReducer = __webpack_require__(149);
+
+var _gameStateReducer2 = _interopRequireDefault(_gameStateReducer);
+
+var _lobbyReducer = __webpack_require__(633);
+
+var _lobbyReducer2 = _interopRequireDefault(_lobbyReducer);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+exports.default = (0, _redux.combineReducers)({
+  chatApp: _chatAppReducer2.default, /*
+                                     players: playersReducer, */
+  game: _gameStateReducer2.default,
+  playersReducer: _playersReducer2.default,
+  lobby: _lobbyReducer2.default
+});
+
+//sad
+
+/***/ }),
+/* 632 */,
+/* 633 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+/* Action Types */
+var UPDATE_LOBBY = 'UPDATE_LOBBY';
+var SET_CURRENT_LOBBYER = 'SET_CURRENT_LOBBYER';
+
+/* Action Creators */
+var dispatchLobbyUpdate = exports.dispatchLobbyUpdate = function dispatchLobbyUpdate(lobbyState) {
+  return { type: UPDATE_LOBBY, lobbyState: lobbyState };
+};
+var dispatchSetCurrentLobbyer = exports.dispatchSetCurrentLobbyer = function dispatchSetCurrentLobbyer(currentLobbyer) {
+  return { type: SET_CURRENT_LOBBYER, currentLobbyer: currentLobbyer };
+};
+
+var initialState = {
+  lobbyers: [],
+  currentLobbyer: {}
+};
+
+/* Reducer */
+
+exports.default = function () {
+  var state = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : initialState;
+  var action = arguments[1];
+
+
+  var newState = Object.assign({}, state);
+
+  switch (action.type) {
+
+    case UPDATE_LOBBY:
+      console.log('reducer updating lobbyers to: ', action.lobbyState);
+      newState.lobbyers = action.lobbyState;
+      break;
+    case SET_CURRENT_LOBBYER:
+      console.log('setting current lobbyer to: ', action.currentLobbyer);
+      newState.currentLobbyer = action.currentLobbyer;
+      break;
+
+    default:
+      return state;
+  }
+
+  return newState;
+};
 
 /***/ })
 /******/ ]);

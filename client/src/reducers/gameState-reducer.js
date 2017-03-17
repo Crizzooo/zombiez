@@ -1,5 +1,6 @@
 const initialState = {
-  gameState: []
+  gameState: [],
+  gamePlaying: false
 };
 
 /* Reducer */
