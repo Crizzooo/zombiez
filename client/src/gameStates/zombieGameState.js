@@ -1,14 +1,25 @@
 const R = require('ramda');
 const throttle = require('lodash.throttle');
 
+
+var self;
+ZG.playerSprites = [];
+
 export default class ZombieGameState extends Phaser.State {
   init () {
     //set constants for game
+    self = this;
     ZG.RUNNING_SPEED = 180;
 
+    window.socket.on('serverUpdate', this.updateClients);
     //cursor keys
-    //this.cursors created in boot state file
+    //Control Mechanics
+    this.cursors = this.input.keyboard.createCursorKeys();
+    this.cursors.spacebar = this.input.keyboard.addKey(Phaser.Keyboard.SPACEBAR);
+
+    this.sendToServer = throttle(this.sendPlayerToServer, 16);
   }
+
 
   preload () {
       //load assets that are specific for this mini game
@@ -22,6 +33,9 @@ export default class ZombieGameState extends Phaser.State {
   update () {
       //NOTE: Collision between SpriteA and SpriteB - callback takes in SpriteA and SpriteB
       this.handleInput();
+      //every 16ms send package to server with position
+      this.sendToServer();
+
   }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -33,18 +47,25 @@ export default class ZombieGameState extends Phaser.State {
     // ZG.gameBackground.anchor.setTo(0.5);
 
     //resize the world to fit the layer
-    //this.world.resize(570, 550);
+    this.world.resize(500, 500);
 
     //for each player in lobby, create a player sprite
-    ZG.playerSprites = ZG.players.map( (playerObj, index) => {
-      console.log('player created for: ', playerObj);
+    console.log('creating this amount of players: ', this.game.players.length);
+    this.game.players.map( (playerObj, index) => {
       let spriteKey = index % 2 === 0 ? 'blueGunGuy' : 'greenGunGuy';
       let playerSprite = this.add.sprite(this.world.centerX + 15*index, this.world.centerY + 15*index, spriteKey);
+      console.log('created player at ', this.world.centerX + 15*index);
+      console.log('created player at ', this.world.centerY + 15*index);
+
       this.physics.arcade.enable(playerSprite);
+      playerSprite.collideWorldBounds = true;
+      console.log('created sprite: ', playerSprite);
       //determine if client is currently a player, and assign his sprite to currentPlayer object
       if (socket.id === playerObj.socketId) {
-          ZG.currentPlayer = playerSprite;
+        ZG.currentPlayer = playerSprite;
+        console.log('current player assigned:', playerSprite);
       }
+      ZG.playerSprites.push({socketId: playerObj.socketId, sprite: playerSprite});
     });
   };
 
@@ -67,16 +88,53 @@ export default class ZombieGameState extends Phaser.State {
     }
   }
 
+  // throttledServerUpdate() {
+  //   console.log('sending to server');
+  //   return throttle(this.sendPlayerToServer, 16);
+  // }
+
+  sendPlayerToServer(){
+    let x = ZG.currentPlayer.body.x;
+    let y = ZG.currentPlayer.body.y;
+    let gameTime = new Date() - ZG.startDate;
+    let playerId = socket.id;
+    console.log('Are we sending a socket:', socket);
+
+    let clientState = {
+      x,
+      y,
+      gameTime,
+      playerId
+    }
+
+    socket.emit('clientUpdate', clientState);
+  }
+
+  updateClients(serverState) {
+    R.forEachObjIndexed(self.updatePlayer, serverState);
+    // console.log('state from server:', serverState);
+  }
+
+  updatePlayer(playerState) {
+
+    // console.log('should be id', playerState)
+
+    // console.log('filtering: ', ZG.playerSprites);
+    // console.log('looking for id:', playerState.id);
+    let playerToMove = ZG.playerSprites.filter((playerSprite) => {
+      // console.log('examining sprite: ', playerSprite)
+      // console.log('returning: ', playerSprite.socketId == playerState.id);
+      return playerSprite.socketId == playerState.id;
+    })[0];
+
+    // console.log('Player To Move: ', playerToMove);
+
+    // let playerToMove = R.find(R.propEq('id', playerState.id))(ZG.playerSprites);
+
+    if (playerToMove && playerToMove.socketId != window.socket.id){
+      playerToMove.sprite.x = playerState.x;
+      playerToMove.sprite.y = playerState.y;
+    }
+  }
+
 }
-
-
-
-
-
-
-
-
-
-
-
-
