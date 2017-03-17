@@ -2,11 +2,6 @@
 
 export default class BootState extends Phaser.State {
   init(levelFile, players, nextState, extraParameters) {
-    //TODO: We may want to revisit these
-    // ZG.scale.pageAlignHorizontally = true;
-    // ZG.scale.pageAlignVertically = true;
-    //this.scale.scaleMode = Phaser.ScaleManager.RESIZE;
-
     //Load Level Data from Level File JSON
     this.levelFile = levelFile;
     this.nextState = nextState;
@@ -35,8 +30,8 @@ export default class BootState extends Phaser.State {
     this.preloadBar.scale.setTo(5);
 
     //Control Mechanics
-    this.cursors = this.input.keyboard.createCursorKeys();
-    this.cursors.spacebar = this.input.keyboard.addKey(Phaser.Keyboard.SPACEBAR);
+    this.game.cursors = this.input.keyboard.createCursorKeys();
+    this.game.cursors.spacebar = this.input.keyboard.addKey(Phaser.Keyboard.SPACEBAR);
 
     //Start next state
     this.state.start('PreloadState', true, false, levelData);

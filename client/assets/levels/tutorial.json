@@ -3,10 +3,15 @@
     "defaultTileset": {"type": "image", "source": "../../assets/images/mapTiles/prisonATerrain.png"},
     "miscTileset": {"type": "image", "source": "../../assets/images/mapTiles/prisonAMisc.png"},
 
+    "playerSpriteSheet": {"type": "spritesheetAtlas",
+      "sourcePNG": "../../assets/images/finalSheet.png",
+      "sourceJSON": "../../assets/images/finalSheet.json"
+    },
+
     "levelTilemap": {"type": "tilemap", "source": "../../assets/maps/tutorial.json"}
   },
   "groups": [
-    "players",
+    "player",
     "enemies",
     "bullets",
     "guns"
@@ -16,6 +21,8 @@
     "tilesets": ["defaultTileset", "miscTileset"]
   },
   "prefabs": {
+
+
 
   }
 }

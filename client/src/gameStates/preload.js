@@ -21,6 +21,9 @@ export default class Preload extends Phaser.State {
           case 'spritesheet':
             this.load.spritesheet(assetKey, asset.source, asset.frame_width, asset.frame_height, asset.frames, asset.margin, asset.spacing);
             break;
+          case 'spritesheetAtlas':
+            this.load.atlasJSONHash(assetKey, asset.sourcePNG, asset.sourceJSON);
+            break;
           case 'tilemap':
             this.load.tilemap(assetKey, asset.source, null, Phaser.Tilemap.TILED_JSON);
             break;
@@ -40,10 +43,6 @@ export default class Preload extends Phaser.State {
 
     //Loading Player Sprite TODO: Change to JSON data
     this.load.atlasJSONHash('playerSpriteSheet', '../../assets/images/finalSheet.png', '../../assets/images/finalSheet.json');
-
-    //Atlases for Player Character
-    this.load.atlasXML('blueGunGuy', '../../assets/images/blueGunGuyAtlas.png', '../../assets/images/blueGunGuyAtlasXML.xml');
-    this.load.atlasXML('greenGunGuy', '../../assets/images/greenGunGuyAtlas.png', '../../assets/images/greenGunGuyAtlasXML.xml');
   }
 
   create () {

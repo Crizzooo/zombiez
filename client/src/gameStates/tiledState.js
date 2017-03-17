@@ -11,8 +11,10 @@ export default class TiledState extends Phaser.State {
   constructor (game) {
     super(game);
 
+    this.prefabs = {};
+
     this.prefabClasses = {
-      "players": Player.prototype.constructor
+      "player": Player.prototype.constructor
     }
   }
 
@@ -22,6 +24,7 @@ export default class TiledState extends Phaser.State {
     //Scaling the Game Window for a pixelated effect
     this.game.scale.scaleMode = Phaser.ScaleManager.USER_SCALE;
     this.game.scale.setUserScale(8, 8, 1000, 1000);
+    //this.game.scale.setUserScale(2, 2, 200, 200);
     this.game.renderer.renderSession.roundPixels = true;
     Phaser.Canvas.setImageRenderingCrisp(this.game.canvas);
 
@@ -64,6 +67,8 @@ export default class TiledState extends Phaser.State {
       this.groups[groupName] = this.game.add.group();
     });
 
+    console.log('this is gorups', this.groups)
+
 
 
 
@@ -72,12 +77,16 @@ export default class TiledState extends Phaser.State {
   createPrefab (prefabName, prefabData, position) {
     let prefab;
 
+    console.log("prefab data", prefabName)
+    console.log("prefab data", prefabData)
+
+    //Pass prefab data into the constructor of that type defined in this constructor
     if (this.prefabClasses.hasOwnProperty(prefabData.type)) {
       prefab = new this.prefabClasses[prefabData.type](this, prefabName, position, prefabData.properties);
     }
 
-    this.prefabs[prefabName] = prefab;
 
+    this.prefabs[prefabName] = prefab;
 
     return prefab;
   }
