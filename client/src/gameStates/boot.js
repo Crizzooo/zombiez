@@ -9,9 +9,9 @@ export default class BootState extends Phaser.State {
       this.scale.scaleMode = Phaser.ScaleManager.RESIZE;
       this.physics.startSystem(Phaser.Physics.ARCADE);
 
-      // ZG.players = players;
+      //game.players initiated with client lobby ovjects!
       this.game.players = players;
-      console.log("ZG Players initiated: ", ZG.players);
+      console.log("this.game.players: ", this.game.players);
   }
 
   preload () {
@@ -25,7 +25,6 @@ export default class BootState extends Phaser.State {
   }
 
   update () {
-    console.log(this.game);
-      this.state.start("PreloadState");
+    this.state.start("PreloadState");
   }
 }

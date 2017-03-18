@@ -3,6 +3,15 @@ const initialState = {
   gamePlaying: false
 };
 
+/* Action Types */
+const CHANGE_GAME_PLAYING = 'CHANGE_GAME_PLAYING';
+const UPDATE_STATE = 'UPDATE_STATE';
+
+/* Action creators */
+export const dispatchGameUpdate = gameState => ({ type: UPDATE_STATE, gameState });
+export const dispatchGamePlaying = gamePlayingStatus => ({ type: CHANGE_GAME_PLAYING, value: gamePlayingStatus });
+
+
 /* Reducer */
 export default (state = initialState, action) => {
 
@@ -11,11 +20,11 @@ export default (state = initialState, action) => {
   switch (action.type) {
 
     case UPDATE_STATE:
-      // newState.allPlayers = action.allPlayers;
-      // PB.customParams.players = newState.allPlayers;
-      console.log('Reducer recieved:', action.gameState);
       newState.gameState = action.gameState;
-      ZG.players = action.gameState;
+      break;
+
+    case CHANGE_GAME_PLAYING:
+      newState.gamePlaying = action.value;
       break;
 
     default:
@@ -24,13 +33,3 @@ export default (state = initialState, action) => {
 
   return newState;
 };
-
-/* Action Types */
-// const ADD_PLAYER = 'ADD_PLAYER';
-const UPDATE_STATE = 'UPDATE_STATE';
-
-
-/* Action Creators */
-export const dispatchGameUpdate = gameState => ({ type: UPDATE_STATE, gameState });
-
-/* Action Dispatchers */

@@ -1,16 +1,13 @@
 import store from './store.js';
 import { loadPlayers, setCurrentPlayer, changeGamePlaying, changePlayerScore } from './reducers/players-reducer.js';
-import { loadMessages, addMessage } from './reducers/chatApp-reducer.js';
-import { dispatchGameUpdate } from './reducers/gameState-reducer.js';
 
-import BootState from './gameStates/boot.js';
-import PreloadState from './gameStates/preload.js';
-import ZombieGameState from './gameStates/zombieGameState.js';
 
 import GenZed from './main.js';
 
-//Import from Lobby Reducer
+//Import from Reducers
+import { loadMessages, addMessage } from './reducers/chatApp-reducer.js';
 import { dispatchLobbyUpdate, dispatchSetCurrentLobbyer } from './reducers/lobby-reducer.js';
+import { dispatchGamePlaying } from './reducers/gameState-reducer';
 
 import R from 'ramda';
 
@@ -47,26 +44,18 @@ export function dispatchNewMessage(msgObj) {
 }
 
 function dispatchGameTrue(){
-  store.dispatch(changeGamePlaying(true));
+  store.dispatch(dispatchGamePlaying(true));
 }
 
 function startClientGame(players, startDate) {
-  console.log('Sockets are starting games with Players:', ZG.players);
-  console.log('GAME STARTING DATE: ', startDate);
-  console.log('typeof startDate pre parse: ', typeof startDate);
-  ZG.startDate = Date.parse(startDate);
-  console.log('typeafter ', typeof Date.parse(startDate));
+  let state = store.getState();
   ZG.game = new GenZed('100%', '100%', Phaser.AUTO, 'game');
-  ZG.game.startGame('BootState', true, false, players);
-  // ZG.game.state.add('Boot', BootState);
-  // ZG.game.state.add('Preload', PreloadState);
-  // ZG.game.state.add('ZombieGameState', ZombieGameState);
-  // ZG.game.state.start('Boot', true, false, players);
+  ZG.game.startGame('BootState', true, false, state.lobby.lobbyers);
 }
 
 function dispatchNewGameState(playerObjects) {
   console.log('client received new GameState:', playerObjects);
-  store.dispatch(dispatchGameUpdate(playerObjects));
+  // store.dispatch(dispatchGameUpdate(playerObjects));
 }
 
 function dispatchScoreUpdate(playerId, score){

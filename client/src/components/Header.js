@@ -5,7 +5,7 @@ class Header extends Component {
     return (
       <div className="App bg-primary">
         <div className="App-header">
-          <h2>Welcome to Platformer Battle!</h2>
+          <h2>Welcome to GEN ZED!</h2><h6>hehehe</h6>
         </div>
       </div>
     );

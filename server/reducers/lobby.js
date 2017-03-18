@@ -42,9 +42,6 @@ const lobby = (state = initialState, action) => {
         newState.lobbyers = state.lobbyers.filter(lobbyer =>
           lobbyer.socketId !== action.lobbyer.socketId
         )
-
-      //   newState.lobbyers = R.filter((lobbyer) => lobbyer.socketId !== action.lobbyer.socketId,
-      // state.lobberys)
         break;
 
     default:

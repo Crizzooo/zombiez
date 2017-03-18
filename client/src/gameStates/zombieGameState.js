@@ -2,14 +2,12 @@ const R = require('ramda');
 const throttle = require('lodash.throttle');
 
 
-var self;
 ZG.playerSprites = [];
 
 export default class ZombieGameState extends Phaser.State {
   init () {
     //set constants for game
-    self = this;
-    ZG.RUNNING_SPEED = 180;
+    this.RUNNING_SPEED = 180;
 
     window.socket.on('serverUpdate', this.updateClients);
     //cursor keys
@@ -22,7 +20,7 @@ export default class ZombieGameState extends Phaser.State {
 
 
   preload () {
-      //load assets that are specific for this mini game
+      //load assets that are specific for this level
   }
 
   create () {
@@ -33,13 +31,14 @@ export default class ZombieGameState extends Phaser.State {
   update () {
       //NOTE: Collision between SpriteA and SpriteB - callback takes in SpriteA and SpriteB
       this.handleInput();
-      //every 16ms send package to server with position
+      //every 32ms send package to server with position
       this.sendToServer();
 
   }
 
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-  //Non Phaser Methods
+    //////////////////////////
+   /// Non Phaser Methods ///
+  //////////////////////////
 
   loadLevel () {
     // ZG.gameBackground = ZG.game.add.sprite(ZG.game.world.centerX, ZG.game.world.centerY, 'snowLandscape');
@@ -54,8 +53,6 @@ export default class ZombieGameState extends Phaser.State {
     this.game.players.map( (playerObj, index) => {
       let spriteKey = index % 2 === 0 ? 'blueGunGuy' : 'greenGunGuy';
       let playerSprite = this.add.sprite(this.world.centerX + 15*index, this.world.centerY + 15*index, spriteKey);
-      console.log('created player at ', this.world.centerX + 15*index);
-      console.log('created player at ', this.world.centerY + 15*index);
       playerSprite.anchor.set(0.5);
       this.physics.arcade.enable(playerSprite);
       playerSprite.collideWorldBounds = true;
@@ -78,13 +75,13 @@ export default class ZombieGameState extends Phaser.State {
           ZG.currentPlayer.body.velocity.x = -ZG.RUNNING_SPEED;
       }
       if (this.cursors.right.isDown){
-          ZG.currentPlayer.body.velocity.x = ZG.RUNNING_SPEED;
+          ZG.currentPlayer.body.velocity.x =  ZG.RUNNING_SPEED;
       }
       if (this.cursors.up.isDown){
           ZG.currentPlayer.body.velocity.y = -ZG.RUNNING_SPEED;
       }
       if (this.cursors.down.isDown){
-          ZG.currentPlayer.body.velocity.y = ZG.RUNNING_SPEED;
+          ZG.currentPlayer.body.velocity.y =  ZG.RUNNING_SPEED;
       }
     }
   }
@@ -111,40 +108,38 @@ export default class ZombieGameState extends Phaser.State {
   }
 
   updateClients(serverState) {
-    R.forEachObjIndexed(self.updatePlayer, serverState);
+    // console.log('this:', this); //THIS IS A SOCKET
+    console.log('this.updatePlayer', this.updatePlayer);
+    console.log('updatePlayer', updatePlayer);
+    R.forEachObjIndexed(this.updatePlayer, serverState);
   }
 
   updatePlayer(playerState) {
 
-    // console.log('should be id', playerState)
-
-    // console.log('filtering: ', ZG.playerSprites);
-    // console.log('looking for id:', playerState.id);
     let playerToMove = ZG.playerSprites.filter((playerSprite) => {
-      // console.log('examining sprite: ', playerSprite)
-      // console.log('returning: ', playerSprite.socketId == playerState.id);
       return playerSprite.socketId == playerState.id;
     })[0];
 
     console.log('Player To Move: ', playerToMove);
 
-    // let playerToMove = R.find(R.propEq('id', playerState.id))(ZG.playerSprites);
     if (!playerToMove.lastUpdate){
       playerToMove.lastUpdate  = 0;
     }
 
     if (playerToMove && playerToMove.socketId != window.socket.id){
-      // playerToMove.sprite.x = playerState.x;
-      // playerToMove.sprite.y = playerState.y;
-      console.log(' gameTime:', playerState.gameTime)
-      console.log(' last Update:', playerToMove.lastUpdate)
-      var timeToTween = (playerState.gameTime - playerToMove.lastUpdate) / 5;
-      console.log(' timeToTween:', timeToTween);
-      let interTween = self.add.tween(playerToMove.sprite);
-      interTween.to({ x: playerState.x, y: playerState.y }, timeToTween, Phaser.Easing.Linear.None, true);
-      console.log('TWEEN?', interTween);
-      interTween.onComplete.addOnce( ()=> console.log('TWEEN HAS COMPLETED... YOU HEAR?'));
-      playerToMove.lastUpdate = new Date() - ZG.startDate;
+      playerToMove.sprite.x = playerState.x;
+      playerToMove.sprite.y = playerState.y;
+
+      //Tween Interpolation
+      // console.log(' gameTime:', playerState.gameTime)
+      // console.log(' last Update:', playerToMove.lastUpdate)
+      // var timeToTween = (playerState.gameTime - playerToMove.lastUpdate) / 5;
+      // console.log(' timeToTween:', timeToTween);
+      // let interTween = self.add.tween(playerToMove.sprite);
+      // interTween.to({ x: playerState.x, y: playerState.y }, timeToTween, Phaser.Easing.Linear.None, true);
+      // console.log('TWEEN?', interTween);
+      // interTween.onComplete.addOnce( ()=> console.log('TWEEN HAS COMPLETED... YOU HEAR?'));
+      // playerToMove.lastUpdate = new Date() - ZG.startDate;
     }
   }
 

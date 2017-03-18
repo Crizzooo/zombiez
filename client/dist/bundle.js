@@ -11582,9 +11582,9 @@ var BootState = function (_Phaser$State) {
             this.scale.scaleMode = Phaser.ScaleManager.RESIZE;
             this.physics.startSystem(Phaser.Physics.ARCADE);
 
-            // ZG.players = players;
+            //game.players initiated with client lobby ovjects!
             this.game.players = players;
-            console.log("ZG Players initiated: ", ZG.players);
+            console.log("this.game.players: ", this.game.players);
         }
     }, {
         key: 'preload',
@@ -11601,7 +11601,6 @@ var BootState = function (_Phaser$State) {
     }, {
         key: 'update',
         value: function update() {
-            console.log(this.game);
             this.state.start("PreloadState");
         }
     }]);
@@ -11647,8 +11646,6 @@ var Preload = function (_Phaser$State) {
     }, {
         key: 'preload',
         value: function preload() {
-            //load assets that are used across all games
-
             //Preload Bar
             this.preloadBar = this.add.sprite(this.world.centerX, this.world.centerY, 'preloadbar', 0);
             this.preloadBar.anchor.setTo(0.5);
@@ -11697,7 +11694,6 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
 var R = __webpack_require__(158);
 var throttle = __webpack_require__(311);
 
-var self;
 ZG.playerSprites = [];
 
 var ZombieGameState = function (_Phaser$State) {
@@ -11713,8 +11709,7 @@ var ZombieGameState = function (_Phaser$State) {
     key: 'init',
     value: function init() {
       //set constants for game
-      self = this;
-      ZG.RUNNING_SPEED = 180;
+      this.RUNNING_SPEED = 180;
 
       window.socket.on('serverUpdate', this.updateClients);
       //cursor keys
@@ -11727,7 +11722,7 @@ var ZombieGameState = function (_Phaser$State) {
   }, {
     key: 'preload',
     value: function preload() {
-      //load assets that are specific for this mini game
+      //load assets that are specific for this level
     }
   }, {
     key: 'create',
@@ -11740,12 +11735,13 @@ var ZombieGameState = function (_Phaser$State) {
     value: function update() {
       //NOTE: Collision between SpriteA and SpriteB - callback takes in SpriteA and SpriteB
       this.handleInput();
-      //every 16ms send package to server with position
+      //every 32ms send package to server with position
       this.sendToServer();
     }
 
-    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    //Non Phaser Methods
+    //////////////////////////
+    /// Non Phaser Methods ///
+    //////////////////////////
 
   }, {
     key: 'loadLevel',
@@ -11764,8 +11760,6 @@ var ZombieGameState = function (_Phaser$State) {
       this.game.players.map(function (playerObj, index) {
         var spriteKey = index % 2 === 0 ? 'blueGunGuy' : 'greenGunGuy';
         var playerSprite = _this2.add.sprite(_this2.world.centerX + 15 * index, _this2.world.centerY + 15 * index, spriteKey);
-        console.log('created player at ', _this2.world.centerX + 15 * index);
-        console.log('created player at ', _this2.world.centerY + 15 * index);
         playerSprite.anchor.set(0.5);
         _this2.physics.arcade.enable(playerSprite);
         playerSprite.collideWorldBounds = true;
@@ -11824,43 +11818,39 @@ var ZombieGameState = function (_Phaser$State) {
   }, {
     key: 'updateClients',
     value: function updateClients(serverState) {
-      R.forEachObjIndexed(self.updatePlayer, serverState);
+      // console.log('this:', this); //THIS IS A SOCKET
+      console.log('this.updatePlayer', this.updatePlayer);
+      console.log('updatePlayer', updatePlayer);
+      R.forEachObjIndexed(this.updatePlayer, serverState);
     }
   }, {
     key: 'updatePlayer',
     value: function updatePlayer(playerState) {
 
-      // console.log('should be id', playerState)
-
-      // console.log('filtering: ', ZG.playerSprites);
-      // console.log('looking for id:', playerState.id);
       var playerToMove = ZG.playerSprites.filter(function (playerSprite) {
-        // console.log('examining sprite: ', playerSprite)
-        // console.log('returning: ', playerSprite.socketId == playerState.id);
         return playerSprite.socketId == playerState.id;
       })[0];
 
       console.log('Player To Move: ', playerToMove);
 
-      // let playerToMove = R.find(R.propEq('id', playerState.id))(ZG.playerSprites);
       if (!playerToMove.lastUpdate) {
         playerToMove.lastUpdate = 0;
       }
 
       if (playerToMove && playerToMove.socketId != window.socket.id) {
-        // playerToMove.sprite.x = playerState.x;
-        // playerToMove.sprite.y = playerState.y;
-        console.log(' gameTime:', playerState.gameTime);
-        console.log(' last Update:', playerToMove.lastUpdate);
-        var timeToTween = (playerState.gameTime - playerToMove.lastUpdate) / 5;
-        console.log(' timeToTween:', timeToTween);
-        var interTween = self.add.tween(playerToMove.sprite);
-        interTween.to({ x: playerState.x, y: playerState.y }, timeToTween, Phaser.Easing.Linear.None, true);
-        console.log('TWEEN?', interTween);
-        interTween.onComplete.addOnce(function () {
-          return console.log('TWEEN HAS COMPLETED... YOU HEAR?');
-        });
-        playerToMove.lastUpdate = new Date() - ZG.startDate;
+        playerToMove.sprite.x = playerState.x;
+        playerToMove.sprite.y = playerState.y;
+
+        //Tween Interpolation
+        // console.log(' gameTime:', playerState.gameTime)
+        // console.log(' last Update:', playerToMove.lastUpdate)
+        // var timeToTween = (playerState.gameTime - playerToMove.lastUpdate) / 5;
+        // console.log(' timeToTween:', timeToTween);
+        // let interTween = self.add.tween(playerToMove.sprite);
+        // interTween.to({ x: playerState.x, y: playerState.y }, timeToTween, Phaser.Easing.Linear.None, true);
+        // console.log('TWEEN?', interTween);
+        // interTween.onComplete.addOnce( ()=> console.log('TWEEN HAS COMPLETED... YOU HEAR?'));
+        // playerToMove.lastUpdate = new Date() - ZG.startDate;
       }
     }
   }]);
@@ -11957,6 +11947,18 @@ var initialState = {
   gamePlaying: false
 };
 
+/* Action Types */
+var CHANGE_GAME_PLAYING = 'CHANGE_GAME_PLAYING';
+var UPDATE_STATE = 'UPDATE_STATE';
+
+/* Action creators */
+var dispatchGameUpdate = exports.dispatchGameUpdate = function dispatchGameUpdate(gameState) {
+  return { type: UPDATE_STATE, gameState: gameState };
+};
+var dispatchGamePlaying = exports.dispatchGamePlaying = function dispatchGamePlaying(gamePlayingStatus) {
+  return { type: CHANGE_GAME_PLAYING, value: gamePlayingStatus };
+};
+
 /* Reducer */
 
 exports.default = function () {
@@ -11969,11 +11971,11 @@ exports.default = function () {
   switch (action.type) {
 
     case UPDATE_STATE:
-      // newState.allPlayers = action.allPlayers;
-      // PB.customParams.players = newState.allPlayers;
-      console.log('Reducer recieved:', action.gameState);
       newState.gameState = action.gameState;
-      ZG.players = action.gameState;
+      break;
+
+    case CHANGE_GAME_PLAYING:
+      newState.gamePlaying = action.value;
       break;
 
     default:
@@ -11982,19 +11984,6 @@ exports.default = function () {
 
   return newState;
 };
-
-/* Action Types */
-// const ADD_PLAYER = 'ADD_PLAYER';
-
-
-var UPDATE_STATE = 'UPDATE_STATE';
-
-/* Action Creators */
-var dispatchGameUpdate = exports.dispatchGameUpdate = function dispatchGameUpdate(gameState) {
-  return { type: UPDATE_STATE, gameState: gameState };
-};
-
-/* Action Dispatchers */
 
 /***/ }),
 /* 150 */
@@ -18941,12 +18930,6 @@ exports.default = (0, _reactRedux.connect)()(Layout);
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-
-var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
-
-//Import from Lobby Reducer
-
-
 exports.dispatchNewMessage = dispatchNewMessage;
 
 var _store = __webpack_require__(139);
@@ -18955,27 +18938,15 @@ var _store2 = _interopRequireDefault(_store);
 
 var _playersReducer = __webpack_require__(91);
 
-var _chatAppReducer = __webpack_require__(148);
-
-var _gameStateReducer = __webpack_require__(149);
-
-var _boot = __webpack_require__(145);
-
-var _boot2 = _interopRequireDefault(_boot);
-
-var _preload = __webpack_require__(146);
-
-var _preload2 = _interopRequireDefault(_preload);
-
-var _zombieGameState = __webpack_require__(147);
-
-var _zombieGameState2 = _interopRequireDefault(_zombieGameState);
-
 var _main = __webpack_require__(630);
 
 var _main2 = _interopRequireDefault(_main);
 
+var _chatAppReducer = __webpack_require__(148);
+
 var _lobbyReducer = __webpack_require__(633);
+
+var _gameStateReducer = __webpack_require__(149);
 
 var _ramda = __webpack_require__(158);
 
@@ -18986,6 +18957,9 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 //NOTE: SET UP DISPATCH LOBBY STATE !!!!!!!!!
 
 //We attach all functions to a socket in here
+
+
+//Import from Reducers
 var attachFunctions = function attachFunctions(socket) {
   socket.on('playerUpdate', dispatchPlayerUpdates);
   socket.on('currentPlayer', dispatchCurrentLobbyer);
@@ -19013,26 +18987,18 @@ function dispatchNewMessage(msgObj) {
 }
 
 function dispatchGameTrue() {
-  _store2.default.dispatch((0, _playersReducer.changeGamePlaying)(true));
+  _store2.default.dispatch((0, _gameStateReducer.dispatchGamePlaying)(true));
 }
 
 function startClientGame(players, startDate) {
-  console.log('Sockets are starting games with Players:', ZG.players);
-  console.log('GAME STARTING DATE: ', startDate);
-  console.log('typeof startDate pre parse: ', typeof startDate === 'undefined' ? 'undefined' : _typeof(startDate));
-  ZG.startDate = Date.parse(startDate);
-  console.log('typeafter ', _typeof(Date.parse(startDate)));
+  var state = _store2.default.getState();
   ZG.game = new _main2.default('100%', '100%', Phaser.AUTO, 'game');
-  ZG.game.startGame('BootState', true, false, players);
-  // ZG.game.state.add('Boot', BootState);
-  // ZG.game.state.add('Preload', PreloadState);
-  // ZG.game.state.add('ZombieGameState', ZombieGameState);
-  // ZG.game.state.start('Boot', true, false, players);
+  ZG.game.startGame('BootState', true, false, state.lobby.lobbyers);
 }
 
 function dispatchNewGameState(playerObjects) {
   console.log('client received new GameState:', playerObjects);
-  _store2.default.dispatch((0, _gameStateReducer.dispatchGameUpdate)(playerObjects));
+  // store.dispatch(dispatchGameUpdate(playerObjects));
 }
 
 function dispatchScoreUpdate(playerId, score) {
@@ -20026,7 +19992,12 @@ var Header = function (_Component) {
           _react2.default.createElement(
             "h2",
             null,
-            "Welcome to Platformer Battle!"
+            "Welcome to GEN ZED!"
+          ),
+          _react2.default.createElement(
+            "h6",
+            null,
+            "hehehe"
           )
         )
       );
@@ -20384,18 +20355,6 @@ var _reactRedux = __webpack_require__(41);
 
 var _playersReducer = __webpack_require__(91);
 
-var _boot = __webpack_require__(145);
-
-var _boot2 = _interopRequireDefault(_boot);
-
-var _preload = __webpack_require__(146);
-
-var _preload2 = _interopRequireDefault(_preload);
-
-var _zombieGameState = __webpack_require__(147);
-
-var _zombieGameState2 = _interopRequireDefault(_zombieGameState);
-
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
@@ -20403,8 +20362,6 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
 
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
-
-//declare global variable for game
 
 var gameContainer = function (_Component) {
   _inherits(gameContainer, _Component);
@@ -20421,9 +20378,9 @@ var gameContainer = function (_Component) {
   _createClass(gameContainer, [{
     key: 'render',
     value: function render() {
-      //TODO: REIMPLEMENT DISABLED ATTRIB ON FALSY RETURN
+      //TODO: REIMPLEMENT DISABLED ATTRIB ON FALSY RETURN AND PLAYERS <= 2
       if (this.props.gamePlaying === false) {
-        if (this.props.players && this.props.players.length >= 2) {
+        if (this.props.lobbyers && this.props.lobbyers.length >= 1) {
           return _react2.default.createElement(
             'div',
             { className: 'col-md-6 gameContainer' },
@@ -20443,7 +20400,7 @@ var gameContainer = function (_Component) {
             { className: 'col-md-6 gameContainer' },
             _react2.default.createElement(
               'button',
-              { type: 'button', className: 'btn btn-lg btn-info playButton', onClick: this.startGame },
+              { type: 'button', className: 'btn btn-lg btn-info playButton', onClick: this.startGame, disabled: true },
               _react2.default.createElement(
                 'span',
                 { className: 'playBtnText' },
@@ -20470,9 +20427,8 @@ var gameContainer = function (_Component) {
   }, {
     key: 'startGame',
     value: function startGame(players) {
-      //TODO: Remove elements in Game Container and replace with game
       //Flip redux state for game = true
-      socket.emit('gameIsStarting', this.props.players);
+      socket.emit('gameIsStarting');
     }
   }]);
 
@@ -20487,11 +20443,6 @@ var mapProps = function mapProps(state) {
   };
 };
 
-/* Note on mapDispatch
-  below is short-hand for mapDispatch, creates key w/ value of anonymous function
-  that dispatches the function that was passed in*/
-
-/* Reference - full way to write mapDispatch */
 var mapDispatch = function mapDispatch(dispatch) {
   return {
     changeGamePlayState: function changeGamePlayState(gamePlayState) {
