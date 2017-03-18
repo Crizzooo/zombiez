@@ -4,7 +4,6 @@ import LobbyControls from './lobbyControls';
 import ChatApp from './chatApp.jsx';
 
 function Leaderboard(props) {
-  console.log('received props:', props);
   let lobbyers = props.lobbyers ? props.lobbyers.sort((a, b) => b.score - a.score) : [];
   let playerRows = [];
   //loop through player count - create player objects
@@ -54,7 +53,6 @@ function Leaderboard(props) {
 }
 
 const mapState = state => {
-  console.log('state in leaderboard: ', state);
   return {
     lobbyers: state.lobby.lobbyers
   };

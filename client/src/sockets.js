@@ -1,15 +1,16 @@
 import store from './store.js';
-import { loadPlayers, setCurrentPlayer, changeGamePlaying, changePlayerScore } from './reducers/players-reducer.js';
 
 
 import GenZed from './main.js';
 
 //Import from Reducers
+import { loadPlayers, setCurrentPlayer, changeGamePlaying, updatePlayers } from './reducers/players-reducer.js';
 import { loadMessages, addMessage } from './reducers/chatApp-reducer.js';
 import { dispatchLobbyUpdate, dispatchSetCurrentLobbyer } from './reducers/lobby-reducer.js';
 import { dispatchGamePlaying } from './reducers/gameState-reducer';
 
 import R from 'ramda';
+import {throttle} from 'lodash';
 
 
 
@@ -24,15 +25,11 @@ const attachFunctions = (socket) => {
   socket.on('turnOnGameComponent', dispatchGameTrue);
   socket.on('startGame', startClientGame);
   socket.on('updateLeaderboard', dispatchScoreUpdate);
-  socket.on('serverUpdate', dispatchNewGameState);
+  // socket.on('serverUpdate', dispatchNewGameState);
   socket.on('lobbyUpdate', dispatchLobbyState);
+  socket.on('serverUpdate', dispatchServerState);
 };
 
-function dispatchPlayerUpdates(players) {
-  console.log('Received Players:', players);
-  //dispatch loadPlayers with players
-  store.dispatch(loadPlayers(players));
-}
 
 function dispatchCurrentLobbyer(lobbyerObj) {
   store.dispatch(dispatchSetCurrentLobbyer(lobbyerObj));
@@ -53,18 +50,31 @@ function startClientGame(players, startDate) {
   ZG.game.startGame('BootState', true, false, state.lobby.lobbyers);
 }
 
-function dispatchNewGameState(playerObjects) {
-  console.log('client received new GameState:', playerObjects);
-  // store.dispatch(dispatchGameUpdate(playerObjects));
+function dispatchServerState(serverState) {
+  // console.log('client received serverState:', serverState);
+
+  //break out data from server - send to appropriate stores
+  store.dispatch(dispatchLobbyUpdate(serverState.lobby.lobbyers));
+  store.dispatch(loadPlayers(serverState.players));
+  throttledLog();
+}
+const throttledLog = throttle(logReceivedState, 10000);
+function logReceivedState() {
+  console.log('state after server update: ', store.getState());
+}
+function dispatchPlayerUpdates(players) {
+  console.log('Received Players:', players);
+  //dispatch loadPlayers with players
+  store.dispatch(loadPlayers(players));
+}
+
+function dispatchLobbyState(lobbyersFromServer){
+  console.log('received lobby from server: ', lobbyersFromServer);
+  store.dispatch(dispatchLobbyUpdate(lobbyersFromServer));
 }
 
 function dispatchScoreUpdate(playerId, score){
   store.dispatch(changePlayerScore(playerId, score));
-}
-
-function dispatchLobbyState(lobbyersFromServer){
-  console.log('received from server: ', lobbyersFromServer);
-  store.dispatch(dispatchLobbyUpdate(lobbyersFromServer));
 }
 
 export default attachFunctions;

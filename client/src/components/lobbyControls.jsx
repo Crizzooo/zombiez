@@ -20,13 +20,13 @@ export class lobbyControls extends React.Component {
   handleSubmit(evt) {
     evt.preventDefault();
     console.log('sending this player obj to server', this.state);
-    socket.emit('playerJoinLobby', this.state);
+    socket.emit('lobbyerJoinLobby', this.state);
     $('#addPlayerModal').modal('hide');
     $('#playerNameInput').val('');
   }
 
   handleLeaveGame(evt) {
-    socket.emit('playerLeaveLobby', this.props.currentLobbyer);
+    socket.emit('lobbyerLeaveLobby', this.props.currentLobbyer);
   }
 
   componentDidMount() {
@@ -36,8 +36,6 @@ export class lobbyControls extends React.Component {
   }
 
   render() {
-    console.log('Current Lobbyer:', this.props.currentLobbyer);
-
     return (
       <div id="buttonHolder">
         {

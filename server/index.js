@@ -10,14 +10,16 @@ const store = require('./store.js');
 const receivePlayerJoin = require('./reducers/lobby.js').receiveJoinLobby;
 const receivePlayerLeave = require('./reducers/lobby.js').receivePlayerLeave;
 
+const {addPlayer, updatePlayer} = require('./reducers/players.js');
 
-
+const startGame = require('./engine/updateClientLoop.js').startGame;
 
 const server = app.listen(3000, () => {
   console.log('listening on *:3000');
 })
 
 const io = require('socket.io')(server);
+
 
 /* initiate middleware */
 (function(){
@@ -40,35 +42,6 @@ io.on('connection', (socket) => {
   // emit player update to specific socket
 
   //TODO: Call function that attaches all functions to socket
-
-  socket.on('playerJoinLobby', (lobbyObj) => {
-    //TODO: Customize Player Obj for server purposes
-    // Send back new player obj
-    lobbyObj.socketId = socket.id;
-    console.log('sending lobbyObj to server reducer', lobbyObj);
-    store.dispatch(receivePlayerJoin(lobbyObj));
-    let state = store.getState();
-    console.log('this is the state im sending back: ', state);
-    io.emit('lobbyUpdate', state.lobby.lobbyers)
-
-    socket.emit('currentPlayer', state.lobby.lobbyers[state.lobby.lobbyers.length - 1]);
-  });
-
-  socket.on('playerLeaveLobby', (currentLobbyer) => {
-    let state = store.getState();
-    console.log('a user has left the lobby with socketId:', socket.id);
-    //TODO: remove socket from players array
-    console.log('lobbyers before:', state.lobby.lobbyers);
-
-    store.dispatch(receivePlayerLeave(currentLobbyer));
-
-    //let lobbyers = R.filter( (lobbyer) => lobbyer.socketId !== socket.id, state.lobby.lobbyers);
-    state = store.getState();
-    console.log('lobbyers after: ', state.lobby.lobbyers);
-    socket.emit('currentPlayer', {});
-    io.emit('lobbyUpdate', state.lobby.lobbyers);
-  });
-
   socket.on('disconnect', () => {
     let state = store.getState();
     console.log('a user has left the lobby with socketId:', socket.id);
@@ -82,10 +55,33 @@ io.on('connection', (socket) => {
     io.emit('lobbyUpdate', state.lobby.lobbyers);
   })
 
-  socket.on('getPlayers', () => {
-    //emiting player.state
-    socket.emit('playerUpdate', players);
-  })
+  socket.on('lobbyerJoinLobby', (lobbyObj) => {
+    //TODO: Customize Player Obj for server purposes
+    // Send back new player obj
+    lobbyObj.socketId = socket.id;
+    console.log('sending lobbyObj to server reducer', lobbyObj);
+    store.dispatch(receivePlayerJoin(lobbyObj));
+    let state = store.getState();
+    console.log('this is the state im sending back: ', state);
+    io.emit('lobbyUpdate', state.lobby.lobbyers)
+
+    socket.emit('currentPlayer', state.lobby.lobbyers[state.lobby.lobbyers.length - 1]);
+  });
+
+  socket.on('lobbyerLeaveLobby', (currentLobbyer) => {
+    let state = store.getState();
+    console.log('a user has left the lobby with socketId:', socket.id);
+    //TODO: remove socket from players array
+    console.log('lobbyers before:', state.lobby.lobbyers);
+
+    store.dispatch(receivePlayerLeave(currentLobbyer));
+
+    //let lobbyers = R.filter( (lobbyer) => lobbyer.socketId !== socket.id, state.lobby.lobbyers);
+    state = store.getState();
+    console.log('lobbyers after: ', state.lobby.lobbyers);
+    socket.emit('currentPlayer', {});
+    io.emit('lobbyUpdate', state.lobby.lobbyers);
+  });
 
   socket.on('getLobby', () => {
     //emit lobby state
@@ -102,11 +98,27 @@ io.on('connection', (socket) => {
   })
 
   socket.on('gameIsStarting', () => {
-    io.emit('turnOnGameComponent');
-    io.emit('startGame');
-  })
+    startGame(io);
+  });
 
   const throttledStateChange = throttle(emitStateChange, 32);
+
+  socket.on('playerEnterGame', (playerState) => {
+      //dispatch player to players reducers
+      console.log('player state', playerState);
+      store.dispatch(addPlayer(playerState));
+      let state = store.getState();
+  });
+
+
+
+//revisit below socket methods
+  socket.on('getPlayers', () => {
+    //emiting player.state
+    socket.emit('playerUpdate', players);
+  })
+
+
   socket.on('playerMoving', (playerObj) => {
     // console.log('receive player?', playerObj);
     // console.log('current server players state:', players);
@@ -138,18 +150,8 @@ io.on('connection', (socket) => {
   })
 
   socket.on('clientUpdate', (state) => {
-    console.log('Server recieved: ', state);
-
-    //package client states
-    clientStates[state.playerId] = {
-      x: state.x,
-      y: state.y,
-      gameTime: state.gameTime,
-      id: state.playerId
-    };
-
-    //emit state holding each client state
-    throttledStateChange();
+    //TODO: break state down and dispatch to appropriate reducers
+    store.dispatch(addPlayer(state.player));
   });
 })
 

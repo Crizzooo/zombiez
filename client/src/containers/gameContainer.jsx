@@ -26,7 +26,6 @@ class gameContainer extends Component {
       }
     } else {
       //Game is Currently Playing
-      console.log('There is a game going on!');
       return (<div className="col-md-6 gameContainer">
         <div id="game">
         </div>

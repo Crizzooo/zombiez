@@ -1,21 +1,24 @@
 const R = require('ramda');
 const throttle = require('lodash.throttle');
 
+import store from '../store.js';
+import {setCurrentPlayer, updateCurrentPlayer} from '../reducers/players-reducer.js';
+import emitCurrentState from '../engine/emitCurrentState.js';
 
-ZG.playerSprites = [];
-
+let remoteSprites = {};
+var self;
 export default class ZombieGameState extends Phaser.State {
   init () {
     //set constants for game
     this.RUNNING_SPEED = 180;
-
-    window.socket.on('serverUpdate', this.updateClients);
+    self = this;
+    // window.socket.on('serverUpdate', this.updateClients);
     //cursor keys
     //Control Mechanics
     this.cursors = this.input.keyboard.createCursorKeys();
     this.cursors.spacebar = this.input.keyboard.addKey(Phaser.Keyboard.SPACEBAR);
 
-    this.sendToServer = throttle(this.sendPlayerToServer, 32);
+    // this.sendToServer = throttle(this.sendPlayerToServer, 32);
   }
 
 
@@ -26,13 +29,20 @@ export default class ZombieGameState extends Phaser.State {
   create () {
       //create game set up
       this.loadLevel();
+      //set interval to emit currentPlayer to server
+      const emitInterval = emitCurrentState(socket);
   }
 
   update () {
       //NOTE: Collision between SpriteA and SpriteB - callback takes in SpriteA and SpriteB
+
+      //get state from store
+      //   //update each player
+      // console.log('phaser update func');
+      this.updateRemotePlayers();
       this.handleInput();
+      this.dispatchCurrentPlayer();
       //every 32ms send package to server with position
-      this.sendToServer();
 
   }
 
@@ -49,98 +59,119 @@ export default class ZombieGameState extends Phaser.State {
     this.world.resize(500, 500);
 
     //for each player in lobby, create a player sprite
-    console.log('creating this amount of players: ', this.game.players.length);
-    this.game.players.map( (playerObj, index) => {
-      let spriteKey = index % 2 === 0 ? 'blueGunGuy' : 'greenGunGuy';
-      let playerSprite = this.add.sprite(this.world.centerX + 15*index, this.world.centerY + 15*index, spriteKey);
-      playerSprite.anchor.set(0.5);
-      this.physics.arcade.enable(playerSprite);
-      playerSprite.collideWorldBounds = true;
-      let interpolate = this.add.tween(playerSprite);
-      console.log('created sprite: ', playerSprite);
-      //determine if client is currently a player, and assign his sprite to currentPlayer object
-      if (socket.id === playerObj.socketId) {
-        ZG.currentPlayer = playerSprite;
-        console.log('current player assigned:', playerSprite);
-      }
-      ZG.playerSprites.push({socketId: playerObj.socketId, sprite: playerSprite, interpolate});
-    });
-  };
+    // console.log('creating this amount of players: ', this.game.players.length);
+    console.log('loading level');
+    //decide player sprite
+    // let spriteKey = index % 2 === 0 ? 'blueGunGuy' : 'greenGunGuy';
 
-  handleInput() {
-    if (ZG.currentPlayer){
-      ZG.currentPlayer.body.velocity.x = 0;
-      ZG.currentPlayer.body.velocity.y = 0;
-      if (this.cursors.left.isDown){
-          ZG.currentPlayer.body.velocity.x = -ZG.RUNNING_SPEED;
-      }
-      if (this.cursors.right.isDown){
-          ZG.currentPlayer.body.velocity.x =  ZG.RUNNING_SPEED;
-      }
-      if (this.cursors.up.isDown){
-          ZG.currentPlayer.body.velocity.y = -ZG.RUNNING_SPEED;
-      }
-      if (this.cursors.down.isDown){
-          ZG.currentPlayer.body.velocity.y =  ZG.RUNNING_SPEED;
-      }
-    }
-  }
-
-  sendPlayerToServer(){
-    let x = ZG.currentPlayer.body.x;
-    let y = ZG.currentPlayer.body.y;
-    let gameTime = new Date() - ZG.startDate;
-    let playerId = socket.id;
-    console.log('NEW DATE: ', new Date());
-    console.log('START DATE: ', ZG.startDate);
-    console.log(typeof ZG.startDate);
-    console.log('GAMETIME TO STRING ', gameTime.toString());
-    console.log('GAMETIME FOR PLAYER: ', parseInt(gameTime, 10));
-
-    let clientState = {
-      x,
-      y,
-      gameTime,
-      playerId
-    }
-
-    socket.emit('clientUpdate', clientState);
-  }
-
-  updateClients(serverState) {
-    // console.log('this:', this); //THIS IS A SOCKET
-    console.log('this.updatePlayer', this.updatePlayer);
-    console.log('updatePlayer', updatePlayer);
-    R.forEachObjIndexed(this.updatePlayer, serverState);
-  }
-
-  updatePlayer(playerState) {
-
-    let playerToMove = ZG.playerSprites.filter((playerSprite) => {
-      return playerSprite.socketId == playerState.id;
+    //create a current player
+    console.log('what is this.game.players', this.game.players);
+    let currentPlayer = this.game.players.filter( (player) => {
+      return player.socketId === socket.id;
     })[0];
 
-    console.log('Player To Move: ', playerToMove);
+    console.log('after filter');
+    if (currentPlayer) {
+      //initiate player sprite
+      let currentPlayerSprite = this.add.sprite(this.world.centerX, this.world.centerY, 'blueGunGuy');
 
-    if (!playerToMove.lastUpdate){
-      playerToMove.lastUpdate  = 0;
-    }
+      //add physics to current player
+      currentPlayerSprite.anchor.set(0.5);
+      this.physics.arcade.enable(currentPlayerSprite);
+      currentPlayerSprite.collideWorldBounds = true;
 
-    if (playerToMove && playerToMove.socketId != window.socket.id){
-      playerToMove.sprite.x = playerState.x;
-      playerToMove.sprite.y = playerState.y;
+      //store on game Object
+      this.currentPlayer = currentPlayerSprite;
 
-      //Tween Interpolation
-      // console.log(' gameTime:', playerState.gameTime)
-      // console.log(' last Update:', playerToMove.lastUpdate)
-      // var timeToTween = (playerState.gameTime - playerToMove.lastUpdate) / 5;
-      // console.log(' timeToTween:', timeToTween);
-      // let interTween = self.add.tween(playerToMove.sprite);
-      // interTween.to({ x: playerState.x, y: playerState.y }, timeToTween, Phaser.Easing.Linear.None, true);
-      // console.log('TWEEN?', interTween);
-      // interTween.onComplete.addOnce( ()=> console.log('TWEEN HAS COMPLETED... YOU HEAR?'));
-      // playerToMove.lastUpdate = new Date() - ZG.startDate;
+      //create currentPlayer
+      let currPlayerState =  {
+            socketId: socket.id,
+            x: currentPlayerSprite.x,
+            y: currentPlayerSprite.y,
+            animationDirection: 'still'
+            // sprite: currentPlayerSprite
+            //TODO: health, fire, guns, bullets, frame? etc
+        }
+
+      console.log('pre dispatch');
+      //send current Player to local store
+      store.dispatch(setCurrentPlayer(currPlayerState));
+      //emit to server to create this player
+      console.log('pre emit');
+      console.log('sending currPlayerState', currPlayerState);
+      socket.emit('playerEnterGame', currPlayerState);
+      console.log('did we hit here');
     }
   }
+
+  handleInput() {
+    if (this.currentPlayer){
+      if ( this.cursors.left.isDown ||
+          this.cursors.right.isDown ||
+             this.cursors.up.isDown ||
+          this.cursors.down.isDown
+        ) {
+            if (this.cursors.left.isDown){
+              this.currentPlayer.body.velocity.x = -this.RUNNING_SPEED;
+              this.currentPlayer.animationDirection = 'left';
+            }
+            if (this.cursors.right.isDown){
+              this.currentPlayer.body.velocity.x =  this.RUNNING_SPEED;
+              this.currentPlayer.animationDirection = 'right';
+            }
+            if (this.cursors.up.isDown){
+              this.currentPlayer.body.velocity.y = -this.RUNNING_SPEED;
+              this.currentPlayer.animationDirection = 'up';
+            }
+            if (this.cursors.down.isDown){
+              this.currentPlayer.body.velocity.y =  this.RUNNING_SPEED;
+              this.currentPlayer.animationDirection = 'down';
+            }
+        } else {
+          //no cursors down
+          this.currentPlayer.body.velocity.x = 0;
+          this.currentPlayer.body.velocity.y = 0;
+          this.currentPlayer.animationDirection = 'still';
+        }
+    }
+  }
+
+  dispatchCurrentPlayer() {
+    console.log('Current Player Sprite: ', this.currentPlayer);
+    let currentPlayer = {
+      x: this.currentPlayer.x,
+      y: this.currentPlayer.y,
+      animationDirection: this.currentPlayer.animationDirection,
+      socketId: socket.id
+    }
+    store.dispatch(updateCurrentPlayer(currentPlayer));
+  }
+
+  updateRemotePlayers() {
+    console.log('update remote players');
+    console.log('state: ', store.getState());
+    let players = store.getState().players.allPlayers.playerStates;
+    console.log('players from server', players);
+    delete players[socket.id];
+    R.forEachObjIndexed(this.updateRemotePlayer, players);
+  }
+
+  updateRemotePlayer(playerState) {
+    console.log('update function received playerState: ', playerState);
+    //get the sprite with player.socketId
+    //check if remoteSprites has a key for this playerState id
+    if (remoteSprites[playerState.socketId]) {
+      //if it does, access that sprite and update it
+      console.log('we found a sprite that looks lioke this: ', remoteSprites[playerState.socketid])
+      remoteSprites[playerState.socketId].x = playerState.x;
+      remoteSprites[playerState.socketId].y = playerState.y;
+
+    } else {
+      //if it doesnt, create a sprite and add it There
+      let remoteSprite = self.game.add.sprite(playerState.x, playerState.y, 'blueGunGuy');
+      remoteSprites[playerState.socketId] = remoteSprite;
+    }
+  }
+
 
 }

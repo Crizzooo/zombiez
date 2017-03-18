@@ -6,7 +6,8 @@ const lobby = require('./lobby.js').lobby;
 
 //need players, engine
 const mainReducer = combineReducers({
-  lobby
+  lobby,
+  players
 })
 console.log(typeof mainReducer);
 

@@ -9,7 +9,7 @@ export default combineReducers({
   chatApp: chatAppReducer, /*
   players: playersReducer, */
   game,
-  playersReducer,
+  players: playersReducer,
   lobby
 });
 

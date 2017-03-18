@@ -1,12 +1,36 @@
 import axios from 'axios';
 import R from 'ramda';
 
+
+/* Action Types */
+// const ADD_PLAYER = 'ADD_PLAYER';
+const LOAD_PLAYERS = 'LOAD_PLAYERS';
+const SET_CURRENT_PLAYER = 'SET_CURRENT_PLAYER';
+const SET_GAME_PLAYING_BOOL = 'SET_GAME_PLAYING_BOOL';
+const UPDATE_PLAYER_SCORE = 'UPDATE_PLAYER_SCORE';
+const UPDATE_PLAYERS = 'UPDATE_PLAYERS';
+const UPDATE_CURRENT_PLAYER = 'UPDATE_CURRENT_PLAYER';
+
+/* Action Creators */
+export const loadMessage = message => ({ type: CHANGE_MESSAGE, message });
+// export const addPlayer = player => ({type: ADD_PLAYER, player});
+export const loadPlayers = allPlayers => ({type: LOAD_PLAYERS, allPlayers})
+export const setCurrentPlayer = player => ({type: SET_CURRENT_PLAYER, player});
+export const changeGamePlaying = gameStatus => ({type: SET_GAME_PLAYING_BOOL, gameStatus});
+export const changePlayerScore = (socketId, newScore) => ({type: UPDATE_PLAYER_SCORE, id: socketId, newScore: newScore})
+export const updatePlayers = serverPlayersState => ({
+  type: UPDATE_PLAYERS,
+  players: serverPlayersState
+})
+export const updateCurrentPlayer = currentPlayerState => ({
+  type: UPDATE_CURRENT_PLAYER,
+  currentPlayerState
+});
+
 //Note: addPlayer can probably be removed from file but will keep for now in case we change structure
 const initialState = {
-  message: 'bye',
-  allPlayers: [],
-  currentPlayer: {},
-  gamePlaying: false
+  playerStates: {},
+  currentPlayer: {}
 };
 
 /* Reducer */
@@ -24,7 +48,6 @@ export default (state = initialState, action) => {
 
     case SET_CURRENT_PLAYER:
       newState.currentPlayer = action.player;
-      ZG.currentPlayer = action.player;
       break;
 
     case SET_GAME_PLAYING_BOOL:
@@ -37,6 +60,15 @@ export default (state = initialState, action) => {
       newState.allPlayers[indexToUpdate].score = action.newScore;
       break;
 
+    case UPDATE_PLAYERS:
+      console.log('PLAYERS GOT FROM SERVER: ', action.players);
+      newState.playerStates = action.players;
+      break;
+
+    case UPDATE_CURRENT_PLAYER:
+      newState.currentPlayer = action.currentPlayerState;
+      break;
+
     default:
       return state;
   }
@@ -45,20 +77,7 @@ export default (state = initialState, action) => {
   return newState;
 };
 
-/* Action Types */
-// const ADD_PLAYER = 'ADD_PLAYER';
-const LOAD_PLAYERS = 'LOAD_PLAYERS';
-const SET_CURRENT_PLAYER = 'SET_CURRENT_PLAYER';
-const SET_GAME_PLAYING_BOOL = 'SET_GAME_PLAYING_BOOL';
-const UPDATE_PLAYER_SCORE = 'UPDATE_PLAYER_SCORE';
 
-/* Action Creators */
-export const loadMessage = message => ({ type: CHANGE_MESSAGE, message });
-// export const addPlayer = player => ({type: ADD_PLAYER, player});
-export const loadPlayers = allPlayers => ({type: LOAD_PLAYERS, allPlayers})
-export const setCurrentPlayer = player => ({type: SET_CURRENT_PLAYER, player});
-export const changeGamePlaying = gameStatus => ({type: SET_GAME_PLAYING_BOOL, gameStatus});
-export const changePlayerScore = (socketId, newScore) => ({type: UPDATE_PLAYER_SCORE, id: socketId, newScore: newScore})
 
 /* Action Dispatchers */
 export const fetchPlayers = () => dispatch => {

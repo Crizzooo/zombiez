@@ -3,7 +3,7 @@ const UPDATE_LOBBY = 'UPDATE_LOBBY';
 const SET_CURRENT_LOBBYER = 'SET_CURRENT_LOBBYER';
 
 /* Action Creators */
-export const dispatchLobbyUpdate = lobbyState => ({ type: UPDATE_LOBBY, lobbyState });
+export const dispatchLobbyUpdate = lobbyers => ({ type: UPDATE_LOBBY, lobbyers });
 export const dispatchSetCurrentLobbyer = currentLobbyer => ({ type: SET_CURRENT_LOBBYER, currentLobbyer});
 
 
@@ -21,14 +21,12 @@ export default (state = initialState, action) => {
   switch (action.type) {
 
     case UPDATE_LOBBY:
-      console.log('reducer updating lobbyers to: ', action.lobbyState);
-      newState.lobbyers = action.lobbyState;
+      newState.lobbyers = action.lobbyers;
       break;
     case SET_CURRENT_LOBBYER:
-      console.log('setting current lobbyer to: ', action.currentLobbyer);
       newState.currentLobbyer = action.currentLobbyer;
       break;
-      
+
     default:
       return state;
   }
