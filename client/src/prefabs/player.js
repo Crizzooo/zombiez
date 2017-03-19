@@ -23,7 +23,6 @@ export default class Player extends Prefab {
     this.animations.add('down', [23, 9, 21, 22, 7, 4], 10, true);
 
     this.game.physics.arcade.enable(this);
-
     //This might not be relevant since the world size is bigger than map size
     //To allow for camera pan
     this.body.collideWorldBounds = true;
