@@ -8,7 +8,7 @@
       "sourceJSON": "../../assets/images/finalSheet.json"
     },
 
-    "levelTilemap": {"type": "tilemap", "source": "../../assets/maps/tutorial.json"}
+    "levelTilemap": {"type": "tilemap", "source": "../../assets/maps/main.json"}
   },
   "groups": [
     "player",

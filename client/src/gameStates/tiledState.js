@@ -72,38 +72,18 @@ export default class TiledState extends Phaser.State {
       this.groups[groupName] = this.game.add.group();
     });
 
-
     //Go through all map layers
     //Also set collision if collision is true
-    // this.layers['collision'] = this.map.createLayer('collision');
-    this.collisionLayer = this.map.createLayer('collision');
-    // this.layers['collision'].debug = true;
+    this.map.layers.forEach( (layer) => {
+      this.layers[layer.name] = this.map.createLayer(layer.name);
 
+      if (layer.properties.collision) {
+        this.map.setCollisionByExclusion([], true, layer.name);
+      }
+    });
 
-    console.log("LAYERS", this.layers);
-    // this.game.physics.arcade.enable(this.map);
-    //this.layers['collision'].visible = true;
-    // this.map.setCollisionByExclusion([], true, this.layers['collision']);
-    // this.layers['collision'].resizeWorld();
+    console.log('all map layers', this.map.layers);
 
-    this.map.setCollisionByExclusion([], true, this.collisionLayer);
-
-
-    // this.map.layers.forEach( (layer) => {
-    //   this.layers[layer.name] = this.map.createLayer(layer.name);
-    //
-    //   // this.map.setCollisionByExclusion([-1], true, layer.name);
-    //   //   console.log('collisions', this.map);
-    //
-    //   if (layer.properties.collision) {
-    //
-    //     this.game.physics.arcade.enable(this.layers[layer.name]);
-    //     //this.map.setCollisionByExclusion([-1], true, layer.name);
-    //     this.map.setCollisionBetween(1, 10000, true, layer.name);
-    //     console.log('collisions', this.map);
-    //   }
-
-    // });
   }
 
 }

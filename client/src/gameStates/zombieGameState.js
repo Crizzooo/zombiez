@@ -17,7 +17,7 @@ export default class ZombieGameState extends TiledState {
     self = this;
 
     //Call super init to load in data;
-    super.init.call(this, levelData)
+    super.init.call(this, levelData);
 
     //Make pixels crisp
     //this.stage.smoothed = false;
@@ -43,6 +43,7 @@ export default class ZombieGameState extends TiledState {
     //     this.currentPlayer = playerPrefab;
     //   }
     // });
+
   }
 
   create() {
@@ -61,15 +62,28 @@ export default class ZombieGameState extends TiledState {
         },
       }, {x: 225, y: 225});
 
+
+
+    //this.currentPlayer = this.game.add.sprite(200, 200, 'testimage');
+    //this.currentPlayer = new Phaser.Sprite(this.game, 200, 200, 'playerSpriteSheet', 18);
+    // this.currentPlayer = new Player(this, 'player', {x: 200, y: 200}, {
+    //   group: 'player',
+    //   initial: 18,
+    //   texture: 'playerSpriteSheet'
+    // });
+
     this.currentPlayer = playerPrefab;
 
+    //this.game.physics.arcade.enable(this.currentPlayer);
+    //this.currentPlayer.body.enable = true;
+    this.game.add.existing(this.currentPlayer);
+
     //Set camera to follow, then make world big to allow camera to pan off
-    this.camera.view = new Phaser.Rectangle(0, 0, this.currentPlayer.position.x, this.currentPlayer.position.y);
+    //this.camera.view = new Phaser.Rectangle(0, 0, this.currentPlayer.position.x, this.currentPlayer.position.y);
     this.camera.follow(this.currentPlayer);
     this.game.world.setBounds(-250, -250, 800, 2000);
 
     console.log('map data', this.layers)
-    console.log('data', this.layers["collision"])
     console.log('data', this.currentPlayer)
 
     this.currentPlayer.debug = true;
@@ -82,9 +96,10 @@ export default class ZombieGameState extends TiledState {
   }
 
   update() {
-    // this.game.physics.arcade.overlap(this.currentPlayer, this.layers["collision"], this.test);
-    //this.physics.arcade.collide(this.currentPlayer, this.map.layers[7]);
-    this.game.physics.arcade.overlap(this.currentPlayer, this.collisionLayer, this.test);
+    this.game.physics.arcade.collide(this.currentPlayer, this.layers.backgroundDecCollision);
+    this.game.physics.arcade.collide(this.currentPlayer, this.layers.backgroundDecCollision2);
+    this.game.physics.arcade.collide(this.currentPlayer, this.layers.waterCollision);
+    this.game.physics.arcade.collide(this.currentPlayer, this.layers.wallCollision);
     this.handleInput();
 
     //every 16ms send package to server with position
