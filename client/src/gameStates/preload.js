@@ -40,9 +40,6 @@ export default class Preload extends Phaser.State {
 
     //Other Sprites
     this.load.setPreloadSprite(this.preloadBar);
-
-    //Loading Player Sprite TODO: Change to JSON data
-    this.load.atlasJSONHash('playerSpriteSheet', '../../assets/images/finalSheet.png', '../../assets/images/finalSheet.json');
   }
 
   create () {
