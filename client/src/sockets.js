@@ -9,6 +9,8 @@ import { loadMessages, addMessage } from './reducers/chatApp-reducer.js';
 import { dispatchLobbyUpdate, dispatchSetCurrentLobbyer } from './reducers/lobby-reducer.js';
 import { dispatchGamePlaying } from './reducers/gameState-reducer';
 
+import { killPlayerSprite } from './gameStates/zombieGameState.js';
+
 import R from 'ramda';
 import {throttle} from 'lodash';
 
@@ -28,7 +30,10 @@ const attachFunctions = (socket) => {
   // socket.on('serverUpdate', dispatchNewGameState);
   socket.on('lobbyUpdate', dispatchLobbyState);
   socket.on('serverUpdate', dispatchServerState);
-  socket.on('playerLeaveGame', dispatchPlayerLeaveGame);
+  socket.on('playerLeaveGame', (playerSocketId) => {
+    dispatchPlayerLeaveGame(playerSocketId);
+    killPlayerSprite(playerSocketId);
+  });
 };
 
 

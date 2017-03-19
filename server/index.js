@@ -48,12 +48,19 @@ io.on('connection', (socket) => {
     let userWhoLeft = state.lobby.lobbyers.filter(lobbyer =>
       lobbyer.socketId === socket.id
     )[0];
-    store.dispatch(receivePlayerLeave(userWhoLeft));
-    state = store.getState();
-    console.log('lobbyers after: ', state.lobby.lobbyers);
-    socket.emit('currentPlayer', {});
-    io.emit('lobbyUpdate', state.lobby.lobbyers);
-    store.dispatch(removePlayer(socket.id));
+    if (userWhoLeft) {
+      store.dispatch(receivePlayerLeave(userWhoLeft));
+      state = store.getState();
+      console.log('lobbyers after: ', state.lobby.lobbyers);
+      socket.emit('currentLobbyer', {});
+      io.emit('lobbyUpdate', state.lobby.lobbyers);
+      //IF GAME IS PLAYING
+      if (state.game.gamePlaying){
+        store.dispatch(removePlayer(socket.id));
+        //emit 'removePlayer'
+        io.emit('playerLeaveGame', socket.id);
+      }
+    }
   })
 
   socket.on('lobbyerJoinLobby', (lobbyObj) => {
@@ -83,8 +90,10 @@ io.on('connection', (socket) => {
     socket.emit('currentLobbyer', {});
     io.emit('lobbyUpdate', state.lobby.lobbyers);
     //TODO: check if game is in progress
-    store.dispatch(removePlayer(socket.id));
-    io.emit('playerLeaveGame', socket.id);
+    if (state.game.isPlaying) {
+      store.dispatch(removePlayer(socket.id));
+      io.emit('playerLeaveGame', socket.id);
+    }
   });
 
   socket.on('getLobby', () => {

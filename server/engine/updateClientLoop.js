@@ -1,7 +1,7 @@
 const store = require('../store.js');
 
 const resetPlayers = require('../reducers/players.js').resetPlayers;
-
+const gamePlaying = require('../reducers/engine.js').gamePlaying;
 
 const SERVER_UPDATE_RATE = 1000 / 30;
 
@@ -10,7 +10,7 @@ const startGame = (io) => {
 
   //reset all reducers related to game
   store.dispatch(resetPlayers());
-
+  store.dispatch(gamePlaying(true));
   //tell clients to turn on game
   io.emit('turnOnGameComponent');
   io.emit('startGame');

@@ -18743,6 +18743,8 @@ var _lobbyReducer = __webpack_require__(148);
 
 var _gameStateReducer = __webpack_require__(147);
 
+var _zombieGameState = __webpack_require__(283);
+
 var _ramda = __webpack_require__(99);
 
 var _ramda2 = _interopRequireDefault(_ramda);
@@ -18754,9 +18756,6 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 //NOTE: SET UP DISPATCH LOBBY STATE !!!!!!!!!
 
 //We attach all functions to a socket in here
-
-
-//Import from Reducers
 var attachFunctions = function attachFunctions(socket) {
   socket.on('playerUpdate', dispatchPlayerUpdates);
   socket.on('currentLobbyer', dispatchCurrentLobbyer);
@@ -18767,8 +18766,14 @@ var attachFunctions = function attachFunctions(socket) {
   // socket.on('serverUpdate', dispatchNewGameState);
   socket.on('lobbyUpdate', dispatchLobbyState);
   socket.on('serverUpdate', dispatchServerState);
-  socket.on('playerLeaveGame', dispatchPlayerLeaveGame);
+  socket.on('playerLeaveGame', function (playerSocketId) {
+    dispatchPlayerLeaveGame(playerSocketId);
+    (0, _zombieGameState.killPlayerSprite)(playerSocketId);
+  });
 };
+
+//Import from Reducers
+
 
 function dispatchCurrentLobbyer(lobbyerObj) {
   _store2.default.dispatch((0, _lobbyReducer.dispatchSetCurrentLobbyer)(lobbyerObj));
@@ -20322,7 +20327,7 @@ var BootState = function (_Phaser$State) {
 
     _createClass(BootState, [{
         key: 'init',
-        value: function init(players, level_file, next_state, extra_parameters) {
+        value: function init(lobbyers, level_file, next_state, extra_parameters) {
             //TODO: We may want to revisit these
             // ZG.scale.pageAlignHorizontally = true;
             // ZG.scale.pageAlignVertically = true;
@@ -20330,8 +20335,8 @@ var BootState = function (_Phaser$State) {
             this.scale.scaleMode = Phaser.ScaleManager.RESIZE;
             this.physics.startSystem(Phaser.Physics.ARCADE);
 
-            //game.players initiated with client lobby ovjects!
-            this.game.players = players;
+            //game. initiated with client lobby objects!
+            this.game.players = lobbyers;
             console.log("this.game.players: ", this.game.players);
         }
     }, {
@@ -20428,6 +20433,7 @@ exports.default = Preload;
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
+exports.killPlayerSprite = undefined;
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
@@ -20542,7 +20548,8 @@ var ZombieGameState = function (_Phaser$State) {
         currentPlayerSprite.collideWorldBounds = true;
 
         //store on game Object
-        this.currentPlayer = currentPlayerSprite;
+        this.currentPlayerSprite = currentPlayerSprite;
+        console.log('created current Player: ', this.currentPlayerSprite);
 
         //create currentPlayer
         var currPlayerState = {
@@ -20567,40 +20574,40 @@ var ZombieGameState = function (_Phaser$State) {
   }, {
     key: 'handleInput',
     value: function handleInput() {
-      if (this.currentPlayer) {
+      if (this.currentPlayerSprite) {
         if (this.cursors.left.isDown || this.cursors.right.isDown || this.cursors.up.isDown || this.cursors.down.isDown) {
           if (this.cursors.left.isDown) {
-            this.currentPlayer.body.velocity.x = -this.RUNNING_SPEED;
-            this.currentPlayer.animationDirection = 'left';
+            this.currentPlayerSprite.body.velocity.x = -this.RUNNING_SPEED;
+            this.currentPlayerSprite.animationDirection = 'left';
           }
           if (this.cursors.right.isDown) {
-            this.currentPlayer.body.velocity.x = this.RUNNING_SPEED;
-            this.currentPlayer.animationDirection = 'right';
+            this.currentPlayerSprite.body.velocity.x = this.RUNNING_SPEED;
+            this.currentPlayerSprite.animationDirection = 'right';
           }
           if (this.cursors.up.isDown) {
-            this.currentPlayer.body.velocity.y = -this.RUNNING_SPEED;
-            this.currentPlayer.animationDirection = 'up';
+            this.currentPlayerSprite.body.velocity.y = -this.RUNNING_SPEED;
+            this.currentPlayerSprite.animationDirection = 'up';
           }
           if (this.cursors.down.isDown) {
-            this.currentPlayer.body.velocity.y = this.RUNNING_SPEED;
-            this.currentPlayer.animationDirection = 'down';
+            this.currentPlayerSprite.body.velocity.y = this.RUNNING_SPEED;
+            this.currentPlayerSprite.animationDirection = 'down';
           }
         } else {
           //no cursors down
-          this.currentPlayer.body.velocity.x = 0;
-          this.currentPlayer.body.velocity.y = 0;
-          this.currentPlayer.animationDirection = 'still';
+          this.currentPlayerSprite.body.velocity.x = 0;
+          this.currentPlayerSprite.body.velocity.y = 0;
+          this.currentPlayerSprite.animationDirection = 'still';
         }
       }
     }
   }, {
     key: 'dispatchCurrentPlayer',
     value: function dispatchCurrentPlayer() {
-      console.log('Current Player Sprite: ', this.currentPlayer);
+      console.log('Current Player Sprite: ', this.currentPlayerSprite);
       var currentPlayer = {
-        x: this.currentPlayer.x,
-        y: this.currentPlayer.y,
-        animationDirection: this.currentPlayer.animationDirection,
+        x: this.currentPlayerSprite.x,
+        y: this.currentPlayerSprite.y,
+        animationDirection: this.currentPlayerSprite.animationDirection,
         socketId: socket.id
       };
       _store2.default.dispatch((0, _playersReducer.updateCurrentPlayer)(currentPlayer));
@@ -20612,7 +20619,8 @@ var ZombieGameState = function (_Phaser$State) {
       console.log('new players from server: ', this.players);
       console.log('remote player sprites', remotePlayerSprites);
       //take current player out
-      delete this.players[socket.id];
+      if (this.players[socket.id]) delete this.players[socket.id];
+      //then update each player from the server
       R.forEachObjIndexed(this.updateRemotePlayer, this.players);
       // R.forEachObjIndexed(this.killMissingPlayers, remotePlayerSprites);
     }
@@ -20624,31 +20632,34 @@ var ZombieGameState = function (_Phaser$State) {
       //check if remotePlayerSprites has a key for this playerState id
       console.log('WHAT IS SELF.PLAYERS?', self.players);
       console.log('DOES IT INCLUDE THIS PLAYER ID?', self.players[playerState.sockedId]);
-      if (remotePlayerSprites[playerState.socketId] && !self.players[playerState.socketId]) {
-        console.log('killing off remote sprite: ', remotePlayerSprites[playerState.socketId]);
-        remotePlayerSprites[playerState.socketId].kill();
-        delete remotePlayerSprites[playerState.socketId];
+      if (remotePlayerSprites[playerState.socketId]) {
+        //if it does, access that sprite and update it
+        console.log('we found a sprite that looks like this: ', remotePlayerSprites[playerState.socketid]);
+        remotePlayerSprites[playerState.socketId].x = playerState.x;
+        remotePlayerSprites[playerState.socketId].y = playerState.y;
       } else {
-        if (remotePlayerSprites[playerState.socketId]) {
-          //if it does, access that sprite and update it
-          console.log('we found a sprite that looks like this: ', remotePlayerSprites[playerState.socketid]);
-          remotePlayerSprites[playerState.socketId].x = playerState.x;
-          remotePlayerSprites[playerState.socketId].y = playerState.y;
-        } else {
-          //if it doesnt, create a sprite and add it There
-          console.log('creating new remote sprite');
-          var remoteSprite = self.game.add.sprite(playerState.x, playerState.y, 'blueGunGuy');
-          remotePlayerSprites[playerState.socketId] = remoteSprite;
-        }
+        //if it doesnt, create a sprite and add it There
+        console.log('creating new remote sprite');
+        var remoteSprite = self.game.add.sprite(playerState.x, playerState.y, 'blueGunGuy');
+        remotePlayerSprites[playerState.socketId] = remoteSprite;
       }
-    }
-  }, {
-    key: 'killMissingPlayers',
-    value: function killMissingPlayers(remotePlayer) {
-      if (!self.players[remotePlayer.socketId]) {
-        remotePlayer.kill();
-        delete remotePlayerSprites[remotePlayer.socketId];
-      }
+      // if (remotePlayerSprites[playerState.socketId] && !self.players[playerState.socketId]) {
+      //   console.log('killing off remote sprite: ', remotePlayerSprites[playerState.socketId])
+      //   remotePlayerSprites[playerState.socketId].kill();
+      //   delete remotePlayerSprites[playerState.socketId];
+      // } else {
+      //   if (remotePlayerSprites[playerState.socketId]) {
+      //     //if it does, access that sprite and update it
+      //     console.log('we found a sprite that looks like this: ', remotePlayerSprites[playerState.socketid])
+      //     remotePlayerSprites[playerState.socketId].x = playerState.x;
+      //     remotePlayerSprites[playerState.socketId].y = playerState.y;
+      //   } else {
+      //     //if it doesnt, create a sprite and add it There
+      //     console.log('creating new remote sprite');
+      //     let remoteSprite = self.game.add.sprite(playerState.x, playerState.y, 'blueGunGuy');
+      //     remotePlayerSprites[playerState.socketId] = remoteSprite;
+      //   }
+      // }
     }
   }]);
 
@@ -20656,6 +20667,17 @@ var ZombieGameState = function (_Phaser$State) {
 }(Phaser.State);
 
 exports.default = ZombieGameState;
+var killPlayerSprite = exports.killPlayerSprite = function killPlayerSprite(playerSocketId) {
+  if (remotePlayerSprites[playerSocketId]) {
+    remotePlayerSprites[playerSocketId].destroy();
+    delete remotePlayerSprites[playerSocketId];
+  } else if (undefined.currentPlayer.socketId === playerSocketId) {
+    console.log('deleting current player sprite who clicked leave game!', playerSocketId);
+    undefined.currentPlayer.destroy();
+    delete undefined.currentPlayer;
+    console.log('does this.currentPlayer still exist?', undefined.currentPlayer);
+  }
+};
 
 /***/ }),
 /* 284 */
