@@ -7763,18 +7763,7 @@ var ZombieGameState = function (_TiledState) {
             //Call super init to load in data;
             _get(ZombieGameState.prototype.__proto__ || Object.getPrototypeOf(ZombieGameState.prototype), 'init', this).call(this, levelData);
 
-            //Make pixels crisp
-            //this.stage.smoothed = false;
-
             window.socket.on('serverUpdate', this.updateClients);
-
-            //TODO: determine if we need these or the ones in boot
-            //cursor keys
-            //Control Mechanics
-            //this.cursors = this.input.keyboard.createCursorKeys();
-            //this.cursors.spacebar = this.input.keyboard.addKey(Phaser.Keyboard.SPACEBAR);
-
-            //this.sendToServer = throttle(this.sendPlayerToServer, 16);
         }
     }, {
         key: 'preload',
@@ -7787,7 +7776,6 @@ var ZombieGameState = function (_TiledState) {
             //     this.currentPlayer = playerPrefab;
             //   }
             // });
-
         }
     }, {
         key: 'create',
@@ -7829,8 +7817,6 @@ var ZombieGameState = function (_TiledState) {
 
             this.pointer = otherPlayerPrefab;
 
-            //this.game.physics.arcade.enable(this.currentPlayer);
-            //this.currentPlayer.body.enable = true;
             this.game.add.existing(this.currentPlayer);
             this.game.add.existing(this.pointer);
 
@@ -7838,9 +7824,6 @@ var ZombieGameState = function (_TiledState) {
             //this.camera.view = new Phaser.Rectangle(0, 0, this.currentPlayer.position.x, this.currentPlayer.position.y);
             this.camera.follow(this.currentPlayer);
             this.game.world.setBounds(-250, -250, 800, 2000);
-
-            console.log('map data', this.layers);
-            console.log('data', this.currentPlayer);
 
             this.currentPlayer.debug = true;
         }
@@ -7950,50 +7933,6 @@ var ZombieGameState = function (_TiledState) {
                 _this2.pointer.y = _this2.game.input.activePointer.worldY;
             });
         }
-
-        // sendPlayerToServer(){
-        //   let x = ZG.currentPlayer.body.x;
-        //   let y = ZG.currentPlayer.body.y;
-        //   let gameTime = new Date() - ZG.startDate;
-        //   let playerId = socket.id;
-        //   console.log('Are we sending a socket:', socket);
-        //
-        //   let clientState = {
-        //     x,
-        //     y,
-        //     gameTime,
-        //     playerId
-        //   }
-        //   socket.emit('clientUpdate', clientState);
-        // }
-        //
-        //
-        // updateClients(serverState) {
-        //   R.forEachObjIndexed(self.updatePlayer, serverState);
-        //   // console.log('state from server:', serverState);
-        // }
-        //
-        // updatePlayer(playerState) {
-        //   // console.log('should be id', playerState)
-        //
-        //   // console.log('filtering: ', ZG.playerSprites);
-        //   // console.log('looking for id:', playerState.id);
-        //   let playerToMove = ZG.playerSprites.filter((playerSprite) => {
-        //     // console.log('examining sprite: ', playerSprite)
-        //     // console.log('returning: ', playerSprite.socketId == playerState.id);
-        //     return playerSprite.socketId == playerState.id;
-        //   })[0];
-        //
-        //   // console.log('Player To Move: ', playerToMove);
-        //
-        //   // let playerToMove = R.find(R.propEq('id', playerState.id))(ZG.playerSprites);
-        //
-        //   if (playerToMove && playerToMove.socketId != window.socket.id){
-        //     playerToMove.sprite.x = playerState.x;
-        //     playerToMove.sprite.y = playerState.y;
-        //   }
-        // }
-
     }]);
 
     return ZombieGameState;
