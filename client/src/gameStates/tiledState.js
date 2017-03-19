@@ -39,10 +39,25 @@ export default class TiledState extends Phaser.State {
     let tilesetIndex = 0;
 
     this.map.tilesets.forEach(function (tileset) {
-      console.log('inside tileset image creation', tileset)
       this.map.addTilesetImage(tileset.name, levelData.map.tilesets[tilesetIndex]);
       tilesetIndex += 1;
     }, this);
+
+  }
+
+  createPrefab (prefabName, prefabData, position) {
+    let prefab;
+
+    console.log("prefab created", prefabName)
+
+    //Pass prefab data into the constructor of that type defined in this constructor
+    if (this.prefabClasses.hasOwnProperty(prefabData.type)) {
+      prefab = new this.prefabClasses[prefabData.type](this, prefabName, position, prefabData.properties);
+    }
+
+    this.prefabs[prefabName] = prefab;
+
+    return prefab;
   }
 
   create () {
@@ -51,45 +66,44 @@ export default class TiledState extends Phaser.State {
     this.layers = {};
     this.groups = {};
 
-    //Go through all map layers
-    //Also set collision if collision is true
-    this.map.layers.forEach( (layer) => {
-      this.layers[layer.name] = this.map.createLayer(layer.name);
-
-      if (layer.properties.collision) {
-        this.map.setCollisionByExclusion([-1], true, layer.name);
-      }
-    });
-
     //Go through all groups in the level data
     //Add group to game state
     this.levelData.groups.forEach( (groupName) => {
       this.groups[groupName] = this.game.add.group();
     });
 
-    console.log('this is gorups', this.groups)
+
+    //Go through all map layers
+    //Also set collision if collision is true
+    // this.layers['collision'] = this.map.createLayer('collision');
+    this.collisionLayer = this.map.createLayer('collision');
+    // this.layers['collision'].debug = true;
 
 
+    console.log("LAYERS", this.layers);
+    // this.game.physics.arcade.enable(this.map);
+    //this.layers['collision'].visible = true;
+    // this.map.setCollisionByExclusion([], true, this.layers['collision']);
+    // this.layers['collision'].resizeWorld();
+
+    this.map.setCollisionByExclusion([], true, this.collisionLayer);
 
 
+    // this.map.layers.forEach( (layer) => {
+    //   this.layers[layer.name] = this.map.createLayer(layer.name);
+    //
+    //   // this.map.setCollisionByExclusion([-1], true, layer.name);
+    //   //   console.log('collisions', this.map);
+    //
+    //   if (layer.properties.collision) {
+    //
+    //     this.game.physics.arcade.enable(this.layers[layer.name]);
+    //     //this.map.setCollisionByExclusion([-1], true, layer.name);
+    //     this.map.setCollisionBetween(1, 10000, true, layer.name);
+    //     console.log('collisions', this.map);
+    //   }
+
+    // });
   }
-
-  createPrefab (prefabName, prefabData, position) {
-    let prefab;
-
-    console.log("prefab data", prefabName)
-    console.log("prefab data", prefabData)
-
-    //Pass prefab data into the constructor of that type defined in this constructor
-    if (this.prefabClasses.hasOwnProperty(prefabData.type)) {
-      prefab = new this.prefabClasses[prefabData.type](this, prefabName, position, prefabData.properties);
-    }
-
-
-    this.prefabs[prefabName] = prefab;
-
-    return prefab;
-  }
-
 
 }

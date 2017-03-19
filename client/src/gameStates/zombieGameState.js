@@ -36,8 +36,6 @@ export default class ZombieGameState extends TiledState {
 
   preload() {
     //TODO: fix spegetti
-    //let playerSprite = ZG.game.add.sprite(this.game, ZG.game.world.centerX + 15 * index, ZG.game.world.centerY + 15 * index, spriteKey, 18);
-
     // //for each player in lobby, create a player sprite
     // ZG.playerSprites = ZG.players.map((playerObj, index) => {
     //   //determine if client is currently a player, and assign his sprite to currentPlayer object
@@ -51,6 +49,8 @@ export default class ZombieGameState extends TiledState {
     //Create game set up through tiled state by calling super
     super.create.call(this);
 
+
+    //Create Players
     let playerPrefab = this.createPrefab('player',
       {
         type: 'player',
@@ -62,13 +62,37 @@ export default class ZombieGameState extends TiledState {
       }, {x: 225, y: 225});
 
     this.currentPlayer = playerPrefab;
+
+    //Set camera to follow, then make world big to allow camera to pan off
+    this.camera.view = new Phaser.Rectangle(0, 0, this.currentPlayer.position.x, this.currentPlayer.position.y);
+    this.camera.follow(this.currentPlayer);
+    this.game.world.setBounds(-250, -250, 800, 2000);
+
+    console.log('map data', this.layers)
+    console.log('data', this.layers["collision"])
+    console.log('data', this.currentPlayer)
+
+    this.currentPlayer.debug = true;
+
+  }
+
+  test (currentPlayer, currentLayer) {
+    console.log('inside callback', currentPlayer)
+    console.log('inside callback', currentLayer)
   }
 
   update() {
+    // this.game.physics.arcade.overlap(this.currentPlayer, this.layers["collision"], this.test);
+    //this.physics.arcade.collide(this.currentPlayer, this.map.layers[7]);
+    this.game.physics.arcade.overlap(this.currentPlayer, this.collisionLayer, this.test);
     this.handleInput();
 
     //every 16ms send package to server with position
     //this.sendToServer();
+  }
+
+  render () {
+    this.game.debug.spriteInfo(this.currentPlayer, 32, 32);
   }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -136,70 +160,6 @@ export default class ZombieGameState extends TiledState {
       }
     }
   }
-
-  // handleInput() {
-  //   if (this.currentPlayer) {
-  //     this.currentPlayer.body.velocity.x = 0;
-  //     this.currentPlayer.body.velocity.y = 0;
-  //     // console.log("VELOCITY", this.currentPlayer.body.velocity.x, this.currentPlayer.body.velocity.y);
-  //     if (this.game.cursors.left.isDown) {
-  //       // if(playerStatus === '')
-  //       this.currentPlayer.animations.play('right');
-  //       this.currentPlayer.scale.setTo(-1, 1);
-  //       this.currentPlayer.body.velocity.x = -this.RUNNING_SPEED;
-  //
-  //       switch (this.currentPlayer.body.sprite._frame.name) {
-  //         case 'lookingRightRightLegUp.png':
-  //           this.currentPlayer.body.velocity.y -= 80;
-  //           break;
-  //         case 'RightComingDown1.png':
-  //           this.currentPlayer.body.velocity.y += 80;
-  //           break;
-  //         case 'movingRight4.png':
-  //           this.currentPlayer.body.velocity.y += 50;
-  //           break;
-  //         case 'playerSprites_266 copy.png':
-  //           this.currentPlayer.body.velocity.y -= 50
-  //       }
-  //
-  //     }
-  //
-  //     if (this.game.cursors.right.isDown) {
-  //       this.currentPlayer.scale.setTo(1, 1);
-  //       this.currentPlayer.animations.play('right');
-  //       this.currentPlayer.body.velocity.x = this.RUNNING_SPEED;
-  //
-  //       switch (this.currentPlayer.body.sprite._frame.name) {
-  //         case 'lookingRightRightLegUp.png':
-  //           this.currentPlayer.body.velocity.y -= 80;
-  //           break;
-  //         case 'RightComingDown1.png':
-  //           this.currentPlayer.body.velocity.y += 80;
-  //           break;
-  //         case 'movingRight4.png':
-  //           this.currentPlayer.body.velocity.y += 50;
-  //           break;
-  //         case 'playerSprites_266 copy.png':
-  //           this.currentPlayer.body.velocity.y -= 50
-  //       }
-  //
-  //       if (this.game.cursors.up.isDown) {
-  //         this.currentPlayer.body.velocity.y = -this.RUNNING_SPEED;
-  //         this.currentPlayer.animations.play('up');
-  //       }
-  //
-  //       if (this.game.cursors.down.isDown) {
-  //         this.currentPlayer.body.velocity.y = this.RUNNING_SPEED;
-  //         this.currentPlayer.animations.play('down');
-  //       }
-  //
-  //       if (this.currentPlayer.body.velocity.x === 0 && this.currentPlayer.body.velocity.y === 0) {
-  //         this.currentPlayer.animations.stop();
-  //         this.currentPlayer.frame = 18;
-  //       }
-  //     }
-  //   }
-  // }
 
   // sendPlayerToServer(){
   //   let x = ZG.currentPlayer.body.x;
