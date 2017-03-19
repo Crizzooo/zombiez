@@ -5,7 +5,7 @@ import store from '../store.js';
 import {setCurrentPlayer, updateCurrentPlayer} from '../reducers/players-reducer.js';
 import emitCurrentState from '../engine/emitCurrentState.js';
 
-let remoteSprites = {};
+let remotePlayerSprites = {};
 var self;
 export default class ZombieGameState extends Phaser.State {
   init () {
@@ -148,28 +148,44 @@ export default class ZombieGameState extends Phaser.State {
   }
 
   updateRemotePlayers() {
-    console.log('update remote players');
-    console.log('state: ', store.getState());
-    let players = store.getState().players.allPlayers.playerStates;
-    console.log('players from server', players);
-    delete players[socket.id];
-    R.forEachObjIndexed(this.updateRemotePlayer, players);
+    this.players = store.getState().players.playerStates;
+    console.log('new players from server: ', this.players)
+    console.log('remote player sprites', remotePlayerSprites);
+    //take current player out
+    delete this.players[socket.id];
+    R.forEachObjIndexed(this.updateRemotePlayer, this.players);
+    // R.forEachObjIndexed(this.killMissingPlayers, remotePlayerSprites);
   }
 
   updateRemotePlayer(playerState) {
     console.log('update function received playerState: ', playerState);
     //get the sprite with player.socketId
-    //check if remoteSprites has a key for this playerState id
-    if (remoteSprites[playerState.socketId]) {
-      //if it does, access that sprite and update it
-      console.log('we found a sprite that looks lioke this: ', remoteSprites[playerState.socketid])
-      remoteSprites[playerState.socketId].x = playerState.x;
-      remoteSprites[playerState.socketId].y = playerState.y;
-
+    //check if remotePlayerSprites has a key for this playerState id
+    console.log('WHAT IS SELF.PLAYERS?', self.players);
+    console.log('DOES IT INCLUDE THIS PLAYER ID?', self.players[playerState.sockedId]);
+    if (remotePlayerSprites[playerState.socketId] && !self.players[playerState.socketId]) {
+      console.log('killing off remote sprite: ', remotePlayerSprites[playerState.socketId])
+      remotePlayerSprites[playerState.socketId].kill();
+      delete remotePlayerSprites[playerState.socketId];
     } else {
-      //if it doesnt, create a sprite and add it There
-      let remoteSprite = self.game.add.sprite(playerState.x, playerState.y, 'blueGunGuy');
-      remoteSprites[playerState.socketId] = remoteSprite;
+      if (remotePlayerSprites[playerState.socketId]) {
+        //if it does, access that sprite and update it
+        console.log('we found a sprite that looks like this: ', remotePlayerSprites[playerState.socketid])
+        remotePlayerSprites[playerState.socketId].x = playerState.x;
+        remotePlayerSprites[playerState.socketId].y = playerState.y;
+      } else {
+        //if it doesnt, create a sprite and add it There
+        console.log('creating new remote sprite');
+        let remoteSprite = self.game.add.sprite(playerState.x, playerState.y, 'blueGunGuy');
+        remotePlayerSprites[playerState.socketId] = remoteSprite;
+      }
+    }
+  }
+
+  killMissingPlayers(remotePlayer){
+    if (!self.players[remotePlayer.socketId]){
+      remotePlayer.kill();
+      delete remotePlayerSprites[remotePlayer.socketId];
     }
   }
 

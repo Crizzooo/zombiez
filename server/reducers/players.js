@@ -41,16 +41,19 @@ const playerReducers = (state = initialState, action) => {
         newState.playerStates[action.playerState.socketId] = action.playerState;
       break;
 
-    case REMOVE_PLAYER:
-      //TODO: Call this when a player clicks leave game and game state is playing or on disconnect if player is in state.players.playerStates
-      break;
-
     case UPDATE_PLAYER:
       newState.playerStates[action.playerToUpdate.socketId] = action.playerToUpdate
       break;
 
     case RESET_PLAYERS:
       newState = initialState;
+      break;
+
+    case REMOVE_PLAYER:
+      console.log('server received remove player: ', action.id);
+      console.log('preRemove: ', newState.playerStates);
+      newState.playerStates = newState.playerStates.filter( (playerObj) => playerObj.socketId !== action.id);
+      console.log('postRemove: ', newState.playerStates);
       break;
 
     default:

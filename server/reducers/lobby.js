@@ -1,4 +1,3 @@
-
 const R = require('ramda');
 const NEW_MESSAGE = 'NEW_MESSSAGE';
 const PLAYER_JOIN_LOBBY = 'PLAYER_JOIN_LOBBY';

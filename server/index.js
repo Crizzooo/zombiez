@@ -10,7 +10,7 @@ const store = require('./store.js');
 const receivePlayerJoin = require('./reducers/lobby.js').receiveJoinLobby;
 const receivePlayerLeave = require('./reducers/lobby.js').receivePlayerLeave;
 
-const {addPlayer, updatePlayer} = require('./reducers/players.js');
+const {addPlayer, updatePlayer, removePlayer} = require('./reducers/players.js');
 
 const startGame = require('./engine/updateClientLoop.js').startGame;
 
@@ -53,6 +53,7 @@ io.on('connection', (socket) => {
     console.log('lobbyers after: ', state.lobby.lobbyers);
     socket.emit('currentPlayer', {});
     io.emit('lobbyUpdate', state.lobby.lobbyers);
+    store.dispatch(removePlayer(socket.id));
   })
 
   socket.on('lobbyerJoinLobby', (lobbyObj) => {
@@ -65,7 +66,7 @@ io.on('connection', (socket) => {
     console.log('this is the state im sending back: ', state);
     io.emit('lobbyUpdate', state.lobby.lobbyers)
 
-    socket.emit('currentPlayer', state.lobby.lobbyers[state.lobby.lobbyers.length - 1]);
+    socket.emit('currentLobbyer', state.lobby.lobbyers[state.lobby.lobbyers.length - 1]);
   });
 
   socket.on('lobbyerLeaveLobby', (currentLobbyer) => {
@@ -79,8 +80,11 @@ io.on('connection', (socket) => {
     //let lobbyers = R.filter( (lobbyer) => lobbyer.socketId !== socket.id, state.lobby.lobbyers);
     state = store.getState();
     console.log('lobbyers after: ', state.lobby.lobbyers);
-    socket.emit('currentPlayer', {});
+    socket.emit('currentLobbyer', {});
     io.emit('lobbyUpdate', state.lobby.lobbyers);
+    //TODO: check if game is in progress
+    store.dispatch(removePlayer(socket.id));
+    io.emit('playerLeaveGame', socket.id);
   });
 
   socket.on('getLobby', () => {

@@ -10,6 +10,7 @@ const SET_GAME_PLAYING_BOOL = 'SET_GAME_PLAYING_BOOL';
 const UPDATE_PLAYER_SCORE = 'UPDATE_PLAYER_SCORE';
 const UPDATE_PLAYERS = 'UPDATE_PLAYERS';
 const UPDATE_CURRENT_PLAYER = 'UPDATE_CURRENT_PLAYER';
+const PLAYER_LEAVE_GAME = 'PLAYER_LEAVE_GAME';
 
 /* Action Creators */
 export const loadMessage = message => ({ type: CHANGE_MESSAGE, message });
@@ -25,6 +26,10 @@ export const updatePlayers = serverPlayersState => ({
 export const updateCurrentPlayer = currentPlayerState => ({
   type: UPDATE_CURRENT_PLAYER,
   currentPlayerState
+});
+export const playerLeaveGame = playerSocketId => ({
+  type: PLAYER_LEAVE_GAME,
+  id: playerSocketId
 });
 
 //Note: addPlayer can probably be removed from file but will keep for now in case we change structure
@@ -67,6 +72,11 @@ export default (state = initialState, action) => {
 
     case UPDATE_CURRENT_PLAYER:
       newState.currentPlayer = action.currentPlayerState;
+      break;
+
+    case PLAYER_LEAVE_GAME:
+      newState.playerStates = newState.playerStates.filter( (playerState) =>
+        playerState.socketId !== action.id);
       break;
 
     default:

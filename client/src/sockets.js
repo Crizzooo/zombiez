@@ -4,7 +4,7 @@ import store from './store.js';
 import GenZed from './main.js';
 
 //Import from Reducers
-import { loadPlayers, setCurrentPlayer, changeGamePlaying, updatePlayers } from './reducers/players-reducer.js';
+import { loadPlayers, setCurrentPlayer, changeGamePlaying, updatePlayers, playerLeaveGame } from './reducers/players-reducer.js';
 import { loadMessages, addMessage } from './reducers/chatApp-reducer.js';
 import { dispatchLobbyUpdate, dispatchSetCurrentLobbyer } from './reducers/lobby-reducer.js';
 import { dispatchGamePlaying } from './reducers/gameState-reducer';
@@ -20,7 +20,7 @@ import {throttle} from 'lodash';
 //We attach all functions to a socket in here
 const attachFunctions = (socket) => {
   socket.on('playerUpdate', dispatchPlayerUpdates);
-  socket.on('currentPlayer', dispatchCurrentLobbyer);
+  socket.on('currentLobbyer', dispatchCurrentLobbyer);
   socket.on('messagesUpdate', dispatchNewMessage);
   socket.on('turnOnGameComponent', dispatchGameTrue);
   socket.on('startGame', startClientGame);
@@ -28,6 +28,7 @@ const attachFunctions = (socket) => {
   // socket.on('serverUpdate', dispatchNewGameState);
   socket.on('lobbyUpdate', dispatchLobbyState);
   socket.on('serverUpdate', dispatchServerState);
+  socket.on('playerLeaveGame', dispatchPlayerLeaveGame);
 };
 
 
@@ -55,7 +56,7 @@ function dispatchServerState(serverState) {
 
   //break out data from server - send to appropriate stores
   store.dispatch(dispatchLobbyUpdate(serverState.lobby.lobbyers));
-  store.dispatch(loadPlayers(serverState.players));
+  store.dispatch(updatePlayers(serverState.players));
   throttledLog();
 }
 const throttledLog = throttle(logReceivedState, 10000);
@@ -75,6 +76,10 @@ function dispatchLobbyState(lobbyersFromServer){
 
 function dispatchScoreUpdate(playerId, score){
   store.dispatch(changePlayerScore(playerId, score));
+}
+
+function dispatchPlayerLeaveGame(playerSocketId){
+  store.dispatch(playerLeaveGame(playerSocketId));
 }
 
 export default attachFunctions;
