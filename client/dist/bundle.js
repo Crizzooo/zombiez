@@ -7858,8 +7858,6 @@ var ZombieGameState = function (_TiledState) {
             this.game.physics.arcade.collide(this.currentPlayer, this.layers.waterCollision);
             this.game.physics.arcade.collide(this.currentPlayer, this.layers.wallCollision);
             this.handleInput();
-            //every 16ms send package to server with position
-            //this.sendToServer();
         }
     }, {
         key: 'render',
@@ -7874,6 +7872,10 @@ var ZombieGameState = function (_TiledState) {
         key: 'handleInput',
         value: function handleInput() {
             if (this.currentPlayer) {
+                var pointerX = this.game.input.activePointer.worldX;
+                var pointerY = this.game.input.activePointer.worldY;
+                var playerX = this.currentPlayer.x;
+                var playerY = this.currentPlayer.y;
                 this.currentPlayer.body.velocity.x = 0;
                 this.currentPlayer.body.velocity.y = 0;
                 if (this.game.cursors.left.isDown) {
@@ -7928,7 +7930,12 @@ var ZombieGameState = function (_TiledState) {
 
                 if (this.currentPlayer.body.velocity.x === 0 && this.currentPlayer.body.velocity.y === 0) {
                     this.currentPlayer.animations.stop();
-                    this.currentPlayer.frame = 18;
+                    console.log("pointer on rest", this.game.input.activePointer.worldX, this.game.input.activePointer.worldY);
+                    console.log("player position on rest", this.currentPlayer.x, this.currentPlayer.y);
+                    if (pointerY > playerY && pointerX < playerX) this.currentPlayer.frame = 17;
+                    if (pointerY > playerY && pointerX > playerX) this.currentPlayer.frame = 18;
+                    if (pointerY < playerY && pointerX > playerX) this.currentPlayer.frame = 14;
+                    if (pointerY < playerY && pointerX < playerX) this.currentPlayer.frame = 14;
                 }
             }
         }
