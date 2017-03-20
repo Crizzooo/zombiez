@@ -10,6 +10,7 @@ ZG.playerSprites = [];
 export default class ZombieGameState extends TiledState {
     constructor(game) {
       super(game);
+
     }
 
     init(levelData) {
@@ -85,6 +86,8 @@ export default class ZombieGameState extends TiledState {
       this.pointer = otherPlayerPrefab;
       this.currentEnemy = enemyPrefab;
 
+      this.currentEnemy.acquireTarget = throttle(this.currentEnemy.acquireTarget, 200);
+
       this.game.add.existing(this.currentPlayer);
       this.game.add.existing(this.currentEnemy);
       this.game.add.existing(this.pointer);
@@ -98,10 +101,6 @@ export default class ZombieGameState extends TiledState {
 
       ////////
       this.currentEnemy.animations.play('dead');
-      this.currentEnemy.acquireTarget();
-
-
-
     }
 
     test(currentPlayer, currentLayer) {
@@ -115,6 +114,9 @@ export default class ZombieGameState extends TiledState {
       this.game.physics.arcade.collide(this.currentPlayer, this.layers.waterCollision);
       this.game.physics.arcade.collide(this.currentPlayer, this.layers.wallCollision);
       this.handleInput();
+
+	    this.currentEnemy.acquireTarget();
+
     }
 
     render() {

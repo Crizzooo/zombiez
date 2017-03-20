@@ -7731,6 +7731,8 @@ var ZombieGameState = function (_TiledState) {
             this.pointer = otherPlayerPrefab;
             this.currentEnemy = enemyPrefab;
 
+            this.currentEnemy.acquireTarget = throttle(this.currentEnemy.acquireTarget, 200);
+
             this.game.add.existing(this.currentPlayer);
             this.game.add.existing(this.currentEnemy);
             this.game.add.existing(this.pointer);
@@ -7744,7 +7746,6 @@ var ZombieGameState = function (_TiledState) {
 
             ////////
             this.currentEnemy.animations.play('dead');
-            this.currentEnemy.acquireTarget();
         }
     }, {
         key: 'test',
@@ -7760,6 +7761,8 @@ var ZombieGameState = function (_TiledState) {
             this.game.physics.arcade.collide(this.currentPlayer, this.layers.waterCollision);
             this.game.physics.arcade.collide(this.currentPlayer, this.layers.wallCollision);
             this.handleInput();
+
+            this.currentEnemy.acquireTarget();
         }
     }, {
         key: 'render',
