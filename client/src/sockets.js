@@ -37,9 +37,7 @@ export function dispatchNewMessage(msgObj) {
 }
 
 function dispatchGamePlayingUpdate(isItPlaying){
-  console.log('before playing update', store.getState());
   store.dispatch(dispatchGamePlaying(isItPlaying));
-  console.log(' after game playing update', store.getState());
 }
 
 function startClientGame(playersFromServer) {
@@ -58,9 +56,7 @@ function dispatchServerState(serverState) {
   if (state.game.gamePlaying){
     let playerStateUpdate = serverState.players.playerStates;
     if (playerStateUpdate[socket.id]){
-      console.log('player state update: ', playerStateUpdate);
       delete playerStateUpdate[socket.id];
-      console.log('after deleting self: ', playerStateUpdate);
     }
     store.dispatch(updatePlayers(playerStateUpdate));
   }

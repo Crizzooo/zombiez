@@ -7,22 +7,40 @@ const removePlayer = require('../reducers/players.js').removePlayer;
 const gamePlaying = require('../reducers/engine.js').gamePlaying;
 const resetEngine = require('../reducers/engine.js').resetEngine;
 const resetLobby = require('../reducers/lobby.js').resetLobby;
-
 const playerReducer = require('../reducers/players.js');
-console.log('player reducer!', playerReducer);
+
 
 const SERVER_UPDATE_RATE = 1000 / 30;
 
 
+let io;
+let broadcastInterval;
+
+
+//TODO: Implement actual spawn positions from map
 let playerPositions = [
   {x: 210, y: 210},
   {x: 230, y: 230},
   {x: 250, y: 250},
   {x: 270, y: 270}
 ]
+//TODO: Implement correct sprite keys for ZOMBIE GUN GAME
+let playerSpriteKeys = [ 'blueGunGuy', 'greenGunGuy'];
+//This function is used to take the server lobby state,
+const convertLobbyers = (lobbyers) => {
+  return lobbyers.map( (lobbyObj, index) => {
+    let spriteKey = playerSpriteKeys[index % 2];
+    return {
+      x: playerPositions[index].x,
+      y: playerPositions[index].y,
+      health: 100,
+      animationDirection: 'still',
+      spriteKey,
+      socketId: lobbyObj.socketId
+    };
+  });
+};
 
-let io;
-let broadcastInterval;
 const startGame = (ioFromSocketsFile) => {
 
   //reset all reducers related to game
@@ -86,18 +104,6 @@ const broadcastGameState = (io) => {
     }
   }, SERVER_UPDATE_RATE);
 }
-
-const convertLobbyers = (lobbyers) => {
-  return lobbyers.map( (lobbyObj, index) => {
-    return {
-      x: playerPositions[index].x,
-      y: playerPositions[index].y,
-      health: 100,
-      animationDirection: 'still',
-      socketId: lobbyObj.socketId
-    };
-  });
-};
 
 const checkPlayerStates = (playerObjVal, playerObjKey) => {
   if (!playerObjVal.socketId) {

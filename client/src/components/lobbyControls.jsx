@@ -23,11 +23,10 @@ export class lobbyControls extends React.Component {
 
   handleSubmit(evt) {
     evt.preventDefault();
-    console.log('sending this player obj to server', this.state);
     socket.emit('lobbyerJoinLobby', this.state);
-    console.log('current lobbyer raw obj:', this.state);
     let currentLobbyer = this.state;
     currentLobbyer.socketId = socket.id;
+    console.log('set current lobbyer obj:', currentLobbyer);
     store.dispatch(dispatchSetCurrentLobbyer(currentLobbyer));
     console.log('store after player joined');
     console.log(store.getState());
@@ -40,9 +39,7 @@ export class lobbyControls extends React.Component {
     stopClientBroadcast();
     store.dispatch(dispatchSetCurrentLobbyer({}));
     //if game playing
-    console.log('i clicked leave game, is game playing? ', this.props);
     if (this.props.gamePlaying){
-      console.log('we have a game playing, lets remove current player');
       //update current player to {}
       store.dispatch(removeCurrentPlayer());
     }

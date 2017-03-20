@@ -32,9 +32,13 @@ export default class ZombieGameState extends Phaser.State {
 
   create () {
       //create game set up
+      console.log('Local state right before load level: ', )
       this.loadLevel();
       //set interval to emit currentPlayer to server
-      const emitInterval = emitCurrentState(socket);
+      //if we have a current player
+      if (this.currentPlayerSprite){
+        const emitInterval = emitCurrentState(socket);
+      }
   }
 
   update () {
@@ -76,7 +80,7 @@ export default class ZombieGameState extends Phaser.State {
     console.log('what is state.players.playerStates on loadLevel', state.players.playerStates);
     let currentPlayer;
 
-    if (state.lobby.currentLobbyer){
+    if (state.lobby.currentLobbyer.name){
       store.dispatch(updateCurrentPlayer(state.lobby.currentLobbyer));
       state = store.getState();
       console.log('state after adding current player from currentLobbyer', state);
@@ -213,12 +217,14 @@ export default class ZombieGameState extends Phaser.State {
 
   destroyCurrentPlayerSprite(){
     //take him off
-    this.currentPlayerSprite.destroy();
-    delete this.currentPlayerSprite;
-    console.log('deleted and destroyed this.currentPlayerSprite');
-    let state = store.getState();
-    console.log('state after destroy current player');
-    console.dir(state, { depth: 3 });
+    if (this.currentPlayerSprite){
+      this.currentPlayerSprite.destroy();
+      delete this.currentPlayerSprite;
+      console.log('deleted and destroyed this.currentPlayerSprite');
+      let state = store.getState();
+      console.log('state after destroy current player');
+      console.dir(state, { depth: 3 });
+    }
   }
 
   handleRemotePlayerLeave(playerSocketId){
@@ -239,7 +245,7 @@ export default class ZombieGameState extends Phaser.State {
     if (playerState.socketId !== socket.id){
       console.log('creating player with this ID: ', playerState.socketId);
       let remoteSprite = self.game.add.sprite(playerState.x, playerState.y, 'blueGunGuy');
-          remotePlayerSprites[playerState.socketId] = remoteSprite;
+      remotePlayerSprites[playerState.socketId] = remoteSprite;
     }
   }
 }

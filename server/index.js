@@ -50,7 +50,6 @@ io.on('connection', (socket) => {
 
   socket.on('lobbyerJoinLobby', (lobbyObj) => {
     //TODO: Customize Player Obj for server purposes
-    // Send back new player obj
     lobbyObj.socketId = socket.id;
     console.log('sending lobbyObj to server reducer', lobbyObj);
     store.dispatch(receiveJoinLobby(lobbyObj));
@@ -164,9 +163,10 @@ function handleLobbyerLeave(socket){
     console.log(state);
     if (state.game.gamePlaying){
       console.log('if game is playing, we need to take him off players reducer')
-      io.emit('playerLeaveGame', socket.id);
       store.dispatch(removePlayer(socket.id));
+      io.emit('playerLeaveGame', socket.id);
       state = store.getState();
+      socket.emit('destroyCurrentPlayerSprite');
       console.log('has the player come off?', state);
     }
   }

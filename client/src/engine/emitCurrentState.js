@@ -12,10 +12,11 @@ export default (socket) => {
     //toDo: on remove player, clear interval for emitId
 
     let currentPlayerObj = state.players.currentPlayer;
-    socket.emit('clientUpdate', {
-      player: currentPlayerObj
-    });
-
+    if (state.lobby.currentLobbyer.name){
+      socket.emit('clientUpdate', {
+        player: currentPlayerObj
+      });
+    }
   }, CLIENT_EMIT_INTERVAL);
   return emitID;
 }

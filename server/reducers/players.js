@@ -38,7 +38,7 @@ const playerReducers = (state = initialState, action) => {
   switch (action.type) {
     case ADD_PLAYER:
         //update player state at socket.id
-        console.log('ADDING PLAYER BACK ON: ', action.playerState);
+        console.log('ADDING PLAYER TO SERVER STATE: ', action.playerState);
         newState.playerStates[action.playerState.socketId] = action.playerState;
       break;
 
