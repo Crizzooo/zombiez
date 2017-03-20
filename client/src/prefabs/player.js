@@ -21,7 +21,7 @@ export default class Player extends Prefab {
 
     this.stats = {
       health: 100,
-      movement: 10,
+      movement: 10
     }
 
   }
