@@ -5,8 +5,6 @@ export default class Preload extends Phaser.State {
 
   preload () {
     //TODO: remove Atlases for Player Character
-    this.load.atlasXML('blueGunGuy', '../../assets/images/blueGunGuyAtlas.png', '../../assets/images/blueGunGuyAtlasXML.xml');
-    this.load.atlasXML('greenGunGuy', '../../assets/images/greenGunGuyAtlas.png', '../../assets/images/greenGunGuyAtlasXML.xml');
     let assets, assetKey, asset;
 
     console.log(this.levelData);

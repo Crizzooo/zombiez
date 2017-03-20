@@ -7,7 +7,7 @@ export default class BootState extends Phaser.State {
     //Load Level Data from Level File JSON
     this.levelFile = levelFile;
     this.nextState = nextState;
-    this.scale.scaleMode = Phaser.ScaleManager.RESIZE;
+    // this.scale.scaleMode = Phaser.ScaleManager.RESIZE;
     //TODO: make a decision here
     //ZG.players = players;
     this.game.players = players;

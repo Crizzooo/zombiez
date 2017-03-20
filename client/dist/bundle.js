@@ -20414,7 +20414,7 @@ var BootState = function (_Phaser$State) {
       //Load Level Data from Level File JSON
       this.levelFile = levelFile;
       this.nextState = nextState;
-      this.scale.scaleMode = Phaser.ScaleManager.RESIZE;
+      // this.scale.scaleMode = Phaser.ScaleManager.RESIZE;
       //TODO: make a decision here
       //ZG.players = players;
       this.game.players = players;
@@ -20492,8 +20492,6 @@ var Preload = function (_Phaser$State) {
     key: 'preload',
     value: function preload() {
       //TODO: remove Atlases for Player Character
-      this.load.atlasXML('blueGunGuy', '../../assets/images/blueGunGuyAtlas.png', '../../assets/images/blueGunGuyAtlasXML.xml');
-      this.load.atlasXML('greenGunGuy', '../../assets/images/greenGunGuyAtlas.png', '../../assets/images/greenGunGuyAtlasXML.xml');
       var assets = void 0,
           assetKey = void 0,
           asset = void 0;
@@ -20547,9 +20545,484 @@ exports.default = Preload;
 
 /***/ }),
 /* 283 */
-/***/ (function(module, exports) {
+/***/ (function(module, exports, __webpack_require__) {
 
-throw new Error("Module build failed: SyntaxError: Unexpected token, expected ; (378:17)\n\n\u001b[0m \u001b[90m 376 | \u001b[39m\u001b[90m  }*/\u001b[39m\n \u001b[90m 377 | \u001b[39m\n\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 378 | \u001b[39m  lockPointer () {\n \u001b[90m     | \u001b[39m                 \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\n \u001b[90m 379 | \u001b[39m    document\u001b[33m.\u001b[39mbody\u001b[33m.\u001b[39mstyle\u001b[33m.\u001b[39mcursor \u001b[33m=\u001b[39m \u001b[32m'none'\u001b[39m\u001b[33m;\u001b[39m\n \u001b[90m 380 | \u001b[39m    \u001b[36mthis\u001b[39m\u001b[33m.\u001b[39mgame\u001b[33m.\u001b[39mcanvas\u001b[33m.\u001b[39maddEventListener(\u001b[32m'mousemove'\u001b[39m\u001b[33m,\u001b[39m () \u001b[33m=>\u001b[39m {\n \u001b[90m 381 | \u001b[39m      \u001b[36mthis\u001b[39m\u001b[33m.\u001b[39mpointer\u001b[33m.\u001b[39mx \u001b[33m=\u001b[39m \u001b[36mthis\u001b[39m\u001b[33m.\u001b[39mgame\u001b[33m.\u001b[39minput\u001b[33m.\u001b[39mactivePointer\u001b[33m.\u001b[39mworldX\u001b[33m;\u001b[39m\u001b[0m\n");
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _get = function get(object, property, receiver) { if (object === null) object = Function.prototype; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { return get(parent, property, receiver); } } else if ("value" in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } };
+
+var _store = __webpack_require__(50);
+
+var _store2 = _interopRequireDefault(_store);
+
+var _playersReducer = __webpack_require__(51);
+
+var _emitCurrentState = __webpack_require__(147);
+
+var _emitCurrentState2 = _interopRequireDefault(_emitCurrentState);
+
+var _tiledState = __webpack_require__(635);
+
+var _tiledState2 = _interopRequireDefault(_tiledState);
+
+var _Pathfinding = __webpack_require__(637);
+
+var _Pathfinding2 = _interopRequireDefault(_Pathfinding);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+var R = __webpack_require__(100);
+var throttle = __webpack_require__(315);
+
+var remotePlayerSprites = {};
+var self;
+
+var ZombieGameState = function (_TiledState) {
+    _inherits(ZombieGameState, _TiledState);
+
+    function ZombieGameState(game) {
+        _classCallCheck(this, ZombieGameState);
+
+        //set constants for game
+        var _this = _possibleConstructorReturn(this, (ZombieGameState.__proto__ || Object.getPrototypeOf(ZombieGameState)).call(this, game));
+
+        _this.RUNNING_SPEED = 100;
+        self = _this;
+        return _this;
+    }
+
+    _createClass(ZombieGameState, [{
+        key: 'init',
+        value: function init(levelData) {
+            //Call super init to load in data;
+            _get(ZombieGameState.prototype.__proto__ || Object.getPrototypeOf(ZombieGameState.prototype), 'init', this).call(this, levelData);
+
+            //set constants for game
+
+            //cursor keys
+            //Control Mechanics
+            this.cursors = this.input.keyboard.createCursorKeys();
+            // this.cursors.spacebar = this.input.keyboard.addKey(Phaser.Keyboard.SPACEBAR);
+
+            //Attach and bind functions
+            this.destroyCurrentPlayerSprite = this.destroyCurrentPlayerSprite.bind(this);
+            this.handleRemotePlayerLeave = this.handleRemotePlayerLeave.bind(this);
+            socket.on('destroyCurrentPlayerSprite', this.destroyCurrentPlayerSprite);
+            socket.on('playerLeaveGame', this.handleRemotePlayerLeave);
+        }
+    }, {
+        key: 'preload',
+        value: function preload() {
+            //load assets that are specific for this level
+        }
+    }, {
+        key: 'create',
+        value: function create() {
+            //PATHFINDING create
+            //Create game set up through tiled state by calling super
+            _get(ZombieGameState.prototype.__proto__ || Object.getPrototypeOf(ZombieGameState.prototype), 'create', this).call(this);
+
+            //Create worldGrid and tile dimensions for pathfinding
+            var worldGrid = this.createWorldGrid();
+            this.tileDimensions = new Phaser.Point(this.map.tileWidth, this.map.tileHeight);
+            this.pathfinding = this.game.plugins.add(_Pathfinding2.default, worldGrid, [-1], this.tileDimensions);
+
+            //Create Players and Temp Objects
+            // let playerPrefab = this.createPrefab('player',
+            //     {
+            //         type: 'player',
+            //         properties: {
+            //             group: 'player',
+            //             initial: 18,
+            //             texture: 'playerSpriteSheet'
+            //         },
+            //     }, {x: 225, y: 225});
+
+            // let enemyPrefab = this.createPrefab('zombie',
+            //   {
+            //       type: 'enemies',
+            //       properties: {
+            //         group: 'enemies',
+            //         initial: 9,
+            //         texture: 'zombieSpriteSheet'
+            //       }
+            //   }, {x: 200, y: 200});
+
+            // let crosshairPrefab = this.createPrefab('crosshair',
+            //   {
+            //     type: 'player',
+            //     properties: {
+            //       group: 'cursor',
+            //       initial: 0,
+            //       texture: 'crosshairSpriteSheet'
+            //     },
+            //   }, {x: 0, y: 0});
+            //
+            // let gunPreFab = this.createPrefab('gun', {
+            //   type: 'guns',
+            //   properties: {
+            //     group: 'guns',
+            //     initial: 0,
+            //     texture: 'gunSpriteSheet'
+            //   }
+            // }, {x: 225, y: 225});
+
+
+            //END PATHFINDING CREATE
+
+
+            //create game set up
+            console.log('Local state right before load level: ', _store2.default.getState());
+            this.loadLevel();
+
+            console.log('currentPlayerSprite', this.currentPlayerSprite);
+            //set interval to emit currentPlayer to server
+            //if we have a current player
+            if (this.currentPlayerSprite) {
+                var emitInterval = (0, _emitCurrentState2.default)(socket);
+            }
+
+            //Charlie/Skinner Tests
+            //Add test prefabs into the game
+            // this.currentPlayer = playerPrefab;
+            // this.gun = gunPreFab;
+            // this.pointer = crosshairPrefab;
+            // this.currentEnemy = enemyPrefab;
+
+            // this.currentEnemy.acquireTarget = throttle(this.currentEnemy.acquireTarget, 200);
+
+            this.game.add.existing(this.currentPlayerSprite);
+            // this.game.add.existing(this.currentEnemy);
+            // this.game.add.existing(this.pointer);
+            // this.game.add.existing(this.gun);
+            //on click lock the users mouse for input
+            this.game.input.onDown.add(this.lockPointer, this);
+
+            //Set camera to follow, then make world big to allow camera to pan off
+            //this.camera.view = new Phaser.Rectangle(0, 0, this.currentPlayer.position.x, this.currentPlayer.position.y);
+            this.camera.follow(this.currentPlayerSprite);
+            this.game.world.setBounds(-250, -250, 2500, 2500);
+            console.log('before anims');
+            ////////
+            // this.currentEnemy.animations.play('dead');
+            debugger;
+        }
+    }, {
+        key: 'update',
+        value: function update() {
+            console.log('do we make it to update func');
+            //NOTE: Collision between SpriteA and SpriteB - callback takes in SpriteA and SpriteB
+            // this.game.physics.arcade.collide(this.currentPlayerSprite, this.layers.backgroundDecCollision);
+            // this.game.physics.arcade.collide(this.currentPlayerSprite, this.layers.backgroundDecCollision2);
+            // this.game.physics.arcade.collide(this.currentPlayerSprite, this.layers.waterCollision);
+            // this.game.physics.arcade.collide(this.currentPlayerSprite, this.layers.wallCollision);
+            //
+            // // this.currentEnemy.acquireTarget();
+            // this.tweenGun();
+            // this.gun.rotation = this.game.physics.arcade.angleToPointer(this.gun);
+            // this.game.physics.arcade.collide(this.currentPlayerSprite, this.layers.backgroundDecCollision);
+            // this.game.physics.arcade.collide(this.currentPlayerSprite, this.layers.backgroundDecCollision2);
+            // this.game.physics.arcade.collide(this.currentPlayerSprite, this.layers.waterCollision);
+            // this.game.physics.arcade.collide(this.currentPlayerSprite, this.layers.wallCollision);
+            //
+            // this.updateRemotePlayers();
+            // if (this.currentPlayerSprite) {
+            //   this.handleInput();
+            //   this.dispatchCurrentPlayer();
+            // }
+            //every 32ms send package to server with position
+        }
+    }, {
+        key: 'render',
+        value: function render() {}
+        // this.game.debug.spriteInfo(this.gun, 32, 32);
+
+        //////////////////////////
+        /// Non Phaser Methods ///
+        //////////////////////////
+
+    }, {
+        key: 'loadLevel',
+        value: function loadLevel() {
+            // this.gameBackground = this.add.sprite(this.world.centerX, this.world.centerY, 'snowLandscape');
+            // this.gameBackground.scale.setTo(0.9, 0.9);
+            // this.gameBackground.anchor.setTo(0.5);
+
+            //resize the world to fit the layer
+            this.world.resize(500, 500);
+
+            var state = _store2.default.getState();
+            console.log('load level begin with this state', state);
+
+            //create a current player
+            console.log('what is state.players.playerStates on loadLevel', state.players.playerStates);
+
+            var currentPlayer = void 0;
+            if (state.players.currentPlayer.socketId) {
+                currentPlayer = state.players.currentPlayer;
+
+                //TODO: make server assign sprite keys
+
+                var playerPrefab = this.createPrefab('player', {
+                    type: 'player',
+                    properties: {
+                        group: 'player',
+                        initial: 18,
+                        texture: 'playerSpriteSheet'
+                    }
+                }, { x: 225, y: 225 });
+
+                this.currentPlayerSprite = playerPrefab;
+
+                //add physics to current player
+                // this.currentPlayerSprite.anchor.set(0.5);
+                //this.physics.arcade.enableBody(this.currentPlayerSprite);
+                // this.currentPlayerSprite.collideWorldBounds = true;
+
+                //store on game Object
+                console.log('created current Player: ', this.currentPlayerSprite);
+
+                //create currentPlayer
+                var currPlayerState = {
+                    socketId: socket.id,
+                    x: this.currentPlayerSprite.x,
+                    y: this.currentPlayerSprite.y,
+                    animationDirection: 'still'
+                    //TODO: health, fire, guns, bullets, frame? etc
+                };
+
+                console.log('Where is  current player on game start?', currPlayerState);
+
+                _store2.default.dispatch((0, _playersReducer.updateCurrentPlayer)(currPlayerState));
+                console.log('end of load level local store looks like: ', _store2.default.getState());
+            }
+            R.forEachObjIndexed(this.createRemotePlayerSprite, state.players.playerStates);
+        }
+    }, {
+        key: 'handleInput',
+        value: function handleInput() {
+
+            if (this.currentPlayerSprite) {
+                var pointerX = this.game.input.activePointer.worldX;
+                var pointerY = this.game.input.activePointer.worldY;
+                var playerX = this.currentPlayerSprite.x;
+                var playerY = this.currentPlayerSprite.y;
+                this.currentPlayerSprite.body.velocity.x = 0;
+                this.currentPlayerSprite.body.velocity.y = 0;
+                if (this.game.cursors.left.isDown) {
+                    this.currentPlayerSprite.animations.play('right');
+                    this.currentPlayerSprite.scale.setTo(-1, 1);
+                    this.currentPlayerSprite.body.velocity.x = -this.RUNNING_SPEED;
+
+                    switch (this.currentPlayerSprite.body.sprite._frame.name) {
+                        case 'lookingRightRightLegUp.png':
+                            this.currentPlayerSprite.body.velocity.y -= 80;
+                            break;
+                        case 'RightComingDown1.png':
+                            this.currentPlayerSprite.body.velocity.y += 80;
+                            break;
+                        case 'movingRight4.png':
+                            this.currentPlayerSprite.body.velocity.y += 50;
+                            break;
+                        case 'playerSprites_266 copy.png':
+                            this.currentPlayerSprite.body.velocity.y -= 50;
+                    }
+                }
+
+                if (this.game.cursors.right.isDown) {
+                    this.currentPlayerSprite.scale.setTo(1, 1);
+                    this.currentPlayerSprite.animations.play('right');
+                    this.currentPlayerSprite.body.velocity.x = this.RUNNING_SPEED;
+
+                    switch (this.currentPlayerSprite.body.sprite._frame.name) {
+                        case 'lookingRightRightLegUp.png':
+                            this.currentPlayerSprite.body.velocity.y -= 80;
+                            break;
+                        case 'RightComingDown1.png':
+                            this.currentPlayerSprite.body.velocity.y += 80;
+                            break;
+                        case 'movingRight4.png':
+                            this.currentPlayerSprite.body.velocity.y += 50;
+                            break;
+                        case 'playerSprites_266 copy.png':
+                            this.currentPlayerSprite.body.velocity.y -= 50;
+                    }
+                }
+
+                if (this.game.cursors.up.isDown) {
+                    this.currentPlayerSprite.body.velocity.y = -this.RUNNING_SPEED;
+                    this.currentPlayerSprite.animations.play('up');
+                }
+
+                if (this.game.cursors.down.isDown) {
+                    this.currentPlayerSprite.body.velocity.y = this.RUNNING_SPEED;
+                    this.currentPlayerSprite.animations.play('down');
+                }
+
+                if (this.currentPlayerSprite.body.velocity.x === 0 && this.currentPlayerSprite.body.velocity.y === 0) {
+                    this.currentPlayerSprite.animations.stop();
+                    //console.log("pointer on rest", this.game.input.activePointer.worldX, this.game.input.activePointer.worldY);
+                    //console.log("player position on rest", this.currentPlayerSprite.x, this.currentPlayerSprite.y);
+
+                    this.currentPlayerSprite.scale.setTo(1, 1);
+                    if (pointerY > playerY && pointerX < playerX) {
+                        this.currentPlayerSprite.frame = 17;
+                        this.gun.scale.setTo(1, -1);
+                    }
+                    if (pointerY > playerY && pointerX > playerX) {
+                        this.currentPlayerSprite.frame = 18;
+                        this.gun.scale.setTo(1, 1);
+                    }
+                    if (pointerY < playerY && pointerX > playerX) {
+                        this.currentPlayerSprite.frame = 14;
+                        this.gun.scale.setTo(1, 1);
+                    }
+                    if (pointerY < playerY && pointerX < playerX) {
+                        this.currentPlayerSprite.frame = 14;
+                        this.gun.scale.setTo(1, -1);
+                    }
+                }
+            }
+        }
+
+        //TODO: RIZZOS handleInput
+        // handleInput() {
+        //   if (this.currentPlayerSprite){
+        //     if ( this.cursors.left.isDown ||
+        //         this.cursors.right.isDown ||
+        //            this.cursors.up.isDown ||
+        //         this.cursors.down.isDown
+        //       ) {
+        //           if (this.cursors.left.isDown){
+        //             this.currentPlayerSprite.body.velocity.x = -this.RUNNING_SPEED;
+        //             this.currentPlayerSprite.animationDirection = 'left';
+        //           }
+        //           if (this.cursors.right.isDown){
+        //             this.currentPlayerSprite.body.velocity.x =  this.RUNNING_SPEED;
+        //             this.currentPlayerSprite.animationDirection = 'right';
+        //           }
+        //           if (this.cursors.up.isDown){
+        //             this.currentPlayerSprite.body.velocity.y = -this.RUNNING_SPEED;
+        //             this.currentPlayerSprite.animationDirection = 'up';
+        //           }
+        //           if (this.cursors.down.isDown){
+        //             this.currentPlayerSprite.body.velocity.y =  this.RUNNING_SPEED;
+        //             this.currentPlayerSprite.animationDirection = 'down';
+        //           }
+        //       } else {
+        //         //no cursors down
+        //         this.currentPlayerSprite.body.velocity.x = 0;
+        //         this.currentPlayerSprite.body.velocity.y = 0;
+        //         this.currentPlayerSprite.animationDirection = 'still';
+        //       }
+        //   }
+        // }
+
+    }, {
+        key: 'dispatchCurrentPlayer',
+        value: function dispatchCurrentPlayer() {
+            var currentPlayer = {
+                x: this.currentPlayerSprite.x,
+                y: this.currentPlayerSprite.y,
+                //animationDirection: this.currentPlayerSprite.animationDirection,
+                socketId: socket.id
+            };
+            _store2.default.dispatch((0, _playersReducer.updateCurrentPlayer)(currentPlayer));
+        }
+
+        //TODO: move remote player updates to other file
+
+    }, {
+        key: 'updateRemotePlayers',
+        value: function updateRemotePlayers() {
+            this.players = _store2.default.getState().players.playerStates;
+            if (this.players[socket.id]) delete this.players[socket.id];
+            //then update each player from the server
+            R.forEachObjIndexed(this.updateRemotePlayer, this.players);
+        }
+    }, {
+        key: 'updateRemotePlayer',
+        value: function updateRemotePlayer(playerState) {
+            if (remotePlayerSprites[playerState.socketId]) {
+                remotePlayerSprites[playerState.socketId].x = playerState.x;
+                remotePlayerSprites[playerState.socketId].y = playerState.y;
+                //TODO: Implement other properties
+            }
+        }
+    }, {
+        key: 'destroyCurrentPlayerSprite',
+        value: function destroyCurrentPlayerSprite() {
+            if (this.currentPlayerSprite) {
+                this.currentPlayerSprite.destroy();
+                delete this.currentPlayerSprite;
+                console.log('deleted and destroyed this.currentPlayerSprite');
+                var state = _store2.default.getState();
+                console.log('state after destroy current player');
+                console.dir(state, { depth: 3 });
+            }
+        }
+    }, {
+        key: 'handleRemotePlayerLeave',
+        value: function handleRemotePlayerLeave(playerSocketId) {
+            _store2.default.dispatch((0, _playersReducer.playerLeaveGame)(playerSocketId));
+            var state = _store2.default.getState();
+            //Kill Remote Player Sprite
+            if (remotePlayerSprites[playerSocketId]) {
+                console.log('we are removing remote player sprite');
+                remotePlayerSprites[playerSocketId].destroy();
+                delete remotePlayerSprites[playerSocketId];
+            }
+        }
+
+        ///////////////////////
+        //Non Phaser Methods
+
+
+    }, {
+        key: 'lockPointer',
+        value: function lockPointer() {
+            var _this2 = this;
+
+            document.body.style.cursor = 'none';
+            this.game.canvas.addEventListener('mousemove', function () {
+                _this2.pointer.x = _this2.game.input.activePointer.worldX;
+                _this2.pointer.y = _this2.game.input.activePointer.worldY;
+            });
+        }
+    }, {
+        key: 'createRemotePlayerSprite',
+        value: function createRemotePlayerSprite(playerState) {
+            if (playerState.socketId !== socket.id) {
+                console.log('creating remote player with this playerState: ', playerState);
+                var remoteSprite = self.game.add.sprite(playerState.x, playerState.y, 'blueGunGuy');
+                remotePlayerSprites[playerState.socketId] = remoteSprite;
+            }
+        }
+    }, {
+        key: 'tweenGun',
+        value: function tweenGun() {
+            //gun follow does not work as a child of the player sprite.. had to tween gun to players x, y position
+            this.add.tween(this.gun).to({ x: this.currentPlayer.x, y: this.currentPlayer.y }, 10, Phaser.Easing.Linear.None, true);
+        }
+    }]);
+
+    return ZombieGameState;
+}(_tiledState2.default);
+
+exports.default = ZombieGameState;
 
 /***/ }),
 /* 284 */
@@ -22700,7 +23173,452 @@ function isObjectLike(value) {
 
 
 /***/ }),
-/* 315 */,
+/* 315 */
+/***/ (function(module, exports, __webpack_require__) {
+
+/* WEBPACK VAR INJECTION */(function(global) {/**
+ * lodash (Custom Build) <https://lodash.com/>
+ * Build: `lodash modularize exports="npm" -o ./`
+ * Copyright jQuery Foundation and other contributors <https://jquery.org/>
+ * Released under MIT license <https://lodash.com/license>
+ * Based on Underscore.js 1.8.3 <http://underscorejs.org/LICENSE>
+ * Copyright Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
+ */
+
+/** Used as the `TypeError` message for "Functions" methods. */
+var FUNC_ERROR_TEXT = 'Expected a function';
+
+/** Used as references for various `Number` constants. */
+var NAN = 0 / 0;
+
+/** `Object#toString` result references. */
+var symbolTag = '[object Symbol]';
+
+/** Used to match leading and trailing whitespace. */
+var reTrim = /^\s+|\s+$/g;
+
+/** Used to detect bad signed hexadecimal string values. */
+var reIsBadHex = /^[-+]0x[0-9a-f]+$/i;
+
+/** Used to detect binary string values. */
+var reIsBinary = /^0b[01]+$/i;
+
+/** Used to detect octal string values. */
+var reIsOctal = /^0o[0-7]+$/i;
+
+/** Built-in method references without a dependency on `root`. */
+var freeParseInt = parseInt;
+
+/** Detect free variable `global` from Node.js. */
+var freeGlobal = typeof global == 'object' && global && global.Object === Object && global;
+
+/** Detect free variable `self`. */
+var freeSelf = typeof self == 'object' && self && self.Object === Object && self;
+
+/** Used as a reference to the global object. */
+var root = freeGlobal || freeSelf || Function('return this')();
+
+/** Used for built-in method references. */
+var objectProto = Object.prototype;
+
+/**
+ * Used to resolve the
+ * [`toStringTag`](http://ecma-international.org/ecma-262/7.0/#sec-object.prototype.tostring)
+ * of values.
+ */
+var objectToString = objectProto.toString;
+
+/* Built-in method references for those with the same name as other `lodash` methods. */
+var nativeMax = Math.max,
+    nativeMin = Math.min;
+
+/**
+ * Gets the timestamp of the number of milliseconds that have elapsed since
+ * the Unix epoch (1 January 1970 00:00:00 UTC).
+ *
+ * @static
+ * @memberOf _
+ * @since 2.4.0
+ * @category Date
+ * @returns {number} Returns the timestamp.
+ * @example
+ *
+ * _.defer(function(stamp) {
+ *   console.log(_.now() - stamp);
+ * }, _.now());
+ * // => Logs the number of milliseconds it took for the deferred invocation.
+ */
+var now = function() {
+  return root.Date.now();
+};
+
+/**
+ * Creates a debounced function that delays invoking `func` until after `wait`
+ * milliseconds have elapsed since the last time the debounced function was
+ * invoked. The debounced function comes with a `cancel` method to cancel
+ * delayed `func` invocations and a `flush` method to immediately invoke them.
+ * Provide `options` to indicate whether `func` should be invoked on the
+ * leading and/or trailing edge of the `wait` timeout. The `func` is invoked
+ * with the last arguments provided to the debounced function. Subsequent
+ * calls to the debounced function return the result of the last `func`
+ * invocation.
+ *
+ * **Note:** If `leading` and `trailing` options are `true`, `func` is
+ * invoked on the trailing edge of the timeout only if the debounced function
+ * is invoked more than once during the `wait` timeout.
+ *
+ * If `wait` is `0` and `leading` is `false`, `func` invocation is deferred
+ * until to the next tick, similar to `setTimeout` with a timeout of `0`.
+ *
+ * See [David Corbacho's article](https://css-tricks.com/debouncing-throttling-explained-examples/)
+ * for details over the differences between `_.debounce` and `_.throttle`.
+ *
+ * @static
+ * @memberOf _
+ * @since 0.1.0
+ * @category Function
+ * @param {Function} func The function to debounce.
+ * @param {number} [wait=0] The number of milliseconds to delay.
+ * @param {Object} [options={}] The options object.
+ * @param {boolean} [options.leading=false]
+ *  Specify invoking on the leading edge of the timeout.
+ * @param {number} [options.maxWait]
+ *  The maximum time `func` is allowed to be delayed before it's invoked.
+ * @param {boolean} [options.trailing=true]
+ *  Specify invoking on the trailing edge of the timeout.
+ * @returns {Function} Returns the new debounced function.
+ * @example
+ *
+ * // Avoid costly calculations while the window size is in flux.
+ * jQuery(window).on('resize', _.debounce(calculateLayout, 150));
+ *
+ * // Invoke `sendMail` when clicked, debouncing subsequent calls.
+ * jQuery(element).on('click', _.debounce(sendMail, 300, {
+ *   'leading': true,
+ *   'trailing': false
+ * }));
+ *
+ * // Ensure `batchLog` is invoked once after 1 second of debounced calls.
+ * var debounced = _.debounce(batchLog, 250, { 'maxWait': 1000 });
+ * var source = new EventSource('/stream');
+ * jQuery(source).on('message', debounced);
+ *
+ * // Cancel the trailing debounced invocation.
+ * jQuery(window).on('popstate', debounced.cancel);
+ */
+function debounce(func, wait, options) {
+  var lastArgs,
+      lastThis,
+      maxWait,
+      result,
+      timerId,
+      lastCallTime,
+      lastInvokeTime = 0,
+      leading = false,
+      maxing = false,
+      trailing = true;
+
+  if (typeof func != 'function') {
+    throw new TypeError(FUNC_ERROR_TEXT);
+  }
+  wait = toNumber(wait) || 0;
+  if (isObject(options)) {
+    leading = !!options.leading;
+    maxing = 'maxWait' in options;
+    maxWait = maxing ? nativeMax(toNumber(options.maxWait) || 0, wait) : maxWait;
+    trailing = 'trailing' in options ? !!options.trailing : trailing;
+  }
+
+  function invokeFunc(time) {
+    var args = lastArgs,
+        thisArg = lastThis;
+
+    lastArgs = lastThis = undefined;
+    lastInvokeTime = time;
+    result = func.apply(thisArg, args);
+    return result;
+  }
+
+  function leadingEdge(time) {
+    // Reset any `maxWait` timer.
+    lastInvokeTime = time;
+    // Start the timer for the trailing edge.
+    timerId = setTimeout(timerExpired, wait);
+    // Invoke the leading edge.
+    return leading ? invokeFunc(time) : result;
+  }
+
+  function remainingWait(time) {
+    var timeSinceLastCall = time - lastCallTime,
+        timeSinceLastInvoke = time - lastInvokeTime,
+        result = wait - timeSinceLastCall;
+
+    return maxing ? nativeMin(result, maxWait - timeSinceLastInvoke) : result;
+  }
+
+  function shouldInvoke(time) {
+    var timeSinceLastCall = time - lastCallTime,
+        timeSinceLastInvoke = time - lastInvokeTime;
+
+    // Either this is the first call, activity has stopped and we're at the
+    // trailing edge, the system time has gone backwards and we're treating
+    // it as the trailing edge, or we've hit the `maxWait` limit.
+    return (lastCallTime === undefined || (timeSinceLastCall >= wait) ||
+      (timeSinceLastCall < 0) || (maxing && timeSinceLastInvoke >= maxWait));
+  }
+
+  function timerExpired() {
+    var time = now();
+    if (shouldInvoke(time)) {
+      return trailingEdge(time);
+    }
+    // Restart the timer.
+    timerId = setTimeout(timerExpired, remainingWait(time));
+  }
+
+  function trailingEdge(time) {
+    timerId = undefined;
+
+    // Only invoke if we have `lastArgs` which means `func` has been
+    // debounced at least once.
+    if (trailing && lastArgs) {
+      return invokeFunc(time);
+    }
+    lastArgs = lastThis = undefined;
+    return result;
+  }
+
+  function cancel() {
+    if (timerId !== undefined) {
+      clearTimeout(timerId);
+    }
+    lastInvokeTime = 0;
+    lastArgs = lastCallTime = lastThis = timerId = undefined;
+  }
+
+  function flush() {
+    return timerId === undefined ? result : trailingEdge(now());
+  }
+
+  function debounced() {
+    var time = now(),
+        isInvoking = shouldInvoke(time);
+
+    lastArgs = arguments;
+    lastThis = this;
+    lastCallTime = time;
+
+    if (isInvoking) {
+      if (timerId === undefined) {
+        return leadingEdge(lastCallTime);
+      }
+      if (maxing) {
+        // Handle invocations in a tight loop.
+        timerId = setTimeout(timerExpired, wait);
+        return invokeFunc(lastCallTime);
+      }
+    }
+    if (timerId === undefined) {
+      timerId = setTimeout(timerExpired, wait);
+    }
+    return result;
+  }
+  debounced.cancel = cancel;
+  debounced.flush = flush;
+  return debounced;
+}
+
+/**
+ * Creates a throttled function that only invokes `func` at most once per
+ * every `wait` milliseconds. The throttled function comes with a `cancel`
+ * method to cancel delayed `func` invocations and a `flush` method to
+ * immediately invoke them. Provide `options` to indicate whether `func`
+ * should be invoked on the leading and/or trailing edge of the `wait`
+ * timeout. The `func` is invoked with the last arguments provided to the
+ * throttled function. Subsequent calls to the throttled function return the
+ * result of the last `func` invocation.
+ *
+ * **Note:** If `leading` and `trailing` options are `true`, `func` is
+ * invoked on the trailing edge of the timeout only if the throttled function
+ * is invoked more than once during the `wait` timeout.
+ *
+ * If `wait` is `0` and `leading` is `false`, `func` invocation is deferred
+ * until to the next tick, similar to `setTimeout` with a timeout of `0`.
+ *
+ * See [David Corbacho's article](https://css-tricks.com/debouncing-throttling-explained-examples/)
+ * for details over the differences between `_.throttle` and `_.debounce`.
+ *
+ * @static
+ * @memberOf _
+ * @since 0.1.0
+ * @category Function
+ * @param {Function} func The function to throttle.
+ * @param {number} [wait=0] The number of milliseconds to throttle invocations to.
+ * @param {Object} [options={}] The options object.
+ * @param {boolean} [options.leading=true]
+ *  Specify invoking on the leading edge of the timeout.
+ * @param {boolean} [options.trailing=true]
+ *  Specify invoking on the trailing edge of the timeout.
+ * @returns {Function} Returns the new throttled function.
+ * @example
+ *
+ * // Avoid excessively updating the position while scrolling.
+ * jQuery(window).on('scroll', _.throttle(updatePosition, 100));
+ *
+ * // Invoke `renewToken` when the click event is fired, but not more than once every 5 minutes.
+ * var throttled = _.throttle(renewToken, 300000, { 'trailing': false });
+ * jQuery(element).on('click', throttled);
+ *
+ * // Cancel the trailing throttled invocation.
+ * jQuery(window).on('popstate', throttled.cancel);
+ */
+function throttle(func, wait, options) {
+  var leading = true,
+      trailing = true;
+
+  if (typeof func != 'function') {
+    throw new TypeError(FUNC_ERROR_TEXT);
+  }
+  if (isObject(options)) {
+    leading = 'leading' in options ? !!options.leading : leading;
+    trailing = 'trailing' in options ? !!options.trailing : trailing;
+  }
+  return debounce(func, wait, {
+    'leading': leading,
+    'maxWait': wait,
+    'trailing': trailing
+  });
+}
+
+/**
+ * Checks if `value` is the
+ * [language type](http://www.ecma-international.org/ecma-262/7.0/#sec-ecmascript-language-types)
+ * of `Object`. (e.g. arrays, functions, objects, regexes, `new Number(0)`, and `new String('')`)
+ *
+ * @static
+ * @memberOf _
+ * @since 0.1.0
+ * @category Lang
+ * @param {*} value The value to check.
+ * @returns {boolean} Returns `true` if `value` is an object, else `false`.
+ * @example
+ *
+ * _.isObject({});
+ * // => true
+ *
+ * _.isObject([1, 2, 3]);
+ * // => true
+ *
+ * _.isObject(_.noop);
+ * // => true
+ *
+ * _.isObject(null);
+ * // => false
+ */
+function isObject(value) {
+  var type = typeof value;
+  return !!value && (type == 'object' || type == 'function');
+}
+
+/**
+ * Checks if `value` is object-like. A value is object-like if it's not `null`
+ * and has a `typeof` result of "object".
+ *
+ * @static
+ * @memberOf _
+ * @since 4.0.0
+ * @category Lang
+ * @param {*} value The value to check.
+ * @returns {boolean} Returns `true` if `value` is object-like, else `false`.
+ * @example
+ *
+ * _.isObjectLike({});
+ * // => true
+ *
+ * _.isObjectLike([1, 2, 3]);
+ * // => true
+ *
+ * _.isObjectLike(_.noop);
+ * // => false
+ *
+ * _.isObjectLike(null);
+ * // => false
+ */
+function isObjectLike(value) {
+  return !!value && typeof value == 'object';
+}
+
+/**
+ * Checks if `value` is classified as a `Symbol` primitive or object.
+ *
+ * @static
+ * @memberOf _
+ * @since 4.0.0
+ * @category Lang
+ * @param {*} value The value to check.
+ * @returns {boolean} Returns `true` if `value` is a symbol, else `false`.
+ * @example
+ *
+ * _.isSymbol(Symbol.iterator);
+ * // => true
+ *
+ * _.isSymbol('abc');
+ * // => false
+ */
+function isSymbol(value) {
+  return typeof value == 'symbol' ||
+    (isObjectLike(value) && objectToString.call(value) == symbolTag);
+}
+
+/**
+ * Converts `value` to a number.
+ *
+ * @static
+ * @memberOf _
+ * @since 4.0.0
+ * @category Lang
+ * @param {*} value The value to process.
+ * @returns {number} Returns the number.
+ * @example
+ *
+ * _.toNumber(3.2);
+ * // => 3.2
+ *
+ * _.toNumber(Number.MIN_VALUE);
+ * // => 5e-324
+ *
+ * _.toNumber(Infinity);
+ * // => Infinity
+ *
+ * _.toNumber('3.2');
+ * // => 3.2
+ */
+function toNumber(value) {
+  if (typeof value == 'number') {
+    return value;
+  }
+  if (isSymbol(value)) {
+    return NAN;
+  }
+  if (isObject(value)) {
+    var other = typeof value.valueOf == 'function' ? value.valueOf() : value;
+    value = isObject(other) ? (other + '') : other;
+  }
+  if (typeof value != 'string') {
+    return value === 0 ? value : +value;
+  }
+  value = value.replace(reTrim, '');
+  var isBinary = reIsBinary.test(value);
+  return (isBinary || reIsOctal.test(value))
+    ? freeParseInt(value.slice(2), isBinary ? 2 : 8)
+    : (reIsBadHex.test(value) ? NAN : +value);
+}
+
+module.exports = throttle;
+
+/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(65)))
+
+/***/ }),
 /* 316 */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -61566,6 +62484,1187 @@ _reactDom2.default.render(_react2.default.createElement(
     _react2.default.createElement(_reactRouter.Route, { path: '/', component: _layout2.default, onEnter: getLobby })
   )
 ), document.getElementById('root'));
+
+/***/ }),
+/* 634 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+	value: true
+});
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+/**
+ * Created by CharlieShi on 3/17/17.
+ */
+
+var Prefab = function (_Phaser$Sprite) {
+	_inherits(Prefab, _Phaser$Sprite);
+
+	function Prefab(game, name, position, properties) {
+		_classCallCheck(this, Prefab);
+
+		var _this = _possibleConstructorReturn(this, (Prefab.__proto__ || Object.getPrototypeOf(Prefab)).call(this, game.game, position.x, position.y, properties.texture, +properties.initial));
+
+		_this.gameState = game;
+		_this.name = name;
+
+		//Add prefab to its group
+		//this.gameState.groups[properties.group].add(this);
+		_this.gameState.groups[properties.group].children.push(_this);
+		_this.initial = +properties.initial;
+
+		//Enable physics for each prefab, we enable it in other prefabs but this is a check
+		_this.game.physics.arcade.enable(_this);
+
+		_this.gameState.prefabs[name] = _this;
+		return _this;
+	}
+
+	return Prefab;
+}(Phaser.Sprite);
+
+exports.default = Prefab;
+
+/***/ }),
+/* 635 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _player = __webpack_require__(640);
+
+var _player2 = _interopRequireDefault(_player);
+
+var _enemy = __webpack_require__(638);
+
+var _enemy2 = _interopRequireDefault(_enemy);
+
+var _gun = __webpack_require__(639);
+
+var _gun2 = _interopRequireDefault(_gun);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; } /**
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                * Created by CharlieShi on 3/16/17.
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                */
+
+//Use this to load map
+//Loads physics engine, scales canvas size etc...
+
+var TiledState = function (_Phaser$State) {
+  _inherits(TiledState, _Phaser$State);
+
+  function TiledState(game) {
+    _classCallCheck(this, TiledState);
+
+    var _this = _possibleConstructorReturn(this, (TiledState.__proto__ || Object.getPrototypeOf(TiledState)).call(this, game));
+
+    _this.prefabs = {};
+
+    _this.prefabClasses = {
+      "player": _player2.default.prototype.constructor,
+      "enemies": _enemy2.default.prototype.constructor,
+      "guns": _gun2.default.prototype.constructor
+    };
+    return _this;
+  }
+
+  _createClass(TiledState, [{
+    key: 'init',
+    value: function init(levelData) {
+      this.levelData = levelData;
+
+      //Scaling the Game Window for a pixelated effect
+      this.game.scale.scaleMode = Phaser.ScaleManager.USER_SCALE;
+      this.game.scale.setUserScale(8, 8, 1000, 1000);
+      //this.game.scale.setUserScale(2, 2, 200, 200);
+      this.game.renderer.renderSession.roundPixels = true;
+      Phaser.Canvas.setImageRenderingCrisp(this.game.canvas);
+
+      this.scale.pageAlignHorizontally = true;
+      this.scale.pageAlignVertically = true;
+
+      // start physics system
+      this.game.physics.startSystem(Phaser.Physics.ARCADE);
+
+      //Create tilemap base on level data
+      this.map = this.game.add.tilemap(levelData.map.key);
+      var tilesetIndex = 0;
+
+      this.map.tilesets.forEach(function (tileset) {
+        this.map.addTilesetImage(tileset.name, levelData.map.tilesets[tilesetIndex]);
+        tilesetIndex += 1;
+      }, this);
+    }
+  }, {
+    key: 'create',
+    value: function create() {
+      var _this2 = this;
+
+      var groupName = void 0,
+          objectLayer = void 0,
+          collisionTiles = void 0,
+          worldGrid = void 0,
+          tileDimensions = void 0,
+          prefabName = void 0;
+
+      this.layers = {};
+      this.groups = {};
+
+      //Go through all groups in the level data
+      //Add group to game state
+      this.levelData.groups.forEach(function (groupName) {
+        _this2.groups[groupName] = _this2.game.add.group();
+      });
+
+      //Go through all map layers
+      //Also set collision if collision is true
+      this.map.layers.forEach(function (layer) {
+        _this2.layers[layer.name] = _this2.map.createLayer(layer.name);
+
+        if (layer.properties.collision) {
+          _this2.map.setCollisionByExclusion([], true, layer.name);
+        }
+      });
+    }
+
+    //Use this method to create prefabs
+
+  }, {
+    key: 'createPrefab',
+    value: function createPrefab(prefabName, prefabData, position) {
+      var prefab = void 0;
+
+      console.log("prefab created", prefabName);
+
+      //Pass prefab data into the constructor of that type defined in this constructor
+      if (this.prefabClasses.hasOwnProperty(prefabData.type)) {
+        prefab = new this.prefabClasses[prefabData.type](this, prefabName, position, prefabData.properties);
+      }
+
+      this.prefabs[prefabName] = prefab;
+
+      return prefab;
+    }
+
+    //This creates the obstacles pathfinding will need to path around
+
+  }, {
+    key: 'createWorldGrid',
+    value: function createWorldGrid() {
+      var obstaclesLayer = void 0,
+          rowIndex = void 0,
+          columnIndex = void 0,
+          worldGrid = void 0;
+
+      obstaclesLayer = this.map.layers[1];
+
+      //todo: need to add other obstacles to worldGrid
+      console.log('obstacles layer', obstaclesLayer);
+
+      worldGrid = [];
+      for (rowIndex = 0; rowIndex < this.map.height; rowIndex += 1) {
+        worldGrid.push([]);
+        for (columnIndex = 0; columnIndex < this.map.width; columnIndex += 1) {
+          worldGrid[rowIndex].push(obstaclesLayer.data[rowIndex][columnIndex].index);
+        }
+      }
+
+      return worldGrid;
+    }
+  }]);
+
+  return TiledState;
+}(Phaser.State);
+
+exports.default = TiledState;
+
+/***/ }),
+/* 636 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;
+
+/**
+ * Created by CharlieShi on 3/11/17.
+ */
+
+// NameSpace
+var EasyStar = EasyStar || {};
+
+// For require.js
+if (true) {
+  !(__WEBPACK_AMD_DEFINE_ARRAY__ = [], __WEBPACK_AMD_DEFINE_RESULT__ = function () {
+    return EasyStar;
+  }.apply(exports, __WEBPACK_AMD_DEFINE_ARRAY__),
+				__WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
+}
+
+// For browserify and node.js
+if (typeof module !== 'undefined' && module.exports) {
+  module.exports = EasyStar;
+}
+/**
+ * A simple Node that represents a single tile on the grid.
+ * @param {Object} parent The parent node.
+ * @param {Number} x The x position on the grid.
+ * @param {Number} y The y position on the grid.
+ * @param {Number} costSoFar How far this node is in moves*cost from the start.
+ * @param {Number} simpleDistanceToTarget Manhatten distance to the end point.
+ **/
+EasyStar.Node = function (parent, x, y, costSoFar, simpleDistanceToTarget) {
+  this.parent = parent;
+  this.x = x;
+  this.y = y;
+  this.costSoFar = costSoFar;
+  this.simpleDistanceToTarget = simpleDistanceToTarget;
+
+  /**
+   * @return {Number} Best guess distance of a cost using this node.
+   **/
+  this.bestGuessDistance = function () {
+    return this.costSoFar + this.simpleDistanceToTarget;
+  };
+};
+
+// Constants
+EasyStar.Node.OPEN_LIST = 0;
+EasyStar.Node.CLOSED_LIST = 1;
+/**
+ * This is an improved Priority Queue data type implementation that can be used to sort any object type.
+ * It uses a technique called a binary heap.
+ *
+ * For more on binary heaps see: http://en.wikipedia.org/wiki/Binary_heap
+ *
+ * @param {String} criteria The criteria by which to sort the objects.
+ * This should be a property of the objects you're sorting.
+ *
+ * @param {Number} heapType either PriorityQueue.MAX_HEAP or PriorityQueue.MIN_HEAP.
+ **/
+EasyStar.PriorityQueue = function (criteria, heapType) {
+  this.length = 0; //The current length of heap.
+  var queue = [];
+  var isMax = false;
+
+  //Constructor
+  if (heapType == EasyStar.PriorityQueue.MAX_HEAP) {
+    isMax = true;
+  } else if (heapType == EasyStar.PriorityQueue.MIN_HEAP) {
+    isMax = false;
+  } else {
+    throw heapType + " not supported.";
+  }
+
+  /**
+   * Inserts the value into the heap and sorts it.
+   *
+   * @param value The object to insert into the heap.
+   **/
+  this.insert = function (value) {
+    if (!value.hasOwnProperty(criteria)) {
+      throw "Cannot insert " + value + " because it does not have a property by the name of " + criteria + ".";
+    }
+    queue.push(value);
+    this.length++;
+    bubbleUp(this.length - 1);
+  };
+
+  /**
+   * Peeks at the highest priority element.
+   *
+   * @return the highest priority element
+   **/
+  this.getHighestPriorityElement = function () {
+    return queue[0];
+  };
+
+  /**
+   * Removes and returns the highest priority element from the queue.
+   *
+   * @return the highest priority element
+   **/
+  this.shiftHighestPriorityElement = function () {
+    if (this.length === 0) {
+      throw "There are no more elements in your priority queue.";
+    } else if (this.length === 1) {
+      var onlyValue = queue[0];
+      queue = [];
+      this.length = 0;
+      return onlyValue;
+    }
+    var oldRoot = queue[0];
+    var newRoot = queue.pop();
+    this.length--;
+    queue[0] = newRoot;
+    swapUntilQueueIsCorrect(0);
+    return oldRoot;
+  };
+
+  var bubbleUp = function bubbleUp(index) {
+    if (index === 0) {
+      return;
+    }
+    var parent = getParentOf(index);
+    if (evaluate(index, parent)) {
+      swap(index, parent);
+      bubbleUp(parent);
+    } else {
+      return;
+    }
+  };
+
+  var swapUntilQueueIsCorrect = function swapUntilQueueIsCorrect(value) {
+    var left = getLeftOf(value);
+    var right = getRightOf(value);
+    if (evaluate(left, value)) {
+      swap(value, left);
+      swapUntilQueueIsCorrect(left);
+    } else if (evaluate(right, value)) {
+      swap(value, right);
+      swapUntilQueueIsCorrect(right);
+    } else if (value == 0) {
+      return;
+    } else {
+      swapUntilQueueIsCorrect(0);
+    }
+  };
+
+  var swap = function swap(self, target) {
+    var placeHolder = queue[self];
+    queue[self] = queue[target];
+    queue[target] = placeHolder;
+  };
+
+  var evaluate = function evaluate(self, target) {
+    if (queue[target] === undefined || queue[self] === undefined) {
+      return false;
+    }
+
+    var selfValue;
+    var targetValue;
+
+    // Check if the criteria should be the result of a function call.
+    if (typeof queue[self][criteria] === 'function') {
+      selfValue = queue[self][criteria]();
+      targetValue = queue[target][criteria]();
+    } else {
+      selfValue = queue[self][criteria];
+      targetValue = queue[target][criteria];
+    }
+
+    if (isMax) {
+      if (selfValue > targetValue) {
+        return true;
+      } else {
+        return false;
+      }
+    } else {
+      if (selfValue < targetValue) {
+        return true;
+      } else {
+        return false;
+      }
+    }
+  };
+
+  var getParentOf = function getParentOf(index) {
+    return Math.floor((index - 1) / 2);
+  };
+
+  var getLeftOf = function getLeftOf(index) {
+    return index * 2 + 1;
+  };
+
+  var getRightOf = function getRightOf(index) {
+    return index * 2 + 2;
+  };
+};
+
+// Constants
+EasyStar.PriorityQueue.MAX_HEAP = 0;
+EasyStar.PriorityQueue.MIN_HEAP = 1;
+
+/**
+ * Represents a single instance of EasyStar.
+ * A path that is in the queue to eventually be found.
+ */
+EasyStar.instance = function () {
+  this.isDoneCalculating = true;
+  this.pointsToAvoid = {};
+  this.startX;
+  this.callback;
+  this.startY;
+  this.endX;
+  this.endY;
+  this.nodeHash = {};
+  this.openList;
+};
+/**
+ *	EasyStar.js
+ *	github.com/prettymuchbryce/EasyStarJS
+ *	Licensed under the MIT license.
+ *
+ *	Implementation By Bryce Neal (@prettymuchbryce)
+ **/
+EasyStar.js = function () {
+  var STRAIGHT_COST = 1.0;
+  var DIAGONAL_COST = 1.4;
+  var syncEnabled = false;
+  var pointsToAvoid = {};
+  var collisionGrid;
+  var costMap = {};
+  var pointsToCost = {};
+  var allowCornerCutting = true;
+  var iterationsSoFar;
+  var instances = [];
+  var iterationsPerCalculation = Number.MAX_VALUE;
+  var acceptableTiles;
+  var diagonalsEnabled = false;
+
+  /**
+   * Sets the collision grid that EasyStar uses.
+   *
+   * @param {Array|Number} tiles An array of numbers that represent
+   * which tiles in your grid should be considered
+   * acceptable, or "walkable".
+   **/
+  this.setAcceptableTiles = function (tiles) {
+    if (tiles instanceof Array) {
+      // Array
+      acceptableTiles = tiles;
+    } else if (!isNaN(parseFloat(tiles)) && isFinite(tiles)) {
+      // Number
+      acceptableTiles = [tiles];
+    }
+  };
+
+  /**
+   * Enables sync mode for this EasyStar instance..
+   * if you're into that sort of thing.
+   **/
+  this.enableSync = function () {
+    syncEnabled = true;
+  };
+
+  /**
+   * Disables sync mode for this EasyStar instance.
+   **/
+  this.disableSync = function () {
+    syncEnabled = false;
+  };
+
+  /**
+   * Enable diagonal pathfinding.
+   */
+  this.enableDiagonals = function () {
+    diagonalsEnabled = true;
+  };
+
+  /**
+   * Disable diagonal pathfinding.
+   */
+  this.disableDiagonals = function () {
+    diagonalsEnabled = false;
+  };
+
+  /**
+   * Sets the collision grid that EasyStar uses.
+   *
+   * @param {Array} grid The collision grid that this EasyStar instance will read from.
+   * This should be a 2D Array of Numbers.
+   **/
+  this.setGrid = function (grid) {
+    collisionGrid = grid;
+
+    //Setup cost map
+    for (var y = 0; y < collisionGrid.length; y++) {
+      for (var x = 0; x < collisionGrid[0].length; x++) {
+        if (!costMap[collisionGrid[y][x]]) {
+          costMap[collisionGrid[y][x]] = 1;
+        }
+      }
+    }
+  };
+
+  /**
+   * Sets the tile cost for a particular tile type.
+   *
+   * @param {Number} The tile type to set the cost for.
+   * @param {Number} The multiplicative cost associated with the given tile.
+   **/
+  this.setTileCost = function (tileType, cost) {
+    costMap[tileType] = cost;
+  };
+
+  /**
+   * Sets the an additional cost for a particular point.
+   * Overrides the cost from setTileCost.
+   *
+   * @param {Number} x The x value of the point to cost.
+   * @param {Number} y The y value of the point to cost.
+   * @param {Number} The multiplicative cost associated with the given point.
+   **/
+  this.setAdditionalPointCost = function (x, y, cost) {
+    pointsToCost[x + '_' + y] = cost;
+  };
+
+  /**
+   * Remove the additional cost for a particular point.
+   *
+   * @param {Number} x The x value of the point to stop costing.
+   * @param {Number} y The y value of the point to stop costing.
+   **/
+  this.removeAdditionalPointCost = function (x, y) {
+    delete pointsToCost[x + '_' + y];
+  };
+
+  /**
+   * Remove all additional point costs.
+   **/
+  this.removeAllAdditionalPointCosts = function () {
+    pointsToCost = {};
+  };
+
+  /**
+   * Sets the number of search iterations per calculation.
+   * A lower number provides a slower result, but more practical if you
+   * have a large tile-map and don't want to block your thread while
+   * finding a path.
+   *
+   * @param {Number} iterations The number of searches to prefrom per calculate() call.
+   **/
+  this.setIterationsPerCalculation = function (iterations) {
+    iterationsPerCalculation = iterations;
+  };
+
+  /**
+   * Avoid a particular point on the grid,
+   * regardless of whether or not it is an acceptable tile.
+   *
+   * @param {Number} x The x value of the point to avoid.
+   * @param {Number} y The y value of the point to avoid.
+   **/
+  this.avoidAdditionalPoint = function (x, y) {
+    pointsToAvoid[x + "_" + y] = 1;
+  };
+
+  /**
+   * Stop avoiding a particular point on the grid.
+   *
+   * @param {Number} x The x value of the point to stop avoiding.
+   * @param {Number} y The y value of the point to stop avoiding.
+   **/
+  this.stopAvoidingAdditionalPoint = function (x, y) {
+    delete pointsToAvoid[x + "_" + y];
+  };
+
+  /**
+   * Enables corner cutting in diagonal movement.
+   **/
+  this.enableCornerCutting = function () {
+    allowCornerCutting = true;
+  };
+
+  /**
+   * Disables corner cutting in diagonal movement.
+   **/
+  this.disableCornerCutting = function () {
+    allowCornerCutting = false;
+  };
+
+  /**
+   * Stop avoiding all additional points on the grid.
+   **/
+  this.stopAvoidingAllAdditionalPoints = function () {
+    pointsToAvoid = {};
+  };
+
+  /**
+   * Find a path.
+   *
+   * @param {Number} startX The X position of the starting point.
+   * @param {Number} startY The Y position of the starting point.
+   * @param {Number} endX The X position of the ending point.
+   * @param {Number} endY The Y position of the ending point.
+   * @param {Function} callback A function that is called when your path
+   * is found, or no path is found.
+   *
+   **/
+  this.findPath = function (startX, startY, endX, endY, callback) {
+    // Wraps the callback for sync vs async logic
+    var callbackWrapper = function callbackWrapper(result) {
+      if (syncEnabled) {
+        callback(result);
+      } else {
+        setTimeout(function () {
+          callback(result);
+        });
+      }
+    };
+
+    // No acceptable tiles were set
+    if (acceptableTiles === undefined) {
+      throw new Error("You can't set a path without first calling setAcceptableTiles() on EasyStar.");
+    }
+    // No grid was set
+    if (collisionGrid === undefined) {
+      throw new Error("You can't set a path without first calling setGrid() on EasyStar.");
+    }
+
+    // Start or endpoint outside of scope.
+    if (startX < 0 || startY < 0 || endX < 0 || endX < 0 || startX > collisionGrid[0].length - 1 || startY > collisionGrid.length - 1 || endX > collisionGrid[0].length - 1 || endY > collisionGrid.length - 1) {
+      throw new Error("Your start or end point is outside the scope of your grid.");
+    }
+
+    // Start and end are the same tile.
+    if (startX === endX && startY === endY) {
+      callbackWrapper([]);
+      return;
+    }
+
+    // End point is not an acceptable tile.
+    var endTile = collisionGrid[endY][endX];
+    var isAcceptable = false;
+    for (var i = 0; i < acceptableTiles.length; i++) {
+      if (endTile === acceptableTiles[i]) {
+        isAcceptable = true;
+        break;
+      }
+    }
+
+    if (isAcceptable === false) {
+      callbackWrapper(null);
+      return;
+    }
+
+    // Create the instance
+    var instance = new EasyStar.instance();
+    instance.openList = new EasyStar.PriorityQueue("bestGuessDistance", EasyStar.PriorityQueue.MIN_HEAP);
+    instance.isDoneCalculating = false;
+    instance.nodeHash = {};
+    instance.startX = startX;
+    instance.startY = startY;
+    instance.endX = endX;
+    instance.endY = endY;
+    instance.callback = callbackWrapper;
+
+    instance.openList.insert(coordinateToNode(instance, instance.startX, instance.startY, null, STRAIGHT_COST));
+
+    instances.push(instance);
+  };
+
+  /**
+   * This method steps through the A* Algorithm in an attempt to
+   * find your path(s). It will search 4-8 tiles (depending on diagonals) for every calculation.
+   * You can change the number of calculations done in a call by using
+   * easystar.setIteratonsPerCalculation().
+   **/
+  this.calculate = function () {
+    if (instances.length === 0 || collisionGrid === undefined || acceptableTiles === undefined) {
+      return;
+    }
+    for (iterationsSoFar = 0; iterationsSoFar < iterationsPerCalculation; iterationsSoFar++) {
+      if (instances.length === 0) {
+        return;
+      }
+
+      if (syncEnabled) {
+        // If this is a sync instance, we want to make sure that it calculates synchronously.
+        iterationsSoFar = 0;
+      }
+
+      // Couldn't find a path.
+      if (instances[0].openList.length === 0) {
+        var ic = instances[0];
+        ic.callback(null);
+        instances.shift();
+        continue;
+      }
+
+      var searchNode = instances[0].openList.shiftHighestPriorityElement();
+
+      var tilesToSearch = [];
+      searchNode.list = EasyStar.Node.CLOSED_LIST;
+
+      if (searchNode.y > 0) {
+        tilesToSearch.push({ instance: instances[0], searchNode: searchNode,
+          x: 0, y: -1, cost: STRAIGHT_COST * getTileCost(searchNode.x, searchNode.y - 1) });
+      }
+      if (searchNode.x < collisionGrid[0].length - 1) {
+        tilesToSearch.push({ instance: instances[0], searchNode: searchNode,
+          x: 1, y: 0, cost: STRAIGHT_COST * getTileCost(searchNode.x + 1, searchNode.y) });
+      }
+      if (searchNode.y < collisionGrid.length - 1) {
+        tilesToSearch.push({ instance: instances[0], searchNode: searchNode,
+          x: 0, y: 1, cost: STRAIGHT_COST * getTileCost(searchNode.x, searchNode.y + 1) });
+      }
+      if (searchNode.x > 0) {
+        tilesToSearch.push({ instance: instances[0], searchNode: searchNode,
+          x: -1, y: 0, cost: STRAIGHT_COST * getTileCost(searchNode.x - 1, searchNode.y) });
+      }
+      if (diagonalsEnabled) {
+        if (searchNode.x > 0 && searchNode.y > 0) {
+
+          if (allowCornerCutting || isTileWalkable(collisionGrid, acceptableTiles, searchNode.x, searchNode.y - 1) && isTileWalkable(collisionGrid, acceptableTiles, searchNode.x - 1, searchNode.y)) {
+
+            tilesToSearch.push({ instance: instances[0], searchNode: searchNode,
+              x: -1, y: -1, cost: DIAGONAL_COST * getTileCost(searchNode.x - 1, searchNode.y - 1) });
+          }
+        }
+        if (searchNode.x < collisionGrid[0].length - 1 && searchNode.y < collisionGrid.length - 1) {
+
+          if (allowCornerCutting || isTileWalkable(collisionGrid, acceptableTiles, searchNode.x, searchNode.y + 1) && isTileWalkable(collisionGrid, acceptableTiles, searchNode.x + 1, searchNode.y)) {
+
+            tilesToSearch.push({ instance: instances[0], searchNode: searchNode,
+              x: 1, y: 1, cost: DIAGONAL_COST * getTileCost(searchNode.x + 1, searchNode.y + 1) });
+          }
+        }
+        if (searchNode.x < collisionGrid[0].length - 1 && searchNode.y > 0) {
+
+          if (allowCornerCutting || isTileWalkable(collisionGrid, acceptableTiles, searchNode.x, searchNode.y - 1) && isTileWalkable(collisionGrid, acceptableTiles, searchNode.x + 1, searchNode.y)) {
+
+            tilesToSearch.push({ instance: instances[0], searchNode: searchNode,
+              x: 1, y: -1, cost: DIAGONAL_COST * getTileCost(searchNode.x + 1, searchNode.y - 1) });
+          }
+        }
+        if (searchNode.x > 0 && searchNode.y < collisionGrid.length - 1) {
+
+          if (allowCornerCutting || isTileWalkable(collisionGrid, acceptableTiles, searchNode.x, searchNode.y + 1) && isTileWalkable(collisionGrid, acceptableTiles, searchNode.x - 1, searchNode.y)) {
+
+            tilesToSearch.push({ instance: instances[0], searchNode: searchNode,
+              x: -1, y: 1, cost: DIAGONAL_COST * getTileCost(searchNode.x - 1, searchNode.y + 1) });
+          }
+        }
+      }
+
+      // First sort all of the potential nodes we could search by their cost + heuristic distance.
+      tilesToSearch.sort(function (a, b) {
+        var aCost = a.cost + getDistance(searchNode.x + a.x, searchNode.y + a.y, instances[0].endX, instances[0].endY);
+        var bCost = b.cost + getDistance(searchNode.x + b.x, searchNode.y + b.y, instances[0].endX, instances[0].endY);
+        if (aCost < bCost) {
+          return -1;
+        } else if (aCost === bCost) {
+          return 0;
+        } else {
+          return 1;
+        }
+      });
+
+      var isDoneCalculating = false;
+
+      // Search all of the surrounding nodes
+      for (var i = 0; i < tilesToSearch.length; i++) {
+        checkAdjacentNode(tilesToSearch[i].instance, tilesToSearch[i].searchNode, tilesToSearch[i].x, tilesToSearch[i].y, tilesToSearch[i].cost);
+        if (tilesToSearch[i].instance.isDoneCalculating === true) {
+          isDoneCalculating = true;
+          break;
+        }
+      }
+
+      if (isDoneCalculating) {
+        instances.shift();
+        continue;
+      }
+    }
+  };
+
+  // Private methods follow
+  var checkAdjacentNode = function checkAdjacentNode(instance, searchNode, x, y, cost) {
+    var adjacentCoordinateX = searchNode.x + x;
+    var adjacentCoordinateY = searchNode.y + y;
+
+    if (pointsToAvoid[adjacentCoordinateX + "_" + adjacentCoordinateY] === undefined) {
+      // Handles the case where we have found the destination
+      if (instance.endX === adjacentCoordinateX && instance.endY === adjacentCoordinateY) {
+        instance.isDoneCalculating = true;
+        var path = [];
+        var pathLen = 0;
+        path[pathLen] = { x: adjacentCoordinateX, y: adjacentCoordinateY };
+        pathLen++;
+        path[pathLen] = { x: searchNode.x, y: searchNode.y };
+        pathLen++;
+        var parent = searchNode.parent;
+        while (parent != null) {
+          path[pathLen] = { x: parent.x, y: parent.y };
+          pathLen++;
+          parent = parent.parent;
+        }
+        path.reverse();
+        var ic = instance;
+        var ip = path;
+        ic.callback(ip);
+        return;
+      }
+
+      if (isTileWalkable(collisionGrid, acceptableTiles, adjacentCoordinateX, adjacentCoordinateY)) {
+        var node = coordinateToNode(instance, adjacentCoordinateX, adjacentCoordinateY, searchNode, cost);
+
+        if (node.list === undefined) {
+          node.list = EasyStar.Node.OPEN_LIST;
+          instance.openList.insert(node);
+        } else if (node.list === EasyStar.Node.OPEN_LIST) {
+          if (searchNode.costSoFar + cost < node.costSoFar) {
+            node.costSoFar = searchNode.costSoFar + cost;
+            node.parent = searchNode;
+          }
+        }
+      }
+    }
+  };
+
+  // Helpers
+  var isTileWalkable = function isTileWalkable(collisionGrid, acceptableTiles, x, y) {
+    for (var i = 0; i < acceptableTiles.length; i++) {
+      if (collisionGrid[y][x] === acceptableTiles[i]) {
+        return true;
+      }
+    }
+
+    return false;
+  };
+
+  var getTileCost = function getTileCost(x, y) {
+    return pointsToCost[x + '_' + y] || costMap[collisionGrid[y][x]];
+  };
+
+  var coordinateToNode = function coordinateToNode(instance, x, y, parent, cost) {
+    if (instance.nodeHash[x + "_" + y] !== undefined) {
+      return instance.nodeHash[x + "_" + y];
+    }
+    var simpleDistanceToTarget = getDistance(x, y, instance.endX, instance.endY);
+    if (parent !== null) {
+      var costSoFar = parent.costSoFar + cost;
+    } else {
+      costSoFar = simpleDistanceToTarget;
+    }
+    var node = new EasyStar.Node(parent, x, y, costSoFar, simpleDistanceToTarget);
+    instance.nodeHash[x + "_" + y] = node;
+    return node;
+  };
+
+  var getDistance = function getDistance(x1, y1, x2, y2) {
+    return Math.sqrt((x2 -= x1) * x2 + (y2 -= y1) * y2);
+  };
+};
+
+/***/ }),
+/* 637 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _EasyStar = __webpack_require__(636);
+
+var _EasyStar2 = _interopRequireDefault(_EasyStar);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; } /**
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                * Created by CharlieShi on 3/20/17.
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                */
+
+var Pathfinding = function (_Phaser$Plugin) {
+  _inherits(Pathfinding, _Phaser$Plugin);
+
+  function Pathfinding(game, parent) {
+    _classCallCheck(this, Pathfinding);
+
+    var _this = _possibleConstructorReturn(this, (Pathfinding.__proto__ || Object.getPrototypeOf(Pathfinding)).call(this, game, parent));
+
+    _this.easyStar = new _EasyStar2.default.js();
+    return _this;
+  }
+
+  _createClass(Pathfinding, [{
+    key: 'init',
+    value: function init(worldGrid, acceptableTiles, tileDimensions) {
+      this.gridDimensions = { row: worldGrid.length, column: worldGrid[0].length };
+      this.worldGrid = worldGrid;
+
+      this.easyStar.setGrid(this.worldGrid);
+      this.easyStar.setAcceptableTiles(acceptableTiles);
+
+      this.tileDimensions = tileDimensions;
+    }
+  }, {
+    key: 'findPath',
+    value: function findPath(origin, target, callback, context) {
+      var originCoord = void 0,
+          targetCoord = void 0;
+      originCoord = this.getCoordFromPoint(origin);
+      targetCoord = this.getCoordFromPoint(target);
+
+      if (!this.outsideGrid(originCoord) && !this.outsideGrid(targetCoord)) {
+        this.easyStar.findPath(originCoord.column, originCoord.row, targetCoord.column, targetCoord.row, this.callCallbackFunction.bind(this, callback, context));
+        this.easyStar.calculate();
+        return true;
+      } else {
+        return false;
+      }
+    }
+  }, {
+    key: 'callCallbackFunction',
+    value: function callCallbackFunction(callback, context, path) {
+      var pathPositions = void 0;
+      pathPositions = [];
+      if (path) {
+        path.forEach(function (pathCoord) {
+          pathPositions.push(this.getPointFromCoord({ row: pathCoord.y, column: pathCoord.x }));
+        }, this);
+        callback.call(context, pathPositions);
+      }
+    }
+  }, {
+    key: 'outsideGrid',
+    value: function outsideGrid(coord) {
+      return coord.row < 0 || coord.row > this.gridDimensions.row - 1 || coord.column < 0 || coord.column > this.gridDimensions.column - 1;
+    }
+  }, {
+    key: 'removeTile',
+    value: function removeTile(coord) {
+      this.worldGrid[coord.row][coord.column] = -1;
+      this.easyStar.setGrid(this.worldGrid);
+    }
+  }, {
+    key: 'getCoordFromPoint',
+    value: function getCoordFromPoint(point) {
+      var row = void 0,
+          column = void 0;
+      row = Math.floor(point.y / this.tileDimensions.y);
+      column = Math.floor(point.x / this.tileDimensions.x);
+      return { row: row, column: column };
+    }
+  }, {
+    key: 'getPointFromCoord',
+    value: function getPointFromCoord(coord) {
+      var x = void 0,
+          y = void 0;
+      x = coord.column * this.tileDimensions.x + this.tileDimensions.x / 2;
+      y = coord.row * this.tileDimensions.y + this.tileDimensions.y / 2;
+      return new Phaser.Point(x, y);
+    }
+  }]);
+
+  return Pathfinding;
+}(Phaser.Plugin);
+
+exports.default = Pathfinding;
+
+/***/ }),
+/* 638 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _Prefab2 = __webpack_require__(634);
+
+var _Prefab3 = _interopRequireDefault(_Prefab2);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+var Enemy = function (_Prefab) {
+  _inherits(Enemy, _Prefab);
+
+  function Enemy(game, name, position, properties) {
+    _classCallCheck(this, Enemy);
+
+    var _this = _possibleConstructorReturn(this, (Enemy.__proto__ || Object.getPrototypeOf(Enemy)).call(this, game, name, position, properties));
+
+    _this.animations.add('left', [9, 10, 11, 12, 9, 13, 14], 9, true);
+    //this.animations.add('right', [], 10, true);
+    _this.animations.add('dead', [1, 2, 3, 4, 5, 6, 7, 8, 0], 9, true);
+
+    _this.currentTarget = {};
+
+    _this.stats = {
+      health: 10,
+      movement: 10
+    };
+
+    return _this;
+  }
+
+  _createClass(Enemy, [{
+    key: 'receiveDamage',
+    value: function receiveDamage(damage) {}
+  }, {
+    key: 'acquireTarget',
+    value: function acquireTarget() {
+      //Loop through player group and find closest player
+      console.log("find player", this.gameState.groups.player.children[0].position);
+
+      return this.gameState.groups.player.children[0].position;
+    }
+  }]);
+
+  return Enemy;
+}(_Prefab3.default);
+
+exports.default = Enemy;
+
+/***/ }),
+/* 639 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+	value: true
+});
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _Prefab2 = __webpack_require__(634);
+
+var _Prefab3 = _interopRequireDefault(_Prefab2);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+var Gun = function (_Prefab) {
+	_inherits(Gun, _Prefab);
+
+	function Gun(game, name, position, properties) {
+		_classCallCheck(this, Gun);
+
+		var _this = _possibleConstructorReturn(this, (Gun.__proto__ || Object.getPrototypeOf(Gun)).call(this, game, name, position, properties));
+
+		_this.game.physics.arcade.enable(_this);
+		_this.body.collideWorldBounds = true;
+
+		_this.anchor.setTo(0.5);
+		_this.pivot.x = -10;
+		return _this;
+	}
+
+	_createClass(Gun, [{
+		key: 'shootGun',
+		value: function shootGun() {}
+	}, {
+		key: 'reload',
+		value: function reload() {}
+	}]);
+
+	return Gun;
+}(_Prefab3.default);
+
+exports.default = Gun;
+
+/***/ }),
+/* 640 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _Prefab2 = __webpack_require__(634);
+
+var _Prefab3 = _interopRequireDefault(_Prefab2);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; } /**
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                * Created by CharlieShi on 3/17/17.
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                */
+
+var Player = function (_Prefab) {
+  _inherits(Player, _Prefab);
+
+  function Player(game, name, position, properties) {
+    _classCallCheck(this, Player);
+
+    var _this = _possibleConstructorReturn(this, (Player.__proto__ || Object.getPrototypeOf(Player)).call(this, game, name, position, properties));
+
+    _this.anchor.setTo(0.5);
+    _this.animations.add('right', [24, 8, 5, 20, 12, 13], 10, true);
+    _this.animations.add('left', [17, 10, 5, 19, 8, 9], 10, true);
+    _this.animations.add('up', [16, 0, 14, 6, 1], 10, true);
+    _this.animations.add('down', [23, 9, 21, 22, 7, 4], 10, true);
+
+    //This might not be relevant since the world size is bigger than map size
+    //To allow for camera pan
+    _this.body.collideWorldBounds = true;
+    _this.game.physics.arcade.enable(_this);
+
+    _this.stats = {
+      health: 100,
+      movement: 10
+    };
+
+    return _this;
+  }
+
+  _createClass(Player, [{
+    key: 'receiveDamage',
+    value: function receiveDamage(damage) {}
+  }]);
+
+  return Player;
+}(_Prefab3.default);
+
+exports.default = Player;
 
 /***/ })
 /******/ ]);
