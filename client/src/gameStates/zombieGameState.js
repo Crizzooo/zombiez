@@ -97,8 +97,6 @@ export default class ZombieGameState extends TiledState {
         this.game.physics.arcade.collide(this.currentPlayer, this.layers.waterCollision);
         this.game.physics.arcade.collide(this.currentPlayer, this.layers.wallCollision);
         this.handleInput();
-        //every 16ms send package to server with position
-        //this.sendToServer();
     }
 
     render() {
@@ -110,6 +108,10 @@ export default class ZombieGameState extends TiledState {
 
     handleInput() {
         if (this.currentPlayer) {
+            let pointerX = this.game.input.activePointer.worldX;
+            let pointerY = this.game.input.activePointer.worldY;
+            let playerX = this.currentPlayer.x;
+            let playerY = this.currentPlayer.y
             this.currentPlayer.body.velocity.x = 0;
             this.currentPlayer.body.velocity.y = 0;
             if (this.game.cursors.left.isDown) {
@@ -165,7 +167,12 @@ export default class ZombieGameState extends TiledState {
 
             if (this.currentPlayer.body.velocity.x === 0 && this.currentPlayer.body.velocity.y === 0) {
                 this.currentPlayer.animations.stop();
-                this.currentPlayer.frame = 18;
+                console.log("pointer on rest", this.game.input.activePointer.worldX, this.game.input.activePointer.worldY);
+                console.log("player position on rest", this.currentPlayer.x, this.currentPlayer.y);
+                if((pointerY > playerY) && (pointerX < playerX)) this.currentPlayer.frame = 17;
+                if((pointerY > playerY) && (pointerX > playerX)) this.currentPlayer.frame = 18;
+                if((pointerY < playerY) && (pointerX > playerX)) this.currentPlayer.frame = 14;
+                if((pointerY < playerY) && (pointerX < playerX)) this.currentPlayer.frame = 14;
             }
         }
     }
