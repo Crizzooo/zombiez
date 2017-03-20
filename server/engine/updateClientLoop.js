@@ -26,25 +26,26 @@ let broadcastInterval;
 const startGame = (ioFromSocketsFile) => {
 
   //reset all reducers related to game
-  console.log(typeof resetPlayers);
-  console.log(resetPlayers);
-  console.log('what is store', store);
-  console.log(typeof store);
   store.dispatch(resetPlayers());
   store.dispatch(gamePlaying(true));
   io = ioFromSocketsFile;
   let state = store.getState();
   //get lobbyers
+  console.log('BEFORE SERVER STARTS NEW GAME - OLD STATE: ', state);
   let lobbyers = state.lobby.lobbyers;
+  console.log('starting new game with these lobbyers: ', lobbyers);
     //convert lobbyers to players with spawn positions
     //TODO: Convert Lobbyers should choose a sprite key
   let players = convertLobbyers(lobbyers);
+  console.log('here are the players that were converted: ', players);
     //put on backend state
   players.forEach( (player) => {
+    console.log('adding player to player store: ', player);
     store.dispatch(addPlayer(player));
   })
 
   state = store.getState();
+  console.log('server state right before starting game: ', state);
   //tell clients to turn on game
   io.emit('gamePlayingUpdate', true);
   io.emit('startGame', state.players.playerStates);
@@ -56,8 +57,6 @@ const startGame = (ioFromSocketsFile) => {
 const endGame = () => {
 
   //reset players
-  console.log(typeof resetPlayers);
-  console.log('rset players', resetPlayers);
   store.dispatch(resetPlayers());
   //reset game
   store.dispatch(resetEngine());
@@ -78,12 +77,13 @@ const broadcastGameState = (io) => {
   broadcastInterval = setInterval(() => {
     let state = store.getState();
 
-    if (Object.keys(state.players.playerStates).length <= 0) {
+    //TODO: check if win condition is hit and endgame
+    if (state.lobby.lobbyers.length <= 0) {
       console.log('we should end game ');
       endGame();
+    } else {
+      io.emit('serverUpdate', state);
     }
-    //TODO: check if win condition is hit and endgame
-    io.emit('serverUpdate', state);
   }, SERVER_UPDATE_RATE);
 }
 

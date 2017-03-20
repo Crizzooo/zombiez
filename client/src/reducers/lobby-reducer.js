@@ -1,10 +1,13 @@
 /* Action Types */
 const UPDATE_LOBBY = 'UPDATE_LOBBY';
 const SET_CURRENT_LOBBYER = 'SET_CURRENT_LOBBYER';
+const RESET_LOBBY = 'RESET_LOBBY';
 
 /* Action Creators */
 export const dispatchLobbyUpdate = lobbyers => ({ type: UPDATE_LOBBY, lobbyers });
 export const dispatchSetCurrentLobbyer = currentLobbyer => ({ type: SET_CURRENT_LOBBYER, currentLobbyer});
+export const resetLobby = () => ({ type: RESET_LOBBY });
+
 
 const initialState = {
   lobbyers: [],
@@ -14,15 +17,21 @@ const initialState = {
 /* Reducer */
 export default (state = initialState, action) => {
 
-  const newState = Object.assign({}, state);
+  let newState = Object.assign({}, state);
 
   switch (action.type) {
 
     case UPDATE_LOBBY:
       newState.lobbyers = action.lobbyers;
       break;
+
     case SET_CURRENT_LOBBYER:
       newState.currentLobbyer = action.currentLobbyer;
+      break;
+
+    case RESET_LOBBY:
+      console.log('resetting client lobby');
+      newState.lobbyers = initialState.lobbyers;
       break;
 
     default:

@@ -57,9 +57,7 @@ io.on('connection', (socket) => {
     let state = store.getState();
     console.log('this is the state im sending back: ');
     console.dir(state, { depth: 3});
-    io.emit('lobbyUpdate', state.lobby.lobbyers)
-
-    socket.emit('currentLobbyer', state.lobby.lobbyers[state.lobby.lobbyers.length - 1]);
+    io.emit('lobbyUpdate', state.lobby.lobbyers);
   });
 
   socket.on('lobbyerLeaveLobby', () => {
@@ -80,7 +78,6 @@ io.on('connection', (socket) => {
   socket.on('getLobby', () => {
     //emit lobby state
     //NOTE: NOT IMPLEMENTED
-    console.log(store);
     let state = store.getState();
     socket.emit('lobbyUpdate', state.lobby.lobbyers);
   })

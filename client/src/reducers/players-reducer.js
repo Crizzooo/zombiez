@@ -9,6 +9,8 @@ const UPDATE_PLAYER_SCORE = 'UPDATE_PLAYER_SCORE';
 const UPDATE_PLAYERS = 'UPDATE_PLAYERS';
 const UPDATE_CURRENT_PLAYER = 'UPDATE_CURRENT_PLAYER';
 const PLAYER_LEAVE_GAME = 'PLAYER_LEAVE_GAME';
+const RESET_PLAYERS = 'RESET_PLAYERS';
+const REMOVE_CURRENT_PLAYER = 'REMOVE_CURRENT_PLAYER';
 
 /* Action Creators */
 export const loadMessage = message => ({ type: CHANGE_MESSAGE, message });
@@ -28,6 +30,12 @@ export const playerLeaveGame = playerSocketId => ({
   type: PLAYER_LEAVE_GAME,
   id: playerSocketId
 });
+export const resetPlayers = () => ({
+  type: RESET_PLAYERS
+})
+export const removeCurrentPlayer = () => ({
+  type: REMOVE_CURRENT_PLAYER
+})
 
 //Note: addPlayer can probably be removed from file but will keep for now in case we change structure
 const initialState = {
@@ -38,7 +46,7 @@ const initialState = {
 /* Reducer */
 export default (state = initialState, action) => {
 
-  const newState = Object.assign({}, state);
+  let newState = Object.assign({}, state);
 
   switch (action.type) {
 
@@ -51,6 +59,7 @@ export default (state = initialState, action) => {
       break;
 
     case UPDATE_PLAYERS:
+      //filter through players and make sure no undefined
       newState.playerStates = action.players;
       break;
 
@@ -62,6 +71,17 @@ export default (state = initialState, action) => {
         if (newState.playerStates[action.id]) {
           delete newState.playerStates[action.id]
         }
+      break;
+
+    case RESET_PLAYERS:
+      newState.playerStates = {};
+      newState.currentPlayer = {};
+      break;
+
+    case REMOVE_CURRENT_PLAYER:
+      console.log('removed  current player on client state');
+      newState.currentPlayer = {};
+      console.log('this will be our next newState: ', newState);
       break;
 
     default:

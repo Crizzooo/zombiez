@@ -4704,7 +4704,7 @@ exports.default = store;
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.playerLeaveGame = exports.updateCurrentPlayer = exports.updatePlayers = exports.changePlayerScore = exports.changeGamePlaying = exports.loadPlayers = exports.loadMessage = undefined;
+exports.removeCurrentPlayer = exports.resetPlayers = exports.playerLeaveGame = exports.updateCurrentPlayer = exports.updatePlayers = exports.changePlayerScore = exports.changeGamePlaying = exports.loadPlayers = exports.loadMessage = undefined;
 
 var _axios = __webpack_require__(91);
 
@@ -4724,6 +4724,8 @@ var UPDATE_PLAYER_SCORE = 'UPDATE_PLAYER_SCORE';
 var UPDATE_PLAYERS = 'UPDATE_PLAYERS';
 var UPDATE_CURRENT_PLAYER = 'UPDATE_CURRENT_PLAYER';
 var PLAYER_LEAVE_GAME = 'PLAYER_LEAVE_GAME';
+var RESET_PLAYERS = 'RESET_PLAYERS';
+var REMOVE_CURRENT_PLAYER = 'REMOVE_CURRENT_PLAYER';
 
 /* Action Creators */
 var loadMessage = exports.loadMessage = function loadMessage(message) {
@@ -4757,6 +4759,16 @@ var playerLeaveGame = exports.playerLeaveGame = function playerLeaveGame(playerS
     id: playerSocketId
   };
 };
+var resetPlayers = exports.resetPlayers = function resetPlayers() {
+  return {
+    type: RESET_PLAYERS
+  };
+};
+var removeCurrentPlayer = exports.removeCurrentPlayer = function removeCurrentPlayer() {
+  return {
+    type: REMOVE_CURRENT_PLAYER
+  };
+};
 
 //Note: addPlayer can probably be removed from file but will keep for now in case we change structure
 var initialState = {
@@ -4784,6 +4796,7 @@ exports.default = function () {
       break;
 
     case UPDATE_PLAYERS:
+      //filter through players and make sure no undefined
       newState.playerStates = action.players;
       break;
 
@@ -4795,6 +4808,17 @@ exports.default = function () {
       if (newState.playerStates[action.id]) {
         delete newState.playerStates[action.id];
       }
+      break;
+
+    case RESET_PLAYERS:
+      newState.playerStates = {};
+      newState.currentPlayer = {};
+      break;
+
+    case REMOVE_CURRENT_PLAYER:
+      console.log('removed  current player on client state');
+      newState.currentPlayer = {};
+      console.log('this will be our next newState: ', newState);
       break;
 
     default:
@@ -7713,6 +7737,7 @@ Object.defineProperty(exports, "__esModule", {
 /* Action Types */
 var UPDATE_LOBBY = 'UPDATE_LOBBY';
 var SET_CURRENT_LOBBYER = 'SET_CURRENT_LOBBYER';
+var RESET_LOBBY = 'RESET_LOBBY';
 
 /* Action Creators */
 var dispatchLobbyUpdate = exports.dispatchLobbyUpdate = function dispatchLobbyUpdate(lobbyers) {
@@ -7720,6 +7745,9 @@ var dispatchLobbyUpdate = exports.dispatchLobbyUpdate = function dispatchLobbyUp
 };
 var dispatchSetCurrentLobbyer = exports.dispatchSetCurrentLobbyer = function dispatchSetCurrentLobbyer(currentLobbyer) {
   return { type: SET_CURRENT_LOBBYER, currentLobbyer: currentLobbyer };
+};
+var resetLobby = exports.resetLobby = function resetLobby() {
+  return { type: RESET_LOBBY };
 };
 
 var initialState = {
@@ -7741,8 +7769,14 @@ exports.default = function () {
     case UPDATE_LOBBY:
       newState.lobbyers = action.lobbyers;
       break;
+
     case SET_CURRENT_LOBBYER:
       newState.currentLobbyer = action.currentLobbyer;
+      break;
+
+    case RESET_LOBBY:
+      console.log('resetting client lobby');
+      newState.lobbyers = initialState.lobbyers;
       break;
 
     default:
@@ -18708,6 +18742,7 @@ var attachFunctions = function attachFunctions(socket) {
 };
 
 function dispatchCurrentLobbyer(lobbyerObj) {
+  lobbyerObj.socketId = socket.id;
   _store2.default.dispatch((0, _lobbyReducer.dispatchSetCurrentLobbyer)(lobbyerObj));
 }
 
@@ -18723,6 +18758,8 @@ function dispatchGamePlayingUpdate(isItPlaying) {
 
 function startClientGame(playersFromServer) {
   var state = _store2.default.getState();
+  console.log('client is starting game with this from server: ', state);
+  console.log('these are the players being sent to store: ', playersFromServer);
   ZG.game = new _main2.default('100%', '100%', Phaser.AUTO, 'game');
   _store2.default.dispatch((0, _playersReducer.loadPlayers)(playersFromServer));
   ZG.game.startGame('BootState', true, false);
@@ -18733,7 +18770,13 @@ function dispatchServerState(serverState) {
   var state = _store2.default.getState();
   _store2.default.dispatch((0, _lobbyReducer.dispatchLobbyUpdate)(serverState.lobby.lobbyers));
   if (state.game.gamePlaying) {
-    _store2.default.dispatch((0, _playersReducer.updatePlayers)(serverState.players.playerStates));
+    var playerStateUpdate = serverState.players.playerStates;
+    if (playerStateUpdate[socket.id]) {
+      console.log('player state update: ', playerStateUpdate);
+      delete playerStateUpdate[socket.id];
+      console.log('after deleting self: ', playerStateUpdate);
+    }
+    _store2.default.dispatch((0, _playersReducer.updatePlayers)(playerStateUpdate));
   }
   throttledLog();
 }
@@ -18750,6 +18793,7 @@ function dispatchPlayerUpdates(players) {
 function dispatchLobbyState(lobbyersFromServer) {
   console.log('received lobby from server: ', lobbyersFromServer);
   _store2.default.dispatch((0, _lobbyReducer.dispatchLobbyUpdate)(lobbyersFromServer));
+  console.log('store after receiving lobby: ', _store2.default.getState());
 }
 
 function dispatchScoreUpdate(playerId, score) {
@@ -18760,6 +18804,7 @@ function dispatchReducerReset() {
   //game reducer has already been set to true
   //reset players reducer
   _store2.default.dispatch((0, _playersReducer.resetPlayers)());
+  _store2.default.dispatch((0, _lobbyReducer.resetLobby)());
   //reset zombies and other game related reducers
 }
 
@@ -19970,6 +20015,12 @@ var lobbyControls = exports.lobbyControls = function (_React$Component) {
       evt.preventDefault();
       console.log('sending this player obj to server', this.state);
       socket.emit('lobbyerJoinLobby', this.state);
+      console.log('current lobbyer raw obj:', this.state);
+      var currentLobbyer = this.state;
+      currentLobbyer.socketId = socket.id;
+      _store2.default.dispatch((0, _lobbyReducer.dispatchSetCurrentLobbyer)(currentLobbyer));
+      console.log('store after player joined');
+      console.log(_store2.default.getState());
       $('#addPlayerModal').modal('hide');
       $('#playerNameInput').val('');
     }
@@ -19980,9 +20031,11 @@ var lobbyControls = exports.lobbyControls = function (_React$Component) {
       (0, _emitCurrentState.stopClientBroadcast)();
       _store2.default.dispatch((0, _lobbyReducer.dispatchSetCurrentLobbyer)({}));
       //if game playing
+      console.log('i clicked leave game, is game playing? ', this.props);
       if (this.props.gamePlaying) {
+        console.log('we have a game playing, lets remove current player');
         //update current player to {}
-        _store2.default.dispatch((0, _playersReducer.updateCurrentPlayer)({}));
+        _store2.default.dispatch((0, _playersReducer.removeCurrentPlayer)());
       }
       socket.emit('lobbyerLeaveLobby');
     }
@@ -20571,9 +20624,11 @@ var ZombieGameState = function (_Phaser$State) {
       console.log('what is state.players.playerStates on loadLevel', state.players.playerStates);
       var currentPlayer = void 0;
 
-      if (state.players.playerStates[socket.id]) {
-        console.log('server player state includes our socket id');
-        currentPlayer = state.players.playerStates[socket.id];
+      if (state.lobby.currentLobbyer) {
+        _store2.default.dispatch((0, _playersReducer.updateCurrentPlayer)(state.lobby.currentLobbyer));
+        state = _store2.default.getState();
+        console.log('state after adding current player from currentLobbyer', state);
+        currentPlayer = state.players.currentPlayer;
 
         //initiate player sprite
         //TODO: make server assign sprite keys

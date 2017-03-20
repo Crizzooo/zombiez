@@ -76,9 +76,11 @@ export default class ZombieGameState extends Phaser.State {
     console.log('what is state.players.playerStates on loadLevel', state.players.playerStates);
     let currentPlayer;
 
-    if (state.players.playerStates[socket.id]){
-      console.log('server player state includes our socket id');
-      currentPlayer = state.players.playerStates[socket.id];
+    if (state.lobby.currentLobbyer){
+      store.dispatch(updateCurrentPlayer(state.lobby.currentLobbyer));
+      state = store.getState();
+      console.log('state after adding current player from currentLobbyer', state);
+      currentPlayer = state.players.currentPlayer;
 
       //initiate player sprite
       //TODO: make server assign sprite keys

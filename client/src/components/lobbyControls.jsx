@@ -2,7 +2,7 @@ import React from 'react';
 import { connect } from 'react-redux';
 import store from '../store.js';
 import { dispatchSetCurrentLobbyer } from '../reducers/lobby-reducer.js';
-import { updateCurrentPlayer } from '../reducers/players-reducer.js';
+import { updateCurrentPlayer, removeCurrentPlayer } from '../reducers/players-reducer.js';
 import { stopClientBroadcast } from '../engine/emitCurrentState.js';
 
 export class lobbyControls extends React.Component {
@@ -25,6 +25,12 @@ export class lobbyControls extends React.Component {
     evt.preventDefault();
     console.log('sending this player obj to server', this.state);
     socket.emit('lobbyerJoinLobby', this.state);
+    console.log('current lobbyer raw obj:', this.state);
+    let currentLobbyer = this.state;
+    currentLobbyer.socketId = socket.id;
+    store.dispatch(dispatchSetCurrentLobbyer(currentLobbyer));
+    console.log('store after player joined');
+    console.log(store.getState());
     $('#addPlayerModal').modal('hide');
     $('#playerNameInput').val('');
   }
@@ -34,9 +40,11 @@ export class lobbyControls extends React.Component {
     stopClientBroadcast();
     store.dispatch(dispatchSetCurrentLobbyer({}));
     //if game playing
+    console.log('i clicked leave game, is game playing? ', this.props);
     if (this.props.gamePlaying){
+      console.log('we have a game playing, lets remove current player');
       //update current player to {}
-      store.dispatch(updateCurrentPlayer({}));
+      store.dispatch(removeCurrentPlayer());
     }
     socket.emit('lobbyerLeaveLobby');
   }

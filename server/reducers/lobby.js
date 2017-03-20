@@ -33,23 +33,27 @@ const lobby = (state = initialState, action) => {
   let newState = Object.assign({}, state);
 
   switch (action.type) {
-    
+
     case NEW_MESSAGE:
 
         break;
 
     case PLAYER_JOIN_LOBBY:
+        console.log('adding player to lobby on server: ', action.lobbyer);
         newState.lobbyers.push(action.lobbyer);
         break;
 
     case PLAYER_LEAVE_LOBBY:
+        console.log('removing socketID from lobby: ', action.id);
         console.log('lobby.lobbyers pre remove: ', newState.lobbyers);
         newState.lobbyers = newState.lobbyers.filter(lobbyer => lobbyer.socketId !== action.lobbyerId);
         console.log('lobby.lobbyers post remove: ', newState.lobbyers);
         break;
 
     case RESET_LOBBY:
-        newState = initialState;
+        console.log('resetting server lobby');
+        newState.lobbyers = [];
+        console.log('new server lobby: ', newState);
         break;
 
     default:

@@ -4,9 +4,9 @@ import store from './store.js';
 import GenZed from './main.js';
 
 //Import from Reducers
-import { loadPlayers, changeGamePlaying, updatePlayers, playerLeaveGame, resetPlayers } from './reducers/players-reducer.js';
+import { loadPlayers, changeGamePlaying, updatePlayers, playerLeaveGame, resetPlayers, updateCurrentPlayer } from './reducers/players-reducer.js';
 import { loadMessages, addMessage } from './reducers/chatApp-reducer.js';
-import { dispatchLobbyUpdate, dispatchSetCurrentLobbyer } from './reducers/lobby-reducer.js';
+import { dispatchLobbyUpdate, dispatchSetCurrentLobbyer, resetLobby } from './reducers/lobby-reducer.js';
 import { dispatchGamePlaying } from './reducers/gameState-reducer';
 
 
@@ -28,6 +28,7 @@ const attachFunctions = (socket) => {
 };
 
 function dispatchCurrentLobbyer(lobbyerObj) {
+  lobbyerObj.socketId = socket.id;
   store.dispatch(dispatchSetCurrentLobbyer(lobbyerObj));
 }
 
@@ -43,6 +44,8 @@ function dispatchGamePlayingUpdate(isItPlaying){
 
 function startClientGame(playersFromServer) {
   let state = store.getState();
+  console.log('client is starting game with this from server: ', state);
+  console.log('these are the players being sent to store: ', playersFromServer);
   ZG.game = new GenZed('100%', '100%', Phaser.AUTO, 'game');
   store.dispatch(loadPlayers(playersFromServer));
   ZG.game.startGame('BootState', true, false);
@@ -53,7 +56,13 @@ function dispatchServerState(serverState) {
   let state = store.getState();
   store.dispatch(dispatchLobbyUpdate(serverState.lobby.lobbyers));
   if (state.game.gamePlaying){
-    store.dispatch(updatePlayers(serverState.players.playerStates));
+    let playerStateUpdate = serverState.players.playerStates;
+    if (playerStateUpdate[socket.id]){
+      console.log('player state update: ', playerStateUpdate);
+      delete playerStateUpdate[socket.id];
+      console.log('after deleting self: ', playerStateUpdate);
+    }
+    store.dispatch(updatePlayers(playerStateUpdate));
   }
   throttledLog();
 }
@@ -70,6 +79,7 @@ function dispatchPlayerUpdates(players) {
 function dispatchLobbyState(lobbyersFromServer){
   console.log('received lobby from server: ', lobbyersFromServer);
   store.dispatch(dispatchLobbyUpdate(lobbyersFromServer));
+  console.log('store after receiving lobby: ', store.getState());
 }
 
 function dispatchScoreUpdate(playerId, score){
@@ -80,6 +90,7 @@ function dispatchReducerReset(){
   //game reducer has already been set to true
   //reset players reducer
   store.dispatch(resetPlayers());
+  store.dispatch(resetLobby());
   //reset zombies and other game related reducers
 
 }

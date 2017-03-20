@@ -47,7 +47,8 @@ const playerReducers = (state = initialState, action) => {
       break;
 
     case RESET_PLAYERS:
-      newState = initialState;
+      newState.playerStates = {};
+      //newState = initialState DOESNT WORK
       break;
 
     case REMOVE_PLAYER:
