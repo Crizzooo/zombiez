@@ -7708,14 +7708,6 @@ var ZombieGameState = function (_TiledState) {
                 }
             }, { x: 0, y: 0 });
 
-            //this.currentPlayer = this.game.add.sprite(200, 200, 'testimage');
-            //this.currentPlayer = new Phaser.Sprite(this.game, 200, 200, 'playerSpriteSheet', 18);
-            // this.currentPlayer = new Player(this, 'player', {x: 200, y: 200}, {
-            //   group: 'player',
-            //   initial: 18,
-            //   texture: 'playerSpriteSheet'
-            // });
-
             this.currentPlayer = playerPrefab;
 
             this.pointer = otherPlayerPrefab;
