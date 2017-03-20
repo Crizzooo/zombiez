@@ -11,19 +11,20 @@ export default class ZombieGameState extends TiledState {
     constructor(game) {
       super(game);
 
+	    //set constants for game
+	    this.RUNNING_SPEED = 100;
+	    self = this;
     }
 
     init(levelData) {
-      //set constants for game
-      this.RUNNING_SPEED = 100;
-      self = this;
-
       //Call super init to load in data;
       super.init.call(this, levelData);
 
       window.socket.on('serverUpdate', this.updateClients);
-    }
 
+	    //on click lock the users mouse for input
+	    this.game.input.onDown.add(this.lockPointer, this);
+    }
 
     preload() {
       //TODO: fix spegetti
@@ -45,11 +46,7 @@ export default class ZombieGameState extends TiledState {
       this.tileDimensions = new Phaser.Point(this.map.tileWidth, this.map.tileHeight);
       this.pathfinding = this.game.plugins.add(Pathfinding, worldGrid, [-1], this.tileDimensions);
 
-
-      //on click lock the users mouse
-      this.game.input.onDown.add(this.lockPointer, this);
-      //listen to mouse move after locked
-      //Create Players
+      //Create Players and Temp Objects
       let playerPrefab = this.createPrefab('player',
           {
               type: 'player',
@@ -70,20 +67,29 @@ export default class ZombieGameState extends TiledState {
             }
         }, {x: 200, y: 200});
 
-      let otherPlayerPrefab = this.createPrefab('cursor',
-          {
-              type: 'player',
-              properties: {
-                  group: 'cursor',
-                  initial: 18,
-                  texture: 'playerSpriteSheet'
-              },
-          }, {x: 0, y: 0});
+	    let crosshairPrefab = this.createPrefab('crosshair',
+		    {
+			    type: 'player',
+			    properties: {
+				    group: 'cursor',
+				    initial: 0,
+				    texture: 'crosshairSpriteSheet'
+			    },
+		    }, {x: 0, y: 0});
 
+	    let gunPreFab = this.createPrefab('gun', {
+		    type: 'guns',
+		    properties: {
+			    group: 'guns',
+			    initial: 0,
+			    texture: 'gunSpriteSheet'
+		    }
+	    }, {x: 225, y: 225});
 
       //Add test prefabs into the game
       this.currentPlayer = playerPrefab;
-      this.pointer = otherPlayerPrefab;
+      this.gun = gunPreFab;
+      this.pointer = crosshairPrefab;
       this.currentEnemy = enemyPrefab;
 
       this.currentEnemy.acquireTarget = throttle(this.currentEnemy.acquireTarget, 200);
@@ -91,13 +97,12 @@ export default class ZombieGameState extends TiledState {
       this.game.add.existing(this.currentPlayer);
       this.game.add.existing(this.currentEnemy);
       this.game.add.existing(this.pointer);
+      this.game.add.existing(this.gun);
 
       //Set camera to follow, then make world big to allow camera to pan off
       //this.camera.view = new Phaser.Rectangle(0, 0, this.currentPlayer.position.x, this.currentPlayer.position.y);
       this.camera.follow(this.currentPlayer);
       this.game.world.setBounds(-250, -250, 2500, 2500);
-
-      this.currentPlayer.debug = true;
 
       ////////
       this.currentEnemy.animations.play('dead');
@@ -109,18 +114,24 @@ export default class ZombieGameState extends TiledState {
     }
 
     update() {
+	    this.game.physics.arcade.collide(this.currentPlayer, this.layers.backgroundDecCollision);
+	    this.game.physics.arcade.collide(this.currentPlayer, this.layers.backgroundDecCollision2);
+	    this.game.physics.arcade.collide(this.currentPlayer, this.layers.waterCollision);
+	    this.game.physics.arcade.collide(this.currentPlayer, this.layers.wallCollision);
+	    this.handleInput();
+
+	    this.currentEnemy.acquireTarget();
+
+      this.tweenGun();
+      this.gun.rotation = this.game.physics.arcade.angleToPointer(this.gun);
       this.game.physics.arcade.collide(this.currentPlayer, this.layers.backgroundDecCollision);
       this.game.physics.arcade.collide(this.currentPlayer, this.layers.backgroundDecCollision2);
       this.game.physics.arcade.collide(this.currentPlayer, this.layers.waterCollision);
       this.game.physics.arcade.collide(this.currentPlayer, this.layers.wallCollision);
-      this.handleInput();
-
-	    this.currentEnemy.acquireTarget();
-
     }
 
     render() {
-        this.game.debug.spriteInfo(this.currentPlayer, 32, 32);
+        this.game.debug.spriteInfo(this.gun, 32, 32);
     }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -189,10 +200,24 @@ export default class ZombieGameState extends TiledState {
                 this.currentPlayer.animations.stop();
                 //console.log("pointer on rest", this.game.input.activePointer.worldX, this.game.input.activePointer.worldY);
                 //console.log("player position on rest", this.currentPlayer.x, this.currentPlayer.y);
-                if((pointerY > playerY) && (pointerX < playerX)) this.currentPlayer.frame = 17;
-                if((pointerY > playerY) && (pointerX > playerX)) this.currentPlayer.frame = 18;
-                if((pointerY < playerY) && (pointerX > playerX)) this.currentPlayer.frame = 14;
-                if((pointerY < playerY) && (pointerX < playerX)) this.currentPlayer.frame = 14;
+
+                this.currentPlayer.scale.setTo(1, 1);
+                if((pointerY > playerY) && (pointerX < playerX)) {
+                    this.currentPlayer.frame = 17;
+                    this.gun.scale.setTo(1, -1);
+                }
+                if((pointerY > playerY) && (pointerX > playerX)) {
+                    this.currentPlayer.frame = 18;
+                    this.gun.scale.setTo(1, 1);
+                }
+                if((pointerY < playerY) && (pointerX > playerX)) {
+                    this.currentPlayer.frame = 14;
+                    this.gun.scale.setTo(1, 1);
+                }
+                if((pointerY < playerY) && (pointerX < playerX)) {
+                    this.currentPlayer.frame = 14;
+                    this.gun.scale.setTo(1, -1);
+                }
             }
         }
     }
@@ -203,5 +228,10 @@ export default class ZombieGameState extends TiledState {
         this.pointer.x = this.game.input.activePointer.worldX;
         this.pointer.y = this.game.input.activePointer.worldY;
       });
+    }
+
+    tweenGun(){
+        //gun follow does not work as a child of the player sprite.. had to tween gun to players x, y position
+        this.add.tween(this.gun).to( { x: this.currentPlayer.x, y: this.currentPlayer.y}, 10, Phaser.Easing.Linear.None, true);
     }
 }

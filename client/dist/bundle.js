@@ -7657,20 +7657,24 @@ var ZombieGameState = function (_TiledState) {
     function ZombieGameState(game) {
         _classCallCheck(this, ZombieGameState);
 
-        return _possibleConstructorReturn(this, (ZombieGameState.__proto__ || Object.getPrototypeOf(ZombieGameState)).call(this, game));
+        //set constants for game
+        var _this = _possibleConstructorReturn(this, (ZombieGameState.__proto__ || Object.getPrototypeOf(ZombieGameState)).call(this, game));
+
+        _this.RUNNING_SPEED = 100;
+        self = _this;
+        return _this;
     }
 
     _createClass(ZombieGameState, [{
         key: 'init',
         value: function init(levelData) {
-            //set constants for game
-            this.RUNNING_SPEED = 100;
-            self = this;
-
             //Call super init to load in data;
             _get(ZombieGameState.prototype.__proto__ || Object.getPrototypeOf(ZombieGameState.prototype), 'init', this).call(this, levelData);
 
             window.socket.on('serverUpdate', this.updateClients);
+
+            //on click lock the users mouse for input
+            this.game.input.onDown.add(this.lockPointer, this);
         }
     }, {
         key: 'preload',
@@ -7695,10 +7699,7 @@ var ZombieGameState = function (_TiledState) {
             this.tileDimensions = new Phaser.Point(this.map.tileWidth, this.map.tileHeight);
             this.pathfinding = this.game.plugins.add(_Pathfinding2.default, worldGrid, [-1], this.tileDimensions);
 
-            //on click lock the users mouse
-            this.game.input.onDown.add(this.lockPointer, this);
-            //listen to mouse move after locked
-            //Create Players
+            //Create Players and Temp Objects
             var playerPrefab = this.createPrefab('player', {
                 type: 'player',
                 properties: {
@@ -7717,18 +7718,28 @@ var ZombieGameState = function (_TiledState) {
                 }
             }, { x: 200, y: 200 });
 
-            var otherPlayerPrefab = this.createPrefab('cursor', {
+            var crosshairPrefab = this.createPrefab('crosshair', {
                 type: 'player',
                 properties: {
                     group: 'cursor',
-                    initial: 18,
-                    texture: 'playerSpriteSheet'
+                    initial: 0,
+                    texture: 'crosshairSpriteSheet'
                 }
             }, { x: 0, y: 0 });
 
+            var gunPreFab = this.createPrefab('gun', {
+                type: 'guns',
+                properties: {
+                    group: 'guns',
+                    initial: 0,
+                    texture: 'gunSpriteSheet'
+                }
+            }, { x: 225, y: 225 });
+
             //Add test prefabs into the game
             this.currentPlayer = playerPrefab;
-            this.pointer = otherPlayerPrefab;
+            this.gun = gunPreFab;
+            this.pointer = crosshairPrefab;
             this.currentEnemy = enemyPrefab;
 
             this.currentEnemy.acquireTarget = throttle(this.currentEnemy.acquireTarget, 200);
@@ -7736,13 +7747,12 @@ var ZombieGameState = function (_TiledState) {
             this.game.add.existing(this.currentPlayer);
             this.game.add.existing(this.currentEnemy);
             this.game.add.existing(this.pointer);
+            this.game.add.existing(this.gun);
 
             //Set camera to follow, then make world big to allow camera to pan off
             //this.camera.view = new Phaser.Rectangle(0, 0, this.currentPlayer.position.x, this.currentPlayer.position.y);
             this.camera.follow(this.currentPlayer);
             this.game.world.setBounds(-250, -250, 2500, 2500);
-
-            this.currentPlayer.debug = true;
 
             ////////
             this.currentEnemy.animations.play('dead');
@@ -7763,11 +7773,18 @@ var ZombieGameState = function (_TiledState) {
             this.handleInput();
 
             this.currentEnemy.acquireTarget();
+
+            this.tweenGun();
+            this.gun.rotation = this.game.physics.arcade.angleToPointer(this.gun);
+            this.game.physics.arcade.collide(this.currentPlayer, this.layers.backgroundDecCollision);
+            this.game.physics.arcade.collide(this.currentPlayer, this.layers.backgroundDecCollision2);
+            this.game.physics.arcade.collide(this.currentPlayer, this.layers.waterCollision);
+            this.game.physics.arcade.collide(this.currentPlayer, this.layers.wallCollision);
         }
     }, {
         key: 'render',
         value: function render() {
-            this.game.debug.spriteInfo(this.currentPlayer, 32, 32);
+            this.game.debug.spriteInfo(this.gun, 32, 32);
         }
 
         ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -7837,10 +7854,24 @@ var ZombieGameState = function (_TiledState) {
                     this.currentPlayer.animations.stop();
                     //console.log("pointer on rest", this.game.input.activePointer.worldX, this.game.input.activePointer.worldY);
                     //console.log("player position on rest", this.currentPlayer.x, this.currentPlayer.y);
-                    if (pointerY > playerY && pointerX < playerX) this.currentPlayer.frame = 17;
-                    if (pointerY > playerY && pointerX > playerX) this.currentPlayer.frame = 18;
-                    if (pointerY < playerY && pointerX > playerX) this.currentPlayer.frame = 14;
-                    if (pointerY < playerY && pointerX < playerX) this.currentPlayer.frame = 14;
+
+                    this.currentPlayer.scale.setTo(1, 1);
+                    if (pointerY > playerY && pointerX < playerX) {
+                        this.currentPlayer.frame = 17;
+                        this.gun.scale.setTo(1, -1);
+                    }
+                    if (pointerY > playerY && pointerX > playerX) {
+                        this.currentPlayer.frame = 18;
+                        this.gun.scale.setTo(1, 1);
+                    }
+                    if (pointerY < playerY && pointerX > playerX) {
+                        this.currentPlayer.frame = 14;
+                        this.gun.scale.setTo(1, 1);
+                    }
+                    if (pointerY < playerY && pointerX < playerX) {
+                        this.currentPlayer.frame = 14;
+                        this.gun.scale.setTo(1, -1);
+                    }
                 }
             }
         }
@@ -7854,6 +7885,12 @@ var ZombieGameState = function (_TiledState) {
                 _this2.pointer.x = _this2.game.input.activePointer.worldX;
                 _this2.pointer.y = _this2.game.input.activePointer.worldY;
             });
+        }
+    }, {
+        key: 'tweenGun',
+        value: function tweenGun() {
+            //gun follow does not work as a child of the player sprite.. had to tween gun to players x, y position
+            this.add.tween(this.gun).to({ x: this.currentPlayer.x, y: this.currentPlayer.y }, 10, Phaser.Easing.Linear.None, true);
         }
     }]);
 
@@ -11885,7 +11922,7 @@ var Prefab = function (_Phaser$Sprite) {
 		_this.gameState.groups[properties.group].children.push(_this);
 		_this.initial = +properties.initial;
 
-		//Enable physics for each prefab
+		//Enable physics for each prefab, we enable it in other prefabs but this is a check
 		_this.game.physics.arcade.enable(_this);
 
 		_this.gameState.prefabs[name] = _this;
@@ -11894,36 +11931,6 @@ var Prefab = function (_Phaser$Sprite) {
 
 	return Prefab;
 }(Phaser.Sprite);
-
-// export default class Prefab extends Phaser.Sprite {
-// 	constructor(game, name, position, properties) {
-// 		super(game.game, position.x, position.y, properties.texture, +properties.initial);
-//
-// 		this.gameState = game;
-// 		this.name = name;
-//
-//
-// 		//Add prefab to its group
-// 		//Adding to groups regularly not working
-// 		//this.gameState.groups.[properties.group].add(this);
-// 		//this.gameState.groups.[properties.group].add(this);
-// 		// this.gameState.groups.player.add(this);
-// 		let temp = this.gameState.groups.[properties.group]
-//
-// 		player.children.push(this);
-// 		this.initial = +properties.initial;
-// 		this.anchor.setTo(0.5);
-//
-// 		console.log('groups', this.gameState.groups)
-//
-// 		//Enable physics for each prefab
-// 		this.game.physics.arcade.enable(this);
-//
-//
-// 		this.gameState.prefabs[name] = this;
-// 	}
-// }
-
 
 exports.default = Prefab;
 
@@ -20552,6 +20559,10 @@ var _enemy = __webpack_require__(285);
 
 var _enemy2 = _interopRequireDefault(_enemy);
 
+var _gun = __webpack_require__(635);
+
+var _gun2 = _interopRequireDefault(_gun);
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
@@ -20577,7 +20588,8 @@ var TiledState = function (_Phaser$State) {
 
     _this.prefabClasses = {
       "player": _player2.default.prototype.constructor,
-      "enemies": _enemy2.default.prototype.constructor
+      "enemies": _enemy2.default.prototype.constructor,
+      "guns": _gun2.default.prototype.constructor
     };
     return _this;
   }
@@ -21645,6 +21657,7 @@ var Player = function (_Prefab) {
 
     var _this = _possibleConstructorReturn(this, (Player.__proto__ || Object.getPrototypeOf(Player)).call(this, game, name, position, properties));
 
+    _this.anchor.setTo(0.5);
     _this.animations.add('right', [24, 8, 5, 20, 12, 13], 10, true);
     _this.animations.add('left', [17, 10, 5, 19, 8, 9], 10, true);
     _this.animations.add('up', [16, 0, 14, 6, 1], 10, true);
@@ -21652,8 +21665,8 @@ var Player = function (_Prefab) {
 
     //This might not be relevant since the world size is bigger than map size
     //To allow for camera pan
+    _this.body.collideWorldBounds = true;
     _this.game.physics.arcade.enable(_this);
-    //this.body.collideWorldBounds = true;
 
     _this.stats = {
       health: 100,
@@ -45895,6 +45908,60 @@ _reactDom2.default.render(_react2.default.createElement(
     _react2.default.createElement(_reactRouter.Route, { path: '/', component: _layout2.default, onEnter: getPlayers })
   )
 ), document.getElementById('root'));
+
+/***/ }),
+/* 635 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+	value: true
+});
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _Prefab2 = __webpack_require__(147);
+
+var _Prefab3 = _interopRequireDefault(_Prefab2);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+var Gun = function (_Prefab) {
+	_inherits(Gun, _Prefab);
+
+	function Gun(game, name, position, properties) {
+		_classCallCheck(this, Gun);
+
+		var _this = _possibleConstructorReturn(this, (Gun.__proto__ || Object.getPrototypeOf(Gun)).call(this, game, name, position, properties));
+
+		_this.game.physics.arcade.enable(_this);
+		_this.body.collideWorldBounds = true;
+
+		_this.anchor.setTo(0.5);
+		_this.pivot.x = -10;
+		return _this;
+	}
+
+	_createClass(Gun, [{
+		key: 'shootGun',
+		value: function shootGun() {}
+	}, {
+		key: 'reload',
+		value: function reload() {}
+	}]);
+
+	return Gun;
+}(_Prefab3.default);
+
+exports.default = Gun;
 
 /***/ })
 /******/ ]);

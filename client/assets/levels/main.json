@@ -15,6 +15,18 @@
       "sourceJSON": "../../assets/images/zombieSheet.json"
     },
 
+    "crosshairSpriteSheet": {
+      "type": "spriteSheetAtlas",
+      "sourcePNG": "../../assets/images/crosshair.png",
+      "sourceJSON": "../../assets/images/crosshair.json"
+    },
+
+    "gunSpriteSheet": {
+      "type": "spriteSheetAtlas",
+      "sourcePNG": "../../assets/images/gunAndBulletTest.png",
+      "sourceJSON": "../../assets/images/gunAndBulletTest.json"
+    },
+
     "levelTilemap": {"type": "tilemap", "source": "../../assets/maps/main.json"}
   },
   "groups": [

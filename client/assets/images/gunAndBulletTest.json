@@ -1,0 +1,28 @@
+{"frames": {
+
+"pistol.png":
+{
+	"frame": {"x":2,"y":2,"w":17,"h":13},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":17,"h":13},
+	"sourceSize": {"w":17,"h":13}
+},
+"pistolBullet.png":
+{
+	"frame": {"x":2,"y":17,"w":13,"h":6},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":2,"y":2,"w":13,"h":6},
+	"sourceSize": {"w":17,"h":13}
+}},
+"meta": {
+	"app": "http://www.codeandweb.com/texturepacker",
+	"version": "1.0",
+	"image": "gunAndBulletTest.png",
+	"format": "RGBA8888",
+	"size": {"w":21,"h":25},
+	"scale": "1",
+	"smartupdate": "$TexturePacker:SmartUpdate:4ba295b93ca016e106220e949cab8ed6:a09f72c3313f2512e3e77222c58101e1:92e655af8e6dc6db82dc499799c9c784$"
+}
+}
