@@ -12,13 +12,11 @@ export default class ZombieGameState extends Phaser.State {
     //set constants for game
     this.RUNNING_SPEED = 180;
     self = this;
-    // window.socket.on('serverUpdate', this.updateClients);
     //cursor keys
     //Control Mechanics
     this.cursors = this.input.keyboard.createCursorKeys();
     this.cursors.spacebar = this.input.keyboard.addKey(Phaser.Keyboard.SPACEBAR);
 
-    // this.sendToServer = throttle(this.sendPlayerToServer, 32);
     this.destroyCurrentPlayerSprite = this.destroyCurrentPlayerSprite.bind(this);
     this.handleRemotePlayerLeave = this.handleRemotePlayerLeave.bind(this);
     socket.on('destroyCurrentPlayerSprite', this.destroyCurrentPlayerSprite);
@@ -32,7 +30,7 @@ export default class ZombieGameState extends Phaser.State {
 
   create () {
       //create game set up
-      console.log('Local state right before load level: ', )
+      console.log('Local state right before load level: ', store.getState() )
       this.loadLevel();
       //set interval to emit currentPlayer to server
       //if we have a current player
@@ -68,56 +66,44 @@ export default class ZombieGameState extends Phaser.State {
     //resize the world to fit the layer
     this.world.resize(500, 500);
 
-    //for each player in lobby, create a player sprite
-    // console.log('creating this amount of players: ', this.game.players.length);
-    //decide player sprite
-    // let spriteKey = index % 2 === 0 ? 'blueGunGuy' : 'greenGunGuy';
-
     let state = store.getState();
     console.log('load level begin with this state', state);
 
     //create a current player
     console.log('what is state.players.playerStates on loadLevel', state.players.playerStates);
-    let currentPlayer;
 
-    if (state.lobby.currentLobbyer.name){
-      store.dispatch(updateCurrentPlayer(state.lobby.currentLobbyer));
+    let currentPlayer;
+    if (state.players.currentPlayer.socketId){
       state = store.getState();
       console.log('state after adding current player from currentLobbyer', state);
       currentPlayer = state.players.currentPlayer;
 
-      //initiate player sprite
       //TODO: make server assign sprite keys
-      let currentPlayerSprite = this.add.sprite(currentPlayer.x, currentPlayer.y, 'blueGunGuy');
+      this.currentPlayerSprite = this.add.sprite(currentPlayer.x, currentPlayer.y, 'blueGunGuy');
 
       //add physics to current player
-      currentPlayerSprite.anchor.set(0.5);
-      this.physics.arcade.enable(currentPlayerSprite);
-      currentPlayerSprite.collideWorldBounds = true;
+      this.currentPlayerSprite.anchor.set(0.5);
+      this.physics.arcade.enable(this.currentPlayerSprite);
+      this.currentPlayerSprite.collideWorldBounds = true;
 
       //store on game Object
-      this.currentPlayerSprite = currentPlayerSprite;
       console.log('created current Player: ', this.currentPlayerSprite);
 
       //create currentPlayer
       let currPlayerState =  {
             socketId: socket.id,
-            x: currentPlayerSprite.x,
-            y: currentPlayerSprite.y,
+            x: this.currentPlayerSprite.x,
+            y: this.currentPlayerSprite.y,
             animationDirection: 'still'
-            //sprite: currentPlayerSprite
             //TODO: health, fire, guns, bullets, frame? etc
         }
+
+      console.log('Where is  current player on game start?', currPlayerState);
 
       //send current Player to local store
       console.log('dispatched to local store after creating player');
       store.dispatch(updateCurrentPlayer(currPlayerState));
       console.log('local store looks like: ', store.getState());
-      //emit to server to create this player
-      //console.log('sending currPlayerState', currPlayerState);
-
-      //current player is assigned in the backend now
-      //socket.emit('playerEnterGame', currPlayerState);
     }
     console.log('player states - we should create all besides current Player', state.players.playerStates);
 

@@ -51,6 +51,12 @@ export default (state = initialState, action) => {
   switch (action.type) {
 
     case LOAD_PLAYERS:
+      //filter out socket id
+      //if there is a socket id, make it current player
+      if (action.players[socket.id]) {
+        newState.currentPlayer = action.players[socket.id];
+        delete action.players[socket.id];
+      }
       newState.playerStates = action.players;
       break;
 
