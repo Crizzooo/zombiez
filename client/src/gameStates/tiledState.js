@@ -7,6 +7,7 @@
 
 import Player from '../prefabs/player';
 import Enemy from '../prefabs/enemy';
+import Gun from '../prefabs/gun'
 
 export default class TiledState extends Phaser.State {
     constructor(game) {
@@ -16,7 +17,8 @@ export default class TiledState extends Phaser.State {
 
         this.prefabClasses = {
             "player": Player.prototype.constructor,
-            "enemies": Enemy.prototype.constructor
+            "enemies": Enemy.prototype.constructor,
+            "guns": Gun.prototype.constructor
         }
     }
 
