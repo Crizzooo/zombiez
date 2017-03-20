@@ -1,5 +1,9 @@
 import React from 'react';
-import { connect } from 'react-redux'
+import { connect } from 'react-redux';
+import store from '../store.js';
+import { dispatchSetCurrentLobbyer } from '../reducers/lobby-reducer.js';
+import { updateCurrentPlayer } from '../reducers/players-reducer.js';
+import { stopClientBroadcast } from '../engine/emitCurrentState.js';
 
 export class lobbyControls extends React.Component {
   constructor(props) {
@@ -26,7 +30,15 @@ export class lobbyControls extends React.Component {
   }
 
   handleLeaveGame(evt) {
-    socket.emit('lobbyerLeaveLobby', this.props.currentLobbyer);
+    //stop broadcasting (was causing ghost players)
+    stopClientBroadcast();
+    store.dispatch(dispatchSetCurrentLobbyer({}));
+    //if game playing
+    if (this.props.gamePlaying){
+      //update current player to {}
+      store.dispatch(updateCurrentPlayer({}));
+    }
+    socket.emit('lobbyerLeaveLobby');
   }
 
   componentDidMount() {
@@ -36,21 +48,18 @@ export class lobbyControls extends React.Component {
   }
 
   render() {
+
+    let joinGameButton = renderJoinGameButton(this.props, this.handleLeaveGame);
+
     return (
       <div id="buttonHolder">
         {
           /* check if current player or not */
-          this.props.lobbyers && this.props.lobbyers.length < 4 && !this.props.currentLobbyer.name ?
-            <button type="button" className="btn btn-lg btn-info btn-danger btn-sm btn-block" data-target="#addPlayerModal" data-toggle="modal"><span className="playBtnText">Join Game!</span></button>
-            :
-            <div>
-              <button type="button" className="btn btn-lg btn-info btn-warning btn-sm btn-block" onClick={this.handleLeaveGame}><span className="playBtnText">Leave Game!</span></button>
-              {this.props.lobbyers.length === 4 ?
-              <h6>Maximum player count reached!</h6>
-              :
-              null
-              }
-            </div>
+          //render join game if no current player
+          //if no game in Progress
+          //if player length not less than 4
+          joinGameButton
+
         }
         <div className="modal fade" id="addPlayerModal" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
           <div className="modal-dialog" role="document">
@@ -80,10 +89,65 @@ export class lobbyControls extends React.Component {
 }
 
 const mapProps = state => ({
-  /*players: state.players.allPlayers,
-  currentLobbyer: state.players.currentLobbyer */
   currentLobbyer: state.lobby.currentLobbyer,
-  lobbyers: state.lobby.lobbyers
+  lobbyers: state.lobby.lobbyers,
+  gamePlaying: state.game.gamePlaying
 });
 
 export default connect(mapProps)(lobbyControls);
+
+
+function renderNormalJoinGame(){
+  return (
+    <div>
+      <button type="button" className="btn btn-lg btn-info btn-danger btn-sm btn-block" data-target="#addPlayerModal" data-toggle="modal"><span className="playBtnText">Join Game!</span>
+      </button>
+    </div>
+  );
+}
+
+function renderFullJoinGame(){
+  return(
+    <div>
+      <button type="button" className="btn btn-lg btn-danger btn-sm btn-block" disabled><span className="playBtnText">Game Is Full!</span></button>
+    </div>
+  );
+}
+
+function renderGameInProgress(){
+  return(
+    <div>
+      <button type="button" className="btn btn-lg btn-info btn-info btn-sm btn-block" disabled><span className="playBtnText">Game In Progress!</span></button>
+    </div>
+  );
+}
+
+function renderLeaveGame(leaveGameFunc, buttonLabel){
+  return(
+    <div>
+      <button type="button" className="btn btn-lg btn-info btn-warning btn-sm btn-block" onClick={leaveGameFunc}><span className="playBtnText">{buttonLabel}</span></button>
+    </div>
+  );
+}
+
+function renderJoinGameButton(props, handleLeaveGame){
+  let jsxButton;
+  if (props.gamePlaying){
+    //render game in progress button
+    if (props.currentLobbyer.name) {
+      jsxButton = renderLeaveGame(handleLeaveGame, 'Quit Game!');
+    } else {
+      jsxButton = renderGameInProgress();
+    }
+  } else if (props.lobbyers.length >= 4 && !props.currentLobbyer.name) {
+    //render game full
+    jsxButton = renderFullJoinGame();
+  } else if ((props.lobbyers && props.lobbyers.length < 4) && !props.currentLobbyer.name){
+      //no current Lobbyer, lobby length is small enough
+      jsxButton = renderNormalJoinGame();
+  } else if (props.currentLobbyer.name) {
+      //render leave game button
+      jsxButton = renderLeaveGame(handleLeaveGame, 'Leave Lobby!');
+  }
+  return jsxButton;
+}

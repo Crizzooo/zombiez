@@ -6,8 +6,6 @@ const SET_CURRENT_LOBBYER = 'SET_CURRENT_LOBBYER';
 export const dispatchLobbyUpdate = lobbyers => ({ type: UPDATE_LOBBY, lobbyers });
 export const dispatchSetCurrentLobbyer = currentLobbyer => ({ type: SET_CURRENT_LOBBYER, currentLobbyer});
 
-
-
 const initialState = {
   lobbyers: [],
   currentLobbyer: {}

@@ -3,23 +3,14 @@ const ADD_PLAYER = 'ADD_PLAYER';
 const GAME_PLAYING = 'GAME_PLAYING';
 const RESET_ENGINE = 'RESET_ENGINE'
 
-const timerTicker = (minutes, seconds) => ({
-  type: TIMER_TICK,
-  minutes,
-  seconds
-})
 
 const resetEngine = () => ({
   type: RESET_ENGINE
 });
 
-const addPlayer = () => ({
-  type: ADD_PLAYER
-});
-
-const gamePlaying = (isPlaying) => ({
+const gamePlaying = (gamePlaying) => ({
   type: GAME_PLAYING,
-  isPlaying
+  gamePlaying
 });
 
 const initialState = {
@@ -30,16 +21,9 @@ const engineReducers = (state = initialState, action) => {
   let newState = Object.assign({}, state);
 
   switch (action.type) {
-    case TIMER_TICK:
-
-      break;
-
-    case ADD_PLAYER:
-
-      break;
 
     case GAME_PLAYING:
-      newState.gamePlaying = action.isPlaying;
+      newState.gamePlaying = action.gamePlaying;
       break;
 
     case RESET_ENGINE:
@@ -51,4 +35,4 @@ const engineReducers = (state = initialState, action) => {
   return newState;
 }
 
-module.exports = {timerTicker, addPlayer, engineReducers, resetEngine, gamePlaying};
+module.exports = {engineReducers, resetEngine, gamePlaying};

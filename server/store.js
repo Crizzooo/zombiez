@@ -5,4 +5,4 @@ const createLogger = require('redux-logger');
 //reducers
 const mainReducer = require('./reducers/index.js');
 
-module.exports = createStore( mainReducer, applyMiddleware(createLogger({collapsed: true}), thunk));
+module.exports = createStore( mainReducer, applyMiddleware(thunk));

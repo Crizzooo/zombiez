@@ -15,14 +15,14 @@ class gameContainer extends Component {
   render () {
     //TODO: REIMPLEMENT DISABLED ATTRIB ON FALSY RETURN AND PLAYERS <= 2
     if(this.props.gamePlaying === false){
-      if(this.props.lobbyers && this.props.lobbyers.length >= 1) {
+      if(this.props.currentPlayer.name) {
         return(
           <div className="col-md-6 gameContainer">
             <button type="button" className="btn btn-lg btn-info playButton" onClick={this.startGame}><span className="playBtnText">Play Game!</span></button>
           </div>
         );
       } else {
-        return (<div className="col-md-6 gameContainer"><button type="button" className="btn btn-lg btn-info playButton" onClick={this.startGame} disabled><span className="playBtnText">Play Game!</span></button><h6>Require Minimum Players: 2</h6></div>);
+        return (<div className="col-md-6 gameContainer"><button type="button" className="btn btn-lg btn-info playButton" onClick={this.startGame} disabled><span className="playBtnText">Play Game!</span></button><h6>Require Minimum Players: 1</h6></div>);
       }
     } else {
       //Game is Currently Playing

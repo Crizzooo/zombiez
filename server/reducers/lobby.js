@@ -2,6 +2,7 @@ const R = require('ramda');
 const NEW_MESSAGE = 'NEW_MESSSAGE';
 const PLAYER_JOIN_LOBBY = 'PLAYER_JOIN_LOBBY';
 const PLAYER_LEAVE_LOBBY = 'PLAYER_LEAVE_LOBBY';
+const RESET_LOBBY = 'RESET_LOBBY';
 
 
 const receiveNewMessage = (msg, user) => ({
@@ -15,11 +16,14 @@ const receiveJoinLobby =  (lobbyObj) => ({
   lobbyer: lobbyObj
 })
 
-const receivePlayerLeave = (lobbyObj) => ({
+const receiveLobbyerLeave = (lobbyerId) => ({
   type: PLAYER_LEAVE_LOBBY,
-  lobbyer: lobbyObj
+  lobbyerId
 })
 
+const resetLobby = () => ({
+  type: RESET_LOBBY
+})
 
 const initialState = {
   lobbyers: []
@@ -29,6 +33,7 @@ const lobby = (state = initialState, action) => {
   let newState = Object.assign({}, state);
 
   switch (action.type) {
+    
     case NEW_MESSAGE:
 
         break;
@@ -38,9 +43,13 @@ const lobby = (state = initialState, action) => {
         break;
 
     case PLAYER_LEAVE_LOBBY:
-        newState.lobbyers = state.lobbyers.filter(lobbyer =>
-          lobbyer.socketId !== action.lobbyer.socketId
-        )
+        console.log('lobby.lobbyers pre remove: ', newState.lobbyers);
+        newState.lobbyers = newState.lobbyers.filter(lobbyer => lobbyer.socketId !== action.lobbyerId);
+        console.log('lobby.lobbyers post remove: ', newState.lobbyers);
+        break;
+
+    case RESET_LOBBY:
+        newState = initialState;
         break;
 
     default:
@@ -49,4 +58,4 @@ const lobby = (state = initialState, action) => {
   return newState;
 }
 
-module.exports = {lobby, receiveJoinLobby, receivePlayerLeave}
+module.exports = {lobby, receiveJoinLobby, receiveLobbyerLeave, resetLobby}

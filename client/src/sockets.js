@@ -4,67 +4,60 @@ import store from './store.js';
 import GenZed from './main.js';
 
 //Import from Reducers
-import { loadPlayers, setCurrentPlayer, changeGamePlaying, updatePlayers, playerLeaveGame } from './reducers/players-reducer.js';
+import { loadPlayers, changeGamePlaying, updatePlayers, playerLeaveGame, resetPlayers } from './reducers/players-reducer.js';
 import { loadMessages, addMessage } from './reducers/chatApp-reducer.js';
 import { dispatchLobbyUpdate, dispatchSetCurrentLobbyer } from './reducers/lobby-reducer.js';
 import { dispatchGamePlaying } from './reducers/gameState-reducer';
 
-import { killPlayerSprite } from './gameStates/zombieGameState.js';
 
 import R from 'ramda';
 import {throttle} from 'lodash';
 
-
-
-
-//NOTE: SET UP DISPATCH LOBBY STATE !!!!!!!!!
 
 //We attach all functions to a socket in here
 const attachFunctions = (socket) => {
   socket.on('playerUpdate', dispatchPlayerUpdates);
   socket.on('currentLobbyer', dispatchCurrentLobbyer);
   socket.on('messagesUpdate', dispatchNewMessage);
-  socket.on('turnOnGameComponent', dispatchGameTrue);
   socket.on('startGame', startClientGame);
   socket.on('updateLeaderboard', dispatchScoreUpdate);
-  // socket.on('serverUpdate', dispatchNewGameState);
   socket.on('lobbyUpdate', dispatchLobbyState);
   socket.on('serverUpdate', dispatchServerState);
-  socket.on('playerLeaveGame', (playerSocketId) => {
-    dispatchPlayerLeaveGame(playerSocketId);
-    killPlayerSprite(playerSocketId);
-  });
+  socket.on('gamePlayingUpdate', dispatchGamePlayingUpdate);
+  socket.on('resetGame', dispatchReducerReset);
 };
-
 
 function dispatchCurrentLobbyer(lobbyerObj) {
   store.dispatch(dispatchSetCurrentLobbyer(lobbyerObj));
 }
 
-//sample function
 export function dispatchNewMessage(msgObj) {
   store.dispatch(addMessage(msgObj));
 }
 
-function dispatchGameTrue(){
-  store.dispatch(dispatchGamePlaying(true));
+function dispatchGamePlayingUpdate(isItPlaying){
+  console.log('before playing update', store.getState());
+  store.dispatch(dispatchGamePlaying(isItPlaying));
+  console.log(' after game playing update', store.getState());
 }
 
-function startClientGame(players, startDate) {
+function startClientGame(playersFromServer) {
   let state = store.getState();
   ZG.game = new GenZed('100%', '100%', Phaser.AUTO, 'game');
-  ZG.game.startGame('BootState', true, false, state.lobby.lobbyers);
+  store.dispatch(loadPlayers(playersFromServer));
+  ZG.game.startGame('BootState', true, false);
 }
 
 function dispatchServerState(serverState) {
-  // console.log('client received serverState:', serverState);
-
   //break out data from server - send to appropriate stores
+  let state = store.getState();
   store.dispatch(dispatchLobbyUpdate(serverState.lobby.lobbyers));
-  store.dispatch(updatePlayers(serverState.players));
+  if (state.game.gamePlaying){
+    store.dispatch(updatePlayers(serverState.players.playerStates));
+  }
   throttledLog();
 }
-const throttledLog = throttle(logReceivedState, 10000);
+const throttledLog = throttle(logReceivedState, 30000);
 function logReceivedState() {
   console.log('state after server update: ', store.getState());
 }
@@ -83,8 +76,12 @@ function dispatchScoreUpdate(playerId, score){
   store.dispatch(changePlayerScore(playerId, score));
 }
 
-function dispatchPlayerLeaveGame(playerSocketId){
-  store.dispatch(playerLeaveGame(playerSocketId));
+function dispatchReducerReset(){
+  //game reducer has already been set to true
+  //reset players reducer
+  store.dispatch(resetPlayers());
+  //reset zombies and other game related reducers
+
 }
 
 export default attachFunctions;

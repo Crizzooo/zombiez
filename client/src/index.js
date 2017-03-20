@@ -21,6 +21,7 @@ attachFunctions(socket);
 
 const getLobby = () => {
   socket.emit('getLobby');
+  socket.emit('getGameState');
 }
 
 ReactDOM.render(

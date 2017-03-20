@@ -1,17 +1,13 @@
 
 
 export default class BootState extends Phaser.State {
-  init (lobbyers, level_file, next_state, extra_parameters) {
+  init (level_file, next_state, extra_parameters) {
       //TODO: We may want to revisit these
       // ZG.scale.pageAlignHorizontally = true;
       // ZG.scale.pageAlignVertically = true;
       this.stage.backgroundColor = '#da2dc3';
       this.scale.scaleMode = Phaser.ScaleManager.RESIZE;
       this.physics.startSystem(Phaser.Physics.ARCADE);
-
-      //game. initiated with client lobby objects!
-      this.game.players = lobbyers;
-      console.log("this.game.players: ", this.game.players);
   }
 
   preload () {

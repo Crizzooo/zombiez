@@ -1,5 +1,14 @@
 import axios from 'axios'
 
+
+/* Action Types */
+const LOAD_MESSAGES = 'LOAD_MESSAGES';
+const ADD_MESSAGE = 'ADD_MESSAGE';
+
+/* Action Creators */
+export const loadMessages = allMessages => ({ type: LOAD_MESSAGES, allMessages });
+export const addMessage = message => ({ type: ADD_MESSAGE, message });
+
 const initialState = {
   allMessages: []
 };
@@ -24,20 +33,3 @@ export default (state = initialState, action) => {
   }
   return newState
 };
-
-/* Action Types */
-const LOAD_MESSAGES = 'LOAD_MESSAGES';
-const ADD_MESSAGE = 'ADD_MESSAGE';
-
-/* Action Creators */
-export const loadMessages = allMessages => ({ type: LOAD_MESSAGES, allMessages });
-export const addMessage = message => ({ type: ADD_MESSAGE, message });
-
-/* Action Dispatchers */
-
-/* - Reference - example dispatch function
-  export const fetchPlayers = () => dispatch => {
-    return axios.get('/players')
-    .then(response => response.data)
-    .then(players => dispatch(loadPlayers(players)))
-  }; */

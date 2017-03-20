@@ -9,18 +9,18 @@ const UPDATE_PLAYER = 'UPDATE_PLAYER';
 const addPlayer = playerState => ({
   type: ADD_PLAYER,
   playerState
-})
+});
 
 const removePlayer = id => ({
   type: REMOVE_PLAYER,
   id
-})
+});
 
 const receiveClientData = (id, data) => ({
   type: RECEIVE_CLIENT_DATA,
   id,
   data
-})
+});
 
 const updatePlayer = (playerToUpdate) => ({
   type: UPDATE_PLAYER,
@@ -38,6 +38,7 @@ const playerReducers = (state = initialState, action) => {
   switch (action.type) {
     case ADD_PLAYER:
         //update player state at socket.id
+        console.log('ADDING PLAYER BACK ON: ', action.playerState);
         newState.playerStates[action.playerState.socketId] = action.playerState;
       break;
 
@@ -51,9 +52,11 @@ const playerReducers = (state = initialState, action) => {
 
     case REMOVE_PLAYER:
       console.log('server received remove player: ', action.id);
-      console.log('preRemove: ', newState.playerStates);
-      newState.playerStates = newState.playerStates.filter( (playerObj) => playerObj.socketId !== action.id);
-      console.log('postRemove: ', newState.playerStates);
+      if (newState.playerStates[action.id]){
+        console.log('pre remove player in players: ', newState.playerStates);
+        delete newState.playerStates[action.id];
+        console.log('post remove player in players player: ', newState.playerStates);
+      }
       break;
 
     default:
