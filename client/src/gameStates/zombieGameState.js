@@ -81,7 +81,7 @@ export default class ZombieGameState extends TiledState {
         //Set camera to follow, then make world big to allow camera to pan off
         //this.camera.view = new Phaser.Rectangle(0, 0, this.currentPlayer.position.x, this.currentPlayer.position.y);
         this.camera.follow(this.currentPlayer);
-        this.game.world.setBounds(-250, -250, 800, 2000);
+        this.game.world.setBounds(-250, -250, 2500, 2500);
 
         this.currentPlayer.debug = true;
     }

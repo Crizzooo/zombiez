@@ -7699,7 +7699,7 @@ var ZombieGameState = function (_TiledState) {
             //Set camera to follow, then make world big to allow camera to pan off
             //this.camera.view = new Phaser.Rectangle(0, 0, this.currentPlayer.position.x, this.currentPlayer.position.y);
             this.camera.follow(this.currentPlayer);
-            this.game.world.setBounds(-250, -250, 800, 2000);
+            this.game.world.setBounds(-250, -250, 2500, 2500);
 
             this.currentPlayer.debug = true;
         }
@@ -18711,7 +18711,7 @@ function startClientGame(players, startDate) {
   ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
   //Game Starts HERE!
   ZG.game = new _main2.default(300, 300, Phaser.AUTO, 'game');
-  ZG.game.startGame('BootState', true, false, "../assets/levels/tutorial.json", players);
+  ZG.game.startGame('BootState', true, false, "../assets/levels/main.json", players);
   ZG.startDate = startDate;
 }
 
@@ -44468,7 +44468,7 @@ exports.default = Prefab;
 
 
 Object.defineProperty(exports, "__esModule", {
-    value: true
+  value: true
 });
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -44488,45 +44488,37 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 */
 
 var Player = function (_Prefab) {
-    _inherits(Player, _Prefab);
+  _inherits(Player, _Prefab);
 
-    function Player(game, name, position, properties) {
-        _classCallCheck(this, Player);
+  function Player(game, name, position, properties) {
+    _classCallCheck(this, Player);
 
-        var _this = _possibleConstructorReturn(this, (Player.__proto__ || Object.getPrototypeOf(Player)).call(this, game, name, position, properties));
+    var _this = _possibleConstructorReturn(this, (Player.__proto__ || Object.getPrototypeOf(Player)).call(this, game, name, position, properties));
 
-        //    name = 'player'
-        // properties: {
-        //     group: 'players',
-        //       initial: 18,
-        //       spritemap: 'playerSpriteSheet'
-        //   }
-        // {x: 0, y: 0}
+    _this.animations.add('right', [24, 8, 5, 20, 12, 13], 10, true);
+    _this.animations.add('left', [17, 10, 5, 19, 8, 9], 10, true);
+    _this.animations.add('up', [16, 0, 14, 6, 1], 10, true);
+    _this.animations.add('down', [23, 9, 21, 22, 7, 4], 10, true);
 
-        _this.animations.add('right', [24, 8, 5, 20, 12, 13], 10, true);
-        _this.animations.add('left', [17, 10, 5, 19, 8, 9], 10, true);
-        _this.animations.add('up', [16, 0, 14, 6, 1], 10, true);
-        _this.animations.add('down', [23, 9, 21, 22, 7, 4], 10, true);
+    //This might not be relevant since the world size is bigger than map size
+    //To allow for camera pan
+    _this.game.physics.arcade.enable(_this);
+    //this.body.collideWorldBounds = true;
 
-        _this.game.physics.arcade.enable(_this);
-        //This might not be relevant since the world size is bigger than map size
-        //To allow for camera pan
-        _this.body.collideWorldBounds = true;
+    _this.stats = {
+      health: 100,
+      movement: 10
+    };
 
-        _this.stats = {
-            health: 100,
-            movement: 10
-        };
+    return _this;
+  }
 
-        return _this;
-    }
+  _createClass(Player, [{
+    key: 'receiveDamage',
+    value: function receiveDamage(damage) {}
+  }]);
 
-    _createClass(Player, [{
-        key: 'receiveDamage',
-        value: function receiveDamage(damage) {}
-    }]);
-
-    return Player;
+  return Player;
 }(_Prefab3.default);
 
 exports.default = Player;
@@ -45008,20 +45000,7 @@ var Enemy = function (_Prefab) {
     function Enemy(game, name, position, properties) {
         _classCallCheck(this, Enemy);
 
-        //    name = 'player'
-        // properties: {
-        //     group: 'players',
-        //       initial: 18,
-        //       spritemap: 'playerSpriteSheet'
-        //   }
-        // {x: 0, y: 0}
-
         return _possibleConstructorReturn(this, (Enemy.__proto__ || Object.getPrototypeOf(Enemy)).call(this, game, name, position, properties));
-
-        // this.animations.add('right', [24, 8, 5, 20, 12, 13], 10, true);
-        // this.animations.add('left', [17, 10, 5, 19, 8, 9], 10, true);
-        // this.animations.add('up', [16, 0, 14, 6, 1], 10, true);
-        // this.animations.add('down', [23, 9, 21, 22, 7, 4], 10, true);
     }
 
     _createClass(Enemy, [{

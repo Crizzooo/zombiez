@@ -1,0 +1,28 @@
+{
+  "assets": {
+    "defaultTileset": {"type": "image", "source": "../../assets/images/mapTiles/dungeon_tileset_32.png"},
+    "miscTileset": {"type": "image", "source": "../../assets/images/mapTiles/objects_tilset_32.png"},
+
+    "playerSpriteSheet": {"type": "spritesheetAtlas",
+      "sourcePNG": "../../assets/images/finalSheet.png",
+      "sourceJSON": "../../assets/images/finalSheet.json"
+    },
+
+    "levelTilemap": {"type": "tilemap", "source": "../../assets/maps/main.json"}
+  },
+  "groups": [
+    "player",
+    "enemies",
+    "bullets",
+    "guns"
+  ],
+  "map": {
+    "key": "levelTilemap",
+    "tilesets": ["defaultTileset", "miscTileset"]
+  },
+  "prefabs": {
+
+
+
+  }
+}
