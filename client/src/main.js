@@ -17,7 +17,7 @@ export default class GenZed extends Phaser.Game {
 
         super(width, height, Phaser.CANVAS, parent, null);
 
-        //Add all game states here
+        //TODO: all game states go here
         this.state.add('BootState', new BootState());
         this.state.add('PreloadState', new PreloadState());
         this.state.add('ZombieGameState', new ZombieGameState());

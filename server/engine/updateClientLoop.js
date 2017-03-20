@@ -26,7 +26,8 @@ let playerPositions = [
 ]
 //TODO: Implement correct sprite keys for ZOMBIE GUN GAME
 let playerSpriteKeys = [ 'blueGunGuy', 'greenGunGuy'];
-//This function is used to take the server lobby state,
+
+//This function is used to take the server lobby state, and initialize player objects
 const convertLobbyers = (lobbyers) => {
   return lobbyers.map( (lobbyObj, index) => {
     let spriteKey = playerSpriteKeys[index % 2];

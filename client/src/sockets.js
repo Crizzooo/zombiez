@@ -1,18 +1,15 @@
 import store from './store.js';
-
-
 import GenZed from './main.js';
+
+import R from 'ramda';
+import {throttle} from 'lodash';
+
 
 //Import from Reducers
 import { loadPlayers, changeGamePlaying, updatePlayers, playerLeaveGame, resetPlayers, updateCurrentPlayer } from './reducers/players-reducer.js';
 import { loadMessages, addMessage } from './reducers/chatApp-reducer.js';
 import { dispatchLobbyUpdate, dispatchSetCurrentLobbyer, resetLobby } from './reducers/lobby-reducer.js';
 import { dispatchGamePlaying } from './reducers/gameState-reducer';
-
-
-import R from 'ramda';
-import {throttle} from 'lodash';
-
 
 //We attach all functions to a socket in here
 const attachFunctions = (socket) => {
@@ -49,6 +46,11 @@ function startClientGame(playersFromServer) {
   ZG.game.startGame('BootState', true, false);
 }
 
+
+const throttledLog = throttle(logReceivedState, 30000);
+function logReceivedState() {
+  console.log('state after server update: ', store.getState());
+}
 function dispatchServerState(serverState) {
   //break out data from server - send to appropriate stores
   let state = store.getState();
@@ -62,13 +64,8 @@ function dispatchServerState(serverState) {
   }
   throttledLog();
 }
-const throttledLog = throttle(logReceivedState, 30000);
-function logReceivedState() {
-  console.log('state after server update: ', store.getState());
-}
+
 function dispatchPlayerUpdates(players) {
-  console.log('Received Players:', players);
-  //dispatch loadPlayers with players
   store.dispatch(loadPlayers(players));
 }
 
@@ -84,11 +81,10 @@ function dispatchScoreUpdate(playerId, score){
 
 function dispatchReducerReset(){
   //game reducer has already been set to true
-  //reset players reducer
+  //reset local reducers
   store.dispatch(resetPlayers());
   store.dispatch(resetLobby());
-  //reset zombies and other game related reducers
-
+  //TODO: reset zombies and other game related reducers
 }
 
 export default attachFunctions;

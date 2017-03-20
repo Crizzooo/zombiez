@@ -4664,11 +4664,6 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 
-var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
-
-//reducers
-
-
 var _redux = __webpack_require__(90);
 
 var _reduxDevtoolsExtension = __webpack_require__(620);
@@ -4687,11 +4682,9 @@ var _index2 = _interopRequireDefault(_index);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-console.log(typeof _index2.default === 'undefined' ? 'undefined' : _typeof(_index2.default));
-console.log('client reducer: ', _index2.default);
-
 var store = (0, _redux.createStore)(_index2.default, (0, _redux.applyMiddleware)(_reduxThunk2.default));
 
+//reducers
 exports.default = store;
 
 /***/ }),
@@ -18758,6 +18751,12 @@ var _main = __webpack_require__(284);
 
 var _main2 = _interopRequireDefault(_main);
 
+var _ramda = __webpack_require__(100);
+
+var _ramda2 = _interopRequireDefault(_ramda);
+
+var _lodash = __webpack_require__(316);
+
 var _playersReducer = __webpack_require__(51);
 
 var _chatAppReducer = __webpack_require__(148);
@@ -18765,12 +18764,6 @@ var _chatAppReducer = __webpack_require__(148);
 var _lobbyReducer = __webpack_require__(93);
 
 var _gameStateReducer = __webpack_require__(149);
-
-var _ramda = __webpack_require__(100);
-
-var _ramda2 = _interopRequireDefault(_ramda);
-
-var _lodash = __webpack_require__(316);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -18812,6 +18805,10 @@ function startClientGame(playersFromServer) {
   ZG.game.startGame('BootState', true, false);
 }
 
+var throttledLog = (0, _lodash.throttle)(logReceivedState, 30000);
+function logReceivedState() {
+  console.log('state after server update: ', _store2.default.getState());
+}
 function dispatchServerState(serverState) {
   //break out data from server - send to appropriate stores
   var state = _store2.default.getState();
@@ -18825,13 +18822,8 @@ function dispatchServerState(serverState) {
   }
   throttledLog();
 }
-var throttledLog = (0, _lodash.throttle)(logReceivedState, 30000);
-function logReceivedState() {
-  console.log('state after server update: ', _store2.default.getState());
-}
+
 function dispatchPlayerUpdates(players) {
-  console.log('Received Players:', players);
-  //dispatch loadPlayers with players
   _store2.default.dispatch((0, _playersReducer.loadPlayers)(players));
 }
 
@@ -18847,10 +18839,10 @@ function dispatchScoreUpdate(playerId, score) {
 
 function dispatchReducerReset() {
   //game reducer has already been set to true
-  //reset players reducer
+  //reset local reducers
   _store2.default.dispatch((0, _playersReducer.resetPlayers)());
   _store2.default.dispatch((0, _lobbyReducer.resetLobby)());
-  //reset zombies and other game related reducers
+  //TODO: reset zombies and other game related reducers
 }
 
 exports.default = attachFunctions;
@@ -20558,11 +20550,13 @@ var ZombieGameState = function (_Phaser$State) {
       //set constants for game
       this.RUNNING_SPEED = 180;
       self = this;
+
       //cursor keys
       //Control Mechanics
       this.cursors = this.input.keyboard.createCursorKeys();
-      this.cursors.spacebar = this.input.keyboard.addKey(Phaser.Keyboard.SPACEBAR);
+      // this.cursors.spacebar = this.input.keyboard.addKey(Phaser.Keyboard.SPACEBAR);
 
+      //Attach and bind functions
       this.destroyCurrentPlayerSprite = this.destroyCurrentPlayerSprite.bind(this);
       this.handleRemotePlayerLeave = this.handleRemotePlayerLeave.bind(this);
       socket.on('destroyCurrentPlayerSprite', this.destroyCurrentPlayerSprite);
@@ -20590,9 +20584,6 @@ var ZombieGameState = function (_Phaser$State) {
     value: function update() {
       //NOTE: Collision between SpriteA and SpriteB - callback takes in SpriteA and SpriteB
 
-      //get state from store
-      //   //update each player
-      // console.log('phaser update func');
       this.updateRemotePlayers();
       if (this.currentPlayerSprite) {
         this.handleInput();
@@ -20608,9 +20599,9 @@ var ZombieGameState = function (_Phaser$State) {
   }, {
     key: 'loadLevel',
     value: function loadLevel() {
-      // ZG.gameBackground = ZG.game.add.sprite(ZG.game.world.centerX, ZG.game.world.centerY, 'snowLandscape');
-      // ZG.gameBackground.scale.setTo(0.9, 0.9);
-      // ZG.gameBackground.anchor.setTo(0.5);
+      // this.gameBackground = this.add.sprite(this.world.centerX, this.world.centerY, 'snowLandscape');
+      // this.gameBackground.scale.setTo(0.9, 0.9);
+      // this.gameBackground.anchor.setTo(0.5);
 
       //resize the world to fit the layer
       this.world.resize(500, 500);
@@ -20623,8 +20614,6 @@ var ZombieGameState = function (_Phaser$State) {
 
       var currentPlayer = void 0;
       if (state.players.currentPlayer.socketId) {
-        state = _store2.default.getState();
-        console.log('state after adding current player from currentLobbyer', state);
         currentPlayer = state.players.currentPlayer;
 
         //TODO: make server assign sprite keys
@@ -20649,13 +20638,9 @@ var ZombieGameState = function (_Phaser$State) {
 
         console.log('Where is  current player on game start?', currPlayerState);
 
-        //send current Player to local store
-        console.log('dispatched to local store after creating player');
         _store2.default.dispatch((0, _playersReducer.updateCurrentPlayer)(currPlayerState));
-        console.log('local store looks like: ', _store2.default.getState());
+        console.log('end of load level local store looks like: ', _store2.default.getState());
       }
-      console.log('player states - we should create all besides current Player', state.players.playerStates);
-
       R.forEachObjIndexed(this.createRemotePlayerSprite, state.players.playerStates);
     }
   }, {
@@ -20690,7 +20675,6 @@ var ZombieGameState = function (_Phaser$State) {
   }, {
     key: 'dispatchCurrentPlayer',
     value: function dispatchCurrentPlayer() {
-      // console.log('Current Player Sprite: ', this.currentPlayerSprite);
       var currentPlayer = {
         x: this.currentPlayerSprite.x,
         y: this.currentPlayerSprite.y,
@@ -20699,60 +20683,29 @@ var ZombieGameState = function (_Phaser$State) {
       };
       _store2.default.dispatch((0, _playersReducer.updateCurrentPlayer)(currentPlayer));
     }
+
+    //TODO: move remote player updates to other file
+
   }, {
     key: 'updateRemotePlayers',
     value: function updateRemotePlayers() {
       this.players = _store2.default.getState().players.playerStates;
-      // console.log('update players from server ', this.players)
-      // console.log('remote player sprites', remotePlayerSprites);
-      //take current player out
       if (this.players[socket.id]) delete this.players[socket.id];
       //then update each player from the server
       R.forEachObjIndexed(this.updateRemotePlayer, this.players);
-      // R.forEachObjIndexed(this.killMissingPlayers, remotePlayerSprites);
     }
   }, {
     key: 'updateRemotePlayer',
     value: function updateRemotePlayer(playerState) {
-      // console.log('update function received playerState: ', playerState);
-      //get the sprite with player.socketId
-      //check if remotePlayerSprites has a key for this playerState id
-      // console.log('WHAT IS SELF.PLAYERS?', self.players);
-      // console.log('DOES IT INCLUDE THIS PLAYER ID?', self.players[playerState.sockedId]);
       if (remotePlayerSprites[playerState.socketId]) {
-        //if it does, access that sprite and update it
-        // console.log('we found a sprite that looks like this: ', remotePlayerSprites[playerState.socketid])
         remotePlayerSprites[playerState.socketId].x = playerState.x;
         remotePlayerSprites[playerState.socketId].y = playerState.y;
+        //TODO: Implement other properties
       }
-      // else {
-      //   //if it doesnt, create a sprite and add it There
-      //   console.log('creating new remote sprite');
-      //   let remoteSprite = self.game.add.sprite(playerState.x, playerState.y, 'blueGunGuy');
-      //   remotePlayerSprites[playerState.socketId] = remoteSprite;
-      // }
-      // if (remotePlayerSprites[playerState.socketId] && !self.players[playerState.socketId]) {
-      //   console.log('killing off remote sprite: ', remotePlayerSprites[playerState.socketId])
-      //   remotePlayerSprites[playerState.socketId].kill();
-      //   delete remotePlayerSprites[playerState.socketId];
-      // } else {
-      //   if (remotePlayerSprites[playerState.socketId]) {
-      //     //if it does, access that sprite and update it
-      //     console.log('we found a sprite that looks like this: ', remotePlayerSprites[playerState.socketid])
-      //     remotePlayerSprites[playerState.socketId].x = playerState.x;
-      //     remotePlayerSprites[playerState.socketId].y = playerState.y;
-      //   } else {
-      //     //if it doesnt, create a sprite and add it There
-      //     console.log('creating new remote sprite');
-      //     let remoteSprite = self.game.add.sprite(playerState.x, playerState.y, 'blueGunGuy');
-      //     remotePlayerSprites[playerState.socketId] = remoteSprite;
-      //   }
-      // }
     }
   }, {
     key: 'destroyCurrentPlayerSprite',
     value: function destroyCurrentPlayerSprite() {
-      //take him off
       if (this.currentPlayerSprite) {
         this.currentPlayerSprite.destroy();
         delete this.currentPlayerSprite;
@@ -20767,21 +20720,18 @@ var ZombieGameState = function (_Phaser$State) {
     value: function handleRemotePlayerLeave(playerSocketId) {
       _store2.default.dispatch((0, _playersReducer.playerLeaveGame)(playerSocketId));
       var state = _store2.default.getState();
-      console.log('state after', state);
       //Kill Remote Player Sprite
-      console.log('RPS: ', remotePlayerSprites);
       if (remotePlayerSprites[playerSocketId]) {
-        console.log('we are removing his ass');
+        console.log('we are removing remote player sprite');
         remotePlayerSprites[playerSocketId].destroy();
         delete remotePlayerSprites[playerSocketId];
       }
-      console.log('RPS AFTER: ', remotePlayerSprites);
     }
   }, {
     key: 'createRemotePlayerSprite',
     value: function createRemotePlayerSprite(playerState) {
       if (playerState.socketId !== socket.id) {
-        console.log('creating player with this ID: ', playerState.socketId);
+        console.log('creating remote player with this playerState: ', playerState);
         var remoteSprite = self.game.add.sprite(playerState.x, playerState.y, 'blueGunGuy');
         remotePlayerSprites[playerState.socketId] = remoteSprite;
       }
@@ -20841,7 +20791,7 @@ var GenZed = function (_Phaser$Game) {
         var height = heightParam || '100%';
         var renderer = rendererParam || Phaser.CANVAS;
 
-        //Add all game states here
+        //TODO: all game states go here
         var _this = _possibleConstructorReturn(this, (GenZed.__proto__ || Object.getPrototypeOf(GenZed)).call(this, width, height, Phaser.CANVAS, parent, null));
 
         _this.state.add('BootState', new _boot2.default());
