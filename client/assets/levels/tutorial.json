@@ -1,0 +1,38 @@
+{
+  "assets": {
+    "defaultTileset": {"type": "image", "source": "../../assets/images/mapTiles/prisonATerrain.png"},
+    "miscTileset": {"type": "image", "source": "../../assets/images/mapTiles/prisonAMisc.png"},
+
+    "playerSpriteSheet": {"type": "spritesheetAtlas",
+      "sourcePNG": "../../assets/images/finalSheet.png",
+      "sourceJSON": "../../assets/images/finalSheet.json"
+    },
+    "crosshairSpriteSheet": {
+      "type": "spritesheetAtlas",
+      "sourcePNG": "../../assets/images/crosshair.png",
+      "sourceJSON": "../../assets/images/crosshair.json"
+    },
+    "gunSpriteSheet": {
+      "type": "spritesheetAtlas",
+      "sourcePNG": "../../assets/images/gunAndBulletTest.png",
+      "sourceJSON": "../../assets/images/gunAndBulletTest.json"
+    },
+
+    "levelTilemap": {"type": "tilemap", "source": "../../assets/maps/tutorial.json"}
+  },
+  "groups": [
+    "player",
+    "enemies",
+    "bullets",
+    "guns"
+  ],
+  "map": {
+    "key": "levelTilemap",
+    "tilesets": ["defaultTileset", "miscTileset"]
+  },
+  "prefabs": {
+
+
+
+  }
+}

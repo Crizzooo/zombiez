@@ -18796,13 +18796,14 @@ function dispatchGamePlayingUpdate(isItPlaying) {
   _store2.default.dispatch((0, _gameStateReducer.dispatchGamePlaying)(isItPlaying));
 }
 
+//game starts here
 function startClientGame(playersFromServer) {
   var state = _store2.default.getState();
   console.log('client is starting game with this from server: ', state);
   console.log('these are the players being sent to store: ', playersFromServer);
   ZG.game = new _main2.default('100%', '100%', Phaser.AUTO, 'game');
   _store2.default.dispatch((0, _playersReducer.loadPlayers)(playersFromServer));
-  ZG.game.startGame('BootState', true, false);
+  ZG.game.startGame('BootState', true, false, "../assets/levels/main.json");
 }
 
 var throttledLog = (0, _lodash.throttle)(logReceivedState, 30000);
@@ -20384,7 +20385,7 @@ exports.default = (0, _reactRedux.connect)(mapProps, mapDispatch)(gameContainer)
 
 
 Object.defineProperty(exports, "__esModule", {
-    value: true
+  value: true
 });
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -20396,44 +20397,60 @@ function _possibleConstructorReturn(self, call) { if (!self) { throw new Referen
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
 var BootState = function (_Phaser$State) {
-    _inherits(BootState, _Phaser$State);
+  _inherits(BootState, _Phaser$State);
 
-    function BootState() {
-        _classCallCheck(this, BootState);
+  function BootState() {
+    _classCallCheck(this, BootState);
 
-        return _possibleConstructorReturn(this, (BootState.__proto__ || Object.getPrototypeOf(BootState)).apply(this, arguments));
+    return _possibleConstructorReturn(this, (BootState.__proto__ || Object.getPrototypeOf(BootState)).apply(this, arguments));
+  }
+
+  _createClass(BootState, [{
+    key: 'init',
+
+
+    //TODO: CHECK WHERE PHYSICS ARE STARTED
+    value: function init(levelFile, players, nextState, extraParameters) {
+      //Load Level Data from Level File JSON
+      this.levelFile = levelFile;
+      this.nextState = nextState;
+      this.scale.scaleMode = Phaser.ScaleManager.RESIZE;
+      //TODO: make a decision here
+      //ZG.players = players;
+      this.game.players = players;
     }
+  }, {
+    key: 'preload',
+    value: function preload() {
+      this.load.image('preloadbar', 'assets/images/preloader-bar.png');
 
-    _createClass(BootState, [{
-        key: 'init',
-        value: function init(level_file, next_state, extra_parameters) {
-            //TODO: We may want to revisit these
-            // ZG.scale.pageAlignHorizontally = true;
-            // ZG.scale.pageAlignVertically = true;
-            this.stage.backgroundColor = '#da2dc3';
-            this.scale.scaleMode = Phaser.ScaleManager.RESIZE;
-            this.physics.startSystem(Phaser.Physics.ARCADE);
-        }
-    }, {
-        key: 'preload',
-        value: function preload() {
-            this.load.image('preloadbar', 'assets/images/preloader-bar.png');
-        }
-    }, {
-        key: 'create',
-        value: function create() {
-            this.preloadBar = this.add.sprite(this.world.centerX, this.world.centerY, 'preloadbar', 0);
-            this.preloadBar.anchor.setTo(0.5);
-            this.preloadBar.scale.setTo(5);
-        }
-    }, {
-        key: 'update',
-        value: function update() {
-            this.state.start("PreloadState");
-        }
-    }]);
+      //Load Level Data from Level File JSON
+      this.load.text("level1", this.levelFile);
+    }
+  }, {
+    key: 'create',
+    value: function create() {
+      //Create level
+      var levelText = void 0,
+          levelData = void 0;
+      levelText = this.game.cache.getText("level1");
+      levelData = JSON.parse(levelText);
 
-    return BootState;
+      //Add loading bar
+      this.preloadBar = this.add.sprite(this.world.centerX, this.world.centerY, 'preloadbar', 0);
+      this.preloadBar.anchor.setTo(0.5);
+      this.preloadBar.scale.setTo(5);
+
+      //Control Mechanics
+      this.game.cursors = this.input.keyboard.createCursorKeys();
+      this.game.cursors.spacebar = this.input.keyboard.addKey(Phaser.Keyboard.SPACEBAR);
+
+      //Start next state
+      this.state.start('PreloadState', true, false, levelData);
+    }
+  }]);
+
+  return BootState;
 }(Phaser.State);
 
 exports.default = BootState;
@@ -20446,7 +20463,7 @@ exports.default = BootState;
 
 
 Object.defineProperty(exports, "__esModule", {
-    value: true
+  value: true
 });
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -20458,290 +20475,81 @@ function _possibleConstructorReturn(self, call) { if (!self) { throw new Referen
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
 var Preload = function (_Phaser$State) {
-    _inherits(Preload, _Phaser$State);
+  _inherits(Preload, _Phaser$State);
 
-    function Preload() {
-        _classCallCheck(this, Preload);
+  function Preload() {
+    _classCallCheck(this, Preload);
 
-        return _possibleConstructorReturn(this, (Preload.__proto__ || Object.getPrototypeOf(Preload)).apply(this, arguments));
+    return _possibleConstructorReturn(this, (Preload.__proto__ || Object.getPrototypeOf(Preload)).apply(this, arguments));
+  }
+
+  _createClass(Preload, [{
+    key: 'init',
+    value: function init(levelData) {
+      this.levelData = levelData;
     }
+  }, {
+    key: 'preload',
+    value: function preload() {
+      //TODO: remove Atlases for Player Character
+      this.load.atlasXML('blueGunGuy', '../../assets/images/blueGunGuyAtlas.png', '../../assets/images/blueGunGuyAtlasXML.xml');
+      this.load.atlasXML('greenGunGuy', '../../assets/images/greenGunGuyAtlas.png', '../../assets/images/greenGunGuyAtlasXML.xml');
+      var assets = void 0,
+          assetKey = void 0,
+          asset = void 0;
 
-    _createClass(Preload, [{
-        key: 'init',
-        value: function init() {
-            this.stage.backgroundColor = '#7c79fa';
+      console.log(this.levelData);
+      //Access assets object from level json
+      assets = this.levelData.assets;
+
+      // load assets according to asset key
+      for (assetKey in assets) {
+        if (assets.hasOwnProperty(assetKey)) {
+          asset = assets[assetKey];
+          switch (asset.type) {
+            case 'image':
+              this.load.image(assetKey, asset.source);
+              break;
+            case 'spriteSheet':
+              this.load.spritesheet(assetKey, asset.source, asset.frame_width, asset.frame_height, asset.frames, asset.margin, asset.spacing);
+              break;
+            case 'spriteSheetAtlas':
+              this.load.atlasJSONHash(assetKey, asset.sourcePNG, asset.sourceJSON);
+              break;
+            case 'tilemap':
+              this.load.tilemap(assetKey, asset.source, null, Phaser.Tilemap.TILED_JSON);
+              break;
+            default:
+              break;
+          }
         }
-    }, {
-        key: 'preload',
-        value: function preload() {
-            //Preload Bar
-            this.preloadBar = this.add.sprite(this.world.centerX, this.world.centerY, 'preloadbar', 0);
-            this.preloadBar.anchor.setTo(0.5);
-            this.preloadBar.scale.setTo(5);
+      }
 
-            //Other Sprites
-            this.load.setPreloadSprite(this.preloadBar);
+      //Preload Bar
+      this.preloadBar = this.add.sprite(this.world.centerX, this.world.centerY, 'preloadbar', 0);
+      this.preloadBar.anchor.setTo(0.5);
+      this.preloadBar.scale.setTo(5);
 
-            //Atlases for Player Character
-            this.load.atlasXML('blueGunGuy', '../../assets/images/blueGunGuyAtlas.png', '../../assets/images/blueGunGuyAtlasXML.xml');
-            this.load.atlasXML('greenGunGuy', '../../assets/images/greenGunGuyAtlas.png', '../../assets/images/greenGunGuyAtlasXML.xml');
-        }
-    }, {
-        key: 'create',
-        value: function create() {
-            this.state.start('ZombieGameState', true, false);
-        }
-    }]);
+      //Other Sprites
+      this.load.setPreloadSprite(this.preloadBar);
+    }
+  }, {
+    key: 'create',
+    value: function create() {
+      this.state.start('ZombieGameState', true, false, this.levelData);
+    }
+  }]);
 
-    return Preload;
+  return Preload;
 }(Phaser.State);
 
 exports.default = Preload;
 
 /***/ }),
 /* 283 */
-/***/ (function(module, exports, __webpack_require__) {
+/***/ (function(module, exports) {
 
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
-var _store = __webpack_require__(50);
-
-var _store2 = _interopRequireDefault(_store);
-
-var _playersReducer = __webpack_require__(51);
-
-var _emitCurrentState = __webpack_require__(147);
-
-var _emitCurrentState2 = _interopRequireDefault(_emitCurrentState);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
-
-function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
-
-var R = __webpack_require__(100);
-var throttle = __webpack_require__(315);
-
-var remotePlayerSprites = {};
-var self;
-
-var ZombieGameState = function (_Phaser$State) {
-  _inherits(ZombieGameState, _Phaser$State);
-
-  function ZombieGameState() {
-    _classCallCheck(this, ZombieGameState);
-
-    return _possibleConstructorReturn(this, (ZombieGameState.__proto__ || Object.getPrototypeOf(ZombieGameState)).apply(this, arguments));
-  }
-
-  _createClass(ZombieGameState, [{
-    key: 'init',
-    value: function init() {
-      //set constants for game
-      this.RUNNING_SPEED = 180;
-      self = this;
-
-      //cursor keys
-      //Control Mechanics
-      this.cursors = this.input.keyboard.createCursorKeys();
-      // this.cursors.spacebar = this.input.keyboard.addKey(Phaser.Keyboard.SPACEBAR);
-
-      //Attach and bind functions
-      this.destroyCurrentPlayerSprite = this.destroyCurrentPlayerSprite.bind(this);
-      this.handleRemotePlayerLeave = this.handleRemotePlayerLeave.bind(this);
-      socket.on('destroyCurrentPlayerSprite', this.destroyCurrentPlayerSprite);
-      socket.on('playerLeaveGame', this.handleRemotePlayerLeave);
-    }
-  }, {
-    key: 'preload',
-    value: function preload() {
-      //load assets that are specific for this level
-    }
-  }, {
-    key: 'create',
-    value: function create() {
-      //create game set up
-      console.log('Local state right before load level: ', _store2.default.getState());
-      this.loadLevel();
-      //set interval to emit currentPlayer to server
-      //if we have a current player
-      if (this.currentPlayerSprite) {
-        var emitInterval = (0, _emitCurrentState2.default)(socket);
-      }
-    }
-  }, {
-    key: 'update',
-    value: function update() {
-      //NOTE: Collision between SpriteA and SpriteB - callback takes in SpriteA and SpriteB
-
-      this.updateRemotePlayers();
-      if (this.currentPlayerSprite) {
-        this.handleInput();
-        this.dispatchCurrentPlayer();
-      }
-      //every 32ms send package to server with position
-    }
-
-    //////////////////////////
-    /// Non Phaser Methods ///
-    //////////////////////////
-
-  }, {
-    key: 'loadLevel',
-    value: function loadLevel() {
-      // this.gameBackground = this.add.sprite(this.world.centerX, this.world.centerY, 'snowLandscape');
-      // this.gameBackground.scale.setTo(0.9, 0.9);
-      // this.gameBackground.anchor.setTo(0.5);
-
-      //resize the world to fit the layer
-      this.world.resize(500, 500);
-
-      var state = _store2.default.getState();
-      console.log('load level begin with this state', state);
-
-      //create a current player
-      console.log('what is state.players.playerStates on loadLevel', state.players.playerStates);
-
-      var currentPlayer = void 0;
-      if (state.players.currentPlayer.socketId) {
-        currentPlayer = state.players.currentPlayer;
-
-        //TODO: make server assign sprite keys
-        this.currentPlayerSprite = this.add.sprite(currentPlayer.x, currentPlayer.y, 'blueGunGuy');
-
-        //add physics to current player
-        this.currentPlayerSprite.anchor.set(0.5);
-        this.physics.arcade.enable(this.currentPlayerSprite);
-        this.currentPlayerSprite.collideWorldBounds = true;
-
-        //store on game Object
-        console.log('created current Player: ', this.currentPlayerSprite);
-
-        //create currentPlayer
-        var currPlayerState = {
-          socketId: socket.id,
-          x: this.currentPlayerSprite.x,
-          y: this.currentPlayerSprite.y,
-          animationDirection: 'still'
-          //TODO: health, fire, guns, bullets, frame? etc
-        };
-
-        console.log('Where is  current player on game start?', currPlayerState);
-
-        _store2.default.dispatch((0, _playersReducer.updateCurrentPlayer)(currPlayerState));
-        console.log('end of load level local store looks like: ', _store2.default.getState());
-      }
-      R.forEachObjIndexed(this.createRemotePlayerSprite, state.players.playerStates);
-    }
-  }, {
-    key: 'handleInput',
-    value: function handleInput() {
-      if (this.currentPlayerSprite) {
-        if (this.cursors.left.isDown || this.cursors.right.isDown || this.cursors.up.isDown || this.cursors.down.isDown) {
-          if (this.cursors.left.isDown) {
-            this.currentPlayerSprite.body.velocity.x = -this.RUNNING_SPEED;
-            this.currentPlayerSprite.animationDirection = 'left';
-          }
-          if (this.cursors.right.isDown) {
-            this.currentPlayerSprite.body.velocity.x = this.RUNNING_SPEED;
-            this.currentPlayerSprite.animationDirection = 'right';
-          }
-          if (this.cursors.up.isDown) {
-            this.currentPlayerSprite.body.velocity.y = -this.RUNNING_SPEED;
-            this.currentPlayerSprite.animationDirection = 'up';
-          }
-          if (this.cursors.down.isDown) {
-            this.currentPlayerSprite.body.velocity.y = this.RUNNING_SPEED;
-            this.currentPlayerSprite.animationDirection = 'down';
-          }
-        } else {
-          //no cursors down
-          this.currentPlayerSprite.body.velocity.x = 0;
-          this.currentPlayerSprite.body.velocity.y = 0;
-          this.currentPlayerSprite.animationDirection = 'still';
-        }
-      }
-    }
-  }, {
-    key: 'dispatchCurrentPlayer',
-    value: function dispatchCurrentPlayer() {
-      var currentPlayer = {
-        x: this.currentPlayerSprite.x,
-        y: this.currentPlayerSprite.y,
-        animationDirection: this.currentPlayerSprite.animationDirection,
-        socketId: socket.id
-      };
-      _store2.default.dispatch((0, _playersReducer.updateCurrentPlayer)(currentPlayer));
-    }
-
-    //TODO: move remote player updates to other file
-
-  }, {
-    key: 'updateRemotePlayers',
-    value: function updateRemotePlayers() {
-      this.players = _store2.default.getState().players.playerStates;
-      if (this.players[socket.id]) delete this.players[socket.id];
-      //then update each player from the server
-      R.forEachObjIndexed(this.updateRemotePlayer, this.players);
-    }
-  }, {
-    key: 'updateRemotePlayer',
-    value: function updateRemotePlayer(playerState) {
-      if (remotePlayerSprites[playerState.socketId]) {
-        remotePlayerSprites[playerState.socketId].x = playerState.x;
-        remotePlayerSprites[playerState.socketId].y = playerState.y;
-        //TODO: Implement other properties
-      }
-    }
-  }, {
-    key: 'destroyCurrentPlayerSprite',
-    value: function destroyCurrentPlayerSprite() {
-      if (this.currentPlayerSprite) {
-        this.currentPlayerSprite.destroy();
-        delete this.currentPlayerSprite;
-        console.log('deleted and destroyed this.currentPlayerSprite');
-        var state = _store2.default.getState();
-        console.log('state after destroy current player');
-        console.dir(state, { depth: 3 });
-      }
-    }
-  }, {
-    key: 'handleRemotePlayerLeave',
-    value: function handleRemotePlayerLeave(playerSocketId) {
-      _store2.default.dispatch((0, _playersReducer.playerLeaveGame)(playerSocketId));
-      var state = _store2.default.getState();
-      //Kill Remote Player Sprite
-      if (remotePlayerSprites[playerSocketId]) {
-        console.log('we are removing remote player sprite');
-        remotePlayerSprites[playerSocketId].destroy();
-        delete remotePlayerSprites[playerSocketId];
-      }
-    }
-  }, {
-    key: 'createRemotePlayerSprite',
-    value: function createRemotePlayerSprite(playerState) {
-      if (playerState.socketId !== socket.id) {
-        console.log('creating remote player with this playerState: ', playerState);
-        var remoteSprite = self.game.add.sprite(playerState.x, playerState.y, 'blueGunGuy');
-        remotePlayerSprites[playerState.socketId] = remoteSprite;
-      }
-    }
-  }]);
-
-  return ZombieGameState;
-}(Phaser.State);
-
-exports.default = ZombieGameState;
+throw new Error("Module build failed: SyntaxError: Unexpected token, expected ; (378:17)\n\n\u001b[0m \u001b[90m 376 | \u001b[39m\u001b[90m  }*/\u001b[39m\n \u001b[90m 377 | \u001b[39m\n\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 378 | \u001b[39m  lockPointer () {\n \u001b[90m     | \u001b[39m                 \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\n \u001b[90m 379 | \u001b[39m    document\u001b[33m.\u001b[39mbody\u001b[33m.\u001b[39mstyle\u001b[33m.\u001b[39mcursor \u001b[33m=\u001b[39m \u001b[32m'none'\u001b[39m\u001b[33m;\u001b[39m\n \u001b[90m 380 | \u001b[39m    \u001b[36mthis\u001b[39m\u001b[33m.\u001b[39mgame\u001b[33m.\u001b[39mcanvas\u001b[33m.\u001b[39maddEventListener(\u001b[32m'mousemove'\u001b[39m\u001b[33m,\u001b[39m () \u001b[33m=>\u001b[39m {\n \u001b[90m 381 | \u001b[39m      \u001b[36mthis\u001b[39m\u001b[33m.\u001b[39mpointer\u001b[33m.\u001b[39mx \u001b[33m=\u001b[39m \u001b[36mthis\u001b[39m\u001b[33m.\u001b[39mgame\u001b[33m.\u001b[39minput\u001b[33m.\u001b[39mactivePointer\u001b[33m.\u001b[39mworldX\u001b[33m;\u001b[39m\u001b[0m\n");
 
 /***/ }),
 /* 284 */
@@ -20774,12 +20582,11 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 
 function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
 
-function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
-/**
- * GenZed
- * A top down multiplyer, battle arena shooter, king of hill with zombies
- * Created by: Charlie Shi, Christopher Rizzo, Ryan Skinner & Jacob Cohen
- */
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; } /**
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                * GenZed
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                * A top down multiplyer, battle arena shooter, king of hill with zombies
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                * Created by: Charlie Shi, Christopher Rizzo, Ryan Skinner & Jacob Cohen
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                */
 
 var GenZed = function (_Phaser$Game) {
     _inherits(GenZed, _Phaser$Game);
@@ -20789,10 +20596,10 @@ var GenZed = function (_Phaser$Game) {
 
         var width = widthParam || '100%';
         var height = heightParam || '100%';
-        var renderer = rendererParam || Phaser.CANVAS;
+        var renderer = rendererParam || Phaser.AUTO;
 
         //TODO: all game states go here
-        var _this = _possibleConstructorReturn(this, (GenZed.__proto__ || Object.getPrototypeOf(GenZed)).call(this, width, height, Phaser.CANVAS, parent, null));
+        var _this = _possibleConstructorReturn(this, (GenZed.__proto__ || Object.getPrototypeOf(GenZed)).call(this, width, height, renderer, parent, null));
 
         _this.state.add('BootState', new _boot2.default());
         _this.state.add('PreloadState', new _preload2.default());
@@ -22893,452 +22700,7 @@ function isObjectLike(value) {
 
 
 /***/ }),
-/* 315 */
-/***/ (function(module, exports, __webpack_require__) {
-
-/* WEBPACK VAR INJECTION */(function(global) {/**
- * lodash (Custom Build) <https://lodash.com/>
- * Build: `lodash modularize exports="npm" -o ./`
- * Copyright jQuery Foundation and other contributors <https://jquery.org/>
- * Released under MIT license <https://lodash.com/license>
- * Based on Underscore.js 1.8.3 <http://underscorejs.org/LICENSE>
- * Copyright Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
- */
-
-/** Used as the `TypeError` message for "Functions" methods. */
-var FUNC_ERROR_TEXT = 'Expected a function';
-
-/** Used as references for various `Number` constants. */
-var NAN = 0 / 0;
-
-/** `Object#toString` result references. */
-var symbolTag = '[object Symbol]';
-
-/** Used to match leading and trailing whitespace. */
-var reTrim = /^\s+|\s+$/g;
-
-/** Used to detect bad signed hexadecimal string values. */
-var reIsBadHex = /^[-+]0x[0-9a-f]+$/i;
-
-/** Used to detect binary string values. */
-var reIsBinary = /^0b[01]+$/i;
-
-/** Used to detect octal string values. */
-var reIsOctal = /^0o[0-7]+$/i;
-
-/** Built-in method references without a dependency on `root`. */
-var freeParseInt = parseInt;
-
-/** Detect free variable `global` from Node.js. */
-var freeGlobal = typeof global == 'object' && global && global.Object === Object && global;
-
-/** Detect free variable `self`. */
-var freeSelf = typeof self == 'object' && self && self.Object === Object && self;
-
-/** Used as a reference to the global object. */
-var root = freeGlobal || freeSelf || Function('return this')();
-
-/** Used for built-in method references. */
-var objectProto = Object.prototype;
-
-/**
- * Used to resolve the
- * [`toStringTag`](http://ecma-international.org/ecma-262/7.0/#sec-object.prototype.tostring)
- * of values.
- */
-var objectToString = objectProto.toString;
-
-/* Built-in method references for those with the same name as other `lodash` methods. */
-var nativeMax = Math.max,
-    nativeMin = Math.min;
-
-/**
- * Gets the timestamp of the number of milliseconds that have elapsed since
- * the Unix epoch (1 January 1970 00:00:00 UTC).
- *
- * @static
- * @memberOf _
- * @since 2.4.0
- * @category Date
- * @returns {number} Returns the timestamp.
- * @example
- *
- * _.defer(function(stamp) {
- *   console.log(_.now() - stamp);
- * }, _.now());
- * // => Logs the number of milliseconds it took for the deferred invocation.
- */
-var now = function() {
-  return root.Date.now();
-};
-
-/**
- * Creates a debounced function that delays invoking `func` until after `wait`
- * milliseconds have elapsed since the last time the debounced function was
- * invoked. The debounced function comes with a `cancel` method to cancel
- * delayed `func` invocations and a `flush` method to immediately invoke them.
- * Provide `options` to indicate whether `func` should be invoked on the
- * leading and/or trailing edge of the `wait` timeout. The `func` is invoked
- * with the last arguments provided to the debounced function. Subsequent
- * calls to the debounced function return the result of the last `func`
- * invocation.
- *
- * **Note:** If `leading` and `trailing` options are `true`, `func` is
- * invoked on the trailing edge of the timeout only if the debounced function
- * is invoked more than once during the `wait` timeout.
- *
- * If `wait` is `0` and `leading` is `false`, `func` invocation is deferred
- * until to the next tick, similar to `setTimeout` with a timeout of `0`.
- *
- * See [David Corbacho's article](https://css-tricks.com/debouncing-throttling-explained-examples/)
- * for details over the differences between `_.debounce` and `_.throttle`.
- *
- * @static
- * @memberOf _
- * @since 0.1.0
- * @category Function
- * @param {Function} func The function to debounce.
- * @param {number} [wait=0] The number of milliseconds to delay.
- * @param {Object} [options={}] The options object.
- * @param {boolean} [options.leading=false]
- *  Specify invoking on the leading edge of the timeout.
- * @param {number} [options.maxWait]
- *  The maximum time `func` is allowed to be delayed before it's invoked.
- * @param {boolean} [options.trailing=true]
- *  Specify invoking on the trailing edge of the timeout.
- * @returns {Function} Returns the new debounced function.
- * @example
- *
- * // Avoid costly calculations while the window size is in flux.
- * jQuery(window).on('resize', _.debounce(calculateLayout, 150));
- *
- * // Invoke `sendMail` when clicked, debouncing subsequent calls.
- * jQuery(element).on('click', _.debounce(sendMail, 300, {
- *   'leading': true,
- *   'trailing': false
- * }));
- *
- * // Ensure `batchLog` is invoked once after 1 second of debounced calls.
- * var debounced = _.debounce(batchLog, 250, { 'maxWait': 1000 });
- * var source = new EventSource('/stream');
- * jQuery(source).on('message', debounced);
- *
- * // Cancel the trailing debounced invocation.
- * jQuery(window).on('popstate', debounced.cancel);
- */
-function debounce(func, wait, options) {
-  var lastArgs,
-      lastThis,
-      maxWait,
-      result,
-      timerId,
-      lastCallTime,
-      lastInvokeTime = 0,
-      leading = false,
-      maxing = false,
-      trailing = true;
-
-  if (typeof func != 'function') {
-    throw new TypeError(FUNC_ERROR_TEXT);
-  }
-  wait = toNumber(wait) || 0;
-  if (isObject(options)) {
-    leading = !!options.leading;
-    maxing = 'maxWait' in options;
-    maxWait = maxing ? nativeMax(toNumber(options.maxWait) || 0, wait) : maxWait;
-    trailing = 'trailing' in options ? !!options.trailing : trailing;
-  }
-
-  function invokeFunc(time) {
-    var args = lastArgs,
-        thisArg = lastThis;
-
-    lastArgs = lastThis = undefined;
-    lastInvokeTime = time;
-    result = func.apply(thisArg, args);
-    return result;
-  }
-
-  function leadingEdge(time) {
-    // Reset any `maxWait` timer.
-    lastInvokeTime = time;
-    // Start the timer for the trailing edge.
-    timerId = setTimeout(timerExpired, wait);
-    // Invoke the leading edge.
-    return leading ? invokeFunc(time) : result;
-  }
-
-  function remainingWait(time) {
-    var timeSinceLastCall = time - lastCallTime,
-        timeSinceLastInvoke = time - lastInvokeTime,
-        result = wait - timeSinceLastCall;
-
-    return maxing ? nativeMin(result, maxWait - timeSinceLastInvoke) : result;
-  }
-
-  function shouldInvoke(time) {
-    var timeSinceLastCall = time - lastCallTime,
-        timeSinceLastInvoke = time - lastInvokeTime;
-
-    // Either this is the first call, activity has stopped and we're at the
-    // trailing edge, the system time has gone backwards and we're treating
-    // it as the trailing edge, or we've hit the `maxWait` limit.
-    return (lastCallTime === undefined || (timeSinceLastCall >= wait) ||
-      (timeSinceLastCall < 0) || (maxing && timeSinceLastInvoke >= maxWait));
-  }
-
-  function timerExpired() {
-    var time = now();
-    if (shouldInvoke(time)) {
-      return trailingEdge(time);
-    }
-    // Restart the timer.
-    timerId = setTimeout(timerExpired, remainingWait(time));
-  }
-
-  function trailingEdge(time) {
-    timerId = undefined;
-
-    // Only invoke if we have `lastArgs` which means `func` has been
-    // debounced at least once.
-    if (trailing && lastArgs) {
-      return invokeFunc(time);
-    }
-    lastArgs = lastThis = undefined;
-    return result;
-  }
-
-  function cancel() {
-    if (timerId !== undefined) {
-      clearTimeout(timerId);
-    }
-    lastInvokeTime = 0;
-    lastArgs = lastCallTime = lastThis = timerId = undefined;
-  }
-
-  function flush() {
-    return timerId === undefined ? result : trailingEdge(now());
-  }
-
-  function debounced() {
-    var time = now(),
-        isInvoking = shouldInvoke(time);
-
-    lastArgs = arguments;
-    lastThis = this;
-    lastCallTime = time;
-
-    if (isInvoking) {
-      if (timerId === undefined) {
-        return leadingEdge(lastCallTime);
-      }
-      if (maxing) {
-        // Handle invocations in a tight loop.
-        timerId = setTimeout(timerExpired, wait);
-        return invokeFunc(lastCallTime);
-      }
-    }
-    if (timerId === undefined) {
-      timerId = setTimeout(timerExpired, wait);
-    }
-    return result;
-  }
-  debounced.cancel = cancel;
-  debounced.flush = flush;
-  return debounced;
-}
-
-/**
- * Creates a throttled function that only invokes `func` at most once per
- * every `wait` milliseconds. The throttled function comes with a `cancel`
- * method to cancel delayed `func` invocations and a `flush` method to
- * immediately invoke them. Provide `options` to indicate whether `func`
- * should be invoked on the leading and/or trailing edge of the `wait`
- * timeout. The `func` is invoked with the last arguments provided to the
- * throttled function. Subsequent calls to the throttled function return the
- * result of the last `func` invocation.
- *
- * **Note:** If `leading` and `trailing` options are `true`, `func` is
- * invoked on the trailing edge of the timeout only if the throttled function
- * is invoked more than once during the `wait` timeout.
- *
- * If `wait` is `0` and `leading` is `false`, `func` invocation is deferred
- * until to the next tick, similar to `setTimeout` with a timeout of `0`.
- *
- * See [David Corbacho's article](https://css-tricks.com/debouncing-throttling-explained-examples/)
- * for details over the differences between `_.throttle` and `_.debounce`.
- *
- * @static
- * @memberOf _
- * @since 0.1.0
- * @category Function
- * @param {Function} func The function to throttle.
- * @param {number} [wait=0] The number of milliseconds to throttle invocations to.
- * @param {Object} [options={}] The options object.
- * @param {boolean} [options.leading=true]
- *  Specify invoking on the leading edge of the timeout.
- * @param {boolean} [options.trailing=true]
- *  Specify invoking on the trailing edge of the timeout.
- * @returns {Function} Returns the new throttled function.
- * @example
- *
- * // Avoid excessively updating the position while scrolling.
- * jQuery(window).on('scroll', _.throttle(updatePosition, 100));
- *
- * // Invoke `renewToken` when the click event is fired, but not more than once every 5 minutes.
- * var throttled = _.throttle(renewToken, 300000, { 'trailing': false });
- * jQuery(element).on('click', throttled);
- *
- * // Cancel the trailing throttled invocation.
- * jQuery(window).on('popstate', throttled.cancel);
- */
-function throttle(func, wait, options) {
-  var leading = true,
-      trailing = true;
-
-  if (typeof func != 'function') {
-    throw new TypeError(FUNC_ERROR_TEXT);
-  }
-  if (isObject(options)) {
-    leading = 'leading' in options ? !!options.leading : leading;
-    trailing = 'trailing' in options ? !!options.trailing : trailing;
-  }
-  return debounce(func, wait, {
-    'leading': leading,
-    'maxWait': wait,
-    'trailing': trailing
-  });
-}
-
-/**
- * Checks if `value` is the
- * [language type](http://www.ecma-international.org/ecma-262/7.0/#sec-ecmascript-language-types)
- * of `Object`. (e.g. arrays, functions, objects, regexes, `new Number(0)`, and `new String('')`)
- *
- * @static
- * @memberOf _
- * @since 0.1.0
- * @category Lang
- * @param {*} value The value to check.
- * @returns {boolean} Returns `true` if `value` is an object, else `false`.
- * @example
- *
- * _.isObject({});
- * // => true
- *
- * _.isObject([1, 2, 3]);
- * // => true
- *
- * _.isObject(_.noop);
- * // => true
- *
- * _.isObject(null);
- * // => false
- */
-function isObject(value) {
-  var type = typeof value;
-  return !!value && (type == 'object' || type == 'function');
-}
-
-/**
- * Checks if `value` is object-like. A value is object-like if it's not `null`
- * and has a `typeof` result of "object".
- *
- * @static
- * @memberOf _
- * @since 4.0.0
- * @category Lang
- * @param {*} value The value to check.
- * @returns {boolean} Returns `true` if `value` is object-like, else `false`.
- * @example
- *
- * _.isObjectLike({});
- * // => true
- *
- * _.isObjectLike([1, 2, 3]);
- * // => true
- *
- * _.isObjectLike(_.noop);
- * // => false
- *
- * _.isObjectLike(null);
- * // => false
- */
-function isObjectLike(value) {
-  return !!value && typeof value == 'object';
-}
-
-/**
- * Checks if `value` is classified as a `Symbol` primitive or object.
- *
- * @static
- * @memberOf _
- * @since 4.0.0
- * @category Lang
- * @param {*} value The value to check.
- * @returns {boolean} Returns `true` if `value` is a symbol, else `false`.
- * @example
- *
- * _.isSymbol(Symbol.iterator);
- * // => true
- *
- * _.isSymbol('abc');
- * // => false
- */
-function isSymbol(value) {
-  return typeof value == 'symbol' ||
-    (isObjectLike(value) && objectToString.call(value) == symbolTag);
-}
-
-/**
- * Converts `value` to a number.
- *
- * @static
- * @memberOf _
- * @since 4.0.0
- * @category Lang
- * @param {*} value The value to process.
- * @returns {number} Returns the number.
- * @example
- *
- * _.toNumber(3.2);
- * // => 3.2
- *
- * _.toNumber(Number.MIN_VALUE);
- * // => 5e-324
- *
- * _.toNumber(Infinity);
- * // => Infinity
- *
- * _.toNumber('3.2');
- * // => 3.2
- */
-function toNumber(value) {
-  if (typeof value == 'number') {
-    return value;
-  }
-  if (isSymbol(value)) {
-    return NAN;
-  }
-  if (isObject(value)) {
-    var other = typeof value.valueOf == 'function' ? value.valueOf() : value;
-    value = isObject(other) ? (other + '') : other;
-  }
-  if (typeof value != 'string') {
-    return value === 0 ? value : +value;
-  }
-  value = value.replace(reTrim, '');
-  var isBinary = reIsBinary.test(value);
-  return (isBinary || reIsOctal.test(value))
-    ? freeParseInt(value.slice(2), isBinary ? 2 : 8)
-    : (reIsBadHex.test(value) ? NAN : +value);
-}
-
-module.exports = throttle;
-
-/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(65)))
-
-/***/ }),
+/* 315 */,
 /* 316 */
 /***/ (function(module, exports, __webpack_require__) {
 

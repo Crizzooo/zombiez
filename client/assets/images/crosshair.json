@@ -1,0 +1,20 @@
+{"frames": {
+
+"reticle_box_001.png":
+{
+	"frame": {"x":2,"y":2,"w":13,"h":13},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":13,"h":13},
+	"sourceSize": {"w":13,"h":13}
+}},
+"meta": {
+	"app": "http://www.codeandweb.com/texturepacker",
+	"version": "1.0",
+	"image": "crosshair.png",
+	"format": "RGBA8888",
+	"size": {"w":17,"h":17},
+	"scale": "1",
+	"smartupdate": "$TexturePacker:SmartUpdate:77a2bb1c193d47bcbc2e0f600daba317:0fe20b02df69a1563ba66ad43f637e41:6bac4185c225db9ea406e2290ff3bae2$"
+}
+}
