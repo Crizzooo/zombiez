@@ -3,6 +3,8 @@
  */
 
 import Prefab from './Prefab';
+import HealthHeart from './healthbar';
+import Heart from './healthHearts';
 
 export default class Player extends Prefab {
     constructor(game, name, position, properties) {
@@ -24,6 +26,28 @@ export default class Player extends Prefab {
       this.body.collideWorldBounds = true;
       this.game.physics.arcade.enable(this);
 
+
+	    //Healthhearts, top left hearts
+	    this.health = new HealthHeart(this.gameState, 'playerHealthHearts', {x: 0, y:0},
+		    {
+		    	group: 'ui'
+		    }
+	    );
+
+	    for (let i = 0; i < 10; i++) {
+		    this.health.addHearts(this.game.add.existing(new Heart(this.gameState, 'playerHeart' + i, {x: (32 * i), y: 0},
+			    {
+			      texture: 'playerHearts',
+				    group: 'ui',
+				    initial: 2
+			    })
+		    ))
+	    }
+
+	    this.game.add.existing(this.health);
+
+
+      //Health text, to be replaced by healthbar
       const style = {
         font: "bold 16px Arial",
         fill: "#FFF",
@@ -32,9 +56,9 @@ export default class Player extends Prefab {
       };
 
       this.healthbar = this.game.add.text(
-      this.position.x - 10,
-      this.position.y - 10,
-      this.stats.health, style);
+	      this.position.x - 10,
+	      this.position.y - 10,
+	      this.stats.health, style);
   }
 
   receiveDamage(damage) {
