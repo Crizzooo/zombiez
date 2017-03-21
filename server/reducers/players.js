@@ -35,29 +35,29 @@ const initialState = { playerStates: {} };
 
 const playerReducers = (state = initialState, action) => {
   let newState = Object.assign({}, state);
+  let newPlayerStates = Object.assign({}, state.playerStates);
   switch (action.type) {
     case ADD_PLAYER:
-        //update player state at socket.id
         console.log('ADDING PLAYER TO SERVER STATE: ', action.playerState);
-        newState.playerStates[action.playerState.socketId] = action.playerState;
+        newPlayerStates[action.playerState.socketId] = action.playerState;
+        newState.playerStates[action.playerState.socketId] = newPlayerStates;
       break;
 
     case UPDATE_PLAYER:
-      newState.playerStates[action.playerToUpdate.socketId] = action.playerToUpdate
+      newPlayerStates[action.playerToUpdate.socketId] = action.playerToUpdate;
+      newState.playerStates = newPlayerStates;
       break;
 
     case RESET_PLAYERS:
       newState.playerStates = {};
-      //newState = initialState DOESNT WORK
       break;
 
     case REMOVE_PLAYER:
       console.log('server received remove player: ', action.id);
-      if (newState.playerStates[action.id]){
-        console.log('pre remove player in players: ', newState.playerStates);
-        delete newState.playerStates[action.id];
-        console.log('post remove player in players player: ', newState.playerStates);
+      if (newPlayerStates.playerStates[action.id]){
+        delete newPlayerStates.playerStates[action.id];
       }
+      newState.playerStates = newPlayerStates;
       break;
 
     default:
