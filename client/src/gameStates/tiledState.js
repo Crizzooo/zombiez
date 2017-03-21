@@ -89,22 +89,22 @@ export default class TiledState extends Phaser.State {
 	}
 
 	//This creates the obstacles pathfinding will need to path around
-	// createWorldGrid () {
-	// 	let obstaclesLayer, rowIndex, columnIndex, worldGrid;
-    //
-	// 	obstaclesLayer = this.map.layers[1];
-    //
-	// 	//todo: need to add other obstacles to worldGrid
-	// 	console.log('obstacles layer', obstaclesLayer)
-    //
-	// 	worldGrid = [];
-	// 	for (rowIndex = 0; rowIndex < this.map.height; rowIndex += 1) {
-	// 		worldGrid.push([]);
-	// 		for (columnIndex = 0; columnIndex < this.map.width; columnIndex += 1) {
-	// 			worldGrid[rowIndex].push(obstaclesLayer.data[rowIndex][columnIndex].index);
-	// 		}
-	// 	}
-    //
-	// 	return worldGrid;
-	// }
+	createWorldGrid () {
+		let obstaclesLayer, rowIndex, columnIndex, worldGrid;
+
+		obstaclesLayer = this.map.layers[1];
+
+		//todo: need to add other obstacles to worldGrid
+		console.log('obstacles layer', obstaclesLayer)
+
+		worldGrid = [];
+		for (rowIndex = 0; rowIndex < this.map.height; rowIndex += 1) {
+			worldGrid.push([]);
+			for (columnIndex = 0; columnIndex < this.map.width; columnIndex += 1) {
+				worldGrid[rowIndex].push(obstaclesLayer.data[rowIndex][columnIndex].index);
+			}
+		}
+
+		return worldGrid;
+	}
 }
