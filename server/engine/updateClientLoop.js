@@ -25,7 +25,7 @@ let playerPositions = [
   {x: 270, y: 270}
 ]
 //TODO: Implement correct sprite keys for ZOMBIE GUN GAME
-let playerSpriteKeys = [ 'blueGunGuy', 'greenGunGuy'];
+let playerSpriteKeys = [ 'playerSpriteSheet', 'playerSpriteSheet'];
 
 //This function is used to take the server lobby state, and initialize player objects
 const convertLobbyers = (lobbyers) => {

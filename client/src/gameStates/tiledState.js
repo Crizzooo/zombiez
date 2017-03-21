@@ -26,8 +26,8 @@ export default class TiledState extends Phaser.State {
         this.levelData = levelData;
 
         //Scaling the Game Window for a pixelated effect
-        this.game.scale.scaleMode = Phaser.ScaleManager.USER_SCALE;
-        this.game.scale.setUserScale(8, 8, 1000, 1000);
+        // this.game.scale.scaleMode = Phaser.ScaleManager.USER_SCALE;
+        // this.game.scale.setUserScale(8, 8, 1000, 1000);
         //this.game.scale.setUserScale(2, 2, 200, 200);
         this.game.renderer.renderSession.roundPixels = true;
         Phaser.Canvas.setImageRenderingCrisp(this.game.canvas);
@@ -89,22 +89,22 @@ export default class TiledState extends Phaser.State {
 	}
 
 	//This creates the obstacles pathfinding will need to path around
-	createWorldGrid () {
-		let obstaclesLayer, rowIndex, columnIndex, worldGrid;
-
-		obstaclesLayer = this.map.layers[1];
-
-		//todo: need to add other obstacles to worldGrid
-		console.log('obstacles layer', obstaclesLayer)
-
-		worldGrid = [];
-		for (rowIndex = 0; rowIndex < this.map.height; rowIndex += 1) {
-			worldGrid.push([]);
-			for (columnIndex = 0; columnIndex < this.map.width; columnIndex += 1) {
-				worldGrid[rowIndex].push(obstaclesLayer.data[rowIndex][columnIndex].index);
-			}
-		}
-
-		return worldGrid;
-	}
+	// createWorldGrid () {
+	// 	let obstaclesLayer, rowIndex, columnIndex, worldGrid;
+    //
+	// 	obstaclesLayer = this.map.layers[1];
+    //
+	// 	//todo: need to add other obstacles to worldGrid
+	// 	console.log('obstacles layer', obstaclesLayer)
+    //
+	// 	worldGrid = [];
+	// 	for (rowIndex = 0; rowIndex < this.map.height; rowIndex += 1) {
+	// 		worldGrid.push([]);
+	// 		for (columnIndex = 0; columnIndex < this.map.width; columnIndex += 1) {
+	// 			worldGrid[rowIndex].push(obstaclesLayer.data[rowIndex][columnIndex].index);
+	// 		}
+	// 	}
+    //
+	// 	return worldGrid;
+	// }
 }

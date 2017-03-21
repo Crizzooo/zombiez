@@ -7,7 +7,7 @@ import Prefab from './Prefab';
 export default class Player extends Prefab {
     constructor(game, name, position, properties) {
       super(game, name, position, properties);
-
+      console.log("THIS AND PARENT", this, this.parent);
       this.anchor.setTo(0.5);
       this.animations.add('right', [24, 8, 5, 20, 12, 13], 10, true);
       this.animations.add('left', [17, 10, 5, 19, 8, 9], 10, true);
