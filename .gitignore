@@ -1,6 +1,5 @@
+*~
 node_modules
-dist
-
 bundle.js
 bundle.min.js
 
