@@ -37,7 +37,8 @@ const convertLobbyers = (lobbyers) => {
       health: 100,
       animationDirection: 'still',
       spriteKey,
-      socketId: lobbyObj.socketId
+      socketId: lobbyObj.socketId,
+      name: lobbyObj.name
     };
   });
 };

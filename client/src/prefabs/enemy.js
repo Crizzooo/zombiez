@@ -33,7 +33,7 @@ export default class Enemy extends Prefab {
     }
 
     followPath (path) {
-    	console.log('inside path', path);
+    	// console.log('inside path', path);
 
     	let movingTween, pathLength
 
@@ -62,4 +62,3 @@ export default class Enemy extends Prefab {
 	    return this.gameState.groups.player.children[0].position
     }
 }
-

@@ -151,7 +151,7 @@ export default class ZombieGameState extends TiledState {
     if (state.players.currentPlayer.socketId) {
 	    currentPlayer = state.players.currentPlayer;
 	    //TODO: make server assign sprite keys
-	    let playerPrefab = this.createPrefab('player',
+	    let playerPrefab = this.createPrefab(currentPlayer.name,
 	      {
 	        type: 'player',
 	        properties: {
@@ -159,7 +159,7 @@ export default class ZombieGameState extends TiledState {
 	          initial: 18,
 	          texture: 'playerSpriteSheet'
 	        },
-	      }, {x: 225, y: 225});
+	      }, {x: 225, y: 225}); //change to new location from server
 
       this.currentPlayerSprite = playerPrefab;
 
@@ -171,7 +171,8 @@ export default class ZombieGameState extends TiledState {
         socketId: socket.id,
         x: this.currentPlayerSprite.x,
         y: this.currentPlayerSprite.y,
-        animationDirection: 'still'
+        animationDirection: 'still',
+        name: currentPlayer.name
         //TODO: health, fire, guns, bullets, frame? etc
       }
 
@@ -179,6 +180,7 @@ export default class ZombieGameState extends TiledState {
       store.dispatch(updateCurrentPlayer(currPlayerState));
       console.log('end of load level local store looks like: ', store.getState());
     }
+    console.log('Creating Sprites for each player in this: ', state.players.playerStates);
     R.forEachObjIndexed(this.createRemotePlayerSprite, state.players.playerStates);
   }
 
@@ -269,6 +271,7 @@ export default class ZombieGameState extends TiledState {
     let currentPlayer = {
       x: this.currentPlayerSprite.x,
       y: this.currentPlayerSprite.y,
+      name: this.currentPlayerSprite.name,
       //animationDirection: this.currentPlayerSprite.animationDirection,
       socketId: socket.id
     }
@@ -306,7 +309,7 @@ export default class ZombieGameState extends TiledState {
 
   handleRemotePlayerLeave(playerSocketId){
     store.dispatch(playerLeaveGame(playerSocketId));
-    let state = store.getState();
+    //let state = store.getState();
 
     //Kill Remote Player Sprite
     if (remotePlayerSprites[playerSocketId]){
@@ -326,11 +329,28 @@ export default class ZombieGameState extends TiledState {
   }
 
   createRemotePlayerSprite(playerState){
+    console.log('May create remote player with playerState', playerState);
+    //TODO: name needs to be unique for each remote player
+    //TODO: take name from server
+    console.log('what is this: ', this);
+    console.log('what is self: ', self);
+    console.log('does self have createPrefab', self.createPrefab);
+
     if (playerState.socketId !== socket.id){
-      console.log('creating remote player with this playerState: ', playerState);
-      let remoteSprite = self.game.add.sprite(playerState.x, playerState.y, 'blueGunGuy');
-      remotePlayerSprites[playerState.socketId] = remoteSprite;
+      console.log('creating prefab for player', playerState)
+      let playerPrefab = self.createPrefab(playerState.name,
+        {
+          type: 'player',
+          properties: {
+            group: 'player',
+            initial: 18,
+            texture: 'playerSpriteSheet'
+          },
+        }, {x: playerState.x, y: playerState.y});
+
+        remotePlayerSprites[playerState.socketId] = playerPrefab;
     }
+
   }
 
   tweenPlayerAssets(){
