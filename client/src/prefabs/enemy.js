@@ -29,19 +29,21 @@ export default class Enemy extends Prefab {
     }
 
     followPath (path) {
-    	console.log('inside path', path);
+    	//console.log('inside path', path);
 
     	let movingTween
-
 	    movingTween = this.game.tweens.create(this);
 
     	path.forEach( (position) => {
-    		movingTween.to({x: position.x, y: position.y}, 1, Phaser.Easing.Linear.None);
+    		movingTween.to({x: position.x, y: position.y}, 500);
 	    })
+
+	    movingTween.start();
     }
 
     acquireTarget () {
     	//Loop through player group and find closest player
+	    //TODO: currently this just returns the first player
       //console.log("find player", this.gameState.groups.player.children[0].position);
 
 	    return this.gameState.groups.player.children[0].position

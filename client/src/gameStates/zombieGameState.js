@@ -91,7 +91,7 @@ export default class ZombieGameState extends TiledState {
     this.currentEnemy = enemyPrefab;
 
     //this.currentEnemy.acquireTarget = throttle(this.currentEnemy.acquireTarget, 200);
-    this.currentEnemy.moveTo = throttle(this.currentEnemy.moveTo, 10000);
+    this.currentEnemy.moveTo = throttle(this.currentEnemy.moveTo, 1000);
 
     this.game.add.existing(this.currentPlayerSprite);
     this.game.add.existing(this.currentEnemy);
@@ -107,7 +107,7 @@ export default class ZombieGameState extends TiledState {
     this.game.world.setBounds(-250, -250, 2500, 2500);
 
     ///////////TODO: WIP
-    this.currentEnemy.animations.play('dead');
+    this.currentEnemy.animations.play('left');
   }
 
   update () {
@@ -121,9 +121,7 @@ export default class ZombieGameState extends TiledState {
 
 	  this.updateRemotePlayers();
 
-	  if (this.game.cursors.spacebar.isDown) {
-		  this.currentEnemy.moveTo(this.currentEnemy.acquireTarget());
-	  }
+	  this.currentEnemy.moveTo(this.currentEnemy.acquireTarget());
 
 	  //every 32ms send package to server with position
 	  if (this.currentPlayerSprite) {

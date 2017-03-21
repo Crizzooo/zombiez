@@ -7756,7 +7756,7 @@ var ZombieGameState = function (_TiledState) {
       this.currentEnemy = enemyPrefab;
 
       //this.currentEnemy.acquireTarget = throttle(this.currentEnemy.acquireTarget, 200);
-      this.currentEnemy.moveTo = throttle(this.currentEnemy.moveTo, 10000);
+      this.currentEnemy.moveTo = throttle(this.currentEnemy.moveTo, 1000);
 
       this.game.add.existing(this.currentPlayerSprite);
       this.game.add.existing(this.currentEnemy);
@@ -7772,7 +7772,7 @@ var ZombieGameState = function (_TiledState) {
       this.game.world.setBounds(-250, -250, 2500, 2500);
 
       ///////////TODO: WIP
-      this.currentEnemy.animations.play('dead');
+      this.currentEnemy.animations.play('left');
     }
   }, {
     key: 'update',
@@ -7787,9 +7787,7 @@ var ZombieGameState = function (_TiledState) {
 
       this.updateRemotePlayers();
 
-      if (this.game.cursors.spacebar.isDown) {
-        this.currentEnemy.moveTo(this.currentEnemy.acquireTarget());
-      }
+      this.currentEnemy.moveTo(this.currentEnemy.acquireTarget());
 
       //every 32ms send package to server with position
       if (this.currentPlayerSprite) {
@@ -21829,7 +21827,7 @@ exports.default = Pathfinding;
 
 
 Object.defineProperty(exports, "__esModule", {
-  value: true
+   value: true
 });
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -21847,60 +21845,62 @@ function _possibleConstructorReturn(self, call) { if (!self) { throw new Referen
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
 var Enemy = function (_Prefab) {
-  _inherits(Enemy, _Prefab);
+   _inherits(Enemy, _Prefab);
 
-  function Enemy(game, name, position, properties) {
-    _classCallCheck(this, Enemy);
+   function Enemy(game, name, position, properties) {
+      _classCallCheck(this, Enemy);
 
-    var _this = _possibleConstructorReturn(this, (Enemy.__proto__ || Object.getPrototypeOf(Enemy)).call(this, game, name, position, properties));
+      var _this = _possibleConstructorReturn(this, (Enemy.__proto__ || Object.getPrototypeOf(Enemy)).call(this, game, name, position, properties));
 
-    _this.animations.add('left', [9, 10, 11, 12, 9, 13, 14], 9, true);
-    //this.animations.add('right', [], 10, true);
-    _this.animations.add('dead', [1, 2, 3, 4, 5, 6, 7, 8, 0], 9, true);
+      _this.animations.add('left', [9, 10, 11, 12, 9, 13, 14], 9, true);
+      //this.animations.add('right', [], 10, true);
+      _this.animations.add('dead', [1, 2, 3, 4, 5, 6, 7, 8, 0], 9, true);
 
-    _this.position = position;
-    //this.currentTarget = {};
+      _this.position = position;
+      //this.currentTarget = {};
 
-    _this.stats = {
-      health: 10,
-      movement: 10
-    };
+      _this.stats = {
+         health: 10,
+         movement: 10
+      };
 
-    return _this;
-  }
+      return _this;
+   }
 
-  _createClass(Enemy, [{
-    key: 'receiveDamage',
-    value: function receiveDamage(damage) {}
-  }, {
-    key: 'moveTo',
-    value: function moveTo(position) {
-      this.gameState.pathfinding.findPath(this.position, position, this.followPath, this);
-    }
-  }, {
-    key: 'followPath',
-    value: function followPath(path) {
-      console.log('inside path', path);
+   _createClass(Enemy, [{
+      key: 'receiveDamage',
+      value: function receiveDamage(damage) {}
+   }, {
+      key: 'moveTo',
+      value: function moveTo(position) {
+         this.gameState.pathfinding.findPath(this.position, position, this.followPath, this);
+      }
+   }, {
+      key: 'followPath',
+      value: function followPath(path) {
+         //console.log('inside path', path);
 
-      var movingTween = void 0;
+         var movingTween = void 0;
+         movingTween = this.game.tweens.create(this);
 
-      movingTween = this.game.tweens.create(this);
+         path.forEach(function (position) {
+            movingTween.to({ x: position.x, y: position.y }, 500);
+         });
 
-      path.forEach(function (position) {
-        movingTween.to({ x: position.x, y: position.y }, 1, Phaser.Easing.Linear.None);
-      });
-    }
-  }, {
-    key: 'acquireTarget',
-    value: function acquireTarget() {
-      //Loop through player group and find closest player
-      //console.log("find player", this.gameState.groups.player.children[0].position);
+         movingTween.start();
+      }
+   }, {
+      key: 'acquireTarget',
+      value: function acquireTarget() {
+         //Loop through player group and find closest player
+         //TODO: currently this just returns the first player
+         //console.log("find player", this.gameState.groups.player.children[0].position);
 
-      return this.gameState.groups.player.children[0].position;
-    }
-  }]);
+         return this.gameState.groups.player.children[0].position;
+      }
+   }]);
 
-  return Enemy;
+   return Enemy;
 }(_Prefab3.default);
 
 exports.default = Enemy;
