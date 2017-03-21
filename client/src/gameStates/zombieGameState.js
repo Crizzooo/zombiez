@@ -148,7 +148,8 @@ export default class ZombieGameState extends TiledState {
 
     //create a current player
     let currentPlayer;
-    if (state.players.currentPlayer.socketId) {
+    if (state.players.currentPlayer !== undefined) {
+      console.log('we have a current player so we shall create him with name: ', state.players.currentPlayer.name);
 	    currentPlayer = state.players.currentPlayer;
 	    //TODO: make server assign sprite keys
 	    let playerPrefab = this.createPrefab(currentPlayer.name,

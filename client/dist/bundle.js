@@ -4765,6 +4765,7 @@ var removeCurrentPlayer = exports.removeCurrentPlayer = function removeCurrentPl
 
 //Note: addPlayer can probably be removed from file but will keep for now in case we change structure
 var initialState = {
+  score: 0,
   playerStates: {},
   currentPlayer: {}
 };
@@ -4776,12 +4777,15 @@ exports.default = function () {
   var action = arguments[1];
 
 
-  var newState = Object.assign({}, state);
+  var newPlayerStates = Object.assign({}, state.playerStates);
+  var newState = Object.assign({}, state, { playerStates: newPlayerStates });
 
   switch (action.type) {
 
     case LOAD_PLAYERS:
       //if there is a socket id, make it current player and remove him from playerStates
+      console.log('LOAD PLAYERS IN REDUCER RECIEVED ACTION: ');
+      console.dir(action.players);
       if (action.players[socket.id]) {
         newState.currentPlayer = action.players[socket.id];
         delete action.players[socket.id];
@@ -18851,10 +18855,14 @@ function dispatchGamePlayingUpdate(isItPlaying) {
 //game starts here
 function startClientGame(playersFromServer) {
   var state = _store2.default.getState();
+  var parsedPlayersFromServer = JSON.parse(playersFromServer);
+  console.dir(parsedPlayersFromServer, { depth: 6 });
   console.log('client is starting game with this from server: ', state);
-  console.log('these are the players being sent to store: ', playersFromServer);
+  console.log('these are the players being sent to store: ', parsedPlayersFromServer);
   ZG.game = new _main2.default('100%', '100%', Phaser.AUTO, 'game');
-  _store2.default.dispatch((0, _playersReducer.loadPlayers)(playersFromServer));
+
+  _store2.default.dispatch((0, _playersReducer.loadPlayers)(parsedPlayersFromServer));
+  console.log('starting game and sending these players to players reducer: ', parsedPlayersFromServer);
   ZG.game.startGame('BootState', true, false, "../assets/levels/main.json");
 }
 
@@ -20959,7 +20967,8 @@ var ZombieGameState = function (_TiledState) {
 
       //create a current player
       var currentPlayer = void 0;
-      if (state.players.currentPlayer.socketId) {
+      if (state.players.currentPlayer !== undefined) {
+        console.log('we have a current player so we shall create him with name: ', state.players.currentPlayer.name);
         currentPlayer = state.players.currentPlayer;
         //TODO: make server assign sprite keys
         var playerPrefab = this.createPrefab(currentPlayer.name, {

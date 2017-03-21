@@ -40,10 +40,14 @@ function dispatchGamePlayingUpdate(isItPlaying){
 //game starts here
 function startClientGame(playersFromServer) {
   let state = store.getState();
+  let parsedPlayersFromServer = JSON.parse(playersFromServer);
+  console.dir(parsedPlayersFromServer, {depth: 6})
   console.log('client is starting game with this from server: ', state);
-  console.log('these are the players being sent to store: ', playersFromServer);
+  console.log('these are the players being sent to store: ', parsedPlayersFromServer);
   ZG.game = new GenZed('100%', '100%', Phaser.AUTO, 'game');
-  store.dispatch(loadPlayers(playersFromServer));
+
+  store.dispatch(loadPlayers(parsedPlayersFromServer));
+  console.log('starting game and sending these players to players reducer: ', parsedPlayersFromServer);
   ZG.game.startGame('BootState', true, false, "../assets/levels/main.json");
 }
 
