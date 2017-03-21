@@ -6,7 +6,7 @@ export default class Prefab extends Phaser.Sprite {
 	constructor(game, name, position, properties) {
 		super(game.game, position.x, position.y, properties.texture, +properties.initial);
 		//TODO: Hacky fix, what can we do??
-		this.parent = this.game.world;
+
 		console.log('in prefab creator: name & then parent', name, this.parent);
 		this.gameState = game;
 		this.name = name;

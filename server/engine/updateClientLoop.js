@@ -69,7 +69,7 @@ const startGame = (ioFromSocketsFile) => {
   console.dir(state, { depth: 8});
   //tell clients to turn on game
   io.emit('gamePlayingUpdate', true);
-  io.emit('startGame', JSON.stringify(state.players.playerStates));
+  io.emit('startGame', state.players.playerStates);
 
   //broadcast interval gets set to global var, clearInterval in endGame
   broadcastGameState(io);

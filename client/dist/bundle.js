@@ -7755,9 +7755,9 @@ var Prefab = function (_Phaser$Sprite) {
 		_classCallCheck(this, Prefab);
 
 		//TODO: Hacky fix, what can we do??
+
 		var _this = _possibleConstructorReturn(this, (Prefab.__proto__ || Object.getPrototypeOf(Prefab)).call(this, game.game, position.x, position.y, properties.texture, +properties.initial));
 
-		_this.parent = _this.game.world;
 		console.log('in prefab creator: name & then parent', name, _this.parent);
 		_this.gameState = game;
 		_this.name = name;
@@ -18855,14 +18855,9 @@ function dispatchGamePlayingUpdate(isItPlaying) {
 //game starts here
 function startClientGame(playersFromServer) {
   var state = _store2.default.getState();
-  var parsedPlayersFromServer = JSON.parse(playersFromServer);
-  console.dir(parsedPlayersFromServer, { depth: 6 });
-  console.log('client is starting game with this from server: ', state);
-  console.log('these are the players being sent to store: ', parsedPlayersFromServer);
+  console.log('client is starting game with this from server: ', playersFromServer);
   ZG.game = new _main2.default('100%', '100%', Phaser.AUTO, 'game');
-
-  _store2.default.dispatch((0, _playersReducer.loadPlayers)(parsedPlayersFromServer));
-  console.log('starting game and sending these players to players reducer: ', parsedPlayersFromServer);
+  _store2.default.dispatch((0, _playersReducer.loadPlayers)(playersFromServer));
   ZG.game.startGame('BootState', true, false, "../assets/levels/main.json");
 }
 
@@ -21177,7 +21172,7 @@ var ZombieGameState = function (_TiledState) {
             texture: 'playerSpriteSheet'
           }
         }, { x: playerState.x, y: playerState.y });
-
+        self.game.add.existing(playerPrefab);
         remotePlayerSprites[playerState.socketId] = playerPrefab;
       }
     }

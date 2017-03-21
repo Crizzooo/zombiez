@@ -348,8 +348,8 @@ export default class ZombieGameState extends TiledState {
             texture: 'playerSpriteSheet'
           },
         }, {x: playerState.x, y: playerState.y});
-
-        remotePlayerSprites[playerState.socketId] = playerPrefab;
+      self.game.add.existing(playerPrefab);
+      remotePlayerSprites[playerState.socketId] = playerPrefab;
     }
 
   }
