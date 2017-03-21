@@ -3,9 +3,28 @@
     "defaultTileset": {"type": "image", "source": "../../assets/images/mapTiles/dungeon_tileset_32.png"},
     "miscTileset": {"type": "image", "source": "../../assets/images/mapTiles/objects_tilset_32.png"},
 
-    "playerSpriteSheet": {"type": "spritesheetAtlas",
+    "playerSpriteSheet": {
+      "type": "spriteSheetAtlas",
       "sourcePNG": "../../assets/images/finalSheet.png",
       "sourceJSON": "../../assets/images/finalSheet.json"
+    },
+
+    "zombieSpriteSheet": {
+      "type": "spriteSheetAtlas",
+      "sourcePNG": "../../assets/images/zombieSprite.png",
+      "sourceJSON": "../../assets/images/zombieSheet.json"
+    },
+
+    "crosshairSpriteSheet": {
+      "type": "spriteSheetAtlas",
+      "sourcePNG": "../../assets/images/crosshair.png",
+      "sourceJSON": "../../assets/images/crosshair.json"
+    },
+
+    "gunSpriteSheet": {
+      "type": "spriteSheetAtlas",
+      "sourcePNG": "../../assets/images/gunAndBulletTest.png",
+      "sourceJSON": "../../assets/images/gunAndBulletTest.json"
     },
 
     "levelTilemap": {"type": "tilemap", "source": "../../assets/maps/main.json"}
@@ -14,7 +33,8 @@
     "player",
     "enemies",
     "bullets",
-    "guns"
+    "guns",
+    "cursor"
   ],
   "map": {
     "key": "levelTilemap",

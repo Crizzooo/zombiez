@@ -1,11 +1,13 @@
 
 
 export default class BootState extends Phaser.State {
+
+  //TODO: CHECK WHERE PHYSICS ARE STARTED
   init(levelFile, players, nextState, extraParameters) {
     //Load Level Data from Level File JSON
     this.levelFile = levelFile;
     this.nextState = nextState;
-
+    // this.scale.scaleMode = Phaser.ScaleManager.RESIZE;
     //TODO: make a decision here
     //ZG.players = players;
     this.game.players = players;
@@ -37,5 +39,3 @@ export default class BootState extends Phaser.State {
     this.state.start('PreloadState', true, false, levelData);
   }
 }
-
-

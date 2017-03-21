@@ -22,8 +22,8 @@ class ChatApp extends React.Component {
   handleSubmit(evt) {
     evt.preventDefault();
     console.log('emitted message:', this.state.messageToSend);
-    if (this.props.currentPlayer.name) {
-      socket.emit('newChatMessage', {message: this.state.messageToSend, name: this.props.currentPlayer.name })
+    if (this.props.currentLobbyer.name) {
+      socket.emit('newChatMessage', {message: this.state.messageToSend, name: this.props.currentLobbyer.name })
     } else {
       socket.emit('newChatMessage', {message: this.state.messageToSend, name: 'Spectator'})
     }
@@ -81,7 +81,7 @@ class ChatApp extends React.Component {
 
 const mapState = state => ({
   messageObjects: state.chatApp.allMessages,
-  currentPlayer: state.players.currentPlayer
+  currentLobbyer: state.lobby.currentLobbyer
 });
 
 export default connect(mapState)(ChatApp);

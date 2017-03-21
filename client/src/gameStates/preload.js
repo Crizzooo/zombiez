@@ -4,6 +4,7 @@ export default class Preload extends Phaser.State {
   }
 
   preload () {
+    //TODO: remove Atlases for Player Character
     let assets, assetKey, asset;
 
     console.log(this.levelData);
@@ -18,10 +19,10 @@ export default class Preload extends Phaser.State {
           case 'image':
             this.load.image(assetKey, asset.source);
             break;
-          case 'spritesheet':
+          case 'spriteSheet':
             this.load.spritesheet(assetKey, asset.source, asset.frame_width, asset.frame_height, asset.frames, asset.margin, asset.spacing);
             break;
-          case 'spritesheetAtlas':
+          case 'spriteSheetAtlas':
             this.load.atlasJSONHash(assetKey, asset.sourcePNG, asset.sourceJSON);
             break;
           case 'tilemap':

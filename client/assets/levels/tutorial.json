@@ -7,6 +7,16 @@
       "sourcePNG": "../../assets/images/finalSheet.png",
       "sourceJSON": "../../assets/images/finalSheet.json"
     },
+    "crosshairSpriteSheet": {
+      "type": "spritesheetAtlas",
+      "sourcePNG": "../../assets/images/crosshair.png",
+      "sourceJSON": "../../assets/images/crosshair.json"
+    },
+    "gunSpriteSheet": {
+      "type": "spritesheetAtlas",
+      "sourcePNG": "../../assets/images/gunAndBulletTest.png",
+      "sourceJSON": "../../assets/images/gunAndBulletTest.json"
+    },
 
     "levelTilemap": {"type": "tilemap", "source": "../../assets/maps/tutorial.json"}
   },

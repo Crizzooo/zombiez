@@ -12,6 +12,7 @@
     "body-parser": "^1.17.1",
     "bootstrap": "4.0.0-alpha.6",
     "express": "^4.15.2",
+    "lodash": "^4.17.4",
     "lodash.throttle": "^4.1.1",
     "node-sass": "^4.5.0",
     "nodemon": "^1.11.0",

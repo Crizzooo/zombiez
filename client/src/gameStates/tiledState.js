@@ -7,6 +7,7 @@
 
 import Player from '../prefabs/player';
 import Enemy from '../prefabs/enemy';
+import Gun from '../prefabs/gun'
 
 export default class TiledState extends Phaser.State {
     constructor(game) {
@@ -16,7 +17,8 @@ export default class TiledState extends Phaser.State {
 
         this.prefabClasses = {
             "player": Player.prototype.constructor,
-            "enemies": Enemy.prototype.constructor
+            "enemies": Enemy.prototype.constructor,
+            "guns": Gun.prototype.constructor
         }
     }
 
@@ -24,8 +26,8 @@ export default class TiledState extends Phaser.State {
         this.levelData = levelData;
 
         //Scaling the Game Window for a pixelated effect
-        this.game.scale.scaleMode = Phaser.ScaleManager.USER_SCALE;
-        this.game.scale.setUserScale(8, 8, 1000, 1000);
+        // this.game.scale.scaleMode = Phaser.ScaleManager.USER_SCALE;
+        // this.game.scale.setUserScale(8, 8, 1000, 1000);
         //this.game.scale.setUserScale(2, 2, 200, 200);
         this.game.renderer.renderSession.roundPixels = true;
         Phaser.Canvas.setImageRenderingCrisp(this.game.canvas);
@@ -47,44 +49,62 @@ export default class TiledState extends Phaser.State {
 
     }
 
-    createPrefab(prefabName, prefabData, position) {
-        let prefab;
+  create() {
+    let groupName, objectLayer, collisionTiles, worldGrid, tileDimensions, prefabName;
 
-        console.log("prefab created", prefabName)
+    this.layers = {};
+    this.groups = {};
 
-        //Pass prefab data into the constructor of that type defined in this constructor
-        if (this.prefabClasses.hasOwnProperty(prefabData.type)) {
-            prefab = new this.prefabClasses[prefabData.type](this, prefabName, position, prefabData.properties);
-        }
+    //Go through all groups in the level data
+    //Add group to game state
+    this.levelData.groups.forEach((groupName) => {
+        this.groups[groupName] = this.game.add.group();
+    });
 
-        this.prefabs[prefabName] = prefab;
+    //Go through all map layers
+    //Also set collision if collision is true
+    this.map.layers.forEach((layer) => {
+      this.layers[layer.name] = this.map.createLayer(layer.name);
 
-        return prefab;
-    }
+      if (layer.properties.collision) {
+        this.map.setCollisionByExclusion([], true, layer.name);
+      }
+    });
+  }
 
-    create() {
-        let groupName, objectLayer, collisionTiles, worldGrid, tileDimensions, prefabName;
+	//Use this method to create prefabs
+	createPrefab(prefabName, prefabData, position) {
+		let prefab;
 
-        this.layers = {};
-        this.groups = {};
+		console.log("prefab created", prefabName)
 
-        //Go through all groups in the level data
-        //Add group to game state
-        this.levelData.groups.forEach((groupName) => {
-            this.groups[groupName] = this.game.add.group();
-        });
+		//Pass prefab data into the constructor of that type defined in this constructor
+		if (this.prefabClasses.hasOwnProperty(prefabData.type)) {
+			prefab = new this.prefabClasses[prefabData.type](this, prefabName, position, prefabData.properties);
+		}
 
-        //Go through all map layers
-        //Also set collision if collision is true
-        this.map.layers.forEach((layer) => {
-            this.layers[layer.name] = this.map.createLayer(layer.name);
+		this.prefabs[prefabName] = prefab;
 
-            if (layer.properties.collision) {
-                this.map.setCollisionByExclusion([], true, layer.name);
-            }
-        });
+		return prefab;
+	}
 
-        console.log('all map layers', this.map.layers);
-    }
-
+	//This creates the obstacles pathfinding will need to path around
+	// createWorldGrid () {
+	// 	let obstaclesLayer, rowIndex, columnIndex, worldGrid;
+    //
+	// 	obstaclesLayer = this.map.layers[1];
+    //
+	// 	//todo: need to add other obstacles to worldGrid
+	// 	console.log('obstacles layer', obstaclesLayer)
+    //
+	// 	worldGrid = [];
+	// 	for (rowIndex = 0; rowIndex < this.map.height; rowIndex += 1) {
+	// 		worldGrid.push([]);
+	// 		for (columnIndex = 0; columnIndex < this.map.width; columnIndex += 1) {
+	// 			worldGrid[rowIndex].push(obstaclesLayer.data[rowIndex][columnIndex].index);
+	// 		}
+	// 	}
+    //
+	// 	return worldGrid;
+	// }
 }
