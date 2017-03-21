@@ -21,8 +21,7 @@ export default class Enemy extends Prefab {
     }
 
     attackPlayer (player) {
-	    player.stats.health -= 10;
-	    player.healthbar.text = player.stats.health;
+	    player.receiveDamage(10);
     }
 
     receiveDamage (damage) {
