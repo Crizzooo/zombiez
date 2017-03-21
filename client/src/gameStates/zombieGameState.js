@@ -22,7 +22,7 @@ export default class ZombieGameState extends TiledState {
 
     //Control Mechanics
     this.cursors = this.input.keyboard.createCursorKeys();
-    // this.cursors.spacebar = this.input.keyboard.addKey(Phaser.Keyboard.SPACEBAR);
+    this.cursors.spacebar = this.input.keyboard.addKey(Phaser.Keyboard.SPACEBAR);
 
     //Attach and bind functions
     this.destroyCurrentPlayerSprite = this.destroyCurrentPlayerSprite.bind(this);
@@ -90,7 +90,8 @@ export default class ZombieGameState extends TiledState {
     this.pointer = crosshairPrefab;
     this.currentEnemy = enemyPrefab;
 
-    this.currentEnemy.acquireTarget = throttle(this.currentEnemy.acquireTarget, 200);
+    //this.currentEnemy.acquireTarget = throttle(this.currentEnemy.acquireTarget, 200);
+    this.currentEnemy.moveTo = throttle(this.currentEnemy.moveTo, 10000);
 
     this.game.add.existing(this.currentPlayerSprite);
     this.game.add.existing(this.currentEnemy);
@@ -99,6 +100,7 @@ export default class ZombieGameState extends TiledState {
 
     //on click lock the users mouse for input
     this.game.input.onDown.add(this.lockPointer, this);
+
     //Set camera to follow, then make world big to allow camera to pan off
     //this.camera.view = new Phaser.Rectangle(0, 0, this.currentPlayer.position.x, this.currentPlayer.position.y);
     this.camera.follow(this.currentPlayerSprite);
@@ -109,18 +111,19 @@ export default class ZombieGameState extends TiledState {
   }
 
   update () {
-	  console.log('do we make it to update func?');
-
 	  this.game.physics.arcade.collide(this.currentPlayerSprite, this.layers.backgroundDecCollision);
 	  this.game.physics.arcade.collide(this.currentPlayerSprite, this.layers.backgroundDecCollision2);
 	  this.game.physics.arcade.collide(this.currentPlayerSprite, this.layers.waterCollision);
 	  this.game.physics.arcade.collide(this.currentPlayerSprite, this.layers.wallCollision);
 
-	  // this.currentEnemy.acquireTarget();
 	  this.tweenGun();
 	  this.gun.rotation = this.game.physics.arcade.angleToPointer(this.gun);
 
 	  this.updateRemotePlayers();
+
+	  if (this.game.cursors.spacebar.isDown) {
+		  this.currentEnemy.moveTo(this.currentEnemy.acquireTarget());
+	  }
 
 	  //every 32ms send package to server with position
 	  if (this.currentPlayerSprite) {
@@ -259,7 +262,6 @@ export default class ZombieGameState extends TiledState {
               this.gun.scale.setTo(1, -1);
           }
       }
-
     }
   }
 
@@ -314,27 +316,27 @@ export default class ZombieGameState extends TiledState {
     }
   }
 
-    lockPointer () {
-      document.body.style.cursor = 'none';
+  lockPointer () {
+    document.body.style.cursor = 'none';
 
-      this.game.canvas.addEventListener('mousemove', () => {
-        this.pointer.x = this.game.input.activePointer.worldX;
-        this.pointer.y = this.game.input.activePointer.worldY;
-      });
-    }
+    this.game.canvas.addEventListener('mousemove', () => {
+      this.pointer.x = this.game.input.activePointer.worldX;
+      this.pointer.y = this.game.input.activePointer.worldY;
+    });
+  }
 
-    createRemotePlayerSprite(playerState){
-      if (playerState.socketId !== socket.id){
-        console.log('creating remote player with this playerState: ', playerState);
-        let remoteSprite = self.game.add.sprite(playerState.x, playerState.y, 'blueGunGuy');
-        remotePlayerSprites[playerState.socketId] = remoteSprite;
-      }
+  createRemotePlayerSprite(playerState){
+    if (playerState.socketId !== socket.id){
+      console.log('creating remote player with this playerState: ', playerState);
+      let remoteSprite = self.game.add.sprite(playerState.x, playerState.y, 'blueGunGuy');
+      remotePlayerSprites[playerState.socketId] = remoteSprite;
     }
+  }
 
-    tweenGun(){
-      //gun follow does not work as a child of the player sprite.. had to tween gun to players x, y position
-      this.add.tween(this.gun).to( { x: this.currentPlayerSprite.x, y: this.currentPlayerSprite.y}, 10, Phaser.Easing.Linear.None, true);
-    }
+  tweenGun(){
+    //gun follow does not work as a child of the player sprite.. had to tween gun to players x, y position
+    this.add.tween(this.gun).to( { x: this.currentPlayerSprite.x, y: this.currentPlayerSprite.y}, 10, Phaser.Easing.Linear.None, true);
+  }
 }
 
 

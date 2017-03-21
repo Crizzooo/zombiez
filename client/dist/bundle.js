@@ -7687,7 +7687,7 @@ var ZombieGameState = function (_TiledState) {
 
       //Control Mechanics
       this.cursors = this.input.keyboard.createCursorKeys();
-      // this.cursors.spacebar = this.input.keyboard.addKey(Phaser.Keyboard.SPACEBAR);
+      this.cursors.spacebar = this.input.keyboard.addKey(Phaser.Keyboard.SPACEBAR);
 
       //Attach and bind functions
       this.destroyCurrentPlayerSprite = this.destroyCurrentPlayerSprite.bind(this);
@@ -7755,7 +7755,8 @@ var ZombieGameState = function (_TiledState) {
       this.pointer = crosshairPrefab;
       this.currentEnemy = enemyPrefab;
 
-      this.currentEnemy.acquireTarget = throttle(this.currentEnemy.acquireTarget, 200);
+      //this.currentEnemy.acquireTarget = throttle(this.currentEnemy.acquireTarget, 200);
+      this.currentEnemy.moveTo = throttle(this.currentEnemy.moveTo, 10000);
 
       this.game.add.existing(this.currentPlayerSprite);
       this.game.add.existing(this.currentEnemy);
@@ -7764,6 +7765,7 @@ var ZombieGameState = function (_TiledState) {
 
       //on click lock the users mouse for input
       this.game.input.onDown.add(this.lockPointer, this);
+
       //Set camera to follow, then make world big to allow camera to pan off
       //this.camera.view = new Phaser.Rectangle(0, 0, this.currentPlayer.position.x, this.currentPlayer.position.y);
       this.camera.follow(this.currentPlayerSprite);
@@ -7775,18 +7777,19 @@ var ZombieGameState = function (_TiledState) {
   }, {
     key: 'update',
     value: function update() {
-      console.log('do we make it to update func?');
-
       this.game.physics.arcade.collide(this.currentPlayerSprite, this.layers.backgroundDecCollision);
       this.game.physics.arcade.collide(this.currentPlayerSprite, this.layers.backgroundDecCollision2);
       this.game.physics.arcade.collide(this.currentPlayerSprite, this.layers.waterCollision);
       this.game.physics.arcade.collide(this.currentPlayerSprite, this.layers.wallCollision);
 
-      // this.currentEnemy.acquireTarget();
       this.tweenGun();
       this.gun.rotation = this.game.physics.arcade.angleToPointer(this.gun);
 
       this.updateRemotePlayers();
+
+      if (this.game.cursors.spacebar.isDown) {
+        this.currentEnemy.moveTo(this.currentEnemy.acquireTarget());
+      }
 
       //every 32ms send package to server with position
       if (this.currentPlayerSprite) {
@@ -12091,9 +12094,6 @@ var Prefab = function (_Phaser$Sprite) {
 	function Prefab(game, name, position, properties) {
 		_classCallCheck(this, Prefab);
 
-		console.log("positionnnnnnnn", position);
-
-		// this.parent = this.game.world;
 		var _this = _possibleConstructorReturn(this, (Prefab.__proto__ || Object.getPrototypeOf(Prefab)).call(this, game.game, position.x, position.y, properties.texture, +properties.initial));
 
 		_this.gameState = game;
@@ -12101,7 +12101,6 @@ var Prefab = function (_Phaser$Sprite) {
 
 		//Add prefab to its group
 		//this.gameState.groups[properties.group].add(this);
-		// this.gameState.groups[properties.group].add(this);
 		_this.gameState.groups[properties.group].children.push(_this);
 		_this.initial = +properties.initial;
 
@@ -12109,7 +12108,6 @@ var Prefab = function (_Phaser$Sprite) {
 		_this.game.physics.arcade.enable(_this);
 
 		_this.gameState.prefabs[name] = _this;
-		console.log("PREFABE SPRITE RAW", _this);
 		return _this;
 	}
 
@@ -21860,7 +21858,8 @@ var Enemy = function (_Prefab) {
     //this.animations.add('right', [], 10, true);
     _this.animations.add('dead', [1, 2, 3, 4, 5, 6, 7, 8, 0], 9, true);
 
-    _this.currentTarget = {};
+    _this.position = position;
+    //this.currentTarget = {};
 
     _this.stats = {
       health: 10,
@@ -21874,10 +21873,28 @@ var Enemy = function (_Prefab) {
     key: 'receiveDamage',
     value: function receiveDamage(damage) {}
   }, {
+    key: 'moveTo',
+    value: function moveTo(position) {
+      this.gameState.pathfinding.findPath(this.position, position, this.followPath, this);
+    }
+  }, {
+    key: 'followPath',
+    value: function followPath(path) {
+      console.log('inside path', path);
+
+      var movingTween = void 0;
+
+      movingTween = this.game.tweens.create(this);
+
+      path.forEach(function (position) {
+        movingTween.to({ x: position.x, y: position.y }, 1, Phaser.Easing.Linear.None);
+      });
+    }
+  }, {
     key: 'acquireTarget',
     value: function acquireTarget() {
       //Loop through player group and find closest player
-      console.log("find player", this.gameState.groups.player.children[0].position);
+      //console.log("find player", this.gameState.groups.player.children[0].position);
 
       return this.gameState.groups.player.children[0].position;
     }
