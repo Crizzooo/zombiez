@@ -22,9 +22,17 @@ export default class Player extends Prefab {
 
       this.stats = {
         health: 100,
-        movement: 10
+        movement: 100
       }
 
+	    const style = {
+		    font: "bold 16px Arial",
+		    fill: "#FFF",
+		    stroke: "#000",
+		    strokeThickness: 3
+	    };
+
+	    this.healthbar = this.game.add.text(this.position.x - 10, this.position.y - 10, this.stats.health, style);
   }
 
   receiveDamage(damage) {

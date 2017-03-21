@@ -5,14 +5,16 @@ import {updateCurrentPlayer, playerLeaveGame} from '../reducers/players-reducer.
 import emitCurrentState from '../engine/emitCurrentState.js';
 import TiledState from './tiledState';
 import Pathfinding from '../plugins/Pathfinding'
+
+//TODO: do we need this?
 let remotePlayerSprites = {};
 var self;
+
 export default class ZombieGameState extends TiledState {
   constructor(game) {
     super(game);
 
     //set constants for game
-    this.RUNNING_SPEED = 100;
     self = this;
   }
 
@@ -21,8 +23,12 @@ export default class ZombieGameState extends TiledState {
     super.init.call(this, levelData);
 
     //Control Mechanics
-    this.cursors = this.input.keyboard.createCursorKeys();
-    this.cursors.spacebar = this.input.keyboard.addKey(Phaser.Keyboard.SPACEBAR);
+	  this.game.cursors = {};
+	  this.game.cursors.up = this.input.keyboard.addKey(Phaser.Keyboard.W);
+	  this.game.cursors.down = this.input.keyboard.addKey(Phaser.Keyboard.S);
+	  this.game.cursors.left = this.input.keyboard.addKey(Phaser.Keyboard.A);
+	  this.game.cursors.right = this.input.keyboard.addKey(Phaser.Keyboard.D);
+    //this.cursors.spacebar = this.input.keyboard.addKey(Phaser.Keyboard.SPACEBAR);
 
     //Attach and bind functions
     this.destroyCurrentPlayerSprite = this.destroyCurrentPlayerSprite.bind(this);
@@ -44,7 +50,9 @@ export default class ZombieGameState extends TiledState {
     this.tileDimensions = new Phaser.Point(this.map.tileWidth, this.map.tileHeight);
     this.pathfinding = this.game.plugins.add(Pathfinding, worldGrid, [-1], this.tileDimensions);
 
-    //Create Players and Temp Objects
+    //Create Players and Temp Objectsw
+	  let crosshair = new Phaser.Sprite(this.game, 0, 0, 'crosshairSpriteSheet');
+
     let enemyPrefab = this.createPrefab('zombie',
 	    {
         type: 'enemies',
@@ -54,16 +62,6 @@ export default class ZombieGameState extends TiledState {
           texture: 'zombieSpriteSheet'
         }
 	    }, {x: 200, y: 200});
-
-    let crosshairPrefab = this.createPrefab('crosshair',
-      {
-        type: 'player',
-        properties: {
-          group: 'cursor',
-          initial: 0,
-          texture: 'crosshairSpriteSheet'
-        },
-      }, {x: 0, y: 0});
 
     let gunPrefab = this.createPrefab('gun', {
         type: 'guns',
@@ -87,11 +85,11 @@ export default class ZombieGameState extends TiledState {
 
     //Add test prefabs into the game
     this.gun = gunPrefab;
-    this.pointer = crosshairPrefab;
+    this.pointer = crosshair;
     this.currentEnemy = enemyPrefab;
 
     //this.currentEnemy.acquireTarget = throttle(this.currentEnemy.acquireTarget, 200);
-    this.currentEnemy.moveTo = throttle(this.currentEnemy.moveTo, 10000);
+    this.currentEnemy.moveTo = throttle(this.currentEnemy.moveTo, 1000);
 
     this.game.add.existing(this.currentPlayerSprite);
     this.game.add.existing(this.currentEnemy);
@@ -107,34 +105,36 @@ export default class ZombieGameState extends TiledState {
     this.game.world.setBounds(-250, -250, 2500, 2500);
 
     ///////////TODO: WIP
-    this.currentEnemy.animations.play('dead');
+    this.currentEnemy.animations.play('left');
   }
 
   update () {
+  	//Check Physics
 	  this.game.physics.arcade.collide(this.currentPlayerSprite, this.layers.backgroundDecCollision);
 	  this.game.physics.arcade.collide(this.currentPlayerSprite, this.layers.backgroundDecCollision2);
 	  this.game.physics.arcade.collide(this.currentPlayerSprite, this.layers.waterCollision);
 	  this.game.physics.arcade.collide(this.currentPlayerSprite, this.layers.wallCollision);
 
-	  this.tweenGun();
+	  //Gun Rotation
+	  this.tweenPlayerAssets();
 	  this.gun.rotation = this.game.physics.arcade.angleToPointer(this.gun);
 
-	  this.updateRemotePlayers();
+	  //Pathfinding
+		this.currentEnemy.moveTo(this.currentEnemy.acquireTarget());
 
-	  if (this.game.cursors.spacebar.isDown) {
-		  this.currentEnemy.moveTo(this.currentEnemy.acquireTarget());
-	  }
 
+		//Server & Input
 	  //every 32ms send package to server with position
 	  if (this.currentPlayerSprite) {
 	    this.handleInput();
 	    this.dispatchCurrentPlayer();
 	  }
 
+	  this.updateRemotePlayers();
   }
 
   render() {
-		//  this.game.debug.spriteInfo(this.gun, 32, 32);
+		//this.game.debug.spriteInfo(this.gun, 32, 32);
   }
 
   //////////////////////////
@@ -195,7 +195,7 @@ export default class ZombieGameState extends TiledState {
       if (this.game.cursors.left.isDown) {
           this.currentPlayerSprite.animations.play('right');
           this.currentPlayerSprite.scale.setTo(-1, 1);
-          this.currentPlayerSprite.body.velocity.x = -this.RUNNING_SPEED;
+          this.currentPlayerSprite.body.velocity.x = -this.currentPlayerSprite.stats.movement;
           switch (this.currentPlayerSprite.body.sprite._frame.name) {
               case 'lookingRightRightLegUp.png':
                   this.currentPlayerSprite.body.velocity.y -= 80;
@@ -214,7 +214,7 @@ export default class ZombieGameState extends TiledState {
       if (this.game.cursors.right.isDown) {
           this.currentPlayerSprite.scale.setTo(1, 1);
           this.currentPlayerSprite.animations.play('right');
-          this.currentPlayerSprite.body.velocity.x = this.RUNNING_SPEED;
+          this.currentPlayerSprite.body.velocity.x = this.currentPlayerSprite.stats.movement;
           switch (this.currentPlayerSprite.body.sprite._frame.name) {
               case 'lookingRightRightLegUp.png':
                   this.currentPlayerSprite.body.velocity.y -= 80;
@@ -231,12 +231,12 @@ export default class ZombieGameState extends TiledState {
       }
 
       if (this.game.cursors.up.isDown) {
-          this.currentPlayerSprite.body.velocity.y = -this.RUNNING_SPEED;
+          this.currentPlayerSprite.body.velocity.y = -this.currentPlayerSprite.stats.movement;
           this.currentPlayerSprite.animations.play('up');
       }
 
       if (this.game.cursors.down.isDown) {
-          this.currentPlayerSprite.body.velocity.y = this.RUNNING_SPEED;
+          this.currentPlayerSprite.body.velocity.y = this.currentPlayerSprite.stats.movement;
           this.currentPlayerSprite.animations.play('down');
       }
 
@@ -333,42 +333,11 @@ export default class ZombieGameState extends TiledState {
     }
   }
 
-  tweenGun(){
+  tweenPlayerAssets(){
     //gun follow does not work as a child of the player sprite.. had to tween gun to players x, y position
     this.add.tween(this.gun).to( { x: this.currentPlayerSprite.x, y: this.currentPlayerSprite.y}, 10, Phaser.Easing.Linear.None, true);
+
+    //Add tween for health
+    this.add.tween(this.currentPlayerSprite.healthbar).to( { x: this.currentPlayerSprite.x - 10, y: this.currentPlayerSprite.y - 30}, 10, Phaser.Easing.Linear.None, true);
   }
 }
-
-
-//TODO: RIZZOS handleInput
-// handleInput() {
-//   if (this.currentPlayerSprite){
-//     if ( this.cursors.left.isDown ||
-//         this.cursors.right.isDown ||
-//            this.cursors.up.isDown ||
-//         this.cursors.down.isDown
-//       ) {
-//           if (this.cursors.left.isDown){
-//             this.currentPlayerSprite.body.velocity.x = -this.RUNNING_SPEED;
-//             this.currentPlayerSprite.animationDirection = 'left';
-//           }
-//           if (this.cursors.right.isDown){
-//             this.currentPlayerSprite.body.velocity.x =  this.RUNNING_SPEED;
-//             this.currentPlayerSprite.animationDirection = 'right';
-//           }
-//           if (this.cursors.up.isDown){
-//             this.currentPlayerSprite.body.velocity.y = -this.RUNNING_SPEED;
-//             this.currentPlayerSprite.animationDirection = 'up';
-//           }
-//           if (this.cursors.down.isDown){
-//             this.currentPlayerSprite.body.velocity.y =  this.RUNNING_SPEED;
-//             this.currentPlayerSprite.animationDirection = 'down';
-//           }
-//       } else {
-//         //no cursors down
-//         this.currentPlayerSprite.body.velocity.x = 0;
-//         this.currentPlayerSprite.body.velocity.y = 0;
-//         this.currentPlayerSprite.animationDirection = 'still';
-//       }
-//   }
-// }

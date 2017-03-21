@@ -7662,6 +7662,8 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
 var R = __webpack_require__(158);
 var throttle = __webpack_require__(315);
 
+
+//TODO: do we need this?
 var remotePlayerSprites = {};
 var self;
 
@@ -7674,7 +7676,6 @@ var ZombieGameState = function (_TiledState) {
     //set constants for game
     var _this = _possibleConstructorReturn(this, (ZombieGameState.__proto__ || Object.getPrototypeOf(ZombieGameState)).call(this, game));
 
-    _this.RUNNING_SPEED = 100;
     self = _this;
     return _this;
   }
@@ -7686,8 +7687,12 @@ var ZombieGameState = function (_TiledState) {
       _get(ZombieGameState.prototype.__proto__ || Object.getPrototypeOf(ZombieGameState.prototype), 'init', this).call(this, levelData);
 
       //Control Mechanics
-      this.cursors = this.input.keyboard.createCursorKeys();
-      this.cursors.spacebar = this.input.keyboard.addKey(Phaser.Keyboard.SPACEBAR);
+      this.game.cursors = {};
+      this.game.cursors.up = this.input.keyboard.addKey(Phaser.Keyboard.W);
+      this.game.cursors.down = this.input.keyboard.addKey(Phaser.Keyboard.S);
+      this.game.cursors.left = this.input.keyboard.addKey(Phaser.Keyboard.A);
+      this.game.cursors.right = this.input.keyboard.addKey(Phaser.Keyboard.D);
+      //this.cursors.spacebar = this.input.keyboard.addKey(Phaser.Keyboard.SPACEBAR);
 
       //Attach and bind functions
       this.destroyCurrentPlayerSprite = this.destroyCurrentPlayerSprite.bind(this);
@@ -7711,7 +7716,9 @@ var ZombieGameState = function (_TiledState) {
       this.tileDimensions = new Phaser.Point(this.map.tileWidth, this.map.tileHeight);
       this.pathfinding = this.game.plugins.add(_Pathfinding2.default, worldGrid, [-1], this.tileDimensions);
 
-      //Create Players and Temp Objects
+      //Create Players and Temp Objectsw
+      var crosshair = new Phaser.Sprite(this.game, 0, 0, 'crosshairSpriteSheet');
+
       var enemyPrefab = this.createPrefab('zombie', {
         type: 'enemies',
         properties: {
@@ -7720,15 +7727,6 @@ var ZombieGameState = function (_TiledState) {
           texture: 'zombieSpriteSheet'
         }
       }, { x: 200, y: 200 });
-
-      var crosshairPrefab = this.createPrefab('crosshair', {
-        type: 'player',
-        properties: {
-          group: 'cursor',
-          initial: 0,
-          texture: 'crosshairSpriteSheet'
-        }
-      }, { x: 0, y: 0 });
 
       var gunPrefab = this.createPrefab('gun', {
         type: 'guns',
@@ -7752,11 +7750,11 @@ var ZombieGameState = function (_TiledState) {
 
       //Add test prefabs into the game
       this.gun = gunPrefab;
-      this.pointer = crosshairPrefab;
+      this.pointer = crosshair;
       this.currentEnemy = enemyPrefab;
 
       //this.currentEnemy.acquireTarget = throttle(this.currentEnemy.acquireTarget, 200);
-      this.currentEnemy.moveTo = throttle(this.currentEnemy.moveTo, 10000);
+      this.currentEnemy.moveTo = throttle(this.currentEnemy.moveTo, 1000);
 
       this.game.add.existing(this.currentPlayerSprite);
       this.game.add.existing(this.currentEnemy);
@@ -7772,35 +7770,37 @@ var ZombieGameState = function (_TiledState) {
       this.game.world.setBounds(-250, -250, 2500, 2500);
 
       ///////////TODO: WIP
-      this.currentEnemy.animations.play('dead');
+      this.currentEnemy.animations.play('left');
     }
   }, {
     key: 'update',
     value: function update() {
+      //Check Physics
       this.game.physics.arcade.collide(this.currentPlayerSprite, this.layers.backgroundDecCollision);
       this.game.physics.arcade.collide(this.currentPlayerSprite, this.layers.backgroundDecCollision2);
       this.game.physics.arcade.collide(this.currentPlayerSprite, this.layers.waterCollision);
       this.game.physics.arcade.collide(this.currentPlayerSprite, this.layers.wallCollision);
 
-      this.tweenGun();
+      //Gun Rotation
+      this.tweenPlayerAssets();
       this.gun.rotation = this.game.physics.arcade.angleToPointer(this.gun);
 
-      this.updateRemotePlayers();
+      //Pathfinding
+      this.currentEnemy.moveTo(this.currentEnemy.acquireTarget());
 
-      if (this.game.cursors.spacebar.isDown) {
-        this.currentEnemy.moveTo(this.currentEnemy.acquireTarget());
-      }
-
+      //Server & Input
       //every 32ms send package to server with position
       if (this.currentPlayerSprite) {
         this.handleInput();
         this.dispatchCurrentPlayer();
       }
+
+      this.updateRemotePlayers();
     }
   }, {
     key: 'render',
     value: function render() {}
-    //  this.game.debug.spriteInfo(this.gun, 32, 32);
+    //this.game.debug.spriteInfo(this.gun, 32, 32);
 
 
     //////////////////////////
@@ -7863,7 +7863,7 @@ var ZombieGameState = function (_TiledState) {
         if (this.game.cursors.left.isDown) {
           this.currentPlayerSprite.animations.play('right');
           this.currentPlayerSprite.scale.setTo(-1, 1);
-          this.currentPlayerSprite.body.velocity.x = -this.RUNNING_SPEED;
+          this.currentPlayerSprite.body.velocity.x = -this.currentPlayerSprite.stats.movement;
           switch (this.currentPlayerSprite.body.sprite._frame.name) {
             case 'lookingRightRightLegUp.png':
               this.currentPlayerSprite.body.velocity.y -= 80;
@@ -7882,7 +7882,7 @@ var ZombieGameState = function (_TiledState) {
         if (this.game.cursors.right.isDown) {
           this.currentPlayerSprite.scale.setTo(1, 1);
           this.currentPlayerSprite.animations.play('right');
-          this.currentPlayerSprite.body.velocity.x = this.RUNNING_SPEED;
+          this.currentPlayerSprite.body.velocity.x = this.currentPlayerSprite.stats.movement;
           switch (this.currentPlayerSprite.body.sprite._frame.name) {
             case 'lookingRightRightLegUp.png':
               this.currentPlayerSprite.body.velocity.y -= 80;
@@ -7899,12 +7899,12 @@ var ZombieGameState = function (_TiledState) {
         }
 
         if (this.game.cursors.up.isDown) {
-          this.currentPlayerSprite.body.velocity.y = -this.RUNNING_SPEED;
+          this.currentPlayerSprite.body.velocity.y = -this.currentPlayerSprite.stats.movement;
           this.currentPlayerSprite.animations.play('up');
         }
 
         if (this.game.cursors.down.isDown) {
-          this.currentPlayerSprite.body.velocity.y = this.RUNNING_SPEED;
+          this.currentPlayerSprite.body.velocity.y = this.currentPlayerSprite.stats.movement;
           this.currentPlayerSprite.animations.play('down');
         }
 
@@ -8012,49 +8012,18 @@ var ZombieGameState = function (_TiledState) {
       }
     }
   }, {
-    key: 'tweenGun',
-    value: function tweenGun() {
+    key: 'tweenPlayerAssets',
+    value: function tweenPlayerAssets() {
       //gun follow does not work as a child of the player sprite.. had to tween gun to players x, y position
       this.add.tween(this.gun).to({ x: this.currentPlayerSprite.x, y: this.currentPlayerSprite.y }, 10, Phaser.Easing.Linear.None, true);
+
+      //Add tween for health
+      this.add.tween(this.currentPlayerSprite.healthbar).to({ x: this.currentPlayerSprite.x - 10, y: this.currentPlayerSprite.y - 30 }, 10, Phaser.Easing.Linear.None, true);
     }
   }]);
 
   return ZombieGameState;
 }(_tiledState2.default);
-
-//TODO: RIZZOS handleInput
-// handleInput() {
-//   if (this.currentPlayerSprite){
-//     if ( this.cursors.left.isDown ||
-//         this.cursors.right.isDown ||
-//            this.cursors.up.isDown ||
-//         this.cursors.down.isDown
-//       ) {
-//           if (this.cursors.left.isDown){
-//             this.currentPlayerSprite.body.velocity.x = -this.RUNNING_SPEED;
-//             this.currentPlayerSprite.animationDirection = 'left';
-//           }
-//           if (this.cursors.right.isDown){
-//             this.currentPlayerSprite.body.velocity.x =  this.RUNNING_SPEED;
-//             this.currentPlayerSprite.animationDirection = 'right';
-//           }
-//           if (this.cursors.up.isDown){
-//             this.currentPlayerSprite.body.velocity.y = -this.RUNNING_SPEED;
-//             this.currentPlayerSprite.animationDirection = 'up';
-//           }
-//           if (this.cursors.down.isDown){
-//             this.currentPlayerSprite.body.velocity.y =  this.RUNNING_SPEED;
-//             this.currentPlayerSprite.animationDirection = 'down';
-//           }
-//       } else {
-//         //no cursors down
-//         this.currentPlayerSprite.body.velocity.x = 0;
-//         this.currentPlayerSprite.body.velocity.y = 0;
-//         this.currentPlayerSprite.animationDirection = 'still';
-//       }
-//   }
-// }
-
 
 exports.default = ZombieGameState;
 
@@ -21046,7 +21015,7 @@ exports.default = GenZed;
 
 
 Object.defineProperty(exports, "__esModule", {
-  value: true
+   value: true
 });
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -21064,60 +21033,76 @@ function _possibleConstructorReturn(self, call) { if (!self) { throw new Referen
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
 var Enemy = function (_Prefab) {
-  _inherits(Enemy, _Prefab);
+   _inherits(Enemy, _Prefab);
 
-  function Enemy(game, name, position, properties) {
-    _classCallCheck(this, Enemy);
+   function Enemy(game, name, position, properties) {
+      _classCallCheck(this, Enemy);
 
-    var _this = _possibleConstructorReturn(this, (Enemy.__proto__ || Object.getPrototypeOf(Enemy)).call(this, game, name, position, properties));
+      var _this = _possibleConstructorReturn(this, (Enemy.__proto__ || Object.getPrototypeOf(Enemy)).call(this, game, name, position, properties));
 
-    _this.animations.add('left', [9, 10, 11, 12, 9, 13, 14], 9, true);
-    //this.animations.add('right', [], 10, true);
-    _this.animations.add('dead', [1, 2, 3, 4, 5, 6, 7, 8, 0], 9, true);
+      _this.animations.add('left', [9, 10, 11, 12, 9, 13, 14], 9, true);
+      //this.animations.add('right', [], 10, true);
+      _this.animations.add('dead', [1, 2, 3, 4, 5, 6, 7, 8, 0], 9, true);
 
-    _this.position = position;
-    //this.currentTarget = {};
+      _this.position = position;
+      //this.currentTarget = {};
 
-    _this.stats = {
-      health: 10,
-      movement: 10
-    };
+      _this.stats = {
+         health: 10,
+         movement: 10
+      };
 
-    return _this;
-  }
+      return _this;
+   }
 
-  _createClass(Enemy, [{
-    key: 'receiveDamage',
-    value: function receiveDamage(damage) {}
-  }, {
-    key: 'moveTo',
-    value: function moveTo(position) {
-      this.gameState.pathfinding.findPath(this.position, position, this.followPath, this);
-    }
-  }, {
-    key: 'followPath',
-    value: function followPath(path) {
-      console.log('inside path', path);
+   _createClass(Enemy, [{
+      key: 'attackPlayer',
+      value: function attackPlayer(player) {
+         player.stats.health -= 10;
+         player.healthbar.text = player.stats.health;
+      }
+   }, {
+      key: 'receiveDamage',
+      value: function receiveDamage(damage) {}
+   }, {
+      key: 'moveTo',
+      value: function moveTo(position) {
+         this.gameState.pathfinding.findPath(this.position, position, this.followPath, this);
+      }
+   }, {
+      key: 'followPath',
+      value: function followPath(path) {
+         console.log('inside path', path);
 
-      var movingTween = void 0;
+         var movingTween = void 0,
+             pathLength = void 0;
 
-      movingTween = this.game.tweens.create(this);
+         movingTween = this.game.tweens.create(this);
+         pathLength = path.length;
 
-      path.forEach(function (position) {
-        movingTween.to({ x: position.x, y: position.y }, 1, Phaser.Easing.Linear.None);
-      });
-    }
-  }, {
-    key: 'acquireTarget',
-    value: function acquireTarget() {
-      //Loop through player group and find closest player
-      //console.log("find player", this.gameState.groups.player.children[0].position);
+         //If path is 0, attack the player
+         //TODO: currently hardcoded player
+         if (pathLength <= 0) {
+            this.attackPlayer(this.gameState.groups.player.children[0]);
+         } else {
+            path.forEach(function (position) {
+               movingTween.to({ x: position.x, y: position.y }, 250);
+            });
 
-      return this.gameState.groups.player.children[0].position;
-    }
-  }]);
+            movingTween.start();
+         }
+      }
+   }, {
+      key: 'acquireTarget',
+      value: function acquireTarget() {
+         //Loop through player group and find closest player
+         //console.log("find player", this.gameState.groups.player.children[0].position);
 
-  return Enemy;
+         return this.gameState.groups.player.children[0].position;
+      }
+   }]);
+
+   return Enemy;
 }(_Prefab3.default);
 
 exports.default = Enemy;
@@ -21171,9 +21156,17 @@ var Player = function (_Prefab) {
 
     _this.stats = {
       health: 100,
-      movement: 10
+      movement: 100
     };
 
+    var style = {
+      font: "bold 16px Arial",
+      fill: "#FFF",
+      stroke: "#000",
+      strokeThickness: 3
+    };
+
+    _this.healthbar = _this.game.add.text(_this.position.x - 10, _this.position.y - 10, _this.stats.health, style);
     return _this;
   }
 

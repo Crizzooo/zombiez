@@ -20,6 +20,11 @@ export default class Enemy extends Prefab {
 
     }
 
+    attackPlayer (player) {
+	    player.stats.health -= 10;
+	    player.healthbar.text = player.stats.health;
+    }
+
     receiveDamage (damage) {
 
     }
@@ -31,13 +36,24 @@ export default class Enemy extends Prefab {
     followPath (path) {
     	console.log('inside path', path);
 
-    	let movingTween
+    	let movingTween, pathLength
 
 	    movingTween = this.game.tweens.create(this);
+    	pathLength = path.length;
 
-    	path.forEach( (position) => {
-    		movingTween.to({x: position.x, y: position.y}, 1, Phaser.Easing.Linear.None);
-	    })
+    	//If path is 0, attack the player
+	    //TODO: currently hardcoded player
+    	if (pathLength <= 0) {
+    		this.attackPlayer(this.gameState.groups.player.children[0])
+	    } else {
+		    path.forEach( (position) => {
+			    movingTween.to({x: position.x, y: position.y}, 250);
+		    })
+
+		    movingTween.start();
+	    }
+
+
     }
 
     acquireTarget () {
