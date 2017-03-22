@@ -15,13 +15,14 @@ export default class Enemy extends Prefab {
 
       this.stats = {
         health: 10,
-        movement: 10
+        movement: 10,
+	      attack: 5
       }
 
     }
 
     attackPlayer (player) {
-	    player.receiveDamage(10);
+	    player.receiveDamage(this.stats.attack);
     }
 
     receiveDamage (damage) {

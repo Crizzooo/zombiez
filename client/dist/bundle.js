@@ -21969,7 +21969,8 @@ var Enemy = function (_Prefab) {
 
       _this.stats = {
          health: 10,
-         movement: 10
+         movement: 10,
+         attack: 5
       };
 
       return _this;
@@ -21978,7 +21979,7 @@ var Enemy = function (_Prefab) {
    _createClass(Enemy, [{
       key: 'attackPlayer',
       value: function attackPlayer(player) {
-         player.receiveDamage(10);
+         player.receiveDamage(this.stats.attack);
       }
    }, {
       key: 'receiveDamage',
@@ -22123,61 +22124,87 @@ var Player = function (_Prefab) {
 
 		var _this = _possibleConstructorReturn(this, (Player.__proto__ || Object.getPrototypeOf(Player)).call(this, game, name, position, properties));
 
+		_this.anchor.setTo(0.5);
+
 		_this.stats = {
+			totalHealth: 100,
 			health: 100,
 			movement: 100
 		};
 
-		_this.anchor.setTo(0.5);
-		_this.animations.add('right', [24, 8, 5, 20, 12, 13], 10, true);
-		_this.animations.add('left', [17, 10, 5, 19, 8, 9], 10, true);
-		_this.animations.add('up', [16, 0, 14, 6, 1], 10, true);
-		_this.animations.add('down', [23, 9, 21, 22, 7, 4], 10, true);
+		//Healthhearts, top left hearts
+		//No one else sees
+		//TODO: make it only visible to the current player
+		_this.loadHearts();
+		//Load healthbar other players see
+		_this.loadHealthbar();
+		//Load animations
+		_this.loadAnimations();
 
 		//This might not be relevant since the world size is bigger than map size
 		//To allow for camera pan
 		_this.body.collideWorldBounds = true;
 		_this.game.physics.arcade.enable(_this);
 
-		//Healthhearts, top left hearts
-		_this.health = new _healthbar2.default(_this.gameState, 'playerHealthHearts', { x: 0, y: 0 }, {
-			group: 'ui'
-		});
-
-		for (var i = 0; i < 10; i++) {
-			_this.health.addHearts(_this.game.add.existing(new _healthHearts2.default(_this.gameState, 'playerHeart' + i, { x: 32 * i, y: 0 }, {
-				texture: 'playerHearts',
-				group: 'ui',
-				initial: 2
-			})));
-		}
-
-		_this.game.add.existing(_this.health);
-
-		//Health text, to be replaced by healthbar
-		var style = {
-			font: "bold 16px Arial",
-			fill: "#FFF",
-			stroke: "#000",
-			strokeThickness: 3
-		};
-
-		_this.healthbar = _this.game.add.text(_this.position.x - 10, _this.position.y - 10, _this.stats.health, style);
 		return _this;
 	}
 
 	_createClass(Player, [{
+		key: 'loadAnimations',
+		value: function loadAnimations() {
+			this.animations.add('right', [24, 8, 5, 20, 12, 13], 10, true);
+			this.animations.add('left', [17, 10, 5, 19, 8, 9], 10, true);
+			this.animations.add('up', [16, 0, 14, 6, 1], 10, true);
+			this.animations.add('down', [23, 9, 21, 22, 7, 4], 10, true);
+		}
+	}, {
+		key: 'loadHealthbar',
+		value: function loadHealthbar() {
+			//Health text, to be replaced by healthbar
+			var style = {
+				font: "bold 16px Arial",
+				fill: "#FFF",
+				stroke: "#000",
+				strokeThickness: 3
+			};
+
+			this.healthbar = this.game.add.text(this.position.x - 10, this.position.y - 10, this.stats.health, style);
+		}
+	}, {
+		key: 'loadHearts',
+		value: function loadHearts() {
+			//Health hearts, top left hearts
+			this.health = new _healthbar2.default(this.gameState, 'playerHealthHearts', { x: 0, y: 0 }, {
+				group: 'ui'
+			});
+
+			for (var i = 0; i < 10; i++) {
+				this.health.addHearts(this.game.add.existing(new _healthHearts2.default(this.gameState, 'playerHeart' + i, { x: 32 * i, y: 0 }, {
+					texture: 'playerHearts',
+					group: 'ui',
+					initial: 2
+				})));
+			}
+
+			this.game.add.existing(this.health);
+		}
+	}, {
 		key: 'receiveDamage',
 		value: function receiveDamage(damage) {
 			var _this2 = this;
 
+			//Change healthbar
 			this.stats.health -= damage;
 			this.healthbar.text = this.stats.health;
-			this.tint = 0x0000ff;
 
+			//Set tint to show damage
+			this.tint = 0x0000ff;
 			setTimeout(function () {
 				_this2.tint = 0xffffff;
 			}, 400);
+
+			//Change Health hearts
+			this.health.newHealth(this.stats.health);
 		}
 	}]);
 
@@ -63526,6 +63553,13 @@ var HealthHearts = function (_Phaser$Sprite) {
 	}
 
 	_createClass(HealthHearts, [{
+		key: 'heartStatus',
+		value: function heartStatus() {
+			if (this.frame === 0) return 'empty';
+			if (this.frame === 1) return 'half';
+			if (this.frame === 2) return 'full';
+		}
+	}, {
 		key: 'changeHeart',
 		value: function changeHeart(heart) {
 			switch (heart) {
@@ -63588,6 +63622,7 @@ var HealthBar = function (_Phaser$Sprite) {
 		_this.gameState.groups[properties.group].children.push(_this);
 		_this.initial = +properties.initial;
 
+		_this.currentHeart = 9;
 		_this.hearts = [];
 		return _this;
 	}
@@ -63596,6 +63631,20 @@ var HealthBar = function (_Phaser$Sprite) {
 		key: 'addHearts',
 		value: function addHearts(heart) {
 			this.hearts.push(heart);
+		}
+	}, {
+		key: 'newHealth',
+		value: function newHealth(health) {
+			var numHearts = Math.floor(health / 10 % 10);
+			var halfHeart = health % 10 >= 5 ? true : false;
+
+			for (var i = this.currentHeart; i >= numHearts; i--) {
+				if (i > numHearts) {
+					this.hearts[i].changeHeart('empty');
+				} else {
+					halfHeart ? this.hearts[i].changeHeart('half') : this.hearts[i].changeHeart('empty');
+				}
+			}
 		}
 	}]);
 

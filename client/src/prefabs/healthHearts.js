@@ -17,6 +17,12 @@ export default class HealthHearts extends Phaser.Sprite {
 		this.gameState.prefabs[name] = this;
 	}
 
+	heartStatus () {
+		if (this.frame === 0) return 'empty';
+		if (this.frame === 1) return 'half';
+		if (this.frame === 2) return 'full';
+	}
+
 	changeHeart (heart) {
 		switch (heart) {
 			case 'full':

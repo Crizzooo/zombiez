@@ -16,10 +16,28 @@ export default class HealthBar extends Phaser.Sprite {
 		this.gameState.groups[properties.group].children.push(this);
 		this.initial = +properties.initial;
 
+		this.currentHeart = 9;
 		this.hearts = [];
 	}
 
 	addHearts(heart) {
 		this.hearts.push(heart);
 	}
+
+	newHealth(health) {
+		let numHearts = Math.floor((health / 10)  % 10);
+		let halfHeart = health % 10 >= 5 ? true : false;
+
+		for (let i = this.currentHeart; i >= numHearts; i--) {
+			if (i > numHearts) {
+				this.hearts[i].changeHeart('empty');
+			} else {
+				(halfHeart ? this.hearts[i].changeHeart('half') : this.hearts[i].changeHeart('empty'))
+			}
+		}
+
+	}
+
+
+
 }
