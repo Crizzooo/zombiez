@@ -38,6 +38,7 @@ const playerReducers = (state = initialState, action) => {
   switch (action.type) {
 
     case ADD_PLAYER: {
+      console.log("Server is adding a player from: ", action.playerState);
       let newPlayerStates = Object.assign({}, state.playerStates);
       newPlayerStates[action.playerState.socketId] = action.playerState;
       newState.playerStates = newPlayerStates;
@@ -45,8 +46,12 @@ const playerReducers = (state = initialState, action) => {
     }
 
     case UPDATE_PLAYER: {
+      console.log('Update received this action: ', action);
       let newPlayerStates = Object.assign({}, state.playerStates);
       newPlayerStates[action.playerToUpdate.socketId] = action.playerToUpdate;
+      if (!action.playerToUpdate.socketId){
+        return state;
+      }
       newState.playerStates = newPlayerStates;
       break;
     }
@@ -59,6 +64,9 @@ const playerReducers = (state = initialState, action) => {
     case REMOVE_PLAYER: {
       let newPlayerStates = Object.assign({}, state.playerStates);
       console.log('server received remove player: ', action.id);
+      if (newPlayerStates['undefined']){
+        delete newPlayerStates['undefined'];
+      }
       if (newPlayerStates[action.id]){
         delete newPlayerStates[action.id];
       }

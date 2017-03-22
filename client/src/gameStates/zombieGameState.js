@@ -77,11 +77,6 @@ export default class ZombieGameState extends TiledState {
 	  console.log('Local state right before load level: ', store.getState() )
     this.loadLevel();
 
-    //set interval to emit currentPlayer to server
-    //if we have a current player
-    if (this.currentPlayerSprite){
-      const emitInterval = emitCurrentState(socket);
-    }
 
     //Add test prefabs into the game
     this.gun = gunPrefab;
@@ -90,30 +85,46 @@ export default class ZombieGameState extends TiledState {
 
     //this.currentEnemy.acquireTarget = throttle(this.currentEnemy.acquireTarget, 200);
     this.currentEnemy.moveTo = throttle(this.currentEnemy.moveTo, 1000);
+    ///////////TODO: WIP
+    this.currentEnemy.animations.play('left');
 
-    this.game.add.existing(this.currentPlayerSprite);
+
+    //add to world
     this.game.add.existing(this.currentEnemy);
     this.game.add.existing(this.pointer);
     this.game.add.existing(this.gun);
 
-    //on click lock the users mouse for input
-    this.game.input.onDown.add(this.lockPointer, this);
 
     //Set camera to follow, then make world big to allow camera to pan off
     //this.camera.view = new Phaser.Rectangle(0, 0, this.currentPlayer.position.x, this.currentPlayer.position.y);
-    this.camera.follow(this.currentPlayerSprite);
     this.game.world.setBounds(-250, -250, 2500, 2500);
 
-    ///////////TODO: WIP
-    this.currentEnemy.animations.play('left');
+
+    //set interval to emit currentPlayer to server
+    //if we have a current player
+    if (this.currentPlayerSprite){
+      const emitInterval = emitCurrentState(socket);
+      //on click lock the users mouse for input
+      this.game.input.onDown.add(this.lockPointer, this);
+
+      //Only follow current player if we have a current player
+      this.camera.follow(this.currentPlayerSprite);
+    } else {
+      //follow the first remote player
+      let remotePlayerOneId = Object.keys(remotePlayerSprites)[0];
+      this.camera.follow(remotePlayerSprites[remotePlayerOneId]);
+    }
   }
 
   update () {
   	//Check Physics
-	  this.game.physics.arcade.collide(this.currentPlayerSprite, this.layers.backgroundDecCollision);
-	  this.game.physics.arcade.collide(this.currentPlayerSprite, this.layers.backgroundDecCollision2);
-	  this.game.physics.arcade.collide(this.currentPlayerSprite, this.layers.waterCollision);
-	  this.game.physics.arcade.collide(this.currentPlayerSprite, this.layers.wallCollision);
+    if (this.currentPlayerSprite){
+  	  this.game.physics.arcade.collide(this.currentPlayerSprite, this.layers.backgroundDecCollision);
+  	  this.game.physics.arcade.collide(this.currentPlayerSprite, this.layers.backgroundDecCollision2);
+  	  this.game.physics.arcade.collide(this.currentPlayerSprite, this.layers.waterCollision);
+  	  this.game.physics.arcade.collide(this.currentPlayerSprite, this.layers.wallCollision);
+    }
+    //TODO: Do we need colission for the remote player group??
 
 	  //Gun Rotation
 	  this.tweenPlayerAssets();
@@ -148,8 +159,8 @@ export default class ZombieGameState extends TiledState {
 
     //create a current player
     let currentPlayer;
-    if (state.players.currentPlayer !== undefined) {
-      console.log('we have a current player so we shall create him with name: ', state.players.currentPlayer.name);
+    if (state.players.currentPlayer.name) {
+      console.log('we have a current player so we shall call him: ', state.players.currentPlayer.name);
 	    currentPlayer = state.players.currentPlayer;
 	    //TODO: make server assign sprite keys
 	    let playerPrefab = this.createPrefab(currentPlayer.name,
@@ -177,11 +188,14 @@ export default class ZombieGameState extends TiledState {
         //TODO: health, fire, guns, bullets, frame? etc
       }
 
-      console.log('Where is  current player on game start?', currPlayerState);
+      //add it to the world
+      this.game.add.existing(this.currentPlayerSprite);
+
       store.dispatch(updateCurrentPlayer(currPlayerState));
       console.log('end of load level local store looks like: ', store.getState());
     }
     console.log('Creating Sprites for each player in this: ', state.players.playerStates);
+    //)
     R.forEachObjIndexed(this.createRemotePlayerSprite, state.players.playerStates);
   }
 
@@ -330,13 +344,8 @@ export default class ZombieGameState extends TiledState {
   }
 
   createRemotePlayerSprite(playerState){
-    console.log('May create remote player with playerState', playerState);
     //TODO: name needs to be unique for each remote player
     //TODO: take name from server
-    console.log('what is this: ', this);
-    console.log('what is self: ', self);
-    console.log('does self have createPrefab', self.createPrefab);
-
     if (playerState.socketId !== socket.id){
       console.log('creating prefab for player', playerState)
       let playerPrefab = self.createPrefab(playerState.name,
@@ -350,15 +359,23 @@ export default class ZombieGameState extends TiledState {
         }, {x: playerState.x, y: playerState.y});
       self.game.add.existing(playerPrefab);
       remotePlayerSprites[playerState.socketId] = playerPrefab;
+      console.log('the created player sprite: ', playerPrefab);
     }
 
   }
 
   tweenPlayerAssets(){
     //gun follow does not work as a child of the player sprite.. had to tween gun to players x, y position
-    this.add.tween(this.gun).to( { x: this.currentPlayerSprite.x, y: this.currentPlayerSprite.y}, 10, Phaser.Easing.Linear.None, true);
 
-    //Add tween for health
-    this.add.tween(this.currentPlayerSprite.healthbar).to( { x: this.currentPlayerSprite.x - 10, y: this.currentPlayerSprite.y - 30}, 10, Phaser.Easing.Linear.None, true);
+    //do tweens on current Player only if he exists
+    if (this.currentPlayerSprite) {
+      this.add.tween(this.gun).to( { x: this.currentPlayerSprite.x, y: this.currentPlayerSprite.y}, 10, Phaser.Easing.Linear.None, true);
+
+      //Add tween for health
+      this.add.tween(this.currentPlayerSprite.healthbar).to( { x: this.currentPlayerSprite.x - 10, y: this.currentPlayerSprite.y - 30}, 10, Phaser.Easing.Linear.None, true);
+    }
+
+
+    //TODO: For each remote player, tween all their stuff
   }
 }

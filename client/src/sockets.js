@@ -54,13 +54,18 @@ function logReceivedState() {
 function dispatchServerState(serverState) {
   //break out data from server - send to appropriate stores
   let state = store.getState();
-  store.dispatch(dispatchLobbyUpdate(serverState.lobby.lobbyers));
+  //store.dispatch(dispatchLobbyUpdate(serverState.lobby.lobbyers));
   if (state.game.gamePlaying){
     let playerStateUpdate = serverState.players.playerStates;
+    // console.log('update pre-remove CP: ', playerStateUpdate);
     if (playerStateUpdate[socket.id]){
       delete playerStateUpdate[socket.id];
     }
-    store.dispatch(updatePlayers(playerStateUpdate));
+    // console.log('and after deleting: ', playerStateUpdate);
+    //TODO: if player state update has nothing, dont dispatch
+    if (!(Object.keys(playerStateUpdate) === [] || Object.keys(playerStateUpdate) === ['undefined'])){
+        store.dispatch(updatePlayers(playerStateUpdate));
+      }
   }
   throttledLog();
 }

@@ -4786,11 +4786,13 @@ exports.default = function () {
       //if there is a socket id, make it current player and remove him from playerStates
       console.log('LOAD PLAYERS IN REDUCER RECIEVED ACTION: ');
       console.dir(action.players);
+      console.log('before we delete current player: ', action.players);
       if (action.players[socket.id]) {
         newState.currentPlayer = action.players[socket.id];
         delete action.players[socket.id];
       }
       newState.playerStates = action.players;
+      console.log('LOAD PLAYERS REDUCER newState.PlayerStates: ', action.players);
       break;
 
     case SET_GAME_PLAYING_BOOL:
@@ -7758,12 +7760,11 @@ var Prefab = function (_Phaser$Sprite) {
 
 		var _this = _possibleConstructorReturn(this, (Prefab.__proto__ || Object.getPrototypeOf(Prefab)).call(this, game.game, position.x, position.y, properties.texture, +properties.initial));
 
-		console.log('in prefab creator: name & then parent', name, _this.parent);
 		_this.gameState = game;
 		_this.name = name;
 
 		//Add prefab to its group
-		//this.gameState.groups[properties.group].add(this);
+		// this.gameState.groups[properties.group].add(this);
 		_this.gameState.groups[properties.group].children.push(_this);
 		_this.initial = +properties.initial;
 
@@ -11952,7 +11953,7 @@ exports.default = function (socket) {
     //toDo: on remove player, clear interval for emitId
 
     var currentPlayerObj = state.players.currentPlayer;
-    if (state.lobby.currentLobbyer.name) {
+    if (state.lobby.currentLobbyer.name && state.game.gamePlaying) {
       socket.emit('clientUpdate', {
         player: currentPlayerObj
       });
@@ -18868,13 +18869,18 @@ function logReceivedState() {
 function dispatchServerState(serverState) {
   //break out data from server - send to appropriate stores
   var state = _store2.default.getState();
-  _store2.default.dispatch((0, _lobbyReducer.dispatchLobbyUpdate)(serverState.lobby.lobbyers));
+  //store.dispatch(dispatchLobbyUpdate(serverState.lobby.lobbyers));
   if (state.game.gamePlaying) {
     var playerStateUpdate = serverState.players.playerStates;
+    // console.log('update pre-remove CP: ', playerStateUpdate);
     if (playerStateUpdate[socket.id]) {
       delete playerStateUpdate[socket.id];
     }
-    _store2.default.dispatch((0, _playersReducer.updatePlayers)(playerStateUpdate));
+    // console.log('and after deleting: ', playerStateUpdate);
+    //TODO: if player state update has nothing, dont dispatch
+    if (!(Object.keys(playerStateUpdate) === [] || Object.keys(playerStateUpdate) === ['undefined'])) {
+      _store2.default.dispatch((0, _playersReducer.updatePlayers)(playerStateUpdate));
+    }
   }
   throttledLog();
 }
@@ -19948,7 +19954,6 @@ var ChatApp = function (_React$Component) {
   _createClass(ChatApp, [{
     key: 'handleChange',
     value: function handleChange(evt) {
-      console.log(evt.target.value);
       this.setState({ messageToSend: evt.target.value });
     }
   }, {
@@ -19965,10 +19970,8 @@ var ChatApp = function (_React$Component) {
       $('#createMessage').val('');
       var height = 0;
       $('.messageText').each(function (i, value) {
-        console.log('is this the error', this);
         height += parseInt($(this).height());
       });
-      console.log('or is this the error');
       $('#messageDisplay').animate({ scrollTop: height });
     }
   }, {
@@ -20120,14 +20123,12 @@ var lobbyControls = exports.lobbyControls = function (_React$Component) {
     key: 'handleLeaveGame',
     value: function handleLeaveGame(evt) {
       //stop broadcasting (was causing ghost players)
+      socket.emit('lobbyerLeaveLobby');
       (0, _emitCurrentState.stopClientBroadcast)();
       _store2.default.dispatch((0, _lobbyReducer.dispatchSetCurrentLobbyer)({}));
       //if game playing
-      if (this.props.gamePlaying) {
-        //update current player to {}
-        _store2.default.dispatch((0, _playersReducer.removeCurrentPlayer)());
-      }
-      socket.emit('lobbyerLeaveLobby');
+      //update current player to {}
+      _store2.default.dispatch((0, _playersReducer.removeCurrentPlayer)());
     }
   }, {
     key: 'componentDidMount',
@@ -20888,12 +20889,6 @@ var ZombieGameState = function (_TiledState) {
       console.log('Local state right before load level: ', _store2.default.getState());
       this.loadLevel();
 
-      //set interval to emit currentPlayer to server
-      //if we have a current player
-      if (this.currentPlayerSprite) {
-        var emitInterval = (0, _emitCurrentState2.default)(socket);
-      }
-
       //Add test prefabs into the game
       this.gun = gunPrefab;
       this.pointer = crosshair;
@@ -20901,31 +20896,44 @@ var ZombieGameState = function (_TiledState) {
 
       //this.currentEnemy.acquireTarget = throttle(this.currentEnemy.acquireTarget, 200);
       this.currentEnemy.moveTo = throttle(this.currentEnemy.moveTo, 1000);
+      ///////////TODO: WIP
+      this.currentEnemy.animations.play('left');
 
-      this.game.add.existing(this.currentPlayerSprite);
+      //add to world
       this.game.add.existing(this.currentEnemy);
       this.game.add.existing(this.pointer);
       this.game.add.existing(this.gun);
 
-      //on click lock the users mouse for input
-      this.game.input.onDown.add(this.lockPointer, this);
-
       //Set camera to follow, then make world big to allow camera to pan off
       //this.camera.view = new Phaser.Rectangle(0, 0, this.currentPlayer.position.x, this.currentPlayer.position.y);
-      this.camera.follow(this.currentPlayerSprite);
       this.game.world.setBounds(-250, -250, 2500, 2500);
 
-      ///////////TODO: WIP
-      this.currentEnemy.animations.play('left');
+      //set interval to emit currentPlayer to server
+      //if we have a current player
+      if (this.currentPlayerSprite) {
+        var emitInterval = (0, _emitCurrentState2.default)(socket);
+        //on click lock the users mouse for input
+        this.game.input.onDown.add(this.lockPointer, this);
+
+        //Only follow current player if we have a current player
+        this.camera.follow(this.currentPlayerSprite);
+      } else {
+        //follow the first remote player
+        var remotePlayerOneId = Object.keys(remotePlayerSprites)[0];
+        this.camera.follow(remotePlayerSprites[remotePlayerOneId]);
+      }
     }
   }, {
     key: 'update',
     value: function update() {
       //Check Physics
-      this.game.physics.arcade.collide(this.currentPlayerSprite, this.layers.backgroundDecCollision);
-      this.game.physics.arcade.collide(this.currentPlayerSprite, this.layers.backgroundDecCollision2);
-      this.game.physics.arcade.collide(this.currentPlayerSprite, this.layers.waterCollision);
-      this.game.physics.arcade.collide(this.currentPlayerSprite, this.layers.wallCollision);
+      if (this.currentPlayerSprite) {
+        this.game.physics.arcade.collide(this.currentPlayerSprite, this.layers.backgroundDecCollision);
+        this.game.physics.arcade.collide(this.currentPlayerSprite, this.layers.backgroundDecCollision2);
+        this.game.physics.arcade.collide(this.currentPlayerSprite, this.layers.waterCollision);
+        this.game.physics.arcade.collide(this.currentPlayerSprite, this.layers.wallCollision);
+      }
+      //TODO: Do we need colission for the remote player group??
 
       //Gun Rotation
       this.tweenPlayerAssets();
@@ -20962,8 +20970,8 @@ var ZombieGameState = function (_TiledState) {
 
       //create a current player
       var currentPlayer = void 0;
-      if (state.players.currentPlayer !== undefined) {
-        console.log('we have a current player so we shall create him with name: ', state.players.currentPlayer.name);
+      if (state.players.currentPlayer.name) {
+        console.log('we have a current player so we shall call him: ', state.players.currentPlayer.name);
         currentPlayer = state.players.currentPlayer;
         //TODO: make server assign sprite keys
         var playerPrefab = this.createPrefab(currentPlayer.name, {
@@ -20990,11 +20998,14 @@ var ZombieGameState = function (_TiledState) {
           //TODO: health, fire, guns, bullets, frame? etc
         };
 
-        console.log('Where is  current player on game start?', currPlayerState);
+        //add it to the world
+        this.game.add.existing(this.currentPlayerSprite);
+
         _store2.default.dispatch((0, _playersReducer.updateCurrentPlayer)(currPlayerState));
         console.log('end of load level local store looks like: ', _store2.default.getState());
       }
       console.log('Creating Sprites for each player in this: ', state.players.playerStates);
+      //)
       R.forEachObjIndexed(this.createRemotePlayerSprite, state.players.playerStates);
     }
   }, {
@@ -21155,13 +21166,8 @@ var ZombieGameState = function (_TiledState) {
   }, {
     key: 'createRemotePlayerSprite',
     value: function createRemotePlayerSprite(playerState) {
-      console.log('May create remote player with playerState', playerState);
       //TODO: name needs to be unique for each remote player
       //TODO: take name from server
-      console.log('what is this: ', this);
-      console.log('what is self: ', self);
-      console.log('does self have createPrefab', self.createPrefab);
-
       if (playerState.socketId !== socket.id) {
         console.log('creating prefab for player', playerState);
         var playerPrefab = self.createPrefab(playerState.name, {
@@ -21174,16 +21180,23 @@ var ZombieGameState = function (_TiledState) {
         }, { x: playerState.x, y: playerState.y });
         self.game.add.existing(playerPrefab);
         remotePlayerSprites[playerState.socketId] = playerPrefab;
+        console.log('the created player sprite: ', playerPrefab);
       }
     }
   }, {
     key: 'tweenPlayerAssets',
     value: function tweenPlayerAssets() {
       //gun follow does not work as a child of the player sprite.. had to tween gun to players x, y position
-      this.add.tween(this.gun).to({ x: this.currentPlayerSprite.x, y: this.currentPlayerSprite.y }, 10, Phaser.Easing.Linear.None, true);
 
-      //Add tween for health
-      this.add.tween(this.currentPlayerSprite.healthbar).to({ x: this.currentPlayerSprite.x - 10, y: this.currentPlayerSprite.y - 30 }, 10, Phaser.Easing.Linear.None, true);
+      //do tweens on current Player only if he exists
+      if (this.currentPlayerSprite) {
+        this.add.tween(this.gun).to({ x: this.currentPlayerSprite.x, y: this.currentPlayerSprite.y }, 10, Phaser.Easing.Linear.None, true);
+
+        //Add tween for health
+        this.add.tween(this.currentPlayerSprite.healthbar).to({ x: this.currentPlayerSprite.x - 10, y: this.currentPlayerSprite.y - 30 }, 10, Phaser.Easing.Linear.None, true);
+      }
+
+      //TODO: For each remote player, tween all their stuff
     }
   }]);
 
@@ -22053,7 +22066,7 @@ exports.default = Pathfinding;
 
 
 Object.defineProperty(exports, "__esModule", {
-   value: true
+    value: true
 });
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -22071,75 +22084,75 @@ function _possibleConstructorReturn(self, call) { if (!self) { throw new Referen
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
 var Enemy = function (_Prefab) {
-   _inherits(Enemy, _Prefab);
+    _inherits(Enemy, _Prefab);
 
-   function Enemy(game, name, position, properties) {
-      _classCallCheck(this, Enemy);
+    function Enemy(game, name, position, properties) {
+        _classCallCheck(this, Enemy);
 
-      var _this = _possibleConstructorReturn(this, (Enemy.__proto__ || Object.getPrototypeOf(Enemy)).call(this, game, name, position, properties));
+        var _this = _possibleConstructorReturn(this, (Enemy.__proto__ || Object.getPrototypeOf(Enemy)).call(this, game, name, position, properties));
 
-      _this.animations.add('left', [9, 10, 11, 12, 9, 13, 14], 9, true);
-      //this.animations.add('right', [], 10, true);
-      _this.animations.add('dead', [1, 2, 3, 4, 5, 6, 7, 8, 0], 9, true);
+        _this.animations.add('left', [9, 10, 11, 12, 9, 13, 14], 9, true);
+        //this.animations.add('right', [], 10, true);
+        _this.animations.add('dead', [1, 2, 3, 4, 5, 6, 7, 8, 0], 9, true);
 
-      _this.position = position;
-      //this.currentTarget = {};
+        _this.position = position;
+        //this.currentTarget = {};
 
-      _this.stats = {
-         health: 10,
-         movement: 10
-      };
+        _this.stats = {
+            health: 10,
+            movement: 10
+        };
 
-      return _this;
-   }
+        return _this;
+    }
 
-   _createClass(Enemy, [{
-      key: 'attackPlayer',
-      value: function attackPlayer(player) {
-         player.receiveDamage(10);
-      }
-   }, {
-      key: 'receiveDamage',
-      value: function receiveDamage(damage) {}
-   }, {
-      key: 'moveTo',
-      value: function moveTo(position) {
-         this.gameState.pathfinding.findPath(this.position, position, this.followPath, this);
-      }
-   }, {
-      key: 'followPath',
-      value: function followPath(path) {
-         // console.log('inside path', path);
+    _createClass(Enemy, [{
+        key: 'attackPlayer',
+        value: function attackPlayer(player) {
+            player.receiveDamage(10);
+        }
+    }, {
+        key: 'receiveDamage',
+        value: function receiveDamage(damage) {}
+    }, {
+        key: 'moveTo',
+        value: function moveTo(position) {
+            this.gameState.pathfinding.findPath(this.position, position, this.followPath, this);
+        }
+    }, {
+        key: 'followPath',
+        value: function followPath(path) {
+            // console.log('inside path', path);
 
-         var movingTween = void 0,
-             pathLength = void 0;
+            var movingTween = void 0,
+                pathLength = void 0;
 
-         movingTween = this.game.tweens.create(this);
-         pathLength = path.length;
+            movingTween = this.game.tweens.create(this);
+            pathLength = path.length;
 
-         //If path is 0, attack the player
-         //TODO: currently hardcoded player
-         if (pathLength <= 0) {
-            this.attackPlayer(this.gameState.groups.player.children[0]);
-         } else {
-            path.forEach(function (position) {
-               movingTween.to({ x: position.x, y: position.y }, 250);
-            });
+            //If path is 0, attack the player
+            //TODO: currently hardcoded player
+            if (pathLength <= 0) {
+                this.attackPlayer(this.gameState.groups.player.children[0]);
+            } else {
+                path.forEach(function (position) {
+                    movingTween.to({ x: position.x, y: position.y }, 250);
+                });
 
-            movingTween.start();
-         }
-      }
-   }, {
-      key: 'acquireTarget',
-      value: function acquireTarget() {
-         //Loop through player group and find closest player
-         //console.log("find player", this.gameState.groups.player.children[0].position);
+                movingTween.start();
+            }
+        }
+    }, {
+        key: 'acquireTarget',
+        value: function acquireTarget() {
+            //Loop through player group and find closest player
+            //console.log("find player", this.gameState.groups.player.children[0].position);
 
-         return this.gameState.groups.player.children[0].position;
-      }
-   }]);
+            return this.gameState.groups.player.children[0].position;
+        }
+    }]);
 
-   return Enemy;
+    return Enemy;
 }(_Prefab3.default);
 
 exports.default = Enemy;
