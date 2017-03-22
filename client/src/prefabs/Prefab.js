@@ -5,11 +5,13 @@
 export default class Prefab extends Phaser.Sprite {
 	constructor(game, name, position, properties) {
 		super(game.game, position.x, position.y, properties.texture, +properties.initial);
+		//TODO: Hacky fix, what can we do??
+
 		this.gameState = game;
 		this.name = name;
 
 		//Add prefab to its group
-		//this.gameState.groups[properties.group].add(this);
+		// this.gameState.groups[properties.group].add(this);
     this.gameState.groups[properties.group].children.push(this);
 		this.initial = +properties.initial;
 
@@ -19,4 +21,3 @@ export default class Prefab extends Phaser.Sprite {
 		this.gameState.prefabs[name] = this;
 	}
 }
-

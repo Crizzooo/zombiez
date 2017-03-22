@@ -36,29 +36,43 @@ const initialState = { playerStates: {} };
 const playerReducers = (state = initialState, action) => {
   let newState = Object.assign({}, state);
   switch (action.type) {
-    case ADD_PLAYER:
-        //update player state at socket.id
-        console.log('ADDING PLAYER TO SERVER STATE: ', action.playerState);
-        newState.playerStates[action.playerState.socketId] = action.playerState;
-      break;
 
-    case UPDATE_PLAYER:
-      newState.playerStates[action.playerToUpdate.socketId] = action.playerToUpdate
+    case ADD_PLAYER: {
+      console.log("Server is adding a player from: ", action.playerState);
+      let newPlayerStates = Object.assign({}, state.playerStates);
+      newPlayerStates[action.playerState.socketId] = action.playerState;
+      newState.playerStates = newPlayerStates;
       break;
+    }
 
-    case RESET_PLAYERS:
-      newState.playerStates = {};
-      //newState = initialState DOESNT WORK
-      break;
-
-    case REMOVE_PLAYER:
-      console.log('server received remove player: ', action.id);
-      if (newState.playerStates[action.id]){
-        console.log('pre remove player in players: ', newState.playerStates);
-        delete newState.playerStates[action.id];
-        console.log('post remove player in players player: ', newState.playerStates);
+    case UPDATE_PLAYER: {
+      console.log('Update received this action: ', action);
+      let newPlayerStates = Object.assign({}, state.playerStates);
+      newPlayerStates[action.playerToUpdate.socketId] = action.playerToUpdate;
+      if (!action.playerToUpdate.socketId){
+        return state;
       }
+      newState.playerStates = newPlayerStates;
       break;
+    }
+
+    case RESET_PLAYERS: {
+      newState.playerStates = {};
+      break;
+    }
+
+    case REMOVE_PLAYER: {
+      let newPlayerStates = Object.assign({}, state.playerStates);
+      console.log('server received remove player: ', action.id);
+      if (newPlayerStates['undefined']){
+        delete newPlayerStates['undefined'];
+      }
+      if (newPlayerStates[action.id]){
+        delete newPlayerStates[action.id];
+      }
+      newState.playerStates = newPlayerStates;
+      break;
+    }
 
     default:
       return state;
