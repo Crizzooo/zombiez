@@ -4,7 +4,8 @@ import store from '../store.js';
 import {updateCurrentPlayer, playerLeaveGame} from '../reducers/players-reducer.js';
 import emitCurrentState from '../engine/emitCurrentState.js';
 import TiledState from './tiledState';
-import Pathfinding from '../plugins/Pathfinding'
+import Pathfinding from '../plugins/Pathfinding';
+import _ from 'lodash';
 
 //TODO: do we need this?
 let remotePlayerSprites = {};
@@ -28,7 +29,7 @@ export default class ZombieGameState extends TiledState {
 	  this.game.cursors.down = this.input.keyboard.addKey(Phaser.Keyboard.S);
 	  this.game.cursors.left = this.input.keyboard.addKey(Phaser.Keyboard.A);
 	  this.game.cursors.right = this.input.keyboard.addKey(Phaser.Keyboard.D);
-    //this.cursors.spacebar = this.input.keyboard.addKey(Phaser.Keyboard.SPACEBAR);
+    this.spacebar = this.input.keyboard.addKey(Phaser.Keyboard.SPACEBAR);
 
     //Attach and bind functions
     this.destroyCurrentPlayerSprite = this.destroyCurrentPlayerSprite.bind(this);
@@ -85,6 +86,11 @@ export default class ZombieGameState extends TiledState {
 
     //Add test prefabs into the game
     this.gun = gunPrefab;
+    //initialize gun and load with finite amount of bullets
+      this.gun.initializeWeapon(this, this.currentPlayerSprite);
+      console.log(this);
+      console.log("THIS IS ZOMBIE STATE GUN", this.gun);
+
     this.pointer = crosshair;
     this.currentEnemy = enemyPrefab;
 
@@ -134,7 +140,7 @@ export default class ZombieGameState extends TiledState {
   }
 
   render() {
-		//this.game.debug.spriteInfo(this.gun, 32, 32);
+		this.game.debug.spriteInfo(this.gun, 32, 32);
   }
 
   //////////////////////////
@@ -191,6 +197,10 @@ export default class ZombieGameState extends TiledState {
 
       this.currentPlayerSprite.body.velocity.x = 0;
       this.currentPlayerSprite.body.velocity.y = 0;
+
+      if(this.spacebar.isDown){
+          this.gun.shoot(this.currentPlayerSprite);
+      }
 
       if (this.game.cursors.left.isDown) {
           this.currentPlayerSprite.animations.play('right');

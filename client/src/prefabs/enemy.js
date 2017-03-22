@@ -33,8 +33,6 @@ export default class Enemy extends Prefab {
     }
 
     followPath (path) {
-    	console.log('inside path', path);
-
     	let movingTween, pathLength
 
 	    movingTween = this.game.tweens.create(this);
