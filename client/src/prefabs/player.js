@@ -3,6 +3,7 @@
  */
 
 import Prefab from './Prefab';
+import TiledState from '../gameStates/tiledState';
 
 export default class Player extends Prefab {
     constructor(game, name, position, properties) {
@@ -23,6 +24,18 @@ export default class Player extends Prefab {
       //To allow for camera pan
       this.body.collideWorldBounds = true;
       this.game.physics.arcade.enable(this);
+
+      //Setup player's gun
+	    this.gun = this.gameState.createPrefab('gun', {
+		    type: 'guns',
+		    properties: {
+			    group: 'guns',
+			    initial: 0,
+			    texture: 'gunSpriteSheet'
+		    }
+	    }, {x: 225, y: 225});
+
+	    this.game.add.existing(this.gun);
 
       const style = {
         font: "bold 16px Arial",

@@ -63,14 +63,6 @@ export default class ZombieGameState extends TiledState {
         }
 	    }, {x: 200, y: 200});
 
-    let gunPrefab = this.createPrefab('gun', {
-        type: 'guns',
-        properties: {
-          group: 'guns',
-          initial: 0,
-          texture: 'gunSpriteSheet'
-        }
-    }, {x: 225, y: 225});
 
     //create game set up
     //This creates player prefab
@@ -79,9 +71,12 @@ export default class ZombieGameState extends TiledState {
 
 
     //Add test prefabs into the game
-    this.gun = gunPrefab;
     this.pointer = crosshair;
     this.currentEnemy = enemyPrefab;
+
+	  //add to world
+	  this.game.add.existing(this.currentEnemy);
+	  this.game.add.existing(this.pointer);
 
     //this.currentEnemy.acquireTarget = throttle(this.currentEnemy.acquireTarget, 200);
     this.currentEnemy.moveTo = throttle(this.currentEnemy.moveTo, 1000);
@@ -89,10 +84,7 @@ export default class ZombieGameState extends TiledState {
     this.currentEnemy.animations.play('left');
 
 
-    //add to world
-    this.game.add.existing(this.currentEnemy);
-    this.game.add.existing(this.pointer);
-    this.game.add.existing(this.gun);
+
 
 
     //Set camera to follow, then make world big to allow camera to pan off
@@ -128,7 +120,7 @@ export default class ZombieGameState extends TiledState {
 
 	  //Gun Rotation
 	  this.tweenPlayerAssets();
-	  this.gun.rotation = this.game.physics.arcade.angleToPointer(this.gun);
+	  this.currentPlayerSprite.gun.rotation = this.game.physics.arcade.angleToPointer(this.currentPlayerSprite.gun);
 
 	  //Pathfinding
 		this.currentEnemy.moveTo(this.currentEnemy.acquireTarget());
@@ -264,19 +256,19 @@ export default class ZombieGameState extends TiledState {
           this.currentPlayerSprite.scale.setTo(1, 1);
           if((pointerY > playerY) && (pointerX < playerX)) {
               this.currentPlayerSprite.frame = 17;
-              this.gun.scale.setTo(1, -1);
+              this.currentPlayerSprite.gun.scale.setTo(1, -1);
           }
           if((pointerY > playerY) && (pointerX > playerX)) {
               this.currentPlayerSprite.frame = 18;
-              this.gun.scale.setTo(1, 1);
+              this.currentPlayerSprite.gun.scale.setTo(1, 1);
           }
           if((pointerY < playerY) && (pointerX > playerX)) {
               this.currentPlayerSprite.frame = 14;
-              this.gun.scale.setTo(1, 1);
+              this.currentPlayerSprite.gun.scale.setTo(1, 1);
           }
           if((pointerY < playerY) && (pointerX < playerX)) {
               this.currentPlayerSprite.frame = 14;
-              this.gun.scale.setTo(1, -1);
+              this.currentPlayerSprite.gun.scale.setTo(1, -1);
           }
       }
     }
@@ -369,7 +361,7 @@ export default class ZombieGameState extends TiledState {
 
     //do tweens on current Player only if he exists
     if (this.currentPlayerSprite) {
-      this.add.tween(this.gun).to( { x: this.currentPlayerSprite.x, y: this.currentPlayerSprite.y}, 10, Phaser.Easing.Linear.None, true);
+      this.add.tween(this.currentPlayerSprite.gun).to( { x: this.currentPlayerSprite.x, y: this.currentPlayerSprite.y}, 10, Phaser.Easing.Linear.None, true);
 
       //Add tween for health
       this.add.tween(this.currentPlayerSprite.healthbar).to( { x: this.currentPlayerSprite.x - 10, y: this.currentPlayerSprite.y - 30}, 10, Phaser.Easing.Linear.None, true);
