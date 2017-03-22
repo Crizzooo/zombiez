@@ -20,7 +20,7 @@ export default class Preload extends Phaser.State {
             this.load.image(assetKey, asset.source);
             break;
           case 'spriteSheet':
-            this.load.spritesheet(assetKey, asset.source, asset.frame_width, asset.frame_height, asset.frames, asset.margin, asset.spacing);
+            this.load.spritesheet(assetKey, asset.source, asset.frameWidth, asset.frameHeight, asset.frames, asset.margin, asset.spacing);
             break;
           case 'spriteSheetAtlas':
             this.load.atlasJSONHash(assetKey, asset.sourcePNG, asset.sourceJSON);
