@@ -1,47 +1,56 @@
-import Prefab from './Prefab';
+import GunPrefab from './GunPrefab';
 import Bullet from './bullet';
-export default class Gun extends Prefab {
-    constructor(game, name, position, properties, bulletPrefab) {
-        super(game, name, position, properties);
-        this.game.physics.arcade.enable(this);
-        this.body.collideWorldBounds = true;
-        this.anchor.setTo(0.5);
-        this.pivot.x = -10;
-        this.group;
-        console.log("BUULLET", bulletPrefab);
+export default class Gun extends GunPrefab {
+  constructor(game, name, position, properties, bulletPrefab) {
+    super(game, name, position, properties);
+    this.game.physics.arcade.enable(this);
+    this.body.collideWorldBounds = true;
+    this.anchor.setTo(0.5);
+    this.pivot.x = -10;
+    console.log("BUULLET", bulletPrefab);
+  }
+
+  initializeWeapon(game) {
+    // this.group = new Phaser.Group(game.game, game.world, 'Single Bullet', false, true, Phaser.Physics.ARCADE);
+    this.gunBullets = game.game.add.group();
+    this.gunBullets.enableBody = true;
+    this.gunBullets.nextFire = 0;
+    this.gunBullets.physicsBodyType = Phaser.Physics.ARCADE;
+    this.gunBullets.setAll('outOfBoundsKill', true);
+    this.gunBullets.setAll('checkWorldBounds', true);
+
+    this.gunBullets.bulletSpeed = 600;
+    this.whatever = game;
+  }
+
+  shoot(player) {
+
+    // if (this.game.time.time < this.nextFire) { return; }
+    let bullet = this.gunBullets.getFirstExists(false);
+    let x = player.world.x;
+    let y = player.world.y;
+    if(!bullet){
+      bullet = new Bullet(this.whatever, 'bullet', {x : this.x , y: this.y}, {
+        group: 'player',
+        initial: 1,
+        texture: 'gunSpriteSheet'
+      });
+      this.gunBullets.add(bullet);
+    } else {
+      bullet.reset(x, y);
     }
+    bullet.rotation = this.game.physics.arcade.moveToPointer(bullet, 600);
+  }
 
-    initializeWeapon(game, player){
-        this.group = new Phaser.Group(game.game, game.world, 'Single Bullet', false, true, Phaser.Physics.ARCADE);
-        this.group.nextFire = 0;
-        this.group.bulletSpeed = 600;
-        this.group.fireRate = 100;
-        // this.group.physicsBodyType = Phaser.Physics.ARCADE;
-        // this.group.setAll('checkWorldBounds', true);
-        // this.group.setAll('outOfBoundsKill', true);
+  hitWall(bullet, layer){
+    bullet.kill();
+  }
 
-        for (var i = 0; i < 64; i++) {
-            this.group.add(new Bullet(game, 'bullet', {x: 0, y:0}, {
-                group: 'bullets',
-                initial: 1,
-                texture: 'gunSpriteSheet'
-            }), true, player);
-        }
-        console.log("THIS IS THE GUN GRoup WITH THE BULLETS", this.group.children);
-
-        // return this;
-    }
-
-    shoot(player) {
-
-        if (this.game.time.time < this.nextFire) { return; }
-
-        let x = player.world.x;
-        let y = player.world.y;
-
-        this.group.getFirstExists(false).fire(x, y, 0, this.group.bulletSpeed, 0, 0);
-
-        this.nextFire = this.game.time.time + this.fireRate;
-
-    }
+  hitZombie(zombie, bullet){
+    console.log("ZOMBZ", zombie);
+    // zombie.animations.stop();
+    // zombie.animations.play('dead');
+    bullet.kill();
+    zombie.destroy();
+  }
 }
