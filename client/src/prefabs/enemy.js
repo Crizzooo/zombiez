@@ -3,13 +3,17 @@ import Prefab from './Prefab';
 export default class Enemy extends Prefab {
   constructor (game, name, position, properties) {
     super (game, name, position, properties);
-      this.animations.add('left', [9, 10, 11, 12, 9, 13, 14], 9, true);
-	    this.animations.add('dead', [1, 2, 3, 4, 5, 6, 7, 8, 0], 9, false);
+
+    this.animations.add('left', [9, 10, 11, 12, 9, 13, 14], 9, true);
+    this.animations.add('dead', [1, 2, 3, 4, 5, 6, 7, 8, 0], 9, false);
+
     this.stats = {
       health: 10,
       movement: 10,
       attack: 5
     }
+
+    this.hit = false;
 
   }
 
@@ -22,7 +26,10 @@ export default class Enemy extends Prefab {
   }
 
   moveTo (position) {
-    this.gameState.pathfinding.findPath(this.position, position, this.followPath, this);
+    if (this.hit === false) {
+      console.log('not hit')
+      this.gameState.pathfinding.findPath(this.position, position, this.followPath, this);
+    }
   }
 
   followPath (path) {

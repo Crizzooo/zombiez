@@ -42,13 +42,6 @@ export default class Player extends Prefab {
 	    }, {x: 225, y: 225});
 
 	    this.game.add.existing(this.gun);
-
-      const style = {
-        font: "bold 16px Arial",
-        fill: "#FFF",
-        stroke: "#000",
-        strokeThickness: 3
-      };
   }
 
   loadAnimations () {
