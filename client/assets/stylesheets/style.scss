@@ -1,6 +1,7 @@
 /* Variables */
 $button-height: 40px;
 $container-height: 100%;
+$gameContainer-height: 66vh;
 
 * {
   box-sizing: border-box;
@@ -57,15 +58,35 @@ body {
 
 .gameContainer {
   height: $container-height;
+  max-width: 80%;
+  margin: auto;
+  display: block;
   // padding-top: calc(100% - $button-height);
   padding: 0px;
-  background-color: black;
+  background-color: pink;
   box-sizing: border-box;
+}
+
+.gc {
+  height: $gameContainer-height;
+  background-color: black;
+}
+
+.buttonHolder {
+  padding-top: calc((66vh / 2) - 70px);
+  width: 300px;
+  margin: auto;
+}
+
+.minPlayerText{
+  margin: auto;
+  text-align: center;
+  margin-top: 100px;
 }
 
 .playButton {
   height: 40px;
-  margin: calc( (100% / 2) - 40px) auto;
+  margin: auto;
   display: block;
   box-sizing: border-box;
   padding: 5px;

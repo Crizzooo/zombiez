@@ -42,13 +42,30 @@ body {
 
 .gameContainer {
   height: 100%;
+  max-width: 80%;
+  margin: auto;
+  display: block;
   padding: 0px;
-  background-color: black;
+  background-color: pink;
   box-sizing: border-box; }
+
+.gc {
+  height: 66vh;
+  background-color: black; }
+
+.buttonHolder {
+  padding-top: calc((66vh / 2) - 70px);
+  width: 300px;
+  margin: auto; }
+
+.minPlayerText {
+  margin: auto;
+  text-align: center;
+  margin-top: 100px; }
 
 .playButton {
   height: 40px;
-  margin: calc( (100% / 2) - 40px) auto;
+  margin: auto;
   display: block;
   box-sizing: border-box;
   padding: 5px; }

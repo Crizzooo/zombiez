@@ -14,24 +14,25 @@ class gameContainer extends Component {
 
   render () {
     //TODO: REIMPLEMENT DISABLED ATTRIB ON FALSY RETURN AND PLAYERS <= 2
-    if(this.props.gamePlaying === false){
-      if(this.props.currentPlayer.name) {
-        return(
-          <div className="col-md-6 gameContainer">
-            <button type="button" className="btn btn-lg btn-info playButton" onClick={this.startGame}><span className="playBtnText">Play Game!</span></button>
-          </div>
-        );
+
+      if(this.props.gamePlaying === false){
+        if(this.props.currentPlayer.name) {
+          return(
+              <div className="gameContainer"><div className="buttonHolder"><button type="button" className="btn btn-lg btn-info playButton" onClick={this.startGame}><span className="playBtnText">Play Game!</span></button></div></div>
+          );
+        } else {
+          return (<div className="gameContainer"><div className="buttonHolder"><button type="button" className="btn btn-lg btn-info playButton" onClick={this.startGame} disabled><span className="playBtnText">Play Game!</span></button><div className="minPlayerText">Require Minimum Players: 1</div></div></div>);
+        }
       } else {
-        return (<div className="col-md-6 gameContainer"><button type="button" className="btn btn-lg btn-info playButton" onClick={this.startGame} disabled><span className="playBtnText">Play Game!</span></button><h6>Require Minimum Players: 1</h6></div>);
+        //Game is Currently Playing
+        return (
+          <div className="gameContainer">
+            <div id="game">
+            </div>
+          </div>);
       }
-    } else {
-      //Game is Currently Playing
-      return (<div className="col-md-6 gameContainer">
-        <div id="game">
-        </div>
-      </div>);
     }
-  }
+
 
   startGame(players) {
   //Flip redux state for game = true
