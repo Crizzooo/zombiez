@@ -19,10 +19,8 @@ class Layout extends Component {
           <GameContainer />
         </div>
         <div className="container mainContainer">
-          <div className="row" id="mainRow">
             <Leaderboard />
             { this.props.children }
-          </div>
         </div>
       </div>
     );
