@@ -63635,9 +63635,13 @@ var HealthBar = function (_Phaser$Sprite) {
 	}, {
 		key: 'newHealth',
 		value: function newHealth(health) {
+			//Takes in current health from player and sets hearts accordingly
+
+			//Determines how many hearts and half hearts to show
 			var numHearts = Math.floor(health / 10 % 10);
 			var halfHeart = health % 10 >= 5 ? true : false;
 
+			//Loops through hearts and sets them appropriately
 			for (var i = this.currentHeart; i >= numHearts; i--) {
 				if (i > numHearts) {
 					this.hearts[i].changeHeart('empty');
