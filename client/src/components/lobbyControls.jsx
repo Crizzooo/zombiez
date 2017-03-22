@@ -36,14 +36,12 @@ export class lobbyControls extends React.Component {
 
   handleLeaveGame(evt) {
     //stop broadcasting (was causing ghost players)
+    socket.emit('lobbyerLeaveLobby');
     stopClientBroadcast();
     store.dispatch(dispatchSetCurrentLobbyer({}));
     //if game playing
-    if (this.props.gamePlaying){
       //update current player to {}
-      store.dispatch(removeCurrentPlayer());
-    }
-    socket.emit('lobbyerLeaveLobby');
+    store.dispatch(removeCurrentPlayer());
   }
 
   componentDidMount() {

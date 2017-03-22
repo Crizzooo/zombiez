@@ -15,7 +15,6 @@ class ChatApp extends React.Component {
 
 
   handleChange(evt) {
-    console.log(evt.target.value);
     this.setState({ messageToSend: evt.target.value });
   }
 
@@ -31,10 +30,8 @@ class ChatApp extends React.Component {
     $('#createMessage').val('');
     let height = 0;
     $('.messageText').each( function(i, value){
-      console.log('is this the error', this);
       height += parseInt($(this).height());
     });
-    console.log('or is this the error');
     $('#messageDisplay').animate({scrollTop: height});
   }
 

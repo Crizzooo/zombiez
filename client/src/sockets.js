@@ -40,8 +40,7 @@ function dispatchGamePlayingUpdate(isItPlaying){
 //game starts here
 function startClientGame(playersFromServer) {
   let state = store.getState();
-  console.log('client is starting game with this from server: ', state);
-  console.log('these are the players being sent to store: ', playersFromServer);
+  console.log('client is starting game with this from server: ', playersFromServer);
   ZG.game = new GenZed('100%', '100%', Phaser.AUTO, 'game');
   store.dispatch(loadPlayers(playersFromServer));
   ZG.game.startGame('BootState', true, false, "../assets/levels/main.json");
@@ -55,13 +54,18 @@ function logReceivedState() {
 function dispatchServerState(serverState) {
   //break out data from server - send to appropriate stores
   let state = store.getState();
-  store.dispatch(dispatchLobbyUpdate(serverState.lobby.lobbyers));
+  //store.dispatch(dispatchLobbyUpdate(serverState.lobby.lobbyers));
   if (state.game.gamePlaying){
     let playerStateUpdate = serverState.players.playerStates;
+    // console.log('update pre-remove CP: ', playerStateUpdate);
     if (playerStateUpdate[socket.id]){
       delete playerStateUpdate[socket.id];
     }
-    store.dispatch(updatePlayers(playerStateUpdate));
+    // console.log('and after deleting: ', playerStateUpdate);
+    //TODO: if player state update has nothing, dont dispatch
+    if (!(Object.keys(playerStateUpdate) === [] || Object.keys(playerStateUpdate) === ['undefined'])){
+        store.dispatch(updatePlayers(playerStateUpdate));
+      }
   }
   throttledLog();
 }
