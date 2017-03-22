@@ -37,7 +37,8 @@ const convertLobbyers = (lobbyers) => {
       health: 100,
       animationDirection: 'still',
       spriteKey,
-      socketId: lobbyObj.socketId
+      socketId: lobbyObj.socketId,
+      name: lobbyObj.name
     };
   });
 };
@@ -65,6 +66,7 @@ const startGame = (ioFromSocketsFile) => {
 
   state = store.getState();
   console.log('server state right before starting game: ', state);
+  console.dir(state, { depth: 8});
   //tell clients to turn on game
   io.emit('gamePlayingUpdate', true);
   io.emit('startGame', state.players.playerStates);

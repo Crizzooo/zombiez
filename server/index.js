@@ -99,6 +99,7 @@ io.on('connection', (socket) => {
 //revisit below socket methods
   socket.on('getPlayers', () => {
     //emiting player.state
+    console.log("server heard 'getPlayers' ");
     socket.emit('playerUpdate', players);
   })
 
@@ -133,6 +134,8 @@ io.on('connection', (socket) => {
 
   socket.on('clientUpdate', (state) => {
     //TODO: break state down and dispatch to appropriate reducers
+    console.log('server heard client update with: ', state);
+    console.log('this client told the server to update: ', socket.id);
     store.dispatch(updatePlayer(state.player));
   });
 })
@@ -159,11 +162,9 @@ function handleLobbyerLeave(socket){
     state = store.getState();
     console.log('after lobbyer leaves: ', state);
     io.emit('lobbyUpdate', state.lobby.lobbyers);
-    console.log('at this point, lobby should not have player');
-    console.log(state);
+    console.log('if game is playing, we need to take him off players reducer')
+    store.dispatch(removePlayer(socket.id));
     if (state.game.gamePlaying){
-      console.log('if game is playing, we need to take him off players reducer')
-      store.dispatch(removePlayer(socket.id));
       io.emit('playerLeaveGame', socket.id);
       state = store.getState();
       socket.emit('destroyCurrentPlayerSprite');

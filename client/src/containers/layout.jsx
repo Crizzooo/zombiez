@@ -14,14 +14,13 @@ class Layout extends Component {
 
   render () {
     return (
-      <div>
-        <Header />
+      <div className="siteContainer">
+        <div className="gc">
+          <GameContainer />
+        </div>
         <div className="container mainContainer">
-          <div className="row" id="mainRow">
             <Leaderboard />
             { this.props.children }
-            <GameContainer />
-          </div>
         </div>
       </div>
     );

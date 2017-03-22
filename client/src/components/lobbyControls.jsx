@@ -36,14 +36,12 @@ export class lobbyControls extends React.Component {
 
   handleLeaveGame(evt) {
     //stop broadcasting (was causing ghost players)
+    socket.emit('lobbyerLeaveLobby');
     stopClientBroadcast();
     store.dispatch(dispatchSetCurrentLobbyer({}));
     //if game playing
-    if (this.props.gamePlaying){
       //update current player to {}
-      store.dispatch(removeCurrentPlayer());
-    }
-    socket.emit('lobbyerLeaveLobby');
+    store.dispatch(removeCurrentPlayer());
   }
 
   componentDidMount() {
@@ -57,7 +55,7 @@ export class lobbyControls extends React.Component {
     let joinGameButton = renderJoinGameButton(this.props, this.handleLeaveGame);
 
     return (
-      <div id="buttonHolder">
+      <div id="joinButtonHolder">
         {
           /* check if current player or not */
           //render join game if no current player
@@ -105,7 +103,7 @@ export default connect(mapProps)(lobbyControls);
 function renderNormalJoinGame(){
   return (
     <div>
-      <button type="button" className="btn btn-lg btn-info btn-danger btn-sm btn-block" data-target="#addPlayerModal" data-toggle="modal"><span className="playBtnText">Join Game!</span>
+      <button type="button" id="joinGame" className="btn btn-lg btn-info btn-danger btn-sm btn-block" data-target="#addPlayerModal" data-toggle="modal"><span className="playBtnText">Join Game!</span>
       </button>
     </div>
   );
@@ -114,7 +112,7 @@ function renderNormalJoinGame(){
 function renderFullJoinGame(){
   return(
     <div>
-      <button type="button" className="btn btn-lg btn-danger btn-sm btn-block" disabled><span className="playBtnText">Game Is Full!</span></button>
+      <button type="button" id="joinGame" className="btn btn-lg btn-danger btn-sm btn-block" disabled><span className="playBtnText">Game Is Full!</span></button>
     </div>
   );
 }
@@ -122,7 +120,7 @@ function renderFullJoinGame(){
 function renderGameInProgress(){
   return(
     <div>
-      <button type="button" className="btn btn-lg btn-info btn-info btn-sm btn-block" disabled><span className="playBtnText">Game In Progress!</span></button>
+      <button type="button" id="joinGame" className="btn btn-lg btn-info btn-info btn-sm btn-block" disabled><span className="playBtnText">Game In Progress!</span></button>
     </div>
   );
 }
@@ -130,7 +128,7 @@ function renderGameInProgress(){
 function renderLeaveGame(leaveGameFunc, buttonLabel){
   return(
     <div>
-      <button type="button" className="btn btn-lg btn-info btn-warning btn-sm btn-block" onClick={leaveGameFunc}><span className="playBtnText">{buttonLabel}</span></button>
+      <button type="button" id="joinGame" className="btn btn-lg btn-info btn-warning btn-sm btn-block" onClick={leaveGameFunc}><span className="playBtnText">{buttonLabel}</span></button>
     </div>
   );
 }

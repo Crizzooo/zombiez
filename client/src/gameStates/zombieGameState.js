@@ -64,54 +64,49 @@ export default class ZombieGameState extends TiledState {
         }
       }, {x: 200, y: 200});
 
-    let gunPrefab = this.createPrefab('gun', {
-      type: 'guns',
-      properties: {
-        group: 'guns',
-        initial: 0,
-        texture: 'gunSpriteSheet'
-      }
-    }, {x: 225, y: 225});
-
     //create game set up
     //This creates player prefab
     console.log('Local state right before load level: ', store.getState())
     this.loadLevel();
 
+
+    this.currentPlayerSprite.gun.initializeWeapon(this);
+    console.log(this);
+    this.pointer = crosshair;
+    this.currentEnemy = enemyPrefab;
+
+    //add to world
+    this.game.add.existing(this.currentEnemy);
+    this.game.add.existing(this.pointer);
+
+    //this.currentEnemy.acquireTarget = throttle(this.currentEnemy.acquireTarget, 200);
+    this.currentEnemy.moveTo = throttle(this.currentEnemy.moveTo, 1000);
+    ///////////TODO: WIP
+    this.currentEnemy.animations.play('left');
+
+    //Remote Player Movement
+    //This gets us the first player from the remote players
+    console.log('this is remote player sprites', remotePlayerSprites[Object.keys(remotePlayerSprites)[0]]);
+
+    //Set camera to follow, then make world big to allow camera to pan off
+    //this.camera.view = new Phaser.Rectangle(0, 0, this.currentPlayer.position.x, this.currentPlayer.position.y);
+    this.game.world.setBounds(-250, -250, 2500, 2500);
+
+
     //set interval to emit currentPlayer to server
     //if we have a current player
     if (this.currentPlayerSprite) {
       const emitInterval = emitCurrentState(socket);
+      //on click lock the users mouse for input
+      this.game.input.onDown.add(this.lockPointer, this);
+
+      //Only follow current player if we have a current player
+      this.camera.follow(this.currentPlayerSprite);
+    } else {
+      //follow the first remote player
+      let remotePlayerOneId = Object.keys(remotePlayerSprites)[0];
+      this.camera.follow(remotePlayerSprites[remotePlayerOneId]);
     }
-
-    //Add test prefabs into the game
-    this.gun = gunPrefab;
-    //initialize gun and load with finite amount of bullets
-    this.gun.initializeWeapon(this);
-    console.log(this);
-    console.log("THIS IS ZOMBIE STATE GUN", this.gun);
-
-    this.pointer = crosshair;
-    this.currentEnemy = enemyPrefab;
-
-    //this.currentEnemy.acquireTarget = throttle(this.currentEnemy.acquireTarget, 200);
-    this.currentEnemy.moveTo = throttle(this.currentEnemy.moveTo, 1000);
-
-    this.game.add.existing(this.currentPlayerSprite);
-    this.game.add.existing(this.currentEnemy);
-    this.game.add.existing(this.pointer);
-    this.game.add.existing(this.gun);
-
-    //on click lock the users mouse for input
-    this.game.input.onDown.add(this.lockPointer, this);
-
-    //Set camera to follow, then make world big to allow camera to pan off
-    //this.camera.view = new Phaser.Rectangle(0, 0, this.currentPlayer.position.x, this.currentPlayer.position.y);
-    this.camera.follow(this.currentPlayerSprite);
-    this.game.world.setBounds(-250, -250, 2500, 2500);
-
-    ///////////TODO: WIP
-    this.currentEnemy.animations.play('left');
   }
 
   update() {
@@ -121,18 +116,28 @@ export default class ZombieGameState extends TiledState {
     this.game.physics.arcade.collide(this.currentPlayerSprite, this.layers.waterCollision);
     this.game.physics.arcade.collide(this.currentPlayerSprite, this.layers.wallCollision);
     //constantly check if bullet hit a wall
-    this.game.physics.arcade.collide(this.layers.wallCollision, this.gun.gunBullets, this.gun.hitWall, null, this);
-    this.game.physics.arcade.collide(this.currentEnemy, this.gun.gunBullets, this.gun.hitZombie, null, this);
-
-
-
-
-    //Gun Rotation
-    this.tweenPlayerAssets();
-    this.gun.rotation = this.game.physics.arcade.angleToPointer(this.gun);
-
+    this.game.physics.arcade.collide(this.layers.wallCollision, this.currentPlayerSprite.gun.gunBullets, this.currentPlayerSprite.gun.hitWall, null, this);
     //Pathfinding
-    this.currentEnemy.moveTo(this.currentEnemy.acquireTarget());
+    if(this.currentEnemy.exists) {
+      console.log("this is enemy", this.currentEnemy);
+      this.currentEnemy.moveTo(this.currentEnemy.acquireTarget());
+    this.game.physics.arcade.collide(this.currentEnemy, this.currentPlayerSprite.gun.gunBullets, this.currentPlayerSprite.gun.hitZombie, null, this);
+    }
+    this.tweenPlayerAssets();
+    //Gun Rotation
+    this.currentPlayerSprite.gun.rotation = this.game.physics.arcade.angleToPointer(this.currentPlayerSprite.gun);
+    // this.gun.rotation = this.game.physics.arcade.angleToPointer(this.gun);
+
+    //Server & Input
+    //every 32ms send package to server with position
+    if (remotePlayerSprites[Object.keys(remotePlayerSprites)[0]]) {
+      this.handleRemoteAnimation(remotePlayerSprites[Object.keys(remotePlayerSprites)[0]])
+    }
+
+    if (this.currentPlayerSprite) {
+      this.handleInput(this.currentPlayerSprite);
+      this.dispatchCurrentPlayer();
+    }
 
 
     //Server & Input
@@ -145,9 +150,9 @@ export default class ZombieGameState extends TiledState {
     this.updateRemotePlayers();
   }
 
-  render() {
-    this.game.debug.spriteInfo(this.gun, 32, 32);
-  }
+  // render() {
+  //   this.game.debug.spriteInfo(this.gun, 32, 32);
+  // }
 
   //////////////////////////
   /// Non Phaser Methods ///
@@ -155,15 +160,18 @@ export default class ZombieGameState extends TiledState {
 
   loadLevel() {
     let state = store.getState();
+
     console.log('load level begin with this state', state);
     console.log('what is state.players.playerStates on loadLevel', state.players.playerStates);
 
     //create a current player
     let currentPlayer;
-    if (state.players.currentPlayer.socketId) {
+    if (state.players.currentPlayer.name) {
+      console.log('we have a current player so we shall call him: ', state.players.currentPlayer.name);
       currentPlayer = state.players.currentPlayer;
+
       //TODO: make server assign sprite keys
-      let playerPrefab = this.createPrefab('player',
+      let playerPrefab = this.createPrefab(currentPlayer.name,
         {
           type: 'player',
           properties: {
@@ -171,9 +179,11 @@ export default class ZombieGameState extends TiledState {
             initial: 18,
             texture: 'playerSpriteSheet'
           },
-        }, {x: 225, y: 225});
+        }, {x: 225, y: 225}); //change to new location from server
 
       this.currentPlayerSprite = playerPrefab;
+      //Current Player Sprite Properties
+      this.currentPlayerSprite.direction = 'idle';
 
       //store on game Object
       console.log('created current Player: ', this.currentPlayerSprite);
@@ -183,101 +193,196 @@ export default class ZombieGameState extends TiledState {
         socketId: socket.id,
         x: this.currentPlayerSprite.x,
         y: this.currentPlayerSprite.y,
-        animationDirection: 'still'
+        animationDirection: this.currentPlayerSprite.direction,
+        name: currentPlayer.name
         //TODO: health, fire, guns, bullets, frame? etc
       }
 
-      console.log('Where is  current player on game start?', currPlayerState);
+      //add it to the world
+      this.game.add.existing(this.currentPlayerSprite);
+
       store.dispatch(updateCurrentPlayer(currPlayerState));
       console.log('end of load level local store looks like: ', store.getState());
     }
+    console.log('Creating Sprites for each player in this: ', state.players.playerStates);
+    //)
     R.forEachObjIndexed(this.createRemotePlayerSprite, state.players.playerStates);
   }
 
-  handleInput() {
-    if (this.currentPlayerSprite) {
-      let pointerX = this.game.input.activePointer.worldX;
-      let pointerY = this.game.input.activePointer.worldY;
-      let playerX = this.currentPlayerSprite.x;
-      let playerY = this.currentPlayerSprite.y
+  handleRemoteAnimation(player) {
+    if (player) {
+      player.body.velocity.x = 0;
+      player.body.velocity.y = 0;
 
-      this.currentPlayerSprite.body.velocity.x = 0;
-      this.currentPlayerSprite.body.velocity.y = 0;
+      console.log('player direction', player.direction)
+
+      if (player.direction === 'idle') {
+        player.animations.stop();
+        //this.handlePlayerRotation(player);
+      }
+
+      if (player.direction === 'left') {
+        player.animations.play('right');
+        player.scale.setTo(-1, 1);
+        player.body.velocity.x = -player.stats.movement;
+        //this.handlePlayerRotation(player);
+
+        //Tween for bounce
+        switch (player.body.sprite._frame.name) {
+          case 'lookingRightRightLegUp.png':
+            player.body.velocity.y -= 80;
+            break;
+          case 'RightComingDown1.png':
+            player.body.velocity.y += 80;
+            break;
+          case 'movingRight4.png':
+            player.body.velocity.y += 50;
+            break;
+          case 'playerSprites_266 copy.png':
+            player.body.velocity.y -= 50
+        }
+      }
+
+      if (player.direction === 'right') {
+        player.direction = 'right';
+        player.scale.setTo(1, 1);
+        player.animations.play('right');
+        player.body.velocity.x = player.stats.movement;
+        //this.handlePlayerRotation(player);
+
+        //Tween for bounce
+        switch (player.body.sprite._frame.name) {
+          case 'lookingRightRightLegUp.png':
+            player.body.velocity.y -= 80;
+            break;
+          case 'RightComingDown1.png':
+            player.body.velocity.y += 80;
+            break;
+          case 'movingRight4.png':
+            player.body.velocity.y += 50;
+            break;
+          case 'playerSprites_266 copy.png':
+            player.body.velocity.y -= 50
+        }
+      }
+
+      if (player.direction === 'up') {
+        player.direction = 'up';
+        player.body.velocity.y = -player.stats.movement;
+        player.animations.play('up');
+        //this.handlePlayerRotation(player);
+      }
+
+      if (player.direction === 'down') {
+        player.direction = 'down';
+        player.body.velocity.y = player.stats.movement;
+        player.animations.play('down');
+        //this.handlePlayerRotation(player);
+      }
+
+    }
+  }
+
+  handleInput(player) {
+    if (player) {
+      player.body.velocity.x = 0;
+      player.body.velocity.y = 0;
 
       if (this.spacebar.isDown) {
-        this.gun.shoot(this.currentPlayerSprite);
+        this.currentPlayerSprite.gun.shoot(this.currentPlayerSprite);
       }
 
       if (this.game.cursors.left.isDown) {
-        this.currentPlayerSprite.animations.play('right');
-        this.currentPlayerSprite.scale.setTo(-1, 1);
-        this.currentPlayerSprite.body.velocity.x = -this.currentPlayerSprite.stats.movement;
-        switch (this.currentPlayerSprite.body.sprite._frame.name) {
+        player.direction = 'left';
+        player.animations.play('right');
+        player.scale.setTo(-1, 1);
+        player.body.velocity.x = -player.stats.movement;
+        //this.handlePlayerRotation(player);
+
+        //Tween for bounce
+        switch (player.body.sprite._frame.name) {
           case 'lookingRightRightLegUp.png':
-            this.currentPlayerSprite.body.velocity.y -= 80;
+            player.body.velocity.y -= 80;
             break;
           case 'RightComingDown1.png':
-            this.currentPlayerSprite.body.velocity.y += 80;
+            player.body.velocity.y += 80;
             break;
           case 'movingRight4.png':
-            this.currentPlayerSprite.body.velocity.y += 50;
+            player.body.velocity.y += 50;
             break;
           case 'playerSprites_266 copy.png':
-            this.currentPlayerSprite.body.velocity.y -= 50
+            player.body.velocity.y -= 50
         }
       }
 
       if (this.game.cursors.right.isDown) {
-        this.currentPlayerSprite.scale.setTo(1, 1);
-        this.currentPlayerSprite.animations.play('right');
-        this.currentPlayerSprite.body.velocity.x = this.currentPlayerSprite.stats.movement;
-        switch (this.currentPlayerSprite.body.sprite._frame.name) {
+        player.direction = 'right';
+        player.scale.setTo(1, 1);
+        player.animations.play('right');
+        player.body.velocity.x = player.stats.movement;
+        //this.handlePlayerRotation(player);
+
+        //Tween for bounce
+        switch (player.body.sprite._frame.name) {
           case 'lookingRightRightLegUp.png':
-            this.currentPlayerSprite.body.velocity.y -= 80;
+            player.body.velocity.y -= 80;
             break;
           case 'RightComingDown1.png':
-            this.currentPlayerSprite.body.velocity.y += 80;
+            player.body.velocity.y += 80;
             break;
           case 'movingRight4.png':
-            this.currentPlayerSprite.body.velocity.y += 50;
+            player.body.velocity.y += 50;
             break;
           case 'playerSprites_266 copy.png':
-            this.currentPlayerSprite.body.velocity.y -= 50
+            player.body.velocity.y -= 50
         }
       }
 
       if (this.game.cursors.up.isDown) {
-        this.currentPlayerSprite.body.velocity.y = -this.currentPlayerSprite.stats.movement;
-        this.currentPlayerSprite.animations.play('up');
+        player.direction = 'up';
+        player.body.velocity.y = -player.stats.movement;
+        player.animations.play('up');
+        //this.handlePlayerRotation(player);
       }
 
       if (this.game.cursors.down.isDown) {
-        this.currentPlayerSprite.body.velocity.y = this.currentPlayerSprite.stats.movement;
-        this.currentPlayerSprite.animations.play('down');
+        player.direction = 'down';
+        player.body.velocity.y = player.stats.movement;
+        player.animations.play('down');
+        //this.handlePlayerRotation(player);
       }
 
-      if (this.currentPlayerSprite.body.velocity.x === 0 && this.currentPlayerSprite.body.velocity.y === 0) {
-        this.currentPlayerSprite.animations.stop();
-        //console.log("pointer on rest", this.game.input.activePointer.worldX, this.game.input.activePointer.worldY);
-        //console.log("player position on rest", this.currentPlayerSprite.x, this.currentPlayerSprite.y);
-        this.currentPlayerSprite.scale.setTo(1, 1);
-        if ((pointerY > playerY) && (pointerX < playerX)) {
-          this.currentPlayerSprite.frame = 17;
-          this.gun.scale.setTo(1, -1);
-        }
-        if ((pointerY > playerY) && (pointerX > playerX)) {
-          this.currentPlayerSprite.frame = 18;
-          this.gun.scale.setTo(1, 1);
-        }
-        if ((pointerY < playerY) && (pointerX > playerX)) {
-          this.currentPlayerSprite.frame = 14;
-          this.gun.scale.setTo(1, 1);
-        }
-        if ((pointerY < playerY) && (pointerX < playerX)) {
-          this.currentPlayerSprite.frame = 14;
-          this.gun.scale.setTo(1, -1);
-        }
+      if (player.body.velocity.x === 0 && player.body.velocity.y === 0) {
+        player.direction = 'idle';
+        player.animations.stop();
+
+        this.handlePlayerRotation(player);
       }
+    }
+  }
+
+  handlePlayerRotation(player) {
+    let pointerX = this.game.input.activePointer.worldX;
+    let pointerY = this.game.input.activePointer.worldY;
+    let playerX = player.x;
+    let playerY = player.y
+
+    player.scale.setTo(1, 1);
+    if ((pointerY > playerY) && (pointerX < playerX)) {
+      player.frame = 17;
+      player.gun.scale.setTo(1, -1);
+    }
+    if ((pointerY > playerY) && (pointerX > playerX)) {
+      player.frame = 18;
+      player.gun.scale.setTo(1, 1);
+    }
+    if ((pointerY < playerY) && (pointerX > playerX)) {
+      player.frame = 14;
+      player.gun.scale.setTo(1, 1);
+    }
+    if ((pointerY < playerY) && (pointerX < playerX)) {
+      player.frame = 14;
+      player.gun.scale.setTo(1, -1);
     }
   }
 
@@ -285,7 +390,8 @@ export default class ZombieGameState extends TiledState {
     let currentPlayer = {
       x: this.currentPlayerSprite.x,
       y: this.currentPlayerSprite.y,
-      //animationDirection: this.currentPlayerSprite.animationDirection,
+      name: this.currentPlayerSprite.name,
+      animationDirection: this.currentPlayerSprite.direction,
       socketId: socket.id
     }
 
@@ -296,7 +402,6 @@ export default class ZombieGameState extends TiledState {
   updateRemotePlayers() {
     this.players = store.getState().players.playerStates;
     if (this.players[socket.id]) delete this.players[socket.id];
-
     //then update each player from the server
     R.forEachObjIndexed(this.updateRemotePlayer, this.players);
   }
@@ -305,6 +410,7 @@ export default class ZombieGameState extends TiledState {
     if (remotePlayerSprites[playerState.socketId]) {
       remotePlayerSprites[playerState.socketId].x = playerState.x;
       remotePlayerSprites[playerState.socketId].y = playerState.y;
+      remotePlayerSprites[playerState.socketId].direction = playerState.animationDirection;
       //TODO: Implement other properties
     }
   }
@@ -322,7 +428,7 @@ export default class ZombieGameState extends TiledState {
 
   handleRemotePlayerLeave(playerSocketId) {
     store.dispatch(playerLeaveGame(playerSocketId));
-    let state = store.getState();
+    //let state = store.getState();
 
     //Kill Remote Player Sprite
     if (remotePlayerSprites[playerSocketId]) {
@@ -349,16 +455,29 @@ export default class ZombieGameState extends TiledState {
   }
 
   createRemotePlayerSprite(playerState) {
+    //TODO: name needs to be unique for each remote player
+    //TODO: take name from server
     if (playerState.socketId !== socket.id) {
-      console.log('creating remote player with this playerState: ', playerState);
-      let remoteSprite = self.game.add.sprite(playerState.x, playerState.y, 'blueGunGuy');
-      remotePlayerSprites[playerState.socketId] = remoteSprite;
+      console.log('creating prefab for player', playerState)
+      let playerPrefab = self.createPrefab(playerState.name,
+        {
+          type: 'player',
+          properties: {
+            group: 'player',
+            initial: 18,
+            texture: 'playerSpriteSheet'
+          },
+        }, {x: playerState.x, y: playerState.y});
+      self.game.add.existing(playerPrefab);
+      remotePlayerSprites[playerState.socketId] = playerPrefab;
+      console.log('the created player sprite: ', playerPrefab);
     }
+
   }
 
   tweenPlayerAssets() {
     //gun follow does not work as a child of the player sprite.. had to tween gun to players x, y position
-    this.add.tween(this.gun).to({
+    this.add.tween(this.currentPlayerSprite.gun).to({
       x: this.currentPlayerSprite.x,
       y: this.currentPlayerSprite.y
     }, 10, Phaser.Easing.Linear.None, true);
