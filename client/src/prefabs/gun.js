@@ -51,6 +51,6 @@ export default class Gun extends GunPrefab {
     // zombie.animations.stop();
     // zombie.animations.play('dead');
     bullet.kill();
-    zombie.destroy();
+    zombie.destroy();[]
   }
 }
