@@ -20,6 +20,8 @@ export default class Player extends Prefab {
       this.animations.add('up', [16, 0, 14, 6, 1], 10, true);
       this.animations.add('down', [23, 9, 21, 22, 7, 4], 10, true);
 
+      this.animations.add('idle', [18], 10, true)
+
       //This might not be relevant since the world size is bigger than map size
       //To allow for camera pan
       this.body.collideWorldBounds = true;
