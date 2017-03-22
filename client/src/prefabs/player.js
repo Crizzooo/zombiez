@@ -18,21 +18,43 @@ export default class Player extends Prefab {
 		    movement: 100
 	    }
 
-	    //Healthhearts, top left hearts
-	    //No one else sees
 	    //TODO: make it only visible to the current player
+	    //Load Hearts, Healthbar, Animations
 	    this.loadHearts();
-	    //Load healthbar other players see
 	    this.loadHealthbar();
-	    //Load animations
 	    this.loadAnimations();
+
+      this.animations.add('idle', [18], 10, true)
 
       //This might not be relevant since the world size is bigger than map size
       //To allow for camera pan
       this.body.collideWorldBounds = true;
       this.game.physics.arcade.enable(this);
 
+      //Setup player's gun
+	    this.gun = this.gameState.createPrefab('gun', {
+		    type: 'guns',
+		    properties: {
+			    group: 'guns',
+			    initial: 0,
+			    texture: 'gunSpriteSheet'
+		    }
+	    }, {x: 225, y: 225});
 
+	    this.game.add.existing(this.gun);
+
+      const style = {
+        font: "bold 16px Arial",
+        fill: "#FFF",
+        stroke: "#000",
+        strokeThickness: 3
+      };
+
+
+      this.healthbar = this.game.add.text(
+      this.position.x - 10,
+      this.position.y - 10,
+      this.stats.health, style);
   }
 
   loadAnimations () {

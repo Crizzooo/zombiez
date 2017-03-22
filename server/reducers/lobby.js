@@ -26,7 +26,8 @@ const resetLobby = () => ({
 })
 
 const initialState = {
-  lobbyers: []
+  lobbyers: [],
+  messages: []
 };
 
 const lobby = (state = initialState, action) => {
@@ -35,25 +36,21 @@ const lobby = (state = initialState, action) => {
   switch (action.type) {
 
     case NEW_MESSAGE:
-
+        //TODO: we probably arent doing anything with this. Server should just be emitting the message to local clients
+        newState.messages = [ ...state.messages, {user: action.user, message: action.msg}];
         break;
 
     case PLAYER_JOIN_LOBBY:
-        console.log('adding player to lobby on server: ', action.lobbyer);
-        newState.lobbyers.push(action.lobbyer);
+        newState.lobbyers = [...state.lobbyers, action.lobbyer];
         break;
 
     case LOBBYER_LEAVE_LOBBY:
-        console.log('removing socketID from lobby: ', action.id);
-        console.log('lobby.lobbyers pre remove: ', newState.lobbyers);
         newState.lobbyers = newState.lobbyers.filter(lobbyer => lobbyer.socketId !== action.lobbyerId);
-        console.log('lobby.lobbyers post remove: ', newState.lobbyers);
         break;
 
     case RESET_LOBBY:
         console.log('resetting server lobby');
         newState.lobbyers = [];
-        console.log('new server lobby: ', newState);
         break;
 
     default:

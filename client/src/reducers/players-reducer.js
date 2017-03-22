@@ -39,25 +39,30 @@ export const removeCurrentPlayer = () => ({
 
 //Note: addPlayer can probably be removed from file but will keep for now in case we change structure
 const initialState = {
+  score: 0,
   playerStates: {},
-  currentPlayer: {}
+  currentPlayer:{}
 };
 
 /* Reducer */
 export default (state = initialState, action) => {
 
-  let newState = Object.assign({}, state);
+  let newPlayerStates = Object.assign({}, state.playerStates);
+  let newState = Object.assign({}, state, {playerStates: newPlayerStates});
 
   switch (action.type) {
 
     case LOAD_PLAYERS:
-      //filter out socket id
-      //if there is a socket id, make it current player
+      //if there is a socket id, make it current player and remove him from playerStates
+      console.log('LOAD PLAYERS IN REDUCER RECIEVED ACTION: ');
+      console.dir(action.players);
+      console.log('before we delete current player: ', action.players);
       if (action.players[socket.id]) {
         newState.currentPlayer = action.players[socket.id];
         delete action.players[socket.id];
       }
       newState.playerStates = action.players;
+      console.log('LOAD PLAYERS REDUCER newState.PlayerStates: ', action.players);
       break;
 
     case SET_GAME_PLAYING_BOOL:
@@ -74,9 +79,12 @@ export default (state = initialState, action) => {
       break;
 
     case PLAYER_LEAVE_GAME:
-        if (newState.playerStates[action.id]) {
-          delete newState.playerStates[action.id]
-        }
+      //TODO: is this immutable?
+      let playerStates = Object.assign({}, state.playerStates);
+      if (playerStates[action.id]) {
+        delete playerStates[action.id];
+      }
+      newState.playerStates = playerStates;
       break;
 
     case RESET_PLAYERS:
@@ -85,9 +93,7 @@ export default (state = initialState, action) => {
       break;
 
     case REMOVE_CURRENT_PLAYER:
-      console.log('removed  current player on client state');
       newState.currentPlayer = {};
-      console.log('this will be our next newState: ', newState);
       break;
 
     default:

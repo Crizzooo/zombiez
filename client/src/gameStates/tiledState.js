@@ -26,9 +26,15 @@ export default class TiledState extends Phaser.State {
         this.levelData = levelData;
 
         //Scaling the Game Window for a pixelated effect
-        // this.game.scale.scaleMode = Phaser.ScaleManager.USER_SCALE;
-        // this.game.scale.setUserScale(8, 8, 1000, 1000);
-        //this.game.scale.setUserScale(2, 2, 200, 200);
+        this.game.scale.scaleMode = Phaser.ScaleManager.USER_SCALE;
+        this.game.scale.setGameSize($('#game').innerWidth(), $('#game').innerHeight());
+        // this.game.scale.setUserScale(4, 4);
+        // this.game.scale.setResizeCallback( (scale, parentBounds) => {
+        //   scale.setupScale(.5, .5);
+        // })
+        // this.game.scale.setMinMax($('#game').innerWidth(), $('#game').innerHeight(),
+        //                           $('#game').innerWidth(), $('#game').innerHeight());
+
         this.game.renderer.renderSession.roundPixels = true;
         Phaser.Canvas.setImageRenderingCrisp(this.game.canvas);
 
