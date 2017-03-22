@@ -39,12 +39,11 @@ body {
 /* Main Container Styles */
 
 .mainContainer {
-  margin-top: 20px;
-  height: 650px;
+  height: 100 - $gameContainer-height;
 }
 
 #mainRow {
-  height: 85%;
+  height: 100%;
 }
 
 .leaderboard {
@@ -106,13 +105,22 @@ canvas {
   font-size: 1em;
 }
 
+#joinButtonHolder {
+  height: 10%;
+  margin-bottom: 1%;
+  margin-top: 1%;
+}
+
+#joinGame {
+  margin-top: 5px;
+  margin-bottom: 5px;
+}
 /* Chat App Styles */
 /* TODO: Resize Leaderboard Components by wrapping in Div with same VH as gameContainer
 Then, give all components a relative height */
 .chatContainer {
-  height: 50%;
-  margin-top: 10px;
-  // padding: 5px;
+  height: 100%;
+  padding: .5%;
   // border: 1px solid black;
 }
 
@@ -120,11 +128,10 @@ Then, give all components a relative height */
   box-sizing: border-box;
   border-radius: 10px;
   height: 100%;
-  margin: 5px;
 }
 
 .messageForm {
-  padding: 3px;
+  padding: 1.5px;
   border: 1px dashed rgba(0, 0, 0, 0.2);
   height: 100%;
 }
@@ -136,6 +143,7 @@ Then, give all components a relative height */
   background-color: rgba(172, 172, 172, 0.18);
   overflow-y: auto;
   text-wrap: normal;
+  margin-bottom: 4px;
 }
 
 .messageList {
@@ -166,6 +174,11 @@ Then, give all components a relative height */
 }
 
 .chatFooter {
-  margin-top: 5px;
-  height: 18%;
+  margin-top: 2px;
+  height: 20%;
+}
+
+/* Table Style */
+.table td, .table th {
+  padding: 5px;
 }
