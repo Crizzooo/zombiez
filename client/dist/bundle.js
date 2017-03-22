@@ -22311,8 +22311,6 @@ var Player = function (_Prefab) {
 			stroke: "#000",
 			strokeThickness: 3
 		};
-
-		_this.healthbar = _this.game.add.text(_this.position.x - 10, _this.position.y - 10, _this.stats.health, style);
 		return _this;
 	}
 

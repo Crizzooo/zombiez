@@ -49,12 +49,6 @@ export default class Player extends Prefab {
         stroke: "#000",
         strokeThickness: 3
       };
-
-
-      this.healthbar = this.game.add.text(
-      this.position.x - 10,
-      this.position.y - 10,
-      this.stats.health, style);
   }
 
   loadAnimations () {
