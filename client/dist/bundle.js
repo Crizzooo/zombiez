@@ -20723,6 +20723,10 @@ var _Pathfinding = __webpack_require__(287);
 
 var _Pathfinding2 = _interopRequireDefault(_Pathfinding);
 
+var _lodash = __webpack_require__(322);
+
+var _lodash2 = _interopRequireDefault(_lodash);
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
@@ -20764,7 +20768,7 @@ var ZombieGameState = function (_TiledState) {
       this.game.cursors.down = this.input.keyboard.addKey(Phaser.Keyboard.S);
       this.game.cursors.left = this.input.keyboard.addKey(Phaser.Keyboard.A);
       this.game.cursors.right = this.input.keyboard.addKey(Phaser.Keyboard.D);
-      //this.cursors.spacebar = this.input.keyboard.addKey(Phaser.Keyboard.SPACEBAR);
+      this.spacebar = this.input.keyboard.addKey(Phaser.Keyboard.SPACEBAR);
 
       //Attach and bind functions
       this.destroyCurrentPlayerSprite = this.destroyCurrentPlayerSprite.bind(this);
@@ -20805,7 +20809,8 @@ var ZombieGameState = function (_TiledState) {
       console.log('Local state right before load level: ', _store2.default.getState());
       this.loadLevel();
 
-      //Add test prefabs into the game
+      this.currentPlayerSprite.gun.initializeWeapon(this);
+      console.log(this);
       this.pointer = crosshair;
       this.currentEnemy = enemyPrefab;
 
@@ -20844,26 +20849,33 @@ var ZombieGameState = function (_TiledState) {
   }, {
     key: 'update',
     value: function update() {
-      //Check Physics
-      if (this.currentPlayerSprite) {
-        this.game.physics.arcade.collide(this.currentPlayerSprite, this.layers.backgroundDecCollision);
-        this.game.physics.arcade.collide(this.currentPlayerSprite, this.layers.backgroundDecCollision2);
-        this.game.physics.arcade.collide(this.currentPlayerSprite, this.layers.waterCollision);
-        this.game.physics.arcade.collide(this.currentPlayerSprite, this.layers.wallCollision);
-      }
-      //TODO: Do we need colission for the remote player group??
+      //Check collisions
+      this.game.physics.arcade.collide(this.currentPlayerSprite, this.layers.backgroundDecCollision);
+      this.game.physics.arcade.collide(this.currentPlayerSprite, this.layers.backgroundDecCollision2);
+      this.game.physics.arcade.collide(this.currentPlayerSprite, this.layers.waterCollision);
+      this.game.physics.arcade.collide(this.currentPlayerSprite, this.layers.wallCollision);
 
-      //Gun Rotation
-      this.tweenPlayerAssets();
-      this.currentPlayerSprite.gun.rotation = this.game.physics.arcade.angleToPointer(this.currentPlayerSprite.gun);
+      //constantly check if bullet hit a wall
+      this.game.physics.arcade.collide(this.layers.wallCollision, this.currentPlayerSprite.gun.gunBullets, this.currentPlayerSprite.gun.hitWall, null, this);
 
+      console.log("this is enemy", this.currentEnemy.exists);
       //Pathfinding
-      this.currentEnemy.moveTo(this.currentEnemy.acquireTarget());
+      //TODO: bug?
+      if (this.currentEnemy.exists) {
+        console.log('still exists--------->');
+        this.currentEnemy.moveTo(this.currentEnemy.acquireTarget());
+        this.game.physics.arcade.collide(this.currentEnemy, this.currentPlayerSprite.gun.gunBullets, this.currentPlayerSprite.gun.hitZombie, null, this);
+      }
+
+      //Tween all player assets
+      //Remote and current
+      this.tweenPlayerAssets();
 
       //Server & Input
       //every 32ms send package to server with position
       if (remotePlayerSprites[Object.keys(remotePlayerSprites)[0]]) {
         this.handleRemoteAnimation(remotePlayerSprites[Object.keys(remotePlayerSprites)[0]]);
+        this.tweenRemoteAssets();
       }
 
       if (this.currentPlayerSprite) {
@@ -20871,13 +20883,19 @@ var ZombieGameState = function (_TiledState) {
         this.dispatchCurrentPlayer();
       }
 
+      //Server & Input
+      //every 32ms send package to server with position
+      if (this.currentPlayerSprite) {
+        this.handleInput();
+        this.dispatchCurrentPlayer();
+      }
+
       this.updateRemotePlayers();
     }
-  }, {
-    key: 'render',
-    value: function render() {}
-    //this.game.debug.spriteInfo(this.gun, 32, 32);
 
+    // render() {
+    //   this.game.debug.spriteInfo(this.gun, 32, 32);
+    // }
 
     //////////////////////////
     /// Non Phaser Methods ///
@@ -20908,8 +20926,6 @@ var ZombieGameState = function (_TiledState) {
         }, { x: 225, y: 225 }); //change to new location from server
 
         this.currentPlayerSprite = playerPrefab;
-        //Current Player Sprite Properties
-        this.currentPlayerSprite.direction = 'idle';
 
         //store on game Object
         console.log('created current Player: ', this.currentPlayerSprite);
@@ -21015,6 +21031,10 @@ var ZombieGameState = function (_TiledState) {
         player.body.velocity.x = 0;
         player.body.velocity.y = 0;
 
+        if (this.spacebar.isDown) {
+          this.currentPlayerSprite.gun.shoot(this.currentPlayerSprite);
+        }
+
         if (this.game.cursors.left.isDown) {
           player.direction = 'left';
           player.animations.play('right');
@@ -21117,6 +21137,7 @@ var ZombieGameState = function (_TiledState) {
         y: this.currentPlayerSprite.y,
         name: this.currentPlayerSprite.name,
         animationDirection: this.currentPlayerSprite.direction,
+        gunRotation: this.currentPlayerSprite.gun.rotation,
         socketId: socket.id
       };
 
@@ -21130,7 +21151,6 @@ var ZombieGameState = function (_TiledState) {
     value: function updateRemotePlayers() {
       this.players = _store2.default.getState().players.playerStates;
       if (this.players[socket.id]) delete this.players[socket.id];
-
       //then update each player from the server
       R.forEachObjIndexed(this.updateRemotePlayer, this.players);
     }
@@ -21180,6 +21200,13 @@ var ZombieGameState = function (_TiledState) {
         _this2.pointer.x = _this2.game.input.activePointer.worldX;
         _this2.pointer.y = _this2.game.input.activePointer.worldY;
       });
+
+      this.game.canvas.addEventListener('mousedown', function () {
+        _this2.game.canvas.addEventListener('mousemove', function () {
+          _this2.pointer.x = _this2.game.input.activePointer.worldX;
+          _this2.pointer.y = _this2.game.input.activePointer.worldY;
+        });
+      });
     }
   }, {
     key: 'createRemotePlayerSprite',
@@ -21202,19 +21229,40 @@ var ZombieGameState = function (_TiledState) {
       }
     }
   }, {
+    key: 'tweenRemoteAssets',
+    value: function tweenRemoteAssets() {
+      //Remote Player Tweens
+      //TODO: refactor for 4 players
+      this.add.tween(remotePlayerSprites[Object.keys(remotePlayerSprites)[0]].healthbar).to({
+        x: remotePlayerSprites[Object.keys(remotePlayerSprites)[0]].x - 10,
+        y: remotePlayerSprites[Object.keys(remotePlayerSprites)[0]].y - 30
+      }, 10, Phaser.Easing.Linear.None, true);
+
+      this.add.tween(remotePlayerSprites[Object.keys(remotePlayerSprites)[0]].gun).to({
+        x: remotePlayerSprites[Object.keys(remotePlayerSprites)[0]].x,
+        y: remotePlayerSprites[Object.keys(remotePlayerSprites)[0]].y
+      }, 10, Phaser.Easing.Linear.None, true);
+
+      //TODO: send rotation angle of player to server, server sends it back and we use it to tween
+      remotePlayerSprites[Object.keys(remotePlayerSprites)[0]].gun.rotation = remotePlayerSprites[Object.keys(remotePlayerSprites)[0]].gunRotation;
+    }
+  }, {
     key: 'tweenPlayerAssets',
     value: function tweenPlayerAssets() {
       //gun follow does not work as a child of the player sprite.. had to tween gun to players x, y position
+      this.add.tween(this.currentPlayerSprite.gun).to({
+        x: this.currentPlayerSprite.x,
+        y: this.currentPlayerSprite.y
+      }, 10, Phaser.Easing.Linear.None, true);
 
-      //do tweens on current Player only if he exists
-      if (this.currentPlayerSprite) {
-        this.add.tween(this.currentPlayerSprite.gun).to({ x: this.currentPlayerSprite.x, y: this.currentPlayerSprite.y }, 10, Phaser.Easing.Linear.None, true);
+      //Add tween for health
+      this.add.tween(this.currentPlayerSprite.healthbar).to({
+        x: this.currentPlayerSprite.x - 10,
+        y: this.currentPlayerSprite.y - 30
+      }, 10, Phaser.Easing.Linear.None, true);
 
-        //Add tween for health
-        this.add.tween(this.currentPlayerSprite.healthbar).to({ x: this.currentPlayerSprite.x - 10, y: this.currentPlayerSprite.y - 30 }, 10, Phaser.Easing.Linear.None, true);
-      }
-
-      //TODO: For each remote player, tween all their stuff
+      //Gun rotation tween
+      this.currentPlayerSprite.gun.rotation = this.game.physics.arcade.angleToPointer(this.currentPlayerSprite.gun);
     }
   }]);
 
@@ -22110,17 +22158,15 @@ var Enemy = function (_Prefab) {
     var _this = _possibleConstructorReturn(this, (Enemy.__proto__ || Object.getPrototypeOf(Enemy)).call(this, game, name, position, properties));
 
     _this.animations.add('left', [9, 10, 11, 12, 9, 13, 14], 9, true);
-    //this.animations.add('right', [], 10, true);
-    _this.animations.add('dead', [1, 2, 3, 4, 5, 6, 7, 8, 0], 9, true);
-
-    _this.position = position;
-    //this.currentTarget = {};
+    _this.animations.add('dead', [1, 2, 3, 4, 5, 6, 7, 8, 0], 9, false);
 
     _this.stats = {
       health: 10,
       movement: 10,
       attack: 5
     };
+
+    _this.hit = false;
 
     return _this;
   }
@@ -22136,7 +22182,10 @@ var Enemy = function (_Prefab) {
   }, {
     key: 'moveTo',
     value: function moveTo(position) {
-      this.gameState.pathfinding.findPath(this.position, position, this.followPath, this);
+      if (this.hit === false) {
+        console.log('not hit');
+        this.gameState.pathfinding.findPath(this.position, position, this.followPath, this);
+      }
     }
   }, {
     key: 'followPath',
@@ -22144,10 +22193,8 @@ var Enemy = function (_Prefab) {
       // console.log('inside path', path);
       var movingTween = void 0,
           pathLength = void 0;
-
       movingTween = this.game.tweens.create(this);
       pathLength = path.length;
-
       //If path is 0, attack the player
       //TODO: currently hardcoded player
       if (pathLength <= 0) {
@@ -22156,7 +22203,6 @@ var Enemy = function (_Prefab) {
         path.forEach(function (position) {
           movingTween.to({ x: position.x, y: position.y }, 250);
         });
-
         movingTween.start();
       }
     }
@@ -22183,14 +22229,18 @@ exports.default = Enemy;
 
 
 Object.defineProperty(exports, "__esModule", {
-	value: true
+  value: true
 });
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-var _Prefab2 = __webpack_require__(92);
+var _GunPrefab2 = __webpack_require__(641);
 
-var _Prefab3 = _interopRequireDefault(_Prefab2);
+var _GunPrefab3 = _interopRequireDefault(_GunPrefab2);
+
+var _bullet = __webpack_require__(642);
+
+var _bullet2 = _interopRequireDefault(_bullet);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -22200,32 +22250,81 @@ function _possibleConstructorReturn(self, call) { if (!self) { throw new Referen
 
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
-var Gun = function (_Prefab) {
-	_inherits(Gun, _Prefab);
+var Gun = function (_GunPrefab) {
+  _inherits(Gun, _GunPrefab);
 
-	function Gun(game, name, position, properties) {
-		_classCallCheck(this, Gun);
+  function Gun(game, name, position, properties, bulletPrefab) {
+    _classCallCheck(this, Gun);
 
-		var _this = _possibleConstructorReturn(this, (Gun.__proto__ || Object.getPrototypeOf(Gun)).call(this, game, name, position, properties));
+    var _this = _possibleConstructorReturn(this, (Gun.__proto__ || Object.getPrototypeOf(Gun)).call(this, game, name, position, properties));
 
-		_this.game.physics.arcade.enable(_this);
-		_this.body.collideWorldBounds = true;
+    _this.game.physics.arcade.enable(_this);
+    _this.body.collideWorldBounds = true;
+    _this.anchor.setTo(0.5);
+    _this.pivot.x = -10;
+    console.log("BUULLET", bulletPrefab);
+    return _this;
+  }
 
-		_this.anchor.setTo(0.5);
-		_this.pivot.x = -10;
-		return _this;
-	}
+  _createClass(Gun, [{
+    key: 'initializeWeapon',
+    value: function initializeWeapon(game) {
+      // this.group = new Phaser.Group(game.game, game.world, 'Single Bullet', false, true, Phaser.Physics.ARCADE);
+      this.gunBullets = game.game.add.group();
+      this.gunBullets.enableBody = true;
+      this.gunBullets.nextFire = 0;
+      this.gunBullets.physicsBodyType = Phaser.Physics.ARCADE;
+      this.gunBullets.setAll('outOfBoundsKill', true);
+      this.gunBullets.setAll('checkWorldBounds', true);
 
-	_createClass(Gun, [{
-		key: 'shootGun',
-		value: function shootGun() {}
-	}, {
-		key: 'reload',
-		value: function reload() {}
-	}]);
+      this.gunBullets.bulletSpeed = 600;
+      this.whatever = game;
+    }
+  }, {
+    key: 'shoot',
+    value: function shoot(player) {
 
-	return Gun;
-}(_Prefab3.default);
+      // if (this.game.time.time < this.nextFire) { return; }
+      var bullet = this.gunBullets.getFirstExists(false);
+      var x = player.world.x;
+      var y = player.world.y;
+      if (!bullet) {
+        bullet = new _bullet2.default(this.whatever, 'bullet', { x: this.x, y: this.y }, {
+          group: 'player',
+          initial: 1,
+          texture: 'gunSpriteSheet'
+        });
+        this.gunBullets.add(bullet);
+      } else {
+        bullet.reset(x, y);
+      }
+      bullet.rotation = this.game.physics.arcade.moveToPointer(bullet, 600);
+    }
+  }, {
+    key: 'hitWall',
+    value: function hitWall(bullet, layer) {
+      bullet.kill();
+    }
+  }, {
+    key: 'hitZombie',
+    value: function hitZombie(zombie, bullet) {
+      console.log("ZOMBZ", zombie);
+      zombie.hit = true;
+      zombie.animations.stop();
+      zombie.animations.play('dead');
+      //let animationRef = zombie.animations.play('dead').animationReference.isPlaying;
+
+      zombie.animations.currentAnim.onComplete.add(function () {
+        zombie.kill();
+      });
+
+      bullet.kill();
+      //setTimeout(zombie.kill, 500);
+    }
+  }]);
+
+  return Gun;
+}(_GunPrefab3.default);
 
 exports.default = Gun;
 
@@ -22304,13 +22403,6 @@ var Player = function (_Prefab) {
 		}, { x: 225, y: 225 });
 
 		_this.game.add.existing(_this.gun);
-
-		var style = {
-			font: "bold 16px Arial",
-			fill: "#FFF",
-			stroke: "#000",
-			strokeThickness: 3
-		};
 		return _this;
 	}
 
@@ -63821,6 +63913,89 @@ var HealthBar = function (_Phaser$Sprite) {
 }(Phaser.Sprite);
 
 exports.default = HealthBar;
+
+/***/ }),
+/* 641 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+var GunPrefab = function (_Phaser$Sprite) {
+  _inherits(GunPrefab, _Phaser$Sprite);
+
+  function GunPrefab(game, name, position, properties) {
+    _classCallCheck(this, GunPrefab);
+
+    var _this = _possibleConstructorReturn(this, (GunPrefab.__proto__ || Object.getPrototypeOf(GunPrefab)).call(this, game.game, position.x, position.y, properties.texture, +properties.initial));
+
+    _this.gameState = game;
+    _this.name = name;
+    //Add prefab to its group
+    //this.gameState.groups[properties.group].add(this);
+    //this.gameState.groups[properties.group].children.push(this);
+    _this.initial = +properties.initial;
+    //Enable physics for each prefab, we enable it in other prefabs but this is a check
+    _this.game.physics.arcade.enable(_this);
+    _this.gameState.prefabs[name] = _this;
+    return _this;
+  }
+
+  return GunPrefab;
+}(Phaser.Sprite);
+
+exports.default = GunPrefab;
+
+/***/ }),
+/* 642 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+
+var _GunPrefab2 = __webpack_require__(641);
+
+var _GunPrefab3 = _interopRequireDefault(_GunPrefab2);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+var Bullet = function (_GunPrefab) {
+    _inherits(Bullet, _GunPrefab);
+
+    function Bullet(game, name, position, properties) {
+        _classCallCheck(this, Bullet);
+
+        var _this = _possibleConstructorReturn(this, (Bullet.__proto__ || Object.getPrototypeOf(Bullet)).call(this, game, name, position, properties));
+
+        _this.game.physics.arcade.enable(_this);
+        _this.tracking = false;
+        return _this;
+    }
+
+    return Bullet;
+}(_GunPrefab3.default);
+
+exports.default = Bullet;
 
 /***/ })
 /******/ ]);
