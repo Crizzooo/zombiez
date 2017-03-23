@@ -23,7 +23,7 @@ export default class Gun extends GunPrefab {
     this.whatever = game;
   }
 
-  shoot(player) {
+  shoot(player, pointer) {
 
     // if (this.game.time.time < this.nextFire) { return; }
     let bullet = this.gunBullets.getFirstExists(false);
@@ -40,6 +40,7 @@ export default class Gun extends GunPrefab {
       bullet.reset(x, y);
     }
     bullet.rotation = this.game.physics.arcade.moveToPointer(bullet, 600);
+     // bullet.rotation = this.game.physics.arcade.moveToObject(pointer, 600);
   }
 
   hitWall(bullet, layer){
@@ -47,10 +48,13 @@ export default class Gun extends GunPrefab {
   }
 
   hitZombie(zombie, bullet){
+    // let zombDeath = zombie.animations.add('dead', [1, 2, 3, 4, 5, 6, 7, 8, 0], 9, false);
     console.log("ZOMBZ", zombie);
-    // zombie.animations.stop();
-    // zombie.animations.play('dead');
-    bullet.kill();
-    zombie.destroy();[]
+	  zombie.hit = true;
+	  bullet.kill();
+		zombie.animations.stop();
+	  zombie.animations.play('dead')
+		//let animationRef = zombie.animations.play('dead').animationReference.isPlaying;
+    zombie.zombDeath.onComplete.add(() => zombie.kill(), this);
   }
 }

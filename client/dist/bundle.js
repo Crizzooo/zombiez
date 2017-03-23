@@ -38076,28 +38076,32 @@ var ZombieGameState = function (_TiledState) {
   }, {
     key: 'update',
     value: function update() {
-      //Check Physics
+      //Check collisions
       this.game.physics.arcade.collide(this.currentPlayerSprite, this.layers.backgroundDecCollision);
       this.game.physics.arcade.collide(this.currentPlayerSprite, this.layers.backgroundDecCollision2);
       this.game.physics.arcade.collide(this.currentPlayerSprite, this.layers.waterCollision);
       this.game.physics.arcade.collide(this.currentPlayerSprite, this.layers.wallCollision);
+
       //constantly check if bullet hit a wall
       this.game.physics.arcade.collide(this.layers.wallCollision, this.currentPlayerSprite.gun.gunBullets, this.currentPlayerSprite.gun.hitWall, null, this);
+
+      this.game.physics.arcade.collide(this.currentEnemy, this.currentPlayerSprite.gun.gunBullets, this.currentPlayerSprite.gun.hitZombie, null, this);
       //Pathfinding
+      //TODO: bug?
       if (this.currentEnemy.exists) {
-        console.log("this is enemy", this.currentEnemy);
+        console.log('still exists--------->');
         this.currentEnemy.moveTo(this.currentEnemy.acquireTarget());
-        this.game.physics.arcade.collide(this.currentEnemy, this.currentPlayerSprite.gun.gunBullets, this.currentPlayerSprite.gun.hitZombie, null, this);
       }
+
+      //Tween all player assets
+      //Remote and current
       this.tweenPlayerAssets();
-      //Gun Rotation
-      this.currentPlayerSprite.gun.rotation = this.game.physics.arcade.angleToPointer(this.currentPlayerSprite.gun);
-      // this.gun.rotation = this.game.physics.arcade.angleToPointer(this.gun);
 
       //Server & Input
       //every 32ms send package to server with position
       if (remotePlayerSprites[Object.keys(remotePlayerSprites)[0]]) {
         this.handleRemoteAnimation(remotePlayerSprites[Object.keys(remotePlayerSprites)[0]]);
+        this.tweenRemoteAssets();
       }
 
       if (this.currentPlayerSprite) {
@@ -38148,8 +38152,6 @@ var ZombieGameState = function (_TiledState) {
         }, { x: 225, y: 225 }); //change to new location from server
 
         this.currentPlayerSprite = playerPrefab;
-        //Current Player Sprite Properties
-        this.currentPlayerSprite.direction = 'idle';
 
         //store on game Object
         console.log('created current Player: ', this.currentPlayerSprite);
@@ -38256,7 +38258,7 @@ var ZombieGameState = function (_TiledState) {
         player.body.velocity.y = 0;
 
         if (this.spacebar.isDown) {
-          this.currentPlayerSprite.gun.shoot(this.currentPlayerSprite);
+          this.currentPlayerSprite.gun.shoot(this.currentPlayerSprite, this.pointer);
         }
 
         if (this.game.cursors.left.isDown) {
@@ -38361,6 +38363,7 @@ var ZombieGameState = function (_TiledState) {
         y: this.currentPlayerSprite.y,
         name: this.currentPlayerSprite.name,
         animationDirection: this.currentPlayerSprite.direction,
+        gunRotation: this.currentPlayerSprite.gun.rotation,
         socketId: socket.id
       };
 
@@ -38452,6 +38455,24 @@ var ZombieGameState = function (_TiledState) {
       }
     }
   }, {
+    key: 'tweenRemoteAssets',
+    value: function tweenRemoteAssets() {
+      //Remote Player Tweens
+      //TODO: refactor for 4 players
+      this.add.tween(remotePlayerSprites[Object.keys(remotePlayerSprites)[0]].healthbar).to({
+        x: remotePlayerSprites[Object.keys(remotePlayerSprites)[0]].x - 10,
+        y: remotePlayerSprites[Object.keys(remotePlayerSprites)[0]].y - 30
+      }, 10, Phaser.Easing.Linear.None, true);
+
+      this.add.tween(remotePlayerSprites[Object.keys(remotePlayerSprites)[0]].gun).to({
+        x: remotePlayerSprites[Object.keys(remotePlayerSprites)[0]].x,
+        y: remotePlayerSprites[Object.keys(remotePlayerSprites)[0]].y
+      }, 10, Phaser.Easing.Linear.None, true);
+
+      //TODO: send rotation angle of player to server, server sends it back and we use it to tween
+      remotePlayerSprites[Object.keys(remotePlayerSprites)[0]].gun.rotation = remotePlayerSprites[Object.keys(remotePlayerSprites)[0]].gunRotation;
+    }
+  }, {
     key: 'tweenPlayerAssets',
     value: function tweenPlayerAssets() {
       //gun follow does not work as a child of the player sprite.. had to tween gun to players x, y position
@@ -38465,6 +38486,9 @@ var ZombieGameState = function (_TiledState) {
         x: this.currentPlayerSprite.x - 10,
         y: this.currentPlayerSprite.y - 30
       }, 10, Phaser.Easing.Linear.None, true);
+
+      //Gun rotation tween
+      this.currentPlayerSprite.gun.rotation = this.game.physics.arcade.angleToPointer(this.currentPlayerSprite.gun);
     }
   }]);
 
@@ -39401,12 +39425,15 @@ var Enemy = function (_Prefab) {
     var _this = _possibleConstructorReturn(this, (Enemy.__proto__ || Object.getPrototypeOf(Enemy)).call(this, game, name, position, properties));
 
     _this.animations.add('left', [9, 10, 11, 12, 9, 13, 14], 9, true);
-    _this.animations.add('dead', [1, 2, 3, 4, 5, 6, 7, 8, 0], 9, false);
+    _this.zombDeath = _this.animations.add('dead', [1, 2, 3, 4, 5, 6, 7, 8, 0], 9, false);
+
     _this.stats = {
       health: 10,
       movement: 10,
       attack: 5
     };
+
+    _this.hit = false;
 
     return _this;
   }
@@ -39422,25 +39449,31 @@ var Enemy = function (_Prefab) {
   }, {
     key: 'moveTo',
     value: function moveTo(position) {
-      this.gameState.pathfinding.findPath(this.position, position, this.followPath, this);
+      if (this.hit === false) {
+        console.log('not hit');
+        this.gameState.pathfinding.findPath(this.position, position, this.followPath, this);
+      }
     }
   }, {
     key: 'followPath',
     value: function followPath(path) {
       // console.log('inside path', path);
-      var movingTween = void 0,
-          pathLength = void 0;
-      movingTween = this.game.tweens.create(this);
-      pathLength = path.length;
-      //If path is 0, attack the player
-      //TODO: currently hardcoded player
-      if (pathLength <= 0) {
-        this.attackPlayer(this.gameState.groups.player.children[0]);
-      } else {
-        path.forEach(function (position) {
-          movingTween.to({ x: position.x, y: position.y }, 250);
-        });
-        movingTween.start();
+      if (this.hit === false) {
+
+        var movingTween = void 0,
+            pathLength = void 0;
+        movingTween = this.game.tweens.create(this);
+        pathLength = path.length;
+        //If path is 0, attack the player
+        //TODO: currently hardcoded player
+        if (pathLength <= 0) {
+          this.attackPlayer(this.gameState.groups.player.children[0]);
+        } else {
+          path.forEach(function (position) {
+            movingTween.to({ x: position.x, y: position.y }, 250);
+          });
+          movingTween.start();
+        }
       }
     }
   }, {
@@ -39519,7 +39552,7 @@ var Gun = function (_GunPrefab) {
     }
   }, {
     key: 'shoot',
-    value: function shoot(player) {
+    value: function shoot(player, pointer) {
 
       // if (this.game.time.time < this.nextFire) { return; }
       var bullet = this.gunBullets.getFirstExists(false);
@@ -39536,6 +39569,7 @@ var Gun = function (_GunPrefab) {
         bullet.reset(x, y);
       }
       bullet.rotation = this.game.physics.arcade.moveToPointer(bullet, 600);
+      // bullet.rotation = this.game.physics.arcade.moveToObject(pointer, 600);
     }
   }, {
     key: 'hitWall',
@@ -39545,11 +39579,16 @@ var Gun = function (_GunPrefab) {
   }, {
     key: 'hitZombie',
     value: function hitZombie(zombie, bullet) {
+      // let zombDeath = zombie.animations.add('dead', [1, 2, 3, 4, 5, 6, 7, 8, 0], 9, false);
       console.log("ZOMBZ", zombie);
-      // zombie.animations.stop();
-      // zombie.animations.play('dead');
+      zombie.hit = true;
       bullet.kill();
-      zombie.destroy();[];
+      zombie.animations.stop();
+      zombie.animations.play('dead');
+      //let animationRef = zombie.animations.play('dead').animationReference.isPlaying;
+      zombie.zombDeath.onComplete.add(function () {
+        return zombie.kill();
+      }, this);
     }
   }]);
 
@@ -39781,13 +39820,6 @@ var Player = function (_Prefab) {
 		}, { x: 225, y: 225 });
 
 		_this.game.add.existing(_this.gun);
-
-		var style = {
-			font: "bold 16px Arial",
-			fill: "#FFF",
-			stroke: "#000",
-			strokeThickness: 3
-		};
 		return _this;
 	}
 
