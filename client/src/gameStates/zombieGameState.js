@@ -579,6 +579,11 @@ export default class ZombieGameState extends TiledState {
     remotePlayerSprites[fireObj.socketId].gun.shoot(remotePlayerSprites[fireObj.socketId], self.remoteBulletGroup);
   }
 
+  handleRemotePlayerReceiveDamage(damageObj){
+    let playerWhoReceivedDamage = remotePlayerSprites[damageObj.socketId];
+    remotePlayerSprites[damageObj.socketId].receiveDamage(damageObj.newDamage);
+  }
+
   logRemotePlayers(){
     console.log('RPS: ', remotePlayerSprites);
     console.log('Local State: ', store.getState());
