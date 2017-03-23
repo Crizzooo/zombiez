@@ -153,6 +153,12 @@ io.on('connection', (socket) => {
       //When validated, tell all players to damage the hit players
       io.emit('damagePlayer', hitPlayerSocketId, dmgToTake);
   });
+
+  //TODO: folllow skinners chain here and evaluate
+  // socket.on('playerReceiveDamage', (damageObj) => {
+  //   socket.broadcast.emit('remoteReceiveDamage', damageObj);
+  // })
+
 })
 
 

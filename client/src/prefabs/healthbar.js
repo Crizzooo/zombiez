@@ -25,28 +25,23 @@ export default class HealthBar extends Phaser.Sprite {
 	}
 
 	newHealth(health) {
-		//TODO: loop goes in to negative numbers and errors out
-		//NOTE: I think currentHeart needs to be updated @CharlieShi
-		//Takes in current health from player and sets hearts accordingly
+		//TODO: This needs to be reoptimized so that it is not called when there are no hearts left
 
 		//Determines how many hearts and half hearts to show
 		let numHearts = Math.floor((health / 10)  % 10);
-		let halfHeart = health % 10 >= 5 ? true : false;
+		let halfHeart = health % 10 > 5 ? true : false;
 
+		if (health < 0){
+			return;
+		}
 		//Loops through hearts and sets them appropriately
-		// console.log('num hearts: ', numHearts);
 		for (let i = this.currentHeart; i >= numHearts; i--) {
-			// console.log('loopoing over heart i: ', i);
-			// console.log('it is: ', this.hearts[i]);
 			if (i > numHearts) {
 				this.hearts[i].changeHeart('empty');
 			} else {
 				(halfHeart ? this.hearts[i].changeHeart('half') : this.hearts[i].changeHeart('empty'))
 			}
 		}
-
 	}
-
-
 
 }
