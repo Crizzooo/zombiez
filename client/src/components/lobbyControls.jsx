@@ -23,6 +23,9 @@ export class lobbyControls extends React.Component {
 
   handleSubmit(evt) {
     evt.preventDefault();
+    if (this.state.name.length < 1){
+      this.state.name = 'I FORGOT TO PUT IN A NAME';
+    }
     socket.emit('lobbyerJoinLobby', this.state);
     let currentLobbyer = this.state;
     currentLobbyer.socketId = socket.id;

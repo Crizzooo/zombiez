@@ -35975,6 +35975,7 @@ var attachFunctions = function attachFunctions(socket) {
   socket.on('serverUpdate', dispatchServerState);
   socket.on('gamePlayingUpdate', dispatchGamePlayingUpdate);
   socket.on('resetGame', dispatchReducerReset);
+  // socket.on('remoteFire', ZGS.prototype.handleRemotePlayerFire);
 };
 
 function dispatchCurrentLobbyer(lobbyerObj) {
@@ -36001,7 +36002,7 @@ function startClientGame(playersFromServer) {
 
 var throttledLog = (0, _lodash.throttle)(logReceivedState, 30000);
 function logReceivedState() {
-  console.log('state after server update: ', _store2.default.getState());
+  // console.log('state after server update: ', store.getState());
 }
 function dispatchServerState(serverState) {
   //break out data from server - send to appropriate stores
@@ -37246,6 +37247,9 @@ var lobbyControls = exports.lobbyControls = function (_React$Component) {
     key: 'handleSubmit',
     value: function handleSubmit(evt) {
       evt.preventDefault();
+      if (this.state.name.length < 1) {
+        this.state.name = 'I FORGOT TO PUT IN A NAME';
+      }
       socket.emit('lobbyerJoinLobby', this.state);
       var currentLobbyer = this.state;
       currentLobbyer.socketId = socket.id;
@@ -38002,6 +38006,8 @@ var ZombieGameState = function (_TiledState) {
       this.handleRemotePlayerLeave = this.handleRemotePlayerLeave.bind(this);
       socket.on('destroyCurrentPlayerSprite', this.destroyCurrentPlayerSprite);
       socket.on('playerLeaveGame', this.handleRemotePlayerLeave);
+      socket.on('remoteFire', this.handleRemotePlayerFire);
+      socket.on('remoteReceiveDamage', this.handleRemotePlayerReceiveDamage);
     }
   }, {
     key: 'preload',
@@ -38036,14 +38042,15 @@ var ZombieGameState = function (_TiledState) {
       console.log('Local state right before load level: ', _store2.default.getState());
       this.loadLevel();
 
-      this.currentPlayerSprite.gun.initializeWeapon(this);
-      console.log(this);
-      this.pointer = crosshair;
-      this.currentEnemy = enemyPrefab;
+      //NOTE: I moved these in to a loop that only runs IF we have a current Player
+      // this.currentPlayerSprite.gun.initializeWeapon(this);
+      // this.pointer = crosshair;
+      //
+      // //add to world
+      // this.game.add.existing(this.pointer);
 
-      //add to world
+      this.currentEnemy = enemyPrefab;
       this.game.add.existing(this.currentEnemy);
-      this.game.add.existing(this.pointer);
 
       //this.currentEnemy.acquireTarget = throttle(this.currentEnemy.acquireTarget, 200);
       this.currentEnemy.moveTo = throttle(this.currentEnemy.moveTo, 1000);
@@ -38052,15 +38059,21 @@ var ZombieGameState = function (_TiledState) {
 
       //Remote Player Movement
       //This gets us the first player from the remote players
-      console.log('this is remote player sprites', remotePlayerSprites[Object.keys(remotePlayerSprites)[0]]);
+      console.log('this is remote player sprites', remotePlayerSprites);
 
       //Set camera to follow, then make world big to allow camera to pan off
       //this.camera.view = new Phaser.Rectangle(0, 0, this.currentPlayer.position.x, this.currentPlayer.position.y);
-      this.game.world.setBounds(-250, -250, 2500, 2500);
+      this.game.world.setBounds(-25, -25, 2500, 2500);
 
       //set interval to emit currentPlayer to server
       //if we have a current player
       if (this.currentPlayerSprite) {
+        this.currentPlayerSprite.gun.initializeWeapon(this);
+        this.pointer = crosshair;
+
+        //add to world
+        this.game.add.existing(this.pointer);
+
         var emitInterval = (0, _emitCurrentState2.default)(socket);
         //on click lock the users mouse for input
         this.game.input.onDown.add(this.lockPointer, this);
@@ -38072,30 +38085,42 @@ var ZombieGameState = function (_TiledState) {
         var remotePlayerOneId = Object.keys(remotePlayerSprites)[0];
         this.camera.follow(remotePlayerSprites[remotePlayerOneId]);
       }
+
+      this.toggledRPS = throttle(this.logRemotePlayers, 20000);
     }
   }, {
     key: 'update',
     value: function update() {
       //Check collisions
-      this.game.physics.arcade.collide(this.currentPlayerSprite, this.layers.backgroundDecCollision);
-      this.game.physics.arcade.collide(this.currentPlayerSprite, this.layers.backgroundDecCollision2);
-      this.game.physics.arcade.collide(this.currentPlayerSprite, this.layers.waterCollision);
-      this.game.physics.arcade.collide(this.currentPlayerSprite, this.layers.wallCollision);
+      //NOTE: only check CPS collissions if we do have a CPS
+      if (this.currentPlayerSprite) {
+        this.game.physics.arcade.collide(this.currentPlayerSprite, this.layers.backgroundDecCollision);
+        this.game.physics.arcade.collide(this.currentPlayerSprite, this.layers.backgroundDecCollision2);
+        this.game.physics.arcade.collide(this.currentPlayerSprite, this.layers.waterCollision);
+        this.game.physics.arcade.collide(this.currentPlayerSprite, this.layers.wallCollision);
 
-      //constantly check if bullet hit a wall
-      this.game.physics.arcade.collide(this.layers.wallCollision, this.currentPlayerSprite.gun.gunBullets, this.currentPlayerSprite.gun.hitWall, null, this);
+        //constantly check if bullet hit a wall
+        this.game.physics.arcade.collide(this.layers.wallCollision, this.currentPlayerSprite.gun.gunBullets, this.currentPlayerSprite.gun.hitWall, null, this);
 
-      this.game.physics.arcade.collide(this.currentEnemy, this.currentPlayerSprite.gun.gunBullets, this.currentPlayerSprite.gun.hitZombie, null, this);
+        //Server & Input
+        //every 32ms send package to server with position
+        this.handleInput(this.currentPlayerSprite);
+        this.dispatchCurrentPlayer();
+
+        //Tween all player assets
+        //Remote and current
+        this.tweenPlayerAssets();
+      }
+
       //Pathfinding
       //TODO: bug?
       if (this.currentEnemy.exists) {
-        console.log('still exists--------->');
+        // console.log('still exists--------->')
         this.currentEnemy.moveTo(this.currentEnemy.acquireTarget());
+        if (this.currentPlayerSprite) {
+          this.game.physics.arcade.collide(this.currentEnemy, this.currentPlayerSprite.gun.gunBullets, this.currentPlayerSprite.gun.hitZombie, null, this);
+        }
       }
-
-      //Tween all player assets
-      //Remote and current
-      this.tweenPlayerAssets();
 
       //Server & Input
       //every 32ms send package to server with position
@@ -38104,19 +38129,9 @@ var ZombieGameState = function (_TiledState) {
         this.tweenRemoteAssets();
       }
 
-      if (this.currentPlayerSprite) {
-        this.handleInput(this.currentPlayerSprite);
-        this.dispatchCurrentPlayer();
-      }
-
-      //Server & Input
-      //every 32ms send package to server with position
-      if (this.currentPlayerSprite) {
-        this.handleInput();
-        this.dispatchCurrentPlayer();
-      }
-
       this.updateRemotePlayers();
+
+      this.toggledRPS();
     }
 
     // render() {
@@ -38162,7 +38177,8 @@ var ZombieGameState = function (_TiledState) {
           x: this.currentPlayerSprite.x,
           y: this.currentPlayerSprite.y,
           animationDirection: this.currentPlayerSprite.direction,
-          name: currentPlayer.name
+          name: currentPlayer.name,
+          health: this.currentPlayerSprite.stats.health
           //TODO: health, fire, guns, bullets, frame? etc
         };
 
@@ -38182,8 +38198,6 @@ var ZombieGameState = function (_TiledState) {
       if (player) {
         player.body.velocity.x = 0;
         player.body.velocity.y = 0;
-
-        console.log('player direction', player.direction);
 
         if (player.direction === 'idle') {
           player.animations.stop();
@@ -38254,11 +38268,22 @@ var ZombieGameState = function (_TiledState) {
     key: 'handleInput',
     value: function handleInput(player) {
       if (player) {
+        this.currentPlayerSprite.pointerX = this.game.input.activePointer.worldX;
+        this.currentPlayerSprite.pointerY = this.game.input.activePointer.worldY;
+
         player.body.velocity.x = 0;
         player.body.velocity.y = 0;
 
         if (this.spacebar.isDown) {
-          this.currentPlayerSprite.gun.shoot(this.currentPlayerSprite, this.pointer);
+          //TODO: emit the shot to all clients
+          socket.emit('userFire', {
+            x: this.currentPlayerSprite.x,
+            y: this.currentPlayerSprite.y,
+            pointerX: this.currentPlayerSprite.pointerX,
+            pointerY: this.currentPlayerSprite.pointerY,
+            socketId: socket.id
+          });
+          this.currentPlayerSprite.gun.shoot(this.currentPlayerSprite);
         }
 
         if (this.game.cursors.left.isDown) {
@@ -38334,6 +38359,7 @@ var ZombieGameState = function (_TiledState) {
     value: function handlePlayerRotation(player) {
       var pointerX = this.game.input.activePointer.worldX;
       var pointerY = this.game.input.activePointer.worldY;
+
       var playerX = player.x;
       var playerY = player.y;
 
@@ -38364,7 +38390,9 @@ var ZombieGameState = function (_TiledState) {
         name: this.currentPlayerSprite.name,
         animationDirection: this.currentPlayerSprite.direction,
         gunRotation: this.currentPlayerSprite.gun.rotation,
-        socketId: socket.id
+        socketId: socket.id,
+        pointerX: this.currentPlayerSprite.pointerX,
+        pointerY: this.currentPlayerSprite.pointerY
       };
 
       _store2.default.dispatch((0, _playersReducer.updateCurrentPlayer)(currentPlayer));
@@ -38451,7 +38479,9 @@ var ZombieGameState = function (_TiledState) {
         }, { x: playerState.x, y: playerState.y });
         self.game.add.existing(playerPrefab);
         remotePlayerSprites[playerState.socketId] = playerPrefab;
+        remotePlayerSprites[playerState.socketId].gun.initializeWeapon(self);
         console.log('the created player sprite: ', playerPrefab);
+        console.log('updated RPS after add: ', remotePlayerSprites);
       }
     }
   }, {
@@ -38489,6 +38519,35 @@ var ZombieGameState = function (_TiledState) {
 
       //Gun rotation tween
       this.currentPlayerSprite.gun.rotation = this.game.physics.arcade.angleToPointer(this.currentPlayerSprite.gun);
+    }
+  }, {
+    key: 'handleRemotePlayerFire',
+    value: function handleRemotePlayerFire(fireObj) {
+      // console.log('client received fire obj from server:', fireObj);
+      // console.log('RPS in player Fire: ', remotePlayerSprites);
+      var playerWhoFired = remotePlayerSprites[fireObj.socketId];
+      // console.log('playerWhoFired:', playerWhoFired);
+      // console.dir(playerWhoFired);
+      // console.log('pwf.gun: ', playerWhoFired.gun);
+      remotePlayerSprites[fireObj.socketId].pointerX = fireObj.pointerX;
+      remotePlayerSprites[fireObj.socketId].pointerY = fireObj.pointerY;
+      // console.log('this motherfucker just fired: ', playerWhoFired);
+      remotePlayerSprites[fireObj.socketId].gun.shoot(remotePlayerSprites[fireObj.socketId]);
+    }
+  }, {
+    key: 'handleRemotePlayerReceiveDamage',
+    value: function handleRemotePlayerReceiveDamage(damageObj) {
+      var playerWhoReceivedDamage = remotePlayerSprites[damageObj.socketId];
+      console.log('this motherfucker just received damage: ', playerWhoReceivedDamage);
+      console.log('this is the damage object: ', damageObj);
+      remotePlayerSprites[damageObj.socketId].receiveDamage(damageObj.newDamage);
+    }
+  }, {
+    key: 'logRemotePlayers',
+    value: function logRemotePlayers() {
+      console.log('RPS: ', remotePlayerSprites);
+      console.log('Local State: ', _store2.default.getState());
+      console.log('CPS: ', this.currentPlayerSprite);
     }
   }]);
 
@@ -39441,7 +39500,11 @@ var Enemy = function (_Prefab) {
   _createClass(Enemy, [{
     key: 'attackPlayer',
     value: function attackPlayer(player) {
-      player.receiveDamage(this.stats.attack);
+      socket.emit('playerReceiveDamage', {
+        socketId: socket.id,
+        newDamage: this.stats.attack
+      });
+      player.receiveDamage(this.stats.attack, player);
     }
   }, {
     key: 'receiveDamage',
@@ -39548,28 +39611,40 @@ var Gun = function (_GunPrefab) {
       this.gunBullets.setAll('checkWorldBounds', true);
 
       this.gunBullets.bulletSpeed = 600;
-      this.whatever = game;
+
+      this.bulletGroup = this.gunBullets;
+
+      this.game = game;
     }
   }, {
     key: 'shoot',
-    value: function shoot(player, pointer) {
-
+    value: function shoot(player, group) {
+      var bulletGroup = void 0;
+      if (!group) {
+        bulletGroup = player.gun.bulletGroup;
+      } else {
+        bulletGroup = group;
+      }
       // if (this.game.time.time < this.nextFire) { return; }
-      var bullet = this.gunBullets.getFirstExists(false);
-      var x = player.world.x;
-      var y = player.world.y;
+      console.log('player firing: ', player);
+      var bullet = bulletGroup.getFirstExists(false);
+      var x = player.x;
+      var y = player.y;
       if (!bullet) {
-        bullet = new _bullet2.default(this.whatever, 'bullet', { x: this.x, y: this.y }, {
+        bullet = new _bullet2.default(this.game, 'bullet', { x: this.x, y: this.y }, {
           group: 'player',
           initial: 1,
           texture: 'gunSpriteSheet'
         });
-        this.gunBullets.add(bullet);
+        bulletGroup.add(bullet);
       } else {
         bullet.reset(x, y);
       }
-      bullet.rotation = this.game.physics.arcade.moveToPointer(bullet, 600);
-      // bullet.rotation = this.game.physics.arcade.moveToObject(pointer, 600);
+      //TODO: we will not be able to use moveToPointer for remote Players
+      //TODO: either we change this or we implement a separate function for firing for remote players
+      //TODO: bullet.rotation = this.game.physics.arcade.moveToXY(displayObj, x, y, speed, maxTime)
+      // speed = 600
+      bullet.rotation = this.game.physics.arcade.moveToXY(bullet, player.pointerX, player.pointerY, 600);
     }
   }, {
     key: 'hitWall',
@@ -39703,7 +39778,7 @@ var HealthBar = function (_Phaser$Sprite) {
 		_this.gameState = game;
 		_this.name = name;
 
-		console.log('in healthbar', _this.gameState.groups.ui);
+		// console.log('in healthbar', this.gameState.groups.ui)
 
 		//Add prefab to its group
 		//this.gameState.groups[properties.group].add(this);
@@ -39723,6 +39798,8 @@ var HealthBar = function (_Phaser$Sprite) {
 	}, {
 		key: 'newHealth',
 		value: function newHealth(health) {
+			//TODO: loop goes in to negative numbers and errors out
+			//NOTE: I think currentHeart needs to be updated @CharlieShi
 			//Takes in current health from player and sets hearts accordingly
 
 			//Determines how many hearts and half hearts to show
@@ -39730,7 +39807,10 @@ var HealthBar = function (_Phaser$Sprite) {
 			var halfHeart = health % 10 >= 5 ? true : false;
 
 			//Loops through hearts and sets them appropriately
+			// console.log('num hearts: ', numHearts);
 			for (var i = this.currentHeart; i >= numHearts; i--) {
+				// console.log('loopoing over heart i: ', i);
+				// console.log('it is: ', this.hearts[i]);
 				if (i > numHearts) {
 					this.hearts[i].changeHeart('empty');
 				} else {
@@ -39753,7 +39833,7 @@ exports.default = HealthBar;
 
 
 Object.defineProperty(exports, "__esModule", {
-	value: true
+  value: true
 });
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -39781,108 +39861,110 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 */
 
 var Player = function (_Prefab) {
-	_inherits(Player, _Prefab);
+  _inherits(Player, _Prefab);
 
-	function Player(game, name, position, properties) {
-		_classCallCheck(this, Player);
+  function Player(game, name, position, properties) {
+    _classCallCheck(this, Player);
 
-		var _this = _possibleConstructorReturn(this, (Player.__proto__ || Object.getPrototypeOf(Player)).call(this, game, name, position, properties));
+    var _this = _possibleConstructorReturn(this, (Player.__proto__ || Object.getPrototypeOf(Player)).call(this, game, name, position, properties));
 
-		_this.anchor.setTo(0.5);
+    _this.anchor.setTo(0.5);
 
-		_this.stats = {
-			totalHealth: 100,
-			health: 100,
-			movement: 100
-		};
+    _this.stats = {
+      totalHealth: 100,
+      health: 100,
+      movement: 100
+    };
 
-		//TODO: make it only visible to the current player
-		//Load Hearts, Healthbar, Animations
-		_this.loadHearts();
-		_this.loadHealthbar();
-		_this.loadAnimations();
+    //TODO: make it only visible to the current player
+    //Load Hearts, Healthbar, Animations
+    _this.loadHearts();
+    _this.loadHealthbar();
+    _this.loadAnimations();
 
-		_this.animations.add('idle', [18], 10, true);
+    _this.animations.add('idle', [18], 10, true);
 
-		//This might not be relevant since the world size is bigger than map size
-		//To allow for camera pan
-		_this.body.collideWorldBounds = true;
-		_this.game.physics.arcade.enable(_this);
+    //This might not be relevant since the world size is bigger than map size
+    //To allow for camera pan
+    _this.body.collideWorldBounds = true;
+    _this.game.physics.arcade.enable(_this);
 
-		//Setup player's gun
-		_this.gun = _this.gameState.createPrefab('gun', {
-			type: 'guns',
-			properties: {
-				group: 'guns',
-				initial: 0,
-				texture: 'gunSpriteSheet'
-			}
-		}, { x: 225, y: 225 });
+    //Setup player's gun
+    _this.gun = _this.gameState.createPrefab('gun', {
+      type: 'guns',
+      properties: {
+        group: 'guns',
+        initial: 0,
+        texture: 'gunSpriteSheet'
+      }
+    }, { x: 225, y: 225 });
 
-		_this.game.add.existing(_this.gun);
-		return _this;
-	}
+    _this.game.add.existing(_this.gun);
+    return _this;
+  }
 
-	_createClass(Player, [{
-		key: 'loadAnimations',
-		value: function loadAnimations() {
-			this.animations.add('right', [24, 8, 5, 20, 12, 13], 10, true);
-			this.animations.add('left', [17, 10, 5, 19, 8, 9], 10, true);
-			this.animations.add('up', [16, 0, 14, 6, 1], 10, true);
-			this.animations.add('down', [23, 9, 21, 22, 7, 4], 10, true);
-		}
-	}, {
-		key: 'loadHealthbar',
-		value: function loadHealthbar() {
-			//Health text, to be replaced by healthbar
-			var style = {
-				font: "bold 16px Arial",
-				fill: "#FFF",
-				stroke: "#000",
-				strokeThickness: 3
-			};
+  _createClass(Player, [{
+    key: 'loadAnimations',
+    value: function loadAnimations() {
+      this.animations.add('right', [24, 8, 5, 20, 12, 13], 10, true);
+      this.animations.add('left', [17, 10, 5, 19, 8, 9], 10, true);
+      this.animations.add('up', [16, 0, 14, 6, 1], 10, true);
+      this.animations.add('down', [23, 9, 21, 22, 7, 4], 10, true);
+    }
+  }, {
+    key: 'loadHealthbar',
+    value: function loadHealthbar() {
+      //Health text, to be replaced by healthbar
+      var style = {
+        font: "bold 16px Arial",
+        fill: "#FFF",
+        stroke: "#000",
+        strokeThickness: 3
+      };
 
-			this.healthbar = this.game.add.text(this.position.x - 10, this.position.y - 10, this.stats.health, style);
-		}
-	}, {
-		key: 'loadHearts',
-		value: function loadHearts() {
-			//Health hearts, top left hearts
-			this.health = new _healthbar2.default(this.gameState, 'playerHealthHearts', { x: 0, y: 0 }, {
-				group: 'ui'
-			});
+      this.healthbar = this.game.add.text(this.position.x - 10, this.position.y - 10, this.stats.health, style);
+    }
+  }, {
+    key: 'loadHearts',
+    value: function loadHearts() {
+      //Health hearts, top left hearts
+      this.health = new _healthbar2.default(this.gameState, 'playerHealthHearts', { x: 0, y: 0 }, {
+        group: 'ui'
+      });
 
-			for (var i = 0; i < 10; i++) {
-				this.health.addHearts(this.game.add.existing(new _healthHearts2.default(this.gameState, 'playerHeart' + i, { x: 32 * i, y: 0 }, {
-					texture: 'playerHearts',
-					group: 'ui',
-					initial: 2
-				})));
-			}
+      for (var i = 0; i < 10; i++) {
+        this.health.addHearts(this.game.add.existing(new _healthHearts2.default(this.gameState, 'playerHeart' + i, { x: 32 * i, y: 0 }, {
+          texture: 'playerHearts',
+          group: 'ui',
+          initial: 2
+        })));
+      }
 
-			this.game.add.existing(this.health);
-		}
-	}, {
-		key: 'receiveDamage',
-		value: function receiveDamage(damage) {
-			var _this2 = this;
+      this.game.add.existing(this.health);
+    }
+  }, {
+    key: 'receiveDamage',
+    value: function receiveDamage(damage) {
+      var _this2 = this;
 
-			//Change healthbar
-			this.stats.health -= damage;
-			this.healthbar.text = this.stats.health;
+      //Change healthbar
+      // console.log("PLAYERRRRRRRR", player)
+      this.stats.health -= damage;
 
-			//Set tint to show damage
-			this.tint = 0x0000ff;
-			setTimeout(function () {
-				_this2.tint = 0xffffff;
-			}, 400);
+      this.healthbar.text = this.stats.health;
 
-			//Change Health hearts
-			this.health.newHealth(this.stats.health);
-		}
-	}]);
+      //Set tint to show damage
+      this.tint = 0x0000ff;
+      setTimeout(function () {
+        _this2.tint = 0xffffff;
+      }, 400);
 
-	return Player;
+      //Change Health hearts
+      this.health.newHealth(this.stats.health);
+    }
+  }]);
+
+  return Player;
 }(_Prefab3.default);
 
 exports.default = Player;
