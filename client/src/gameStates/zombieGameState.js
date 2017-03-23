@@ -130,8 +130,14 @@ export default class ZombieGameState extends TiledState {
       this.game.physics.arcade.collide(this.currentPlayerSprite, this.layers.waterCollision);
       this.game.physics.arcade.collide(this.currentPlayerSprite, this.layers.wallCollision);
 
-      //constantly check if bullet hit a wall
-      this.game.physics.arcade.collide(this.layers.wallCollision, this.currentPlayerSprite.gun.gunBullets, this.currentPlayerSprite.gun.hitWall, null, this);
+      //NOTE: check if remote bullets hit wallCollision - kill bullet
+      this.game.physics.arcade.collide(this.currentPlayerSprite.gun.gunBullets, this.layers.wallCollision, this.bulletHitWall, null, this);
+
+
+      //NOTE: check if own bullets hit playerSprites - emit a hit
+      this.game.physics.arcade.collide(this.currentPlayerSprite.gun.gunBullets, this.playerSpriteGroup, this.bulletHitPlayer, null, this);
+
+      //TODO: check if remote players hit any zombies - kill bullet, emit zombieHit
 
       //Server & Input
       //every 32ms send package to server with position
@@ -140,16 +146,24 @@ export default class ZombieGameState extends TiledState {
 
       //Tween all player assets
       //Remote and current
-      this.tweenPlayerAssets();
+      this.tweenCurrentPlayerAssets();
     }
 
+    //collisions for remoteBulletGroups
+    this.game.physics.arcade.collide(this.remoteBulletGroup, this.layers.wallCollision, this.bulletHitWall, null, this)
+
+    this.game.physics.arcade.collide(this.remoteBulletGroup, this.playerSpriteGroup, this.bulletHitPlayer, null, this);
+
+
+	  // console.log("this is enemy", this.currentEnemy.exists);
     //Pathfinding
 	  //TODO: bug?
     if(this.currentEnemy.exists) {
 			// console.log('still exists--------->')
       this.currentEnemy.moveTo(this.currentEnemy.acquireTarget());
       if (this.currentPlayerSprite){
-        this.game.physics.arcade.collide(this.currentEnemy, this.currentPlayerSprite.gun.gunBullets, this.currentPlayerSprite.gun.hitZombie, null, this);
+        //NOTE: sprite zombie will always go first when comparing a group of sprites with a sprite
+        this.game.physics.arcade.collide(this.currentEnemy, this.currentPlayerSprite.gun.gunBullets, this.bulletHitZombie, null, this);
       }
     }
 
@@ -223,6 +237,23 @@ export default class ZombieGameState extends TiledState {
     console.log('Creating Sprites for each player in this: ', state.players.playerStates);
     //)
     R.forEachObjIndexed(this.createRemotePlayerSprite, state.players.playerStates);
+
+    //TODO - create player sprite group using all in RPS, and CP sprite
+    this.playerSpriteGroup = this.game.add.group();
+
+    //if current player, add to group
+    if (this.currentPlayerSprite) {
+      this.playerSpriteGroup.add(this.currentPlayerSprite);
+    }
+
+    R.forEachObjIndexed(this.addRemotePlayerToGroup, remotePlayerSprites);
+
+    console.log('our player sprite group length: ', this.playerSpriteGroup.length);
+
+    //TODO initialize game.remoteBulletGroup
+    //TODO: call gun.shoot with this bulletGroup when a remote player is firing
+    this.remoteBulletGroup = this.game.add.group();
+    this.remoteBulletGroup.name = 'remoteBulletGroup';
   }
 
   handleRemoteAnimation(player) {
@@ -314,7 +345,7 @@ export default class ZombieGameState extends TiledState {
           pointerY: this.currentPlayerSprite.pointerY,
           socketId: socket.id
         });
-        this.currentPlayerSprite.gun.shoot(this.currentPlayerSprite);
+        this.currentPlayerSprite.gun.shoot(this.currentPlayerSprite, this.currentPlayerSprite.gun.gunBullets);
       }
 
       if (this.game.cursors.left.isDown) {
@@ -423,6 +454,7 @@ export default class ZombieGameState extends TiledState {
       socketId: socket.id,
       pointerX: this.currentPlayerSprite.pointerX,
       pointerY: this.currentPlayerSprite.pointerY,
+      health: this.currentPlayerSprite.stats.health
     }
 
     store.dispatch(updateCurrentPlayer(currentPlayer));
@@ -524,7 +556,7 @@ export default class ZombieGameState extends TiledState {
 	  remotePlayerSprites[Object.keys(remotePlayerSprites)[0]].gun.rotation = remotePlayerSprites[Object.keys(remotePlayerSprites)[0]].gunRotation;
   }
 
-  tweenPlayerAssets() {
+  tweenCurrentPlayerAssets() {
     //gun follow does not work as a child of the player sprite.. had to tween gun to players x, y position
     this.add.tween(this.currentPlayerSprite.gun).to({
       x: this.currentPlayerSprite.x,
@@ -542,16 +574,11 @@ export default class ZombieGameState extends TiledState {
   }
 
   handleRemotePlayerFire(fireObj) {
-    // console.log('client received fire obj from server:', fireObj);
-    // console.log('RPS in player Fire: ', remotePlayerSprites);
     let playerWhoFired = remotePlayerSprites[fireObj.socketId];
-    // console.log('playerWhoFired:', playerWhoFired);
-    // console.dir(playerWhoFired);
-    // console.log('pwf.gun: ', playerWhoFired.gun);
     remotePlayerSprites[fireObj.socketId].pointerX = fireObj.pointerX;
     remotePlayerSprites[fireObj.socketId].pointerY = fireObj.pointerY;
-    // console.log('this motherfucker just fired: ', playerWhoFired);
-    remotePlayerSprites[fireObj.socketId].gun.shoot(remotePlayerSprites[fireObj.socketId]);
+    console.log('this motherfucker just fired: ', playerWhoFired);
+    remotePlayerSprites[fireObj.socketId].gun.shoot(remotePlayerSprites[fireObj.socketId], self.remoteBulletGroup);
   }
 
   handleRemotePlayerReceiveDamage(damageObj){
@@ -565,5 +592,48 @@ export default class ZombieGameState extends TiledState {
     console.log('RPS: ', remotePlayerSprites);
     console.log('Local State: ', store.getState());
     console.log('CPS: ', this.currentPlayerSprite);
+  }
+
+  addRemotePlayerToGroup(remotePlayerSprite){
+    console.log('adding this RP to group: ', remotePlayerSprite);
+    self.playerSpriteGroup.add(remotePlayerSprite);
+  }
+
+  bulletHitWall(bullet, layer){
+    console.log('this bullet has hit a wall: ', bullet);
+    if (bullet.parent.name === 'currentPlayerBulletGroup'){
+      console.log('i just hit a fucking wall, I suck');
+    } else if (bullet.parent.name === 'remoteBulletGroup') {
+      console.log('remote player bullet just hit a fucking wall, ok??');
+    }
+    bullet.kill();
+  }
+
+  bulletHitZombie(zombie, bullet){
+    console.log("ZOMBZ", zombie);
+
+    zombie.hit = true;
+    zombie.animations.stop();
+    zombie.animations.play('dead')
+    //let animationRef = zombie.animations.play('dead').animationReference.isPlaying;
+
+    zombie.animations.currentAnim.onComplete.add( () => {
+      zombie.kill();
+    })
+
+    bullet.kill();
+  }
+
+  bulletHitPlayer(bullet, player){
+      console.log('bullet hit player');
+      console.log('bullet: ', bullet );
+      console.log('player: ', player);
+      bullet.kill();
+      if (bullet.parent.name === 'currentPlayerBulletGroup'){
+        //TODO: emit to server
+        console.log('I HIT A MOTHERFUCKER');
+      } else if (bullet.parent.name === 'remoteBulletGroup') {
+        console.log('eh someone else hit someone');
+      }
   }
 }

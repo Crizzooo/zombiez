@@ -38099,8 +38099,13 @@ var ZombieGameState = function (_TiledState) {
         this.game.physics.arcade.collide(this.currentPlayerSprite, this.layers.waterCollision);
         this.game.physics.arcade.collide(this.currentPlayerSprite, this.layers.wallCollision);
 
-        //constantly check if bullet hit a wall
-        this.game.physics.arcade.collide(this.layers.wallCollision, this.currentPlayerSprite.gun.gunBullets, this.currentPlayerSprite.gun.hitWall, null, this);
+        //NOTE: check if remote bullets hit wallCollision - kill bullet
+        this.game.physics.arcade.collide(this.currentPlayerSprite.gun.gunBullets, this.layers.wallCollision, this.bulletHitWall, null, this);
+
+        //NOTE: check if own bullets hit playerSprites - emit a hit
+        this.game.physics.arcade.collide(this.currentPlayerSprite.gun.gunBullets, this.playerSpriteGroup, this.bulletHitPlayer, null, this);
+
+        //TODO: check if remote players hit any zombies - kill bullet, emit zombieHit
 
         //Server & Input
         //every 32ms send package to server with position
@@ -38109,16 +38114,23 @@ var ZombieGameState = function (_TiledState) {
 
         //Tween all player assets
         //Remote and current
-        this.tweenPlayerAssets();
+        this.tweenCurrentPlayerAssets();
       }
 
+      //collisions for remoteBulletGroups
+      this.game.physics.arcade.collide(this.remoteBulletGroup, this.layers.wallCollision, this.bulletHitWall, null, this);
+
+      this.game.physics.arcade.collide(this.remoteBulletGroup, this.playerSpriteGroup, this.bulletHitPlayer, null, this);
+
+      // console.log("this is enemy", this.currentEnemy.exists);
       //Pathfinding
       //TODO: bug?
       if (this.currentEnemy.exists) {
         // console.log('still exists--------->')
         this.currentEnemy.moveTo(this.currentEnemy.acquireTarget());
         if (this.currentPlayerSprite) {
-          this.game.physics.arcade.collide(this.currentEnemy, this.currentPlayerSprite.gun.gunBullets, this.currentPlayerSprite.gun.hitZombie, null, this);
+          //NOTE: sprite zombie will always go first when comparing a group of sprites with a sprite
+          this.game.physics.arcade.collide(this.currentEnemy, this.currentPlayerSprite.gun.gunBullets, this.bulletHitZombie, null, this);
         }
       }
 
@@ -38191,6 +38203,23 @@ var ZombieGameState = function (_TiledState) {
       console.log('Creating Sprites for each player in this: ', state.players.playerStates);
       //)
       R.forEachObjIndexed(this.createRemotePlayerSprite, state.players.playerStates);
+
+      //TODO - create player sprite group using all in RPS, and CP sprite
+      this.playerSpriteGroup = this.game.add.group();
+
+      //if current player, add to group
+      if (this.currentPlayerSprite) {
+        this.playerSpriteGroup.add(this.currentPlayerSprite);
+      }
+
+      R.forEachObjIndexed(this.addRemotePlayerToGroup, remotePlayerSprites);
+
+      console.log('our player sprite group length: ', this.playerSpriteGroup.length);
+
+      //TODO initialize game.remoteBulletGroup
+      //TODO: call gun.shoot with this bulletGroup when a remote player is firing
+      this.remoteBulletGroup = this.game.add.group();
+      this.remoteBulletGroup.name = 'remoteBulletGroup';
     }
   }, {
     key: 'handleRemoteAnimation',
@@ -38283,7 +38312,7 @@ var ZombieGameState = function (_TiledState) {
             pointerY: this.currentPlayerSprite.pointerY,
             socketId: socket.id
           });
-          this.currentPlayerSprite.gun.shoot(this.currentPlayerSprite);
+          this.currentPlayerSprite.gun.shoot(this.currentPlayerSprite, this.currentPlayerSprite.gun.gunBullets);
         }
 
         if (this.game.cursors.left.isDown) {
@@ -38392,7 +38421,8 @@ var ZombieGameState = function (_TiledState) {
         gunRotation: this.currentPlayerSprite.gun.rotation,
         socketId: socket.id,
         pointerX: this.currentPlayerSprite.pointerX,
-        pointerY: this.currentPlayerSprite.pointerY
+        pointerY: this.currentPlayerSprite.pointerY,
+        health: this.currentPlayerSprite.stats.health
       };
 
       _store2.default.dispatch((0, _playersReducer.updateCurrentPlayer)(currentPlayer));
@@ -38503,8 +38533,8 @@ var ZombieGameState = function (_TiledState) {
       remotePlayerSprites[Object.keys(remotePlayerSprites)[0]].gun.rotation = remotePlayerSprites[Object.keys(remotePlayerSprites)[0]].gunRotation;
     }
   }, {
-    key: 'tweenPlayerAssets',
-    value: function tweenPlayerAssets() {
+    key: 'tweenCurrentPlayerAssets',
+    value: function tweenCurrentPlayerAssets() {
       //gun follow does not work as a child of the player sprite.. had to tween gun to players x, y position
       this.add.tween(this.currentPlayerSprite.gun).to({
         x: this.currentPlayerSprite.x,
@@ -38523,16 +38553,11 @@ var ZombieGameState = function (_TiledState) {
   }, {
     key: 'handleRemotePlayerFire',
     value: function handleRemotePlayerFire(fireObj) {
-      // console.log('client received fire obj from server:', fireObj);
-      // console.log('RPS in player Fire: ', remotePlayerSprites);
       var playerWhoFired = remotePlayerSprites[fireObj.socketId];
-      // console.log('playerWhoFired:', playerWhoFired);
-      // console.dir(playerWhoFired);
-      // console.log('pwf.gun: ', playerWhoFired.gun);
       remotePlayerSprites[fireObj.socketId].pointerX = fireObj.pointerX;
       remotePlayerSprites[fireObj.socketId].pointerY = fireObj.pointerY;
-      // console.log('this motherfucker just fired: ', playerWhoFired);
-      remotePlayerSprites[fireObj.socketId].gun.shoot(remotePlayerSprites[fireObj.socketId]);
+      console.log('this motherfucker just fired: ', playerWhoFired);
+      remotePlayerSprites[fireObj.socketId].gun.shoot(remotePlayerSprites[fireObj.socketId], self.remoteBulletGroup);
     }
   }, {
     key: 'handleRemotePlayerReceiveDamage',
@@ -38548,6 +38573,53 @@ var ZombieGameState = function (_TiledState) {
       console.log('RPS: ', remotePlayerSprites);
       console.log('Local State: ', _store2.default.getState());
       console.log('CPS: ', this.currentPlayerSprite);
+    }
+  }, {
+    key: 'addRemotePlayerToGroup',
+    value: function addRemotePlayerToGroup(remotePlayerSprite) {
+      console.log('adding this RP to group: ', remotePlayerSprite);
+      self.playerSpriteGroup.add(remotePlayerSprite);
+    }
+  }, {
+    key: 'bulletHitWall',
+    value: function bulletHitWall(bullet, layer) {
+      console.log('this bullet has hit a wall: ', bullet);
+      if (bullet.parent.name === 'currentPlayerBulletGroup') {
+        console.log('i just hit a fucking wall, I suck');
+      } else if (bullet.parent.name === 'remoteBulletGroup') {
+        console.log('remote player bullet just hit a fucking wall, ok??');
+      }
+      bullet.kill();
+    }
+  }, {
+    key: 'bulletHitZombie',
+    value: function bulletHitZombie(zombie, bullet) {
+      console.log("ZOMBZ", zombie);
+
+      zombie.hit = true;
+      zombie.animations.stop();
+      zombie.animations.play('dead');
+      //let animationRef = zombie.animations.play('dead').animationReference.isPlaying;
+
+      zombie.animations.currentAnim.onComplete.add(function () {
+        zombie.kill();
+      });
+
+      bullet.kill();
+    }
+  }, {
+    key: 'bulletHitPlayer',
+    value: function bulletHitPlayer(bullet, player) {
+      console.log('bullet hit player');
+      console.log('bullet: ', bullet);
+      console.log('player: ', player);
+      bullet.kill();
+      if (bullet.parent.name === 'currentPlayerBulletGroup') {
+        //TODO: emit to server
+        console.log('I HIT A MOTHERFUCKER');
+      } else if (bullet.parent.name === 'remoteBulletGroup') {
+        console.log('eh someone else hit someone');
+      }
     }
   }]);
 
@@ -39609,6 +39681,7 @@ var Gun = function (_GunPrefab) {
       this.gunBullets.physicsBodyType = Phaser.Physics.ARCADE;
       this.gunBullets.setAll('outOfBoundsKill', true);
       this.gunBullets.setAll('checkWorldBounds', true);
+      this.gunBullets.name = 'currentPlayerBulletGroup';
 
       this.gunBullets.bulletSpeed = 600;
 
@@ -39619,14 +39692,11 @@ var Gun = function (_GunPrefab) {
   }, {
     key: 'shoot',
     value: function shoot(player, group) {
-      var bulletGroup = void 0;
-      if (!group) {
-        bulletGroup = player.gun.bulletGroup;
-      } else {
-        bulletGroup = group;
-      }
+      //NOTE: shoot gets called with currentPlayerSprite.gun.gunBullets OR game.remoteBulletGroup, if shoot is being called due to a server 'remoteFire' emit
+      var bulletGroup = group;
+
       // if (this.game.time.time < this.nextFire) { return; }
-      console.log('player firing: ', player);
+      // console.log('player firing: ', player);
       var bullet = bulletGroup.getFirstExists(false);
       var x = player.x;
       var y = player.y;
@@ -39640,30 +39710,8 @@ var Gun = function (_GunPrefab) {
       } else {
         bullet.reset(x, y);
       }
-      //TODO: we will not be able to use moveToPointer for remote Players
-      //TODO: either we change this or we implement a separate function for firing for remote players
-      //TODO: bullet.rotation = this.game.physics.arcade.moveToXY(displayObj, x, y, speed, maxTime)
-      // speed = 600
+
       bullet.rotation = this.game.physics.arcade.moveToXY(bullet, player.pointerX, player.pointerY, 600);
-    }
-  }, {
-    key: 'hitWall',
-    value: function hitWall(bullet, layer) {
-      bullet.kill();
-    }
-  }, {
-    key: 'hitZombie',
-    value: function hitZombie(zombie, bullet) {
-      // let zombDeath = zombie.animations.add('dead', [1, 2, 3, 4, 5, 6, 7, 8, 0], 9, false);
-      console.log("ZOMBZ", zombie);
-      zombie.hit = true;
-      bullet.kill();
-      zombie.animations.stop();
-      zombie.animations.play('dead');
-      //let animationRef = zombie.animations.play('dead').animationReference.isPlaying;
-      zombie.zombDeath.onComplete.add(function () {
-        return zombie.kill();
-      }, this);
     }
   }]);
 
@@ -39887,6 +39935,7 @@ var Player = function (_Prefab) {
     //This might not be relevant since the world size is bigger than map size
     //To allow for camera pan
     _this.body.collideWorldBounds = true;
+    _this.body.immovable = true;
     _this.game.physics.arcade.enable(_this);
 
     //Setup player's gun
