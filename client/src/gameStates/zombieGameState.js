@@ -37,6 +37,7 @@ export default class ZombieGameState extends TiledState {
     socket.on('destroyCurrentPlayerSprite', this.destroyCurrentPlayerSprite);
     socket.on('playerLeaveGame', this.handleRemotePlayerLeave);
     socket.on('remoteFire', this.handleRemotePlayerFire);
+    socket.on('remoteReceiveDamage', this.handleRemotePlayerReceiveDamage())
   }
 
   preload() {
