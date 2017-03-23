@@ -52,8 +52,13 @@ io.on('connection', (socket) => {
     //TODO: Customize Player Obj for server purposes
     lobbyObj.socketId = socket.id;
     console.log('sending lobbyObj to server reducer', lobbyObj);
-    store.dispatch(receiveJoinLobby(lobbyObj));
     let state = store.getState();
+    console.log('current lobbyer count is: ', state.lobby.lobbyers.length);
+    lobbyObj.playerNumber = state.lobby.lobbyers.length + 1;
+    lobbyObj.host = lobbyObj.playerNumber === 1 ? true : false;
+    console.log('my new lobbyObj:', lobbyObj);
+    store.dispatch(receiveJoinLobby(lobbyObj));
+    state = store.getState();
     console.log('this is the state im sending back: ');
     console.dir(state, { depth: 3});
     io.emit('lobbyUpdate', state.lobby.lobbyers);
