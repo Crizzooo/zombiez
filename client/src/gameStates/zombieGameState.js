@@ -153,7 +153,6 @@ export default class ZombieGameState extends TiledState {
 
     this.game.physics.arcade.collide(this.remoteBulletGroup, this.playerSpriteGroup, this.bulletHitPlayer, null, this);
 
-
 	  // console.log("this is enemy", this.currentEnemy.exists);
     //Pathfinding
 	  //TODO: bug?

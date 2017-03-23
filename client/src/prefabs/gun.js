@@ -47,8 +47,17 @@ export default class Gun extends GunPrefab {
     } else {
       bullet.reset(x, y);
     }
-
     bullet.rotation = this.game.physics.arcade.moveToXY(bullet, player.pointerX, player.pointerY, 600);
   }
 
+  hitZombie(zombie, bullet){
+    // let zombDeath = zombie.animations.add('dead', [1, 2, 3, 4, 5, 6, 7, 8, 0], 9, false);
+    console.log("ZOMBZ", zombie);
+	  zombie.hit = true;
+	  bullet.kill();
+		zombie.animations.stop();
+	  zombie.animations.play('dead')
+		//let animationRef = zombie.animations.play('dead').animationReference.isPlaying;
+    zombie.zombDeath.onComplete.add(() => zombie.kill(), this);
+  }
 }
