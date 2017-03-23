@@ -143,6 +143,11 @@ io.on('connection', (socket) => {
     console.log("INSIDE OF SOCKETS", fireObj);
     socket.broadcast.emit('remoteFire', fireObj);
   })
+
+  socket.on('playerReceiveDamage', (damageObj) => {
+    socket.broadcast.emit('remoteReceiveDamage', damageObj);
+  })
+
 })
 
 

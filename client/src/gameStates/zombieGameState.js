@@ -37,7 +37,7 @@ export default class ZombieGameState extends TiledState {
     socket.on('destroyCurrentPlayerSprite', this.destroyCurrentPlayerSprite);
     socket.on('playerLeaveGame', this.handleRemotePlayerLeave);
     socket.on('remoteFire', this.handleRemotePlayerFire);
-    socket.on('remoteReceiveDamage', this.handleRemotePlayerReceiveDamage())
+    socket.on('remoteReceiveDamage', this.handleRemotePlayerReceiveDamage)
   }
 
   preload() {
@@ -581,6 +581,7 @@ export default class ZombieGameState extends TiledState {
   }
 
   handleRemotePlayerReceiveDamage(damageObj){
+    console.log("DAMAGE OBJ", damageObj);
     let playerWhoReceivedDamage = remotePlayerSprites[damageObj.socketId];
     remotePlayerSprites[damageObj.socketId].receiveDamage(damageObj.newDamage);
   }
