@@ -294,6 +294,7 @@ export default class ZombieGameState extends TiledState {
       player.body.velocity.y = 0;
 
       if (this.spacebar.isDown) {
+        //TODO: emit the shot to all clients
         this.currentPlayerSprite.gun.shoot(this.currentPlayerSprite);
       }
 

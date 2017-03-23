@@ -39,6 +39,8 @@ export default class Gun extends GunPrefab {
     } else {
       bullet.reset(x, y);
     }
+    //TODO: we will not be able to use moveToPointer for remote Players
+    //TODO: either we change this or we implement a separate function for firing for remote players
     bullet.rotation = this.game.physics.arcade.moveToPointer(bullet, 600);
   }
 
