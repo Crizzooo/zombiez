@@ -34,9 +34,12 @@ export default class ZombieGameState extends TiledState {
     //Attach and bind functions
     this.destroyCurrentPlayerSprite = this.destroyCurrentPlayerSprite.bind(this);
     this.handleRemotePlayerLeave = this.handleRemotePlayerLeave.bind(this);
+
+    //Attach socket functions that need Game State variable access
     socket.on('destroyCurrentPlayerSprite', this.destroyCurrentPlayerSprite);
     socket.on('playerLeaveGame', this.handleRemotePlayerLeave);
     socket.on('remoteFire', this.handleRemotePlayerFire);
+    socket.on('damagePlayer', this.handlePlayerDamage);
   }
 
   preload() {
@@ -206,7 +209,8 @@ export default class ZombieGameState extends TiledState {
           properties: {
             group: 'player',
             initial: 18,
-            texture: 'playerSpriteSheet'
+            texture: 'playerSpriteSheet',
+            socketId: socket.id
           },
         }, {x: 225, y: 225}); //change to new location from server
 
@@ -525,7 +529,8 @@ export default class ZombieGameState extends TiledState {
           properties: {
             group: 'player',
             initial: 18,
-            texture: 'playerSpriteSheet'
+            texture: 'playerSpriteSheet',
+            socketId: playerState.socketId
           },
         }, {x: playerState.x, y: playerState.y});
       self.game.add.existing(playerPrefab);
@@ -572,6 +577,10 @@ export default class ZombieGameState extends TiledState {
   }
 
   handleRemotePlayerFire(fireObj) {
+    if (fireObj.socketId === socket.id){
+      console.log('i got into handleRemotePlayerFire with my own socket id?');
+      return;
+    }
     let playerWhoFired = remotePlayerSprites[fireObj.socketId];
     remotePlayerSprites[fireObj.socketId].pointerX = fireObj.pointerX;
     remotePlayerSprites[fireObj.socketId].pointerY = fireObj.pointerY;
@@ -622,9 +631,26 @@ export default class ZombieGameState extends TiledState {
       bullet.kill();
       if (bullet.parent.name === 'currentPlayerBulletGroup'){
         //TODO: emit to server
+        console.log('my player:', self.currentPlayerSprite);
+        socket.emit('shotPlayer', player.socketId, self.currentPlayerSprite.gun.damage);
         console.log('I HIT A MOTHERFUCKER');
       } else if (bullet.parent.name === 'remoteBulletGroup') {
         console.log('eh someone else hit someone');
       }
+  }
+
+  handlePlayerDamage(playerSocketId, dmgToTake){
+    console.log('handle player damage');
+    console.log('RPS in HPD: ', remotePlayerSprites);
+    console.log('looking for: ', playerSocketId);
+    let playerToDamage = remotePlayerSprites[playerSocketId];
+    if (!playerToDamage){
+      if (playerSocketId === socket.id){
+        console.log('Ouch, Im damaging myself for: ', dmgToTake);
+        playerToDamage = self.currentPlayerSprite;
+      }
+    }
+    console.log(`this player will be hit for ${dmgToTake}`, playerToDamage);
+    playerToDamage.receiveDamage(dmgToTake);
   }
 }
