@@ -441,7 +441,6 @@ export default class ZombieGameState extends TiledState {
       remotePlayerSprites[playerState.socketId].x = playerState.x;
       remotePlayerSprites[playerState.socketId].y = playerState.y;
       remotePlayerSprites[playerState.socketId].direction = playerState.animationDirection;
-      remotePlayerSprites[playerState.socketId].stats.health = playerState.health;
       //TODO: Implement other properties
     }
   }

@@ -100,6 +100,7 @@ export default class Player extends Prefab {
 
 	  //Change Health hearts
 	  this.health.newHealth(this.stats.health);
+
   }
 
 

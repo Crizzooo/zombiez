@@ -41,7 +41,7 @@ export const removeCurrentPlayer = () => ({
 const initialState = {
   score: 0,
   playerStates: {},
-  currentPlayer:{}
+  currentPlayer: {}
 };
 
 /* Reducer */
