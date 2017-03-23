@@ -69,8 +69,9 @@ export default class ZombieGameState extends TiledState {
     console.log('Local state right before load level: ', store.getState())
     this.loadLevel();
 
-
+    console.log('bug here or after?');
     this.currentPlayerSprite.gun.initializeWeapon(this);
+    console.log('could we access gun on CPS?');
     console.log(this);
     this.pointer = crosshair;
     this.currentEnemy = enemyPrefab;
