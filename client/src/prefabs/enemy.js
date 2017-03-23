@@ -5,7 +5,7 @@ export default class Enemy extends Prefab {
     super (game, name, position, properties);
 
     this.animations.add('left', [9, 10, 11, 12, 9, 13, 14], 9, true);
-    this.animations.add('dead', [1, 2, 3, 4, 5, 6, 7, 8, 0], 9, false);
+    this.zombDeath = this.animations.add('dead', [1, 2, 3, 4, 5, 6, 7, 8, 0], 9, false);
 
     this.stats = {
       health: 10,
@@ -18,7 +18,11 @@ export default class Enemy extends Prefab {
   }
 
   attackPlayer (player) {
-    player.receiveDamage(this.stats.attack);
+    socket.emit('playerReceiveDamage', {
+      socketId: socket.id,
+      newDamage: this.stats.attack
+    });
+    player.receiveDamage(this.stats.attack, player);
   }
 
   receiveDamage (damage) {
@@ -34,6 +38,8 @@ export default class Enemy extends Prefab {
 
   followPath (path) {
     // console.log('inside path', path);
+    if (this.hit === false){
+
     let movingTween, pathLength
     movingTween = this.game.tweens.create(this);
     pathLength = path.length;
@@ -47,6 +53,7 @@ export default class Enemy extends Prefab {
         })
         movingTween.start();
       }
+    }
   }
 
   acquireTarget () {
