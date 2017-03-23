@@ -11,6 +11,7 @@ import { loadMessages, addMessage } from './reducers/chatApp-reducer.js';
 import { dispatchLobbyUpdate, dispatchSetCurrentLobbyer, resetLobby } from './reducers/lobby-reducer.js';
 import { dispatchGamePlaying } from './reducers/gameState-reducer';
 
+
 //We attach all functions to a socket in here
 const attachFunctions = (socket) => {
   socket.on('playerUpdate', dispatchPlayerUpdates);
@@ -22,6 +23,7 @@ const attachFunctions = (socket) => {
   socket.on('serverUpdate', dispatchServerState);
   socket.on('gamePlayingUpdate', dispatchGamePlayingUpdate);
   socket.on('resetGame', dispatchReducerReset);
+  // socket.on('remoteFire', ZGS.prototype.handleRemotePlayerFire);
 };
 
 function dispatchCurrentLobbyer(lobbyerObj) {
@@ -49,7 +51,7 @@ function startClientGame(playersFromServer) {
 
 const throttledLog = throttle(logReceivedState, 30000);
 function logReceivedState() {
-  console.log('state after server update: ', store.getState());
+  // console.log('state after server update: ', store.getState());
 }
 function dispatchServerState(serverState) {
   //break out data from server - send to appropriate stores

@@ -138,6 +138,11 @@ io.on('connection', (socket) => {
     console.log('this client told the server to update: ', socket.id);
     store.dispatch(updatePlayer(state.player));
   });
+
+  socket.on('userFire', (fireObj) => {
+    console.log("INSIDE OF SOCKETS", fireObj);
+    socket.broadcast.emit('remoteFire', fireObj);
+  })
 })
 
 

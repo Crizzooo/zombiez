@@ -1,5 +1,6 @@
 import GunPrefab from './GunPrefab';
 import Bullet from './bullet';
+
 export default class Gun extends GunPrefab {
   constructor(game, name, position, properties, bulletPrefab) {
     super(game, name, position, properties);
@@ -18,48 +19,36 @@ export default class Gun extends GunPrefab {
     this.gunBullets.physicsBodyType = Phaser.Physics.ARCADE;
     this.gunBullets.setAll('outOfBoundsKill', true);
     this.gunBullets.setAll('checkWorldBounds', true);
+    this.gunBullets.name = 'currentPlayerBulletGroup';
 
     this.gunBullets.bulletSpeed = 600;
-    this.whatever = game;
+
+    this.bulletGroup = this.gunBullets;
+
+    this.game = game;
   }
 
-  shoot(player) {
+  shoot(player, group) {
+    //NOTE: shoot gets called with currentPlayerSprite.gun.gunBullets OR game.remoteBulletGroup, if shoot is being called due to a server 'remoteFire' emit
+    let bulletGroup = group;
 
     // if (this.game.time.time < this.nextFire) { return; }
-    let bullet = this.gunBullets.getFirstExists(false);
-    let x = player.world.x;
-    let y = player.world.y;
+    // console.log('player firing: ', player);
+    let bullet = bulletGroup.getFirstExists(false);
+    let x = player.x;
+    let y = player.y;
     if(!bullet){
-      bullet = new Bullet(this.whatever, 'bullet', {x : this.x , y: this.y}, {
+      bullet = new Bullet(this.game, 'bullet', {x : this.x , y: this.y}, {
         group: 'player',
         initial: 1,
         texture: 'gunSpriteSheet'
       });
-      this.gunBullets.add(bullet);
+      bulletGroup.add(bullet);
     } else {
       bullet.reset(x, y);
     }
-    //TODO: we will not be able to use moveToPointer for remote Players
-    //TODO: either we change this or we implement a separate function for firing for remote players
-    bullet.rotation = this.game.physics.arcade.moveToPointer(bullet, 600);
+
+    bullet.rotation = this.game.physics.arcade.moveToXY(bullet, player.pointerX, player.pointerY, 600);
   }
 
-  hitWall(bullet, layer){
-    bullet.kill();
-  }
-
-  hitZombie(zombie, bullet){
-	  console.log("ZOMBZ", zombie);
-	  zombie.hit = true;
-		zombie.animations.stop();
-	  zombie.animations.play('dead')
-		//let animationRef = zombie.animations.play('dead').animationReference.isPlaying;
-
-	  zombie.animations.currentAnim.onComplete.add( () => {
-		  zombie.kill();
-	  })
-
-	  bullet.kill();
-	  //setTimeout(zombie.kill, 500);
-  }
 }
