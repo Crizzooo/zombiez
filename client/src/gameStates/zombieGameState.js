@@ -5,6 +5,7 @@ import {updateCurrentPlayer, playerLeaveGame} from '../reducers/players-reducer.
 import emitCurrentState from '../engine/emitCurrentState.js';
 import TiledState from './tiledState';
 import Pathfinding from '../plugins/Pathfinding'
+import VisibilityPolygon from '../plugins/VisibilityPolygon';
 
 //TODO: do we need this?
 let remotePlayerSprites = {};
@@ -33,12 +34,18 @@ export default class ZombieGameState extends TiledState {
     //Attach and bind functions
     this.destroyCurrentPlayerSprite = this.destroyCurrentPlayerSprite.bind(this);
     this.handleRemotePlayerLeave = this.handleRemotePlayerLeave.bind(this);
+    this.createLightPolygon = this.createLightPolygon.bind(this);
     socket.on('destroyCurrentPlayerSprite', this.destroyCurrentPlayerSprite);
     socket.on('playerLeaveGame', this.handleRemotePlayerLeave);
   }
 
   preload () {
     //load assets that are specific for this level
+    this.game.load.image('blackness', '../../assets/images/blackness.jpg');
+    this.game.load.image('transparent', '../../assets/images/transparent.png');
+    this.game.load.image('map', '../../assets/images/map.png');
+    //this.game.load.image('yellowish', '../../assets/images/yellowish.png')
+
   }
 
   create () {
@@ -50,8 +57,10 @@ export default class ZombieGameState extends TiledState {
     this.tileDimensions = new Phaser.Point(this.map.tileWidth, this.map.tileHeight);
     this.pathfinding = this.game.plugins.add(Pathfinding, worldGrid, [-1], this.tileDimensions);
 
+
+
     //Create Players and Temp Objectsw
-	  let crosshair = new Phaser.Sprite(this.game, 0, 0, 'crosshairSpriteSheet');
+	let crosshair = new Phaser.Sprite(this.game, 0, 0, 'crosshairSpriteSheet');
 
     let enemyPrefab = this.createPrefab('zombie',
 	    {
@@ -74,8 +83,19 @@ export default class ZombieGameState extends TiledState {
 
     //create game set up
     //This creates player prefab
-	  console.log('Local state right before load level: ', store.getState() )
+	console.log('Local state right before load level: ', store.getState() )
+
+
+    this.blackness = this.game.add.sprite(0,0,'blackness');
+    this.blackness.alpha = 0.7
+
+    this.mapBack = this.game.add.sprite(0,0,'map');
+
     this.loadLevel();
+
+
+      this.currentEnemy = enemyPrefab;
+      this.game.add.existing(this.currentEnemy);
 
     //set interval to emit currentPlayer to server
     //if we have a current player
@@ -86,13 +106,13 @@ export default class ZombieGameState extends TiledState {
     //Add test prefabs into the game
     this.gun = gunPrefab;
     this.pointer = crosshair;
-    this.currentEnemy = enemyPrefab;
+
 
     //this.currentEnemy.acquireTarget = throttle(this.currentEnemy.acquireTarget, 200);
     this.currentEnemy.moveTo = throttle(this.currentEnemy.moveTo, 1000);
 
     this.game.add.existing(this.currentPlayerSprite);
-    this.game.add.existing(this.currentEnemy);
+
     this.game.add.existing(this.pointer);
     this.game.add.existing(this.gun);
 
@@ -106,6 +126,28 @@ export default class ZombieGameState extends TiledState {
 
     ///////////TODO: WIP
     this.currentEnemy.animations.play('left');
+
+
+
+    //this.transparent = this.game.add.sprite(0,0,'transparent');
+    //this.transparent.scale.set(4);
+
+
+
+    this.lightBitmap = this.game.add.image(0,0,this.bmd);
+    this.lightBitmap.blendMode = Phaser.blendModes.MULTIPLY;
+
+    this.lightCanvas = this.game.add.graphics(0,0);
+    //this.lightCanvas.blendMode = Phaser.blendModes.MULTIPLY;
+    //this.lightCanvas.lineStyle(4, 0xffffff, 1);
+    this.polygons = [];
+    //this.polygons.push([[0,0],[37+1,0],[37+1,74+1],[0,74+1]]);
+    //this.polygons.push([38,75],[1000,75],[1000,1000],[38,1000])
+      //this.polygons.push([0,0],[1000,0],[1000,1000],[0,1000]);
+      //this.polygons.push([100,100],[120,100],[120,120],[100,120]);
+    this.polygons.push([[0,0],[600,0],[600,600],[0,600]]);
+    this.polygons.push([[200,200],[400,200],[400,400],[200,400]]);
+
   }
 
   update () {
@@ -131,6 +173,43 @@ export default class ZombieGameState extends TiledState {
 	  }
 
 	  this.updateRemotePlayers();
+
+
+	  let visibility = this.createLightPolygon(this.currentPlayerSprite.x, this.currentPlayerSprite.y);
+
+	  this.lightCanvas.clear();
+      this.lightCanvas.beginFill(0xffffff,0.7);
+      console.log('visibility',visibility)
+      this.lightCanvas.moveTo(visibility[0][0],visibility[0][1]);
+      for(let i=1;i<=visibility.length;i++){
+          this.lightCanvas.lineTo(visibility[i%visibility.length][0],visibility[i%visibility.length][1]);
+      }
+      this.lightCanvas.endFill();
+      this.mapBack.mask = this.lightCanvas;
+
+
+
+  }
+
+  createLightPolygon(x,y){
+    let segments = VisibilityPolygon.convertToSegments(this.polygons);
+    console.log('segments:',segments);
+    segments = VisibilityPolygon.breakIntersections(segments);
+
+    console.log('segmentsagain:',segments);
+    let position = [x, y];
+    console.log('the player is at', x, y)
+    console.log('the polygon they should be in is', this.polygons[0])
+    if (VisibilityPolygon.inPolygon(position, this.polygons[0])) {
+        console.log('should be in here')
+        return VisibilityPolygon.compute(position, segments);
+    }
+    else {
+        console.log('not within polygon');
+        return VisibilityPolygon.compute(position, segments);
+        //return null;
+    }
+
   }
 
   render() {

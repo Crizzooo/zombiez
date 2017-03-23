@@ -42,7 +42,7 @@ function startClientGame(playersFromServer) {
   let state = store.getState();
   console.log('client is starting game with this from server: ', state);
   console.log('these are the players being sent to store: ', playersFromServer);
-  ZG.game = new GenZed('100%', '100%', Phaser.AUTO, 'game');
+  ZG.game = new GenZed('100%', '100%', Phaser.WEBGL, 'game');
   store.dispatch(loadPlayers(playersFromServer));
   ZG.game.startGame('BootState', true, false, "../assets/levels/main.json");
 }
