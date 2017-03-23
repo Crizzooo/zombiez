@@ -19,6 +19,7 @@ export default class Gun extends GunPrefab {
     this.gunBullets.physicsBodyType = Phaser.Physics.ARCADE;
     this.gunBullets.setAll('outOfBoundsKill', true);
     this.gunBullets.setAll('checkWorldBounds', true);
+    this.gunBullets.name = 'currentPlayerBulletGroup';
 
     this.gunBullets.bulletSpeed = 600;
 
@@ -28,14 +29,11 @@ export default class Gun extends GunPrefab {
   }
 
   shoot(player, group) {
-    let bulletGroup;
-    if (!group) {
-      bulletGroup = player.gun.bulletGroup;
-    } else {
-      bulletGroup = group;
-    }
+    //NOTE: shoot gets called with currentPlayerSprite.gun.gunBullets OR game.remoteBulletGroup, if shoot is being called due to a server 'remoteFire' emit
+    let bulletGroup = group;
+
     // if (this.game.time.time < this.nextFire) { return; }
-    console.log('player firing: ', player);
+    // console.log('player firing: ', player);
     let bullet = bulletGroup.getFirstExists(false);
     let x = player.x;
     let y = player.y;
@@ -49,29 +47,8 @@ export default class Gun extends GunPrefab {
     } else {
       bullet.reset(x, y);
     }
-    //TODO: we will not be able to use moveToPointer for remote Players
-    //TODO: either we change this or we implement a separate function for firing for remote players
-    //TODO: bullet.rotation = this.game.physics.arcade.moveToXY(displayObj, x, y, speed, maxTime)
-    // speed = 600
+
     bullet.rotation = this.game.physics.arcade.moveToXY(bullet, player.pointerX, player.pointerY, 600);
   }
 
-  hitWall(bullet, layer){
-    bullet.kill();
-  }
-
-  hitZombie(zombie, bullet){
-	  console.log("ZOMBZ", zombie);
-	  zombie.hit = true;
-		zombie.animations.stop();
-	  zombie.animations.play('dead')
-		//let animationRef = zombie.animations.play('dead').animationReference.isPlaying;
-
-	  zombie.animations.currentAnim.onComplete.add( () => {
-		  zombie.kill();
-	  })
-
-	  bullet.kill();
-	  //setTimeout(zombie.kill, 500);
-  }
 }

@@ -29,6 +29,7 @@ export default class Player extends Prefab {
       //This might not be relevant since the world size is bigger than map size
       //To allow for camera pan
       this.body.collideWorldBounds = true;
+      this.body.immovable = true;
       this.game.physics.arcade.enable(this);
 
       //Setup player's gun
