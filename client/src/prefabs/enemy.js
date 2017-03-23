@@ -18,7 +18,11 @@ export default class Enemy extends Prefab {
   }
 
   attackPlayer (player) {
-    player.receiveDamage(this.stats.attack);
+    socket.emit('playerReceiveDamage', {
+      socketId: socket.id,
+      newDamage: this.stats.attack
+    });
+    player.receiveDamage(this.stats.attack, player);
   }
 
   receiveDamage (damage) {
