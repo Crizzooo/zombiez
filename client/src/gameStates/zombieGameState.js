@@ -85,7 +85,7 @@ export default class ZombieGameState extends TiledState {
 	  // this.currentEnemy.animations.play('left');
 
 		//Enemy Generator Initial
-	  enemyGeneratorInitial(this, 5);
+	  enemyGeneratorInitial(this, 10);
 		console.log('enemy group', this.groups.enemies);
 
     //set interval to emit currentPlayer to server
@@ -158,7 +158,9 @@ export default class ZombieGameState extends TiledState {
 	  this.game.physics.arcade.collide(this.groups.enemies, this.currentPlayerSprite.gun.gunBullets, this.bulletHitZombie, null, this);
 
     //Pathfinding
-	  this.groups.enemies.forEachAlive((enemy) => {
+	  this.groups.enemies.forEachExists((enemy) => {
+	  	//console.log('enemies alive', enemy);
+		  //console.log('this is the target', enemy.acquireTarget(this.groups.player));
 	  	enemy.moveTo(enemy.acquireTarget(this.groups.player));
 	  });
 

@@ -13,12 +13,12 @@ export function enemyGeneratorInitial (gameState, numEnemies, enemyType) {
 		{x: 400, y: 400},
 		{x: 600, y: 600},
 		{x: 250, y: 250},
-		{x: 250, y: 250},
-		{x: 500, y: 500},
-		{x: 600, y: 600},
-		{x: 700, y: 700},
-		{x: 800, y: 800},
-		{x: 900, y: 900}
+		{x: 250, y: 250}
+		// {x: 500, y: 500},
+		// {x: 600, y: 600},
+		// {x: 700, y: 700},
+		// {x: 800, y: 800},
+		// {x: 900, y: 900}
 	];
 
 	//TODO: right animation for walking

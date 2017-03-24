@@ -1,4 +1,5 @@
 import Prefab from './Prefab';
+import throttle from 'lodash.throttle';
 
 export default class Enemy extends Prefab {
   constructor (game, name, position, properties) {
@@ -15,6 +16,9 @@ export default class Enemy extends Prefab {
 
     this.currentTarget = null;
     this.hit = false;
+
+    this.moveTo = throttle(this.moveTo, 1000)
+	  this.acquireTarget = throttle(this.acquireTarget, 1000)
 
   }
 
@@ -37,7 +41,7 @@ export default class Enemy extends Prefab {
   }
 
   followPath (path) {
-    // console.log('inside path', path);
+    console.log('inside path', path);
     let movingTween, pathLength
     movingTween = this.game.tweens.create(this);
     pathLength = path.length;
@@ -47,10 +51,13 @@ export default class Enemy extends Prefab {
 	    if (pathLength <= 0) {
 	      this.attackPlayer(this.currentTarget)
 	      } else {
+					console.log(movingTween)
 	        path.forEach( (position) => {
-	          movingTween.to({x: position.x, y: position.y}, 250, Phaser.Easing.BOUNCE);
+	          movingTween.to({x: position.x, y: position.y}, 350, Phaser.Easing.LINEAR);
 	        });
+
 	        movingTween.start();
+		    console.log('starting tween', movingTween);
       }
     }
   }
