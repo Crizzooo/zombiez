@@ -24,7 +24,7 @@ export default class Player extends Prefab {
 
 
 
-	  this.loadHealthbar();
+
 	  this.loadAnimations();
 
     //This might not be relevant since the world size is bigger than map size
@@ -52,6 +52,10 @@ export default class Player extends Prefab {
 		  this.loadHearts();
 		  this.loadGunUi();
 		  this.loadControls();
+	  }
+
+	  if (socket.id !==  properties.socketId) {
+		  this.loadHealthbar();
 	  }
 
     //how frequently a player can roll

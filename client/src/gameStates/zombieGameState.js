@@ -157,7 +157,7 @@ export default class ZombieGameState extends TiledState {
 
     //collisions for remoteBulletGroups
     this.game.physics.arcade.collide(this.remoteBulletGroup, this.layers.wallCollision, this.bulletHitWall, null, this)
-    this.game.physics.arcade.collide(this.remoteBulletGroup, this.playerSpriteGroup, this.bulletHitPlayer, null, this);
+	  this.game.physics.arcade.collide(this.remoteBulletGroup, this.playerSpriteGroup, this.bulletHitPlayer, null, this);
 
     //Pathfinding
 	  //TODO: bug?
@@ -183,6 +183,7 @@ export default class ZombieGameState extends TiledState {
             //Handle Animations clientside for remote players
             handleRemoteAnimation(remotePlayerSprites[key]);
             tweenRemoteAssets(remotePlayerSprites[key], this);
+	          this.game.physics.arcade.collide(this.remoteBulletGroup, this.playerSpriteGroup, this.bulletHitPlayer, null, this);
           }
 		    }
 	    }

@@ -145,10 +145,10 @@ export function tweenCurrentPlayerAssets(player, context) {
 	}, 10, Phaser.Easing.Linear.None, true);
 
 	//Add tween for health
-	context.add.tween(player.healthbar).to({
-		x: player.x - 10,
-		y: player.y - 30
-	}, 10, Phaser.Easing.Linear.None, true);
+	// context.add.tween(player.healthbar).to({
+	// 	x: player.x - 10,
+	// 	y: player.y - 30
+	// }, 10, Phaser.Easing.Linear.None, true);
 
 	//Gun rotation tween
 	player.gun.rotation = context.game.physics.arcade.angleToPointer(player.gun);
