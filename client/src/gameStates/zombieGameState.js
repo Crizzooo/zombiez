@@ -85,7 +85,7 @@ export default class ZombieGameState extends TiledState {
 	  // this.currentEnemy.animations.play('left');
 
 		//Enemy Generator Initial
-	  enemyGeneratorInitial(this, 10);
+	  enemyGeneratorInitial(this,  100);
 		console.log('enemy group', this.groups.enemies);
 
     //set interval to emit currentPlayer to server
@@ -125,6 +125,8 @@ export default class ZombieGameState extends TiledState {
       }
     }
 
+    //this.lighting.mapSprite.addChild(this.groups.enemies);
+
 	  console.log('THIS IS WORLD', this.game.world.children)
 	  console.log('this is groups', this.groups)
 
@@ -159,8 +161,6 @@ export default class ZombieGameState extends TiledState {
 
     //Pathfinding
 	  this.groups.enemies.forEachExists((enemy) => {
-	  	//console.log('enemies alive', enemy);
-		  //console.log('this is the target', enemy.acquireTarget(this.groups.player));
 	  	enemy.moveTo(enemy.acquireTarget(this.groups.player));
 	  });
 
