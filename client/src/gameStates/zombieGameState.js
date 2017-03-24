@@ -68,6 +68,7 @@ export default class ZombieGameState extends TiledState {
 	  //This creates player prefab
 	  this.loadLevel();
 
+	  ///////////TODO: WIP
     let enemyPrefab = this.createPrefab('zombie',
       {
         type: 'enemies',
@@ -78,11 +79,8 @@ export default class ZombieGameState extends TiledState {
         }
       }, {x: 200, y: 200});
 
-
     this.currentEnemy = enemyPrefab;
-
     this.currentEnemy.moveTo = throttle(this.currentEnemy.moveTo, 1000);
-    ///////////TODO: WIP
     this.currentEnemy.animations.play('left');
 
     //Remote Player Movement
@@ -174,13 +172,16 @@ export default class ZombieGameState extends TiledState {
 
     //Server & Input
     //every 32ms send package to server with position
-    if (remotePlayerSprites.length > 0) {
-	    for (let key in remotePlayerSprites) {
-		    this.updateRemotePlayers();
+	  //If there are remote clients, update their stuff
+    if (!_.isEmpty(remotePlayerSprites)) {
+	    this.updateRemotePlayers();
 
-		    //Handle Animations clientside for remote players
-		    handleRemoteAnimation(remotePlayerSprites[key]);
-		    tweenRemoteAssets(remotePlayerSprites[key]);
+	    for (let key in remotePlayerSprites) {
+          if (key !== socket.id) {
+            //Handle Animations clientside for remote players
+            handleRemoteAnimation(remotePlayerSprites[key]);
+            tweenRemoteAssets(remotePlayerSprites[key], this);
+          }
 		    }
 	    }
 
@@ -304,6 +305,7 @@ export default class ZombieGameState extends TiledState {
       remotePlayerSprites[playerState.socketId].x = playerState.x;
       remotePlayerSprites[playerState.socketId].y = playerState.y;
       remotePlayerSprites[playerState.socketId].direction = playerState.animationDirection;
+	    //remotePlayerSprites[playerState.socketId].gun.rotation = playerState.gunRotation;
       //TODO: Implement other properties
     }
   }

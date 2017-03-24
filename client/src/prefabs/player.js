@@ -20,13 +20,13 @@ export default class Player extends Prefab {
 
     //TODO: make it only visible to the current player
     //Load Hearts, Healthbar, Animations
+	  console.log('do we have sockets here', socket.id);
+
+		if ()
     this.loadHearts();
     this.loadHealthbar();
     this.loadAnimations();
     this.loadControls();
-
-
-
 
     //This might not be relevant since the world size is bigger than map size
     //To allow for camera pan

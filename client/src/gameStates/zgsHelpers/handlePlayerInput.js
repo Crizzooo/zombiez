@@ -46,16 +46,20 @@ export function handleInput(player) {
 			player.body.velocity.x = player.stats.movement;
 			player.animations.play('up');
 		} else if(cursors.up.isDown && cursors.jump.isDown){
+			player.direction = 'roll-up';
 			player.animations.play('roll-up');
 			player.body.velocity.y = -player.stats.movement - 100;
 		} else if(cursors.down.isDown && cursors.jump.isDown){
+			player.direction = 'roll-up';
 			player.body.velocity.y = player.stats.movement + 100;
 			player.animations.play('roll-down');
 		} else if(cursors.right.isDown && cursors.jump.isDown){
+			player.direction = 'roll-right';
 			player.scale.setTo(1, 1);
 			player.animations.play('roll-right');
 			player.body.velocity.x = player.stats.movement + 100;
 		} else if(cursors.left.isDown && cursors.jump.isDown){
+			player.direction = 'roll-left';
 			player.scale.setTo(-1, 1);
 			player.animations.play('roll-right');
 			player.body.velocity.x = -player.stats.movement - 100;
