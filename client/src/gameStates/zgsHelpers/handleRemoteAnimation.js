@@ -7,25 +7,25 @@ import { handlePlayerRotation } from './handlePlayerInput'
 //TODO: refactor
 export default function handleRemoteAnimation(player) {
 	if (player) {
-		player.pointerX = player.game.input.activePointer.worldX;
-		player.pointerY = player.game.input.activePointer.worldY;
+		//player.pointerX = player.game.input.activePointer.worldX;
+		//player.pointerY = player.game.input.activePointer.worldY;
 
 		player.body.velocity.x = 0;
 		player.body.velocity.y = 0;
 
-		let cursors = player.game.cursors;
-
-		if (cursors.fire.isDown) {
-			//TODO: emit the shot to all clients
-			socket.emit('userFire', {
-				x: player.x,
-				y: player.y,
-				pointerX: player.pointerX,
-				pointerY: player.pointerY,
-				socketId: socket.id
-			});
-			player.gun.shoot(player, player.gun.gunBullets);
-		}
+		// let cursors = player.game.cursors;
+		//
+		// if (cursors.fire.isDown) {
+		// 	//TODO: emit the shot to all clients
+		// 	socket.emit('userFire', {
+		// 		x: player.x,
+		// 		y: player.y,
+		// 		pointerX: player.pointerX,
+		// 		pointerY: player.pointerY,
+		// 		socketId: socket.id
+		// 	});
+		// 	player.gun.shoot(player, player.gun.gunBullets);
+		// }
 
 		//TODO: use onDown instead? Need to set a previous animation
 		if (player.direction === 'down') {
@@ -51,10 +51,6 @@ export default function handleRemoteAnimation(player) {
 			player.animations.play('roll-right');
 			player.body.velocity.x = -player.stats.movement - 100;
 		} else if (player.direction === 'left') {
-			player.animations.play('right');
-			player.scale.setTo(-1, 1);
-			player.body.velocity.x = -player.stats.movement;
-		} else if (cursors.left.isDown && !player.rollright.isPlaying) {
 			player.animations.play('right');
 			player.scale.setTo(-1, 1);
 			player.body.velocity.x = -player.stats.movement;
@@ -88,7 +84,7 @@ export function tweenRemoteAssets(player, context) {
 		y: player.y
 	}, 10, Phaser.Easing.Linear.None, true);
 
-	console.log('player remote tween', player)
+	//console.log('player remote tween', player)
 	//TODO: send rotation angle of player to server, server sends it back and we use it to tween
 	player.gun.rotation = player.gunRotation;
 }

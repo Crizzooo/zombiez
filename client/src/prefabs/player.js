@@ -20,13 +20,12 @@ export default class Player extends Prefab {
 
     //TODO: make it only visible to the current player
     //Load Hearts, Healthbar, Animations
-	  console.log('do we have sockets here', socket.id);
+	  console.log('do we have sockets here', socket);
 
-		if ()
-    this.loadHearts();
-    this.loadHealthbar();
-    this.loadAnimations();
-    this.loadControls();
+
+
+	  this.loadHealthbar();
+	  this.loadAnimations();
 
     //This might not be relevant since the world size is bigger than map size
     //To allow for camera pan
@@ -49,7 +48,11 @@ export default class Player extends Prefab {
       }
     }, {x: 225, y: 225});
 
-	  this.loadGunUi();
+	  if (socket.id ===  properties.socketId) {
+		  this.loadHearts();
+		  this.loadGunUi();
+		  this.loadControls();
+	  }
 
     //how frequently a player can roll
     this.rateOfRoll = 10000;
@@ -57,13 +60,13 @@ export default class Player extends Prefab {
   }
 
   loadControls () {
-	  this.gameState.game.cursors = {};
-	  this.gameState.game.cursors.up = this.gameState.input.keyboard.addKey(Phaser.Keyboard.W);
-	  this.gameState.game.cursors.down = this.gameState.input.keyboard.addKey(Phaser.Keyboard.S);
-	  this.gameState.game.cursors.left = this.gameState.input.keyboard.addKey(Phaser.Keyboard.A);
-	  this.gameState.game.cursors.right = this.gameState.input.keyboard.addKey(Phaser.Keyboard.D);
-	  this.gameState.game.cursors.jump = this.gameState.input.keyboard.addKey(Phaser.Keyboard.SPACEBAR);
-	  this.gameState.game.cursors.fire = this.gameState.input.activePointer;
+	  this.cursors = {};
+	  this.cursors.up = this.gameState.input.keyboard.addKey(Phaser.Keyboard.W);
+	  this.cursors.down = this.gameState.input.keyboard.addKey(Phaser.Keyboard.S);
+	  this.cursors.left = this.gameState.input.keyboard.addKey(Phaser.Keyboard.A);
+	  this.cursors.right = this.gameState.input.keyboard.addKey(Phaser.Keyboard.D);
+	  this.cursors.jump = this.gameState.input.keyboard.addKey(Phaser.Keyboard.SPACEBAR);
+	  this.cursors.fire = this.gameState.input.activePointer;
   }
 
   loadAnimations() {

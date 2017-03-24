@@ -10,7 +10,7 @@ export function handleInput(player) {
 		player.body.velocity.x = 0;
 		player.body.velocity.y = 0;
 
-		let cursors = player.game.cursors;
+		let cursors = player.cursors;
 
 		if (cursors.fire.isDown) {
 			//TODO: emit the shot to all clients

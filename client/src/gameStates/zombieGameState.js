@@ -177,6 +177,8 @@ export default class ZombieGameState extends TiledState {
 	    this.updateRemotePlayers();
 
 	    for (let key in remotePlayerSprites) {
+		    // console.log('all remote socket keys', key);
+		    // console.log('all remote socket keys 2', socket.id);
           if (key !== socket.id) {
             //Handle Animations clientside for remote players
             handleRemoteAnimation(remotePlayerSprites[key]);
@@ -216,7 +218,8 @@ export default class ZombieGameState extends TiledState {
           properties: {
             group: 'player',
             initial: 18,
-            texture: 'playerSpriteSheet'
+            texture: 'playerSpriteSheet',
+            socketId: socket.id
           },
         }, {x: 225, y: 225}); //change to new location from server
 
@@ -232,7 +235,8 @@ export default class ZombieGameState extends TiledState {
         y: this.currentPlayerSprite.y,
         animationDirection: this.currentPlayerSprite.direction,
         name: currentPlayer.name,
-        health: this.currentPlayerSprite.stats.health
+        health: this.currentPlayerSprite.stats.health,
+        gunRotation: this.currentPlayerSprite.gun.rotation
         //TODO: health, fire, guns, bullets, frame? etc
       }
 
