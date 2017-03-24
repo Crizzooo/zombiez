@@ -98,6 +98,9 @@ function dispatchReducerReset(){
   //reset local reducers
   store.dispatch(resetPlayers());
   store.dispatch(resetLobby());
+
+  //Stop game, remove the canvas, and return the cursor
+  ZG.game.destroy();
   $('canvas').remove();
   document.body.style.cursor = 'default';
   //TODO: reset zombies and other game related reducers
