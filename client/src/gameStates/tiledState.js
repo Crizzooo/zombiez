@@ -23,35 +23,36 @@ export default class TiledState extends Phaser.State {
     }
 
     init(levelData) {
-        this.levelData = levelData;
+      this.levelData = levelData;
 
-        //Scaling the Game Window for a pixelated effect
-        this.game.scale.scaleMode = Phaser.ScaleManager.USER_SCALE;
-        this.game.scale.setGameSize($('#game').innerWidth(), $('#game').innerHeight());
-        // this.game.scale.setUserScale(4, 4);
-        // this.game.scale.setResizeCallback( (scale, parentBounds) => {
-        //   scale.setupScale(.5, .5);
-        // })
-        // this.game.scale.setMinMax($('#game').innerWidth(), $('#game').innerHeight(),
-        //                           $('#game').innerWidth(), $('#game').innerHeight());
+	    //Scaling the Game Window for a pixelated effect
+	    this.game.scale.scaleMode = Phaser.ScaleManager.USER_SCALE;
+	    this.game.scale.setGameSize($('#game').innerWidth()/2, $('#game').innerHeight()/2);
+	    this.game.scale.setUserScale(2, 2);
+	    //this.game.scale.setUserScale(6, 6);
+	    // this.game.scale.setResizeCallback( (scale, parentBounds) => {
+	    // })
+	    // this.game.scale.setMinMax($('#game').innerWidth(), $('#game').innerHeight(),
+	    //                           $('#game').innerWidth(), $('#game').innerHeight());
 
-        this.game.renderer.renderSession.roundPixels = true;
-        Phaser.Canvas.setImageRenderingCrisp(this.game.canvas);
+	    //this.game.renderer.renderSession.roundPixels = true;
+	    Phaser.Canvas.setImageRenderingCrisp(this.game.canvas);
+	    PIXI.scaleModes.DEFAULT = PIXI.scaleModes.NEAREST
 
-        this.scale.pageAlignHorizontally = true;
-        this.scale.pageAlignVertically = true;
+      this.scale.pageAlignHorizontally = true;
+      this.scale.pageAlignVertically = true;
 
-        // start physics system
-        this.game.physics.startSystem(Phaser.Physics.ARCADE);
+      // start physics system
+      this.game.physics.startSystem(Phaser.Physics.ARCADE);
 
-        //Create tilemap base on level data
-        this.map = this.game.add.tilemap(levelData.map.key);
-        let tilesetIndex = 0;
+      //Create tilemap base on level data
+      this.map = this.game.add.tilemap(levelData.map.key);
+      let tilesetIndex = 0;
 
-        this.map.tilesets.forEach(function (tileset) {
-            this.map.addTilesetImage(tileset.name, levelData.map.tilesets[tilesetIndex]);
-            tilesetIndex += 1;
-        }, this);
+      this.map.tilesets.forEach(function (tileset) {
+          this.map.addTilesetImage(tileset.name, levelData.map.tilesets[tilesetIndex]);
+          tilesetIndex += 1;
+      }, this);
 
     }
 
@@ -65,6 +66,7 @@ export default class TiledState extends Phaser.State {
     //Add group to game state
     this.levelData.groups.forEach((groupName) => {
         this.groups[groupName] = this.game.add.group();
+	      this.groups[groupName].pushToOverlay = true;
     });
 
     //Go through all map layers
@@ -81,8 +83,6 @@ export default class TiledState extends Phaser.State {
 	//Use this method to create prefabs
 	createPrefab(prefabName, prefabData, position) {
 		let prefab;
-
-		console.log("prefab created", prefabName)
 
 		//Pass prefab data into the constructor of that type defined in this constructor
 		if (this.prefabClasses.hasOwnProperty(prefabData.type)) {
@@ -101,7 +101,7 @@ export default class TiledState extends Phaser.State {
 		obstaclesLayer = this.map.layers[1];
 
 		//todo: need to add other obstacles to worldGrid
-		console.log('obstacles layer', obstaclesLayer)
+		//console.log('obstacles layer', obstaclesLayer)
 
 		worldGrid = [];
 		for (rowIndex = 0; rowIndex < this.map.height; rowIndex += 1) {

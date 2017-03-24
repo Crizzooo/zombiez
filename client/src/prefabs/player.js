@@ -41,8 +41,6 @@ export default class Player extends Prefab {
 			    texture: 'gunSpriteSheet'
 		    }
 	    }, {x: 225, y: 225});
-
-	    this.game.add.existing(this.gun);
   }
 
   loadAnimations () {
@@ -50,6 +48,10 @@ export default class Player extends Prefab {
 	  this.animations.add('left', [17, 10, 5, 19, 8, 9], 10, true);
 	  this.animations.add('up', [16, 0, 14, 6, 1], 10, true);
 	  this.animations.add('down', [23, 9, 21, 22, 7, 4], 10, true);
+  }
+
+  loadGunUi () {
+
   }
 
   loadHealthbar () {
@@ -65,6 +67,9 @@ export default class Player extends Prefab {
 		  this.position.x - 10,
 		  this.position.y - 10,
 		  this.stats.health, style);
+
+	  //Add to existing
+	  this.gameState.add.existing(this.healthbar);
   }
 
   loadHearts () {
@@ -84,8 +89,6 @@ export default class Player extends Prefab {
 			  })
 		  ))
 	  }
-
-	  this.game.add.existing(this.health);
 	}
 
   receiveDamage(damage) {
@@ -101,8 +104,5 @@ export default class Player extends Prefab {
 
 	  //Change Health hearts
 	  this.health.newHealth(this.stats.health);
-
   }
-
-
 }
