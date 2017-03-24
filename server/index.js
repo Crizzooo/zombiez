@@ -110,6 +110,7 @@ io.on('connection', (socket) => {
     socket.broadcast.emit('remoteFire', fireObj);
   })
 
+
   socket.on('shotPlayer', (hitPlayerSocketId, dmgToTake) => {
       //NOTE: We could validate the hit by checking location of players here
       //When validated, tell all players to damage the hit players

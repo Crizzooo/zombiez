@@ -2,20 +2,26 @@ import GunPrefab from './GunPrefab';
 import Bullet from './bullet';
 
 export default class Gun extends GunPrefab {
-  constructor(game, name, position, properties, bulletPrefab) {
+  constructor(game, name, position, properties) {
     super(game, name, position, properties);
     this.game.physics.arcade.enable(this);
     this.body.collideWorldBounds = true;
     this.anchor.setTo(0.5);
+    //how much time in miliseconds do you want the player to wait
+    this.rateOfFire = properties.rateOfFire;
+    this.ammo = properties.clip;
+    this.clip = properties.clip;
+    this.reloadSpeed = properties.reloadSpeed;
+    this.nextFire = 0;
+    this.isReloading = false;
     this.pivot.x = -10;
-    console.log("BUULLET", bulletPrefab);
   }
 
   initializeWeapon(game) {
     // this.group = new Phaser.Group(game.game, game.world, 'Single Bullet', false, true, Phaser.Physics.ARCADE);
     this.gunBullets = game.game.add.group();
     this.gunBullets.enableBody = true;
-    this.gunBullets.nextFire = 0;
+    // this.gunBullets.nextFire = 10000;
     this.gunBullets.physicsBodyType = Phaser.Physics.ARCADE;
     this.gunBullets.setAll('outOfBoundsKill', true);
     this.gunBullets.setAll('checkWorldBounds', true);
@@ -32,9 +38,17 @@ export default class Gun extends GunPrefab {
     //NOTE: shoot gets called with currentPlayerSprite.gun.gunBullets OR game.remoteBulletGroup, if shoot is being called due to a server 'remoteFire' emit
     let bulletGroup = group;
 
-    // if (this.game.time.time < this.nextFire) { return; }
-    // console.log('player firing: ', player);
+    if (this.ammo === 0 || this.game.time.time < this.nextFire) {
+      if(this.isReloading) {
+        return null;
+      } else if (this.ammo === 0 && !this.isReloading){
+      this.isReloading = true;
+      this.reloadGun();
+      }
+      return;
+    }
     let bullet = bulletGroup.getFirstExists(false);
+    this.nextFire = this.game.time.time + this.rateOfFire;
     let x = player.x;
     let y = player.y;
     if(!bullet){
@@ -49,6 +63,13 @@ export default class Gun extends GunPrefab {
     }
     bullet.rotation = this.game.physics.arcade.moveToXY(bullet, player.pointerX, player.pointerY, 600);
     bullet.shooterSocketId = player.socketId;
+    this.ammo--;
   }
 
+  reloadGun(){
+    setTimeout(() => {
+      this.ammo = 30;
+      this.isReloading = false;
+    }, this.reloadSpeed)
+  }
 }
