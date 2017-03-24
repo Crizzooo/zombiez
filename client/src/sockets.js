@@ -23,7 +23,6 @@ const attachFunctions = (socket) => {
   socket.on('serverUpdate', dispatchServerState);
   socket.on('gamePlayingUpdate', dispatchGamePlayingUpdate);
   socket.on('resetGame', dispatchReducerReset);
-  // socket.on('remoteFire', ZGS.prototype.handleRemotePlayerFire);
 };
 
 function dispatchCurrentLobbyer(lobbyerObj) {
@@ -61,7 +60,13 @@ function dispatchServerState(serverState) {
     let playerStateUpdate = serverState.players.playerStates;
     // console.log('update pre-remove CP: ', playerStateUpdate);
     if (playerStateUpdate[socket.id]){
-      delete playerStateUpdate[socket.id];
+      //If server has a different health for yourself, correct it
+      //You will then update the server with the correct health on next broadcast
+
+      if( currentPlayerSprite.stats && (playerStateUpdate[socket.id].health !== serverState.players.playerHealths[socket.id])){
+          currentPlayerSprite.stats.health = serverState.players.playerHealths[socket.id];
+      }
+      // delete playerStateUpdate[socket.id];
     }
     // console.log('and after deleting: ', playerStateUpdate);
     //TODO: if player state update has nothing, dont dispatch
@@ -91,6 +96,7 @@ function dispatchReducerReset(){
   //reset local reducers
   store.dispatch(resetPlayers());
   store.dispatch(resetLobby());
+  $('canvas').remove();
   //TODO: reset zombies and other game related reducers
 }
 

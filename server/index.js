@@ -35,9 +35,6 @@ const io = require('socket.io')(server);
 //SERVER IN MEMORY STORAGE FOR GAME STATE MANAGEMENT & CHAT
 let players = [];
 
-let clientStates = {};
-const throttledStateChange = throttle(emitStateChange, 32);
-
 //Initiate Socket with all functions for server
 io.on('connection', (socket) => {
   console.log('a user connected with socketID', socket.id);
@@ -51,16 +48,11 @@ io.on('connection', (socket) => {
   socket.on('lobbyerJoinLobby', (lobbyObj) => {
     //TODO: Customize Player Obj for server purposes
     lobbyObj.socketId = socket.id;
-    console.log('sending lobbyObj to server reducer', lobbyObj);
     let state = store.getState();
-    console.log('current lobbyer count is: ', state.lobby.lobbyers.length);
     lobbyObj.playerNumber = state.lobby.lobbyers.length + 1;
     lobbyObj.host = lobbyObj.playerNumber === 1 ? true : false;
-    console.log('my new lobbyObj:', lobbyObj);
     store.dispatch(receiveJoinLobby(lobbyObj));
     state = store.getState();
-    console.log('this is the state im sending back: ');
-    console.dir(state, { depth: 3});
     io.emit('lobbyUpdate', state.lobby.lobbyers);
   });
 
@@ -96,46 +88,16 @@ io.on('connection', (socket) => {
     startGame(io);
   });
 
-  const throttledStateChange = throttle(emitStateChange, 32);
-
-//No longer creating the player in the front end, so we no longer use this
-
-
-//revisit below socket methods
-  socket.on('getPlayers', () => {
-    //emiting player.state
-    console.log("server heard 'getPlayers' ");
-    socket.emit('playerUpdate', players);
-  })
-
-
-  socket.on('playerMoving', (playerObj) => {
-    console.log('looking for ', playerObj);
-    console.log('in ', players);
-    var indexToUpdate = findPlayer(playerObj.socketId);
-    console.log('findPlayer id:', indexToUpdate);
-
-    console.log('does server make it here')
-    var movingPlayer = players[indexToUpdate];
-    if (!movingPlayer) {
-      return;
-    }
-    console.log('WHAT ABOUT HERE');
-    movingPlayer.x = playerObj.x;
-    movingPlayer.y = playerObj.y;
-    movingPlayer.velocityY = playerObj.velocityY;
-    movingPlayer.velocityX = playerObj.velocityX;
-    movingPlayer.dir = playerObj.dir;
-    movingPlayer.socketId = playerObj.socketId;
-    movingPlayer.hasMoved = true;
-    console.log('sending updated player:', players[indexToUpdate]);
-    // emitStateChange();
-    throttledStateChange();
-  });
-
-  socket.on('playerScored', (playerId, score) => {
-    io.emit('updateLeaderboard', playerId, score);
-  })
+  //revisit below socket methods
+  // socket.on('getPlayers', () => {
+  //   //emiting player.state
+  //   console.log("server heard 'getPlayers' ");
+  //   socket.emit('playerUpdate', players);
+  // })
+  //
+  // socket.on('playerScored', (playerId, score) => {
+  //   io.emit('updateLeaderboard', playerId, score);
+  // })
 
   socket.on('clientUpdate', (state) => {
     //TODO: break state down and dispatch to appropriate reducers
@@ -167,29 +129,18 @@ function findPlayer(socketId){
   return R.findIndex(R.propEq('socketId', socketId))(players);
 }
 
-function emitStateChange(){
-  console.log('emitting players:', clientStates);
-  io.emit('serverUpdate', clientStates);
-}
-
 function handleLobbyerLeave(socket){
   let state = store.getState();
-  console.log('preleave state: ', state);
-  console.log('a user has left the lobby with socketId: ', socket.id)
   let userWhoLeft = state.lobby.lobbyers.filter(lobbyer => lobbyer.socketId === socket.id)[0];
   if (userWhoLeft){
-    console.log('USER WHO WAS SUPPOSED TO LEAVE', userWhoLeft)
     store.dispatch(receiveLobbyerLeave(userWhoLeft.socketId));
     state = store.getState();
-    console.log('after lobbyer leaves: ', state);
     io.emit('lobbyUpdate', state.lobby.lobbyers);
-    console.log('if game is playing, we need to take him off players reducer')
     store.dispatch(removePlayer(socket.id));
     if (state.game.gamePlaying){
       io.emit('playerLeaveGame', socket.id);
       state = store.getState();
       socket.emit('destroyCurrentPlayerSprite');
-      console.log('has the player come off?', state);
     }
   }
 }

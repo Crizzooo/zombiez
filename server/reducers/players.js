@@ -1,9 +1,11 @@
+ const PLAYER_HEALTH = require('../../client/src/engine/gameConstants.js').PLAYER_HEALTH;
 // Action Types
 const ADD_PLAYER = 'ADD_PLAYER';
 const REMOVE_PLAYER = 'REMOVE_PLAYER';
 const RECEIVE_CLIENT_DATA = 'RECEIVE_CLIENT_DATA';
 const RESET_PLAYERS = 'RESET_PLAYERS';
 const UPDATE_PLAYER = 'UPDATE_PLAYER';
+const DAMAGE_PLAYER = 'DAMAGE_PLAYER';
 
 //Action Creators
 const addPlayer = playerState => ({
@@ -31,7 +33,13 @@ const resetPlayers = () => ({
   type: RESET_PLAYERS
 });
 
-const initialState = { playerStates: {} };
+const damagePlayer = (dmgToTake, socketId) => ({
+  type: DAMAGE_PLAYER,
+  amount: dmgToTake,
+  socketId
+})
+
+const initialState = { playerStates: {}, playerHealths: {} };
 
 const playerReducers = (state = initialState, action) => {
   let newState = Object.assign({}, state);
@@ -41,7 +49,11 @@ const playerReducers = (state = initialState, action) => {
       console.log("Server is adding a player from: ", action.playerState);
       let newPlayerStates = Object.assign({}, state.playerStates);
       newPlayerStates[action.playerState.socketId] = action.playerState;
+      // let newPlayerHealths = Object.assign({}, state.playerHealths);
+      // newPlayerHealths[action.playerState.socketId] = PLAYER_HEALTH;
       newState.playerStates = newPlayerStates;
+      // newState.playerHealths = newPlayerHealths;
+      console.log('player reducer after add player: ', newState);
       break;
     }
 
@@ -52,6 +64,9 @@ const playerReducers = (state = initialState, action) => {
       if (!action.playerToUpdate.socketId){
         return state;
       }
+      // if (newPlayerStates[action.playerToUpdate.socketId].health !== state.playerHealths[action.playerToUpdate.socketId]){
+      //   newPlayerStates[action.playerToUpdate.socketId].health = state.playerHealths[action.playerToUpdate.socketId];
+      // }
       newState.playerStates = newPlayerStates;
       break;
     }
@@ -72,6 +87,12 @@ const playerReducers = (state = initialState, action) => {
       }
       newState.playerStates = newPlayerStates;
       break;
+    }
+
+    case DAMAGE_PLAYER: {
+      let newPlayerHealths = Object.assign({}, state.playerHealths);
+      newPlayerHealths[action.socketId].health -= action.amount;
+      newState.playerHealths = newPlayerHealths;
     }
 
     default:

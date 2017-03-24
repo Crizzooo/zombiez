@@ -48,6 +48,7 @@ export default class Gun extends GunPrefab {
       bullet.reset(x, y);
     }
     bullet.rotation = this.game.physics.arcade.moveToXY(bullet, player.pointerX, player.pointerY, 600);
+    bullet.shooterSocketId = player.socketId;
   }
 
 }

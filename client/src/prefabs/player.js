@@ -6,6 +6,8 @@ import Prefab from './Prefab';
 import HealthHeart from './healthbar';
 import Heart from './healthHearts';
 
+const PLAYER_HEALTH = require('../engine/gameConstants.js').PLAYER_HEALTH;
+
 export default class Player extends Prefab {
     constructor(game, name, position, properties) {
       super(game, name, position, properties);
@@ -14,7 +16,7 @@ export default class Player extends Prefab {
 
 	    this.stats = {
 	    	totalHealth: 100,
-		    health: 100,
+		    health: PLAYER_HEALTH,
 		    movement: 100
 	    }
 
