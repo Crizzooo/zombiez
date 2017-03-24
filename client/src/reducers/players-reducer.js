@@ -84,7 +84,7 @@ export default (state = initialState, action) => {
     case UPDATE_CURRENT_PLAYER:
       let updatedPlayerState = Object.assign({}, state.currentPlayer, action.currentPlayerState);
       newState.currentPlayer = updatedPlayerState;
-      console.log('updated Current Player to: ', newState.currentPlayer);
+      // console.log('updated Current Player to: ', newState.currentPlayer);
       break;
 
     case PLAYER_LEAVE_GAME:
@@ -111,7 +111,7 @@ export default (state = initialState, action) => {
           toX: action.fire.toX,
           toY: action.fire.toY
         }});
-        console.log('updated CP state to include fire: ', newPlayerState);
+        // console.log('updated CP state to include fire: ', newPlayerState);
         newState.currentPlayer = newPlayerState;
         break;
 

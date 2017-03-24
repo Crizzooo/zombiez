@@ -286,8 +286,8 @@ export default class ZombieGameState extends TiledState {
       pointerY: currentPlayerSprite.pointerY,
       health: currentPlayerSprite.stats.health
     }
-    console.log('just attached socket.id', socket.id);
-    console.log('my new CP obj: ', currentPlayer.socketId);
+    // console.log('just attached socket.id', socket.id);
+    // console.log('my new CP obj: ', currentPlayer.socketId);
     store.dispatch(updateCurrentPlayer(currentPlayer));
   }
 
@@ -428,12 +428,6 @@ export default class ZombieGameState extends TiledState {
     console.log('this motherfucker just fired: ', playerWhoFired);
     remotePlayerSprites[fireObj.socketId].gun.shoot(remotePlayerSprites[fireObj.socketId], self.remoteBulletGroup);
   }
-
-  // handleRemotePlayerReceiveDamage(damageObj){
-  //   console.log("DAMAGE OBJ", damageObj);
-  //   let playerWhoReceivedDamage = remotePlayerSprites[damageObj.socketId];
-  //   remotePlayerSprites[damageObj.socketId].receiveDamage(damageObj.newDamage);
-  // }
 
   logRemotePlayers(){
     console.log('RPS: ', remotePlayerSprites);
