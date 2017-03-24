@@ -28,6 +28,9 @@ export default class Preload extends Phaser.State {
           case 'tilemap':
             this.load.tilemap(assetKey, asset.source, null, Phaser.Tilemap.TILED_JSON);
             break;
+          case 'sound':
+            this.load.audio(assetKey, asset.source);
+            break;
           default:
             break;
         }

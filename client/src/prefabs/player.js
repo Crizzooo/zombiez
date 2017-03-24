@@ -162,6 +162,7 @@ export default class Player extends Prefab {
 	}
 
   receiveDamage(damage) {
+  	console.log(this);
     //Change healthbar
     this.stats.health -= damage;
     this.healthbar.text = this.stats.health;

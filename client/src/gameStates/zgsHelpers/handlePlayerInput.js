@@ -1,9 +1,20 @@
 /**
  * Created by CharlieShi on 3/24/17.
  */
+import _ from 'lodash';
+
+function playSound (player, whatSound)  {
+  player.game.state.callbackContext[whatSound].play();
+}
+
+let throttledSound = _.throttle(playSound,50);
 
 export function handleInput(player) {
+
+
 	if (player) {
+
+
 		player.pointerX = player.game.input.activePointer.worldX;
 		player.pointerY = player.game.input.activePointer.worldY;
 
@@ -13,7 +24,8 @@ export function handleInput(player) {
 		let cursors = player.cursors;
 
 		if (cursors.fire.isDown) {
-			//TODO: emit the shot to all clients
+
+			//TODO: emit the shot t all clients
 			socket.emit('userFire', {
 				x: player.x,
 				y: player.y,
@@ -22,6 +34,11 @@ export function handleInput(player) {
 				socketId: socket.id
 			});
 			player.gun.shoot(player, player.gun.gunBullets);
+
+			throttledSound(player,'shootSound');
+			//console.log(player.game.state.callbackContext.shootSound)
+      //player.game.state.callbackContext['shootSound'].play('',0,1,false,false);
+      //player.game.state.callbackContext['shootSound'].play();
 		}
 
 		//TODO: use onDown instead? Need to set a previous animation

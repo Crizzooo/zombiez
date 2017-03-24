@@ -42,10 +42,17 @@ export default class ZombieGameState extends TiledState {
     socket.on('destroyCurrentPlayerSprite', this.destroyCurrentPlayerSprite);
     socket.on('playerLeaveGame', this.handleRemotePlayerLeave);
     socket.on('remoteFire', this.handleRemotePlayerFire);
-    socket.on('remoteReceiveDamage', this.handleRemotePlayerReceiveDamage)
+    socket.on('remoteReceiveDamage', this.handleRemotePlayerReceiveDamage);
+
+    this.game.time.advancedTiming = true;
+    this.game.desiredFps = 30;
+
+
   }
 
   preload() {
+    //this.load.audio('themeLoop','../../assets/sounds/themeLoop.wav');
+    //this.load.audio('shoot','../../assets/sounds/shoot.ogg');
     //load assets that are specific for this level
   }
 
@@ -53,6 +60,11 @@ export default class ZombieGameState extends TiledState {
     //Create game set up through tiled state by calling super
     //Loads level tilemap
     super.create.call(this);
+
+    //adding sound here?
+    this.soundLoop = this.game.add.audio('themeLoop',1,true);
+    this.shootSound = this.game.add.audio('shoot');
+
 
     //Create worldGrid and tile dimensions for pathfinding
     //Load light plugin
@@ -131,6 +143,8 @@ export default class ZombieGameState extends TiledState {
       }
     }
 
+
+    this.soundLoop.play();
 	  console.log('THIS IS WORLD', this.game.world.children)
     console.log('THIS IS ', this)
   }
@@ -191,9 +205,9 @@ export default class ZombieGameState extends TiledState {
     this.toggledRPS();
   }
 
-  // render() {
-  //   this.game.debug.spriteInfo(this.gun, 32, 32);
-  // }
+  render() {
+    this.game.debug.text(this.game.time.fps || '--', 2, 14, "#00ff00");
+  }
 
   //////////////////////////
   /// Non Phaser Methods ///
