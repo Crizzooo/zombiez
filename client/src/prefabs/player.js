@@ -38,7 +38,10 @@ export default class Player extends Prefab {
 		    properties: {
 			    group: 'guns',
 			    initial: 0,
-			    texture: 'gunSpriteSheet'
+			    texture: 'gunSpriteSheet',
+					rateOfFire: 100,
+					reloadSpeed: 2000,
+					clip: 30
 		    }
 	    }, {x: 225, y: 225});
 

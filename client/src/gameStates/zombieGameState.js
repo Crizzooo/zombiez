@@ -623,10 +623,11 @@ export default class ZombieGameState extends TiledState {
   }
 
   bulletHitPlayer(bullet, player){
-      console.log('bullet hit player');
-      console.log('bullet: ', bullet );
-      console.log('player: ', player);
       bullet.kill();
+    // socket.emit('playerReceiveDamage', {
+    //   socketId: socket.id,
+    //   newDamage: player.gun.damage
+    // });
       if (bullet.parent.name === 'currentPlayerBulletGroup'){
         //TODO: emit to server
         console.log('I HIT A MOTHERFUCKER');
