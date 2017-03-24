@@ -1,11 +1,19 @@
 const R = require('ramda');
+import _ from 'lodash';
 const throttle = require('lodash.throttle');
+
 import store from '../store.js';
 import {updateCurrentPlayer, playerLeaveGame} from '../reducers/players-reducer.js';
 import emitCurrentState from '../engine/emitCurrentState.js';
+
+//Import game plugins and tiledstate
 import TiledState from './tiledState';
 import Pathfinding from '../plugins/Pathfinding';
-import _ from 'lodash';
+import Lighting from '../plugins/Lighting';
+
+//Import Helpers
+import { handleInput, tweenCurrentPlayerAssets } from './zgsHelpers/handlePlayerInput';
+import handleRemoteAnimation, { tweenRemoteAssets } from './zgsHelpers/handleRemoteAnimation'
 
  const PLAYER_HEALTH = require('../engine/gameConstants.js').PLAYER_HEALTH;
 
@@ -24,19 +32,15 @@ export default class ZombieGameState extends TiledState {
     //Call super init to load in data;
     super.init.call(this, levelData);
 
-    //Control Mechanics
-    this.game.cursors = {};
-    this.game.cursors.up = this.input.keyboard.addKey(Phaser.Keyboard.W);
-    this.game.cursors.down = this.input.keyboard.addKey(Phaser.Keyboard.S);
-    this.game.cursors.left = this.input.keyboard.addKey(Phaser.Keyboard.A);
-    this.game.cursors.right = this.input.keyboard.addKey(Phaser.Keyboard.D);
-    this.spacebar = this.input.keyboard.addKey(Phaser.Keyboard.SPACEBAR);
-
     //Attach and bind functions
     this.destroyCurrentPlayerSprite = this.destroyCurrentPlayerSprite.bind(this);
     this.handleRemotePlayerLeave = this.handleRemotePlayerLeave.bind(this);
 
-    //Attach socket functions that need Game State variable access
+
+    //Throttled Console logs
+	  this.toggledRPS = throttle(this.logRemotePlayers, 20000);
+
+    //Sockets
     socket.on('destroyCurrentPlayerSprite', this.destroyCurrentPlayerSprite);
     socket.on('playerLeaveGame', this.handleRemotePlayerLeave);
     socket.on('remoteFire', this.handleRemotePlayerFire);
@@ -50,30 +54,37 @@ export default class ZombieGameState extends TiledState {
 
   create() {
     //Create game set up through tiled state by calling super
+    //Loads level tilemap
     super.create.call(this);
 
     //Create worldGrid and tile dimensions for pathfinding
+    //Load light plugin
     let worldGrid = this.createWorldGrid();
     this.tileDimensions = new Phaser.Point(this.map.tileWidth, this.map.tileHeight);
     this.pathfinding = this.game.plugins.add(Pathfinding, worldGrid, [-1], this.tileDimensions);
+    this.lightingPlugin = new Lighting(this);
 
-    //Create Players and Temp Objectsw
+    //Create Players and Temp Objects
     let crosshair = new Phaser.Sprite(this.game, 0, 0, 'crosshairSpriteSheet');
 
-    // let enemyPrefab = this.createPrefab('zombie',
-    //   {
-    //     type: 'enemies',
-    //     properties: {
-    //       group: 'enemies',
-    //       initial: 9,
-    //       texture: 'zombieSpriteSheet'
-    //     }
-    //   }, {x: 200, y: 200});
+	  //create game set up
+	  //This creates player prefab
+	  this.loadLevel();
 
-    //create game set up
-    //This creates player prefab
-    console.log('Local state right before load level: ', store.getState())
-    this.loadLevel();
+	  ///////////TODO: WIP
+    let enemyPrefab = this.createPrefab('zombie',
+      {
+        type: 'enemies',
+        properties: {
+	        group: 'enemies',
+	        initial: 9,
+	        texture: 'zombieSpriteSheet'
+        }
+      }, {x: 200, y: 200});
+
+    this.currentEnemy = enemyPrefab;
+    this.currentEnemy.moveTo = throttle(this.currentEnemy.moveTo, 1000);
+    this.currentEnemy.animations.play('left');
 
     //Remote Player Movement
     //This gets us the first player from the remote players
@@ -81,7 +92,7 @@ export default class ZombieGameState extends TiledState {
 
     //Set camera to follow, then make world big to allow camera to pan off
     //this.camera.view = new Phaser.Rectangle(0, 0, this.currentPlayer.position.x, this.currentPlayer.position.y);
-    this.game.world.setBounds(-25, -25, 2500, 2500);
+    this.game.world.setBounds(-250, -250, 3200 + 250, 3200 + 250);
 
 
     //set interval to emit currentPlayer to server
@@ -93,8 +104,8 @@ export default class ZombieGameState extends TiledState {
       //add to world
       this.game.add.existing(this.pointer);
 
-
       const emitInterval = emitCurrentState(socket);
+
       //on click lock the users mouse for input
       this.game.input.onDown.add(this.lockPointer, this);
 
@@ -106,7 +117,25 @@ export default class ZombieGameState extends TiledState {
       this.camera.follow(remotePlayerSprites[remotePlayerOneId]);
     }
 
-    this.toggledRPS = throttle(this.logRemotePlayers, 20000);
+
+
+    //Push all sprites in the world onto the child of the mapSpriteOverlay
+    //All prefabs created with a pushToOverlay = true
+    this.game.world.children.forEach((layer) => {
+      if (layer.pushToOverlay) {
+	      this.lighting.mapSprite.addChild(layer)
+      }
+    });
+    //Also push all remote players and their assets onto the lighting layer
+	  for (let key in remotePlayerSprites) {
+	    if (remotePlayerSprites.hasOwnProperty(key)) {
+	      this.lighting.mapSprite.addChild(remotePlayerSprites[key])
+		    this.lighting.mapSprite.addChild(remotePlayerSprites[key].healthbar)
+      }
+    }
+
+	  console.log('THIS IS WORLD', this.game.world.children)
+    console.log('THIS IS ', this)
   }
 
   update() {
@@ -125,32 +154,48 @@ export default class ZombieGameState extends TiledState {
       //NOTE: check if own bullets hit playerSprites - emit a hit
       this.game.physics.arcade.collide(currentPlayerSprite.gun.gunBullets, this.playerSpriteGroup, this.bulletHitPlayer, null, this);
 
+
+    if (currentPlayerSprite){
+      this.updateCollisions();
       //TODO: check if remote players hit any zombies - kill bullet, emit zombieHit
+
+      //Set up local client lighting
+      this.lightingPlugin.update();
 
       //Server & Input
       //every 32ms send package to server with position
-      this.handleInput(currentPlayerSprite);
+      handleInput(currentPlayerSprite);
       this.dispatchCurrentPlayer();
 
       //Tween all player assets
       //Remote and current
-      this.tweenCurrentPlayerAssets();
+      tweenCurrentPlayerAssets(currentPlayerSprite, this);
     }
 
     //collisions for remoteBulletGroups
     this.game.physics.arcade.collide(this.remoteBulletGroup, this.layers.wallCollision, this.bulletHitWall, null, this)
+	  this.game.physics.arcade.collide(this.remoteBulletGroup, this.playerSpriteGroup, this.bulletHitPlayer, null, this);
 
-    this.game.physics.arcade.collide(this.remoteBulletGroup, this.playerSpriteGroup, this.bulletHitPlayer, null, this);
+    }
 
 
     //Server & Input
     //every 32ms send package to server with position
-    if (remotePlayerSprites[Object.keys(remotePlayerSprites)[0]]) {
-      this.handleRemoteAnimation(remotePlayerSprites[Object.keys(remotePlayerSprites)[0]])
-	    this.tweenRemoteAssets();
-    }
+	  //If there are remote clients, update their stuff
+    if (!_.isEmpty(remotePlayerSprites)) {
+	    this.updateRemotePlayers();
 
-    this.updateRemotePlayers();
+	    for (let key in remotePlayerSprites) {
+		    // console.log('all remote socket keys', key);
+		    // console.log('all remote socket keys 2', socket.id);
+          if (key !== socket.id) {
+            //Handle Animations clientside for remote players
+            handleRemoteAnimation(remotePlayerSprites[key]);
+            tweenRemoteAssets(remotePlayerSprites[key], this);
+	          this.game.physics.arcade.collide(this.remoteBulletGroup, this.playerSpriteGroup, this.bulletHitPlayer, null, this);
+          }
+		    }
+	    }
 
     this.toggledRPS();
   }
@@ -167,6 +212,7 @@ export default class ZombieGameState extends TiledState {
 
     //create a current player
     let currentPlayer;
+
     if (state.players.currentPlayer.name) {
       console.log('we have a current player so we shall call him: ', state.players.currentPlayer.name);
       currentPlayer = state.players.currentPlayer;
@@ -184,6 +230,7 @@ export default class ZombieGameState extends TiledState {
         }, {x: 225, y: 225}); //change to new location from server
 
       currentPlayerSprite = playerPrefab;
+      this.currentPlayerSprite = currentPlayerSprite;
 
       //store on game Object
       console.log('created current Player: ', currentPlayerSprite);
@@ -195,18 +242,18 @@ export default class ZombieGameState extends TiledState {
         y: currentPlayerSprite.y,
         animationDirection: currentPlayerSprite.direction,
         name: currentPlayer.name,
-        health: PLAYER_HEALTH
+        health: PLAYER_HEALTH,
+        gunRotation: currentPlayerSprite.gun.rotation
         //TODO: health, fire, guns, bullets, frame? etc
       }
 
       //add it to the world
       this.game.add.existing(currentPlayerSprite);
-
       store.dispatch(updateCurrentPlayer(currPlayerState));
       console.log('end of load level local store looks like: ', store.getState());
     }
+
     console.log('Creating Sprites for each player in this: ', state.players.playerStates);
-    //)
     R.forEachObjIndexed(this.createRemotePlayerSprite, state.players.playerStates);
 
     //TODO - create player sprite group using all in RPS, and CP sprite
@@ -227,193 +274,17 @@ export default class ZombieGameState extends TiledState {
     this.remoteBulletGroup.name = 'remoteBulletGroup';
   }
 
-  handleRemoteAnimation(player) {
-    if (player) {
-      player.body.velocity.x = 0;
-      player.body.velocity.y = 0;
+  updateCollisions () {
+	  this.game.physics.arcade.collide(currentPlayerSprite, this.layers.backgroundDecCollision);
+	  this.game.physics.arcade.collide(currentPlayerSprite, this.layers.backgroundDecCollision2);
+	  this.game.physics.arcade.collide(currentPlayerSprite, this.layers.waterCollision);
+	  this.game.physics.arcade.collide(currentPlayerSprite, this.layers.wallCollision);
 
-      if (player.direction === 'idle') {
-        player.animations.stop();
-        //this.handlePlayerRotation(player);
-      }
-
-      if (player.direction === 'left') {
-        player.animations.play('right');
-        player.scale.setTo(-1, 1);
-        player.body.velocity.x = -player.stats.movement;
-        //this.handlePlayerRotation(player);
-
-        //Tween for bounce
-        switch (player.body.sprite._frame.name) {
-          case 'lookingRightRightLegUp.png':
-            player.body.velocity.y -= 80;
-            break;
-          case 'RightComingDown1.png':
-            player.body.velocity.y += 80;
-            break;
-          case 'movingRight4.png':
-            player.body.velocity.y += 50;
-            break;
-          case 'playerSprites_266 copy.png':
-            player.body.velocity.y -= 50
-        }
-      }
-
-      if (player.direction === 'right') {
-        player.direction = 'right';
-        player.scale.setTo(1, 1);
-        player.animations.play('right');
-        player.body.velocity.x = player.stats.movement;
-        //this.handlePlayerRotation(player);
-
-        //Tween for bounce
-        switch (player.body.sprite._frame.name) {
-          case 'lookingRightRightLegUp.png':
-            player.body.velocity.y -= 80;
-            break;
-          case 'RightComingDown1.png':
-            player.body.velocity.y += 80;
-            break;
-          case 'movingRight4.png':
-            player.body.velocity.y += 50;
-            break;
-          case 'playerSprites_266 copy.png':
-            player.body.velocity.y -= 50
-        }
-      }
-
-      if (player.direction === 'up') {
-        player.direction = 'up';
-        player.body.velocity.y = -player.stats.movement;
-        player.animations.play('up');
-        //this.handlePlayerRotation(player);
-      }
-
-      if (player.direction === 'down') {
-        player.direction = 'down';
-        player.body.velocity.y = player.stats.movement;
-        player.animations.play('down');
-        //this.handlePlayerRotation(player);
-      }
-
-    }
+	  //NOTE: check if remote bullets hit wallCollision - kill bullet
+	  this.game.physics.arcade.collide(currentPlayerSprite.gun.gunBullets, this.layers.wallCollision, this.bulletHitWall, null, this);
   }
 
-  handleInput(player) {
-    if (player) {
-      currentPlayerSprite.pointerX = this.game.input.activePointer.worldX;
-      currentPlayerSprite.pointerY = this.game.input.activePointer.worldY;
 
-      player.body.velocity.x = 0;
-      player.body.velocity.y = 0;
-
-      if (this.spacebar.isDown) {
-        //TODO: emit the shot to all clients
-        socket.emit('userFire', {
-          x: currentPlayerSprite.x,
-          y: currentPlayerSprite.y,
-          pointerX: currentPlayerSprite.pointerX,
-          pointerY: currentPlayerSprite.pointerY,
-          socketId: socket.id
-        });
-        currentPlayerSprite.gun.shoot(currentPlayerSprite, currentPlayerSprite.gun.gunBullets);
-      }
-
-      if (this.game.cursors.left.isDown) {
-        player.direction = 'left';
-        player.animations.play('right');
-        player.scale.setTo(-1, 1);
-        player.body.velocity.x = -player.stats.movement;
-        //this.handlePlayerRotation(player);
-
-        //Tween for bounce
-        switch (player.body.sprite._frame.name) {
-          case 'lookingRightRightLegUp.png':
-            player.body.velocity.y -= 80;
-            break;
-          case 'RightComingDown1.png':
-            player.body.velocity.y += 80;
-            break;
-          case 'movingRight4.png':
-            player.body.velocity.y += 50;
-            break;
-          case 'playerSprites_266 copy.png':
-            player.body.velocity.y -= 50
-        }
-      }
-
-      if (this.game.cursors.right.isDown) {
-        player.direction = 'right';
-        player.scale.setTo(1, 1);
-        player.animations.play('right');
-        player.body.velocity.x = player.stats.movement;
-        //this.handlePlayerRotation(player);
-
-        //Tween for bounce
-        switch (player.body.sprite._frame.name) {
-          case 'lookingRightRightLegUp.png':
-            player.body.velocity.y -= 80;
-            break;
-          case 'RightComingDown1.png':
-            player.body.velocity.y += 80;
-            break;
-          case 'movingRight4.png':
-            player.body.velocity.y += 50;
-            break;
-          case 'playerSprites_266 copy.png':
-            player.body.velocity.y -= 50
-        }
-      }
-
-      if (this.game.cursors.up.isDown) {
-        player.direction = 'up';
-        player.body.velocity.y = -player.stats.movement;
-        player.animations.play('up');
-        //this.handlePlayerRotation(player);
-      }
-
-      if (this.game.cursors.down.isDown) {
-        player.direction = 'down';
-        player.body.velocity.y = player.stats.movement;
-        player.animations.play('down');
-        //this.handlePlayerRotation(player);
-      }
-
-      if (player.body.velocity.x === 0 && player.body.velocity.y === 0) {
-        player.direction = 'idle';
-        player.animations.stop();
-
-        this.handlePlayerRotation(player);
-      }
-    }
-  }
-
-  handlePlayerRotation(player) {
-    let pointerX = this.game.input.activePointer.worldX;
-    let pointerY = this.game.input.activePointer.worldY;
-
-
-    let playerX = player.x;
-    let playerY = player.y
-
-    player.scale.setTo(1, 1);
-    if ((pointerY > playerY) && (pointerX < playerX)) {
-      player.frame = 17;
-      player.gun.scale.setTo(1, -1);
-    }
-    if ((pointerY > playerY) && (pointerX > playerX)) {
-      player.frame = 18;
-      player.gun.scale.setTo(1, 1);
-    }
-    if ((pointerY < playerY) && (pointerX > playerX)) {
-      player.frame = 14;
-      player.gun.scale.setTo(1, 1);
-    }
-    if ((pointerY < playerY) && (pointerX < playerX)) {
-      player.frame = 14;
-      player.gun.scale.setTo(1, -1);
-    }
-  }
 
   dispatchCurrentPlayer() {
     let currentPlayer = {
@@ -444,6 +315,7 @@ export default class ZombieGameState extends TiledState {
       remotePlayerSprites[playerState.socketId].x = playerState.x;
       remotePlayerSprites[playerState.socketId].y = playerState.y;
       remotePlayerSprites[playerState.socketId].direction = playerState.animationDirection;
+	    //remotePlayerSprites[playerState.socketId].gun.rotation = playerState.gunRotation;
       //TODO: Implement other properties
     }
   }
@@ -475,17 +347,9 @@ export default class ZombieGameState extends TiledState {
 
   lockPointer() {
     document.body.style.cursor = 'none';
-
     this.game.canvas.addEventListener('mousemove', () => {
       this.pointer.x = this.game.input.activePointer.worldX;
       this.pointer.y = this.game.input.activePointer.worldY;
-    });
-
-    this.game.canvas.addEventListener('mousedown', () => {
-      this.game.canvas.addEventListener('mousemove', () => {
-        this.pointer.x = this.game.input.activePointer.worldX;
-        this.pointer.y = this.game.input.activePointer.worldY;
-      });
     });
   }
 
@@ -510,7 +374,6 @@ export default class ZombieGameState extends TiledState {
       console.log('the created player sprite: ', playerPrefab);
       console.log('updated RPS after add: ', remotePlayerSprites);
     }
-
   }
 
   tweenRemoteAssets() {
@@ -588,7 +451,6 @@ export default class ZombieGameState extends TiledState {
 
   bulletHitZombie(zombie, bullet){
     console.log("ZOMBZ", zombie);
-
     zombie.hit = true;
     zombie.animations.stop();
     zombie.animations.play('dead')
@@ -597,7 +459,6 @@ export default class ZombieGameState extends TiledState {
     zombie.animations.currentAnim.onComplete.add( () => {
       zombie.kill();
     })
-
     bullet.kill();
   }
 
@@ -610,10 +471,6 @@ export default class ZombieGameState extends TiledState {
         return;
       }
       bullet.kill();
-    // socket.emit('playerReceiveDamage', {
-    //   socketId: socket.id,
-    //   newDamage: player.gun.damage
-    // });
       if (bullet.parent.name === 'currentPlayerBulletGroup'){
         //TODO: emit to server
         console.log('my player:', currentPlayerSprite);

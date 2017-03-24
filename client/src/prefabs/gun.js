@@ -55,9 +55,12 @@ export default class Gun extends GunPrefab {
       bullet = new Bullet(this.game, 'bullet', {x : this.x , y: this.y}, {
         group: 'player',
         initial: 1,
-        texture: 'gunSpriteSheet'
+        texture: 'pistolSpriteSheet'
       });
       bulletGroup.add(bullet);
+
+      //Change bullet ui
+	    player.clipUpdate();
     } else {
       bullet.reset(x, y);
     }
@@ -66,10 +69,20 @@ export default class Gun extends GunPrefab {
     this.ammo--;
   }
 
+
   reloadGun(){
     setTimeout(() => {
       this.ammo = 30;
       this.isReloading = false;
     }, this.reloadSpeed)
+  }
+
+  hitZombie(zombie, bullet){
+    console.log("ZOMBZ", zombie);
+	  zombie.hit = true;
+	  bullet.kill();
+		zombie.animations.stop();
+	  zombie.animations.play('dead')
+    zombie.zombDeath.onComplete.add(() => zombie.kill(), this);
   }
 }

@@ -16,6 +16,11 @@ export default class HealthBar extends Phaser.Sprite {
 		this.gameState.groups[properties.group].children.push(this);
 		this.initial = +properties.initial;
 
+		//Add to existing
+		this.gameState.add.existing(this);
+		this.fixedToCamera = true;
+		//this.gameState.stage.children.unshift(this);
+
 		this.currentHeart = 9;
 		this.hearts = [];
 	}
@@ -25,7 +30,15 @@ export default class HealthBar extends Phaser.Sprite {
 	}
 
 	newHealth(health) {
-		//TODO: This needs to be reoptimized so that it is not called when there are no hearts left
+		//TODO: loop goes in to negative numbers and errors out
+		//Takes in current health from player and sets hearts accordingly
+
+		if (health <= 0) {
+			if (this.hearts[0].heartStatus === 'empty') return;
+
+			this.hearts[0].changeHeart('empty');
+			return;
+		}
 
 		//Determines how many hearts and half hearts to show
 		let numHearts = Math.floor((health / 10)  % 10);
