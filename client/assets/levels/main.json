@@ -17,10 +17,20 @@
       "spacing": 0
     },
 
+    "gunUiFrame": {
+      "type": "spriteSheet",
+      "source": "../../assets/images/ui/gunContainer.png",
+      "frameWidth": 231,
+      "frameHeight": 128,
+      "frames": 1,
+      "margin": 0,
+      "spacing": 0
+    },
+
     "playerSpriteSheet": {
       "type": "spriteSheetAtlas",
-      "sourcePNG": "../../assets/images/finalSheet.png",
-      "sourceJSON": "../../assets/images/finalSheet.json"
+      "sourcePNG": "../../assets/images/playerRolls.png",
+      "sourceJSON": "../../assets/images/playerRolls.json"
     },
 
     "zombieSpriteSheet": {
@@ -35,7 +45,7 @@
       "sourceJSON": "../../assets/images/crosshair.json"
     },
 
-    "gunSpriteSheet": {
+    "pistolSpriteSheet": {
       "type": "spriteSheetAtlas",
       "sourcePNG": "../../assets/images/gunAndBulletTest.png",
       "sourceJSON": "../../assets/images/gunAndBulletTest.json"
