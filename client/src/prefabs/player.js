@@ -9,7 +9,7 @@ import Heart from './healthHearts';
 const PLAYER_HEALTH = require('../engine/gameConstants.js').PLAYER_HEALTH;
 
 export default class Player extends Prefab {
-  
+
   constructor(game, name, position, properties) {
     super(game, name, position, properties);
 
@@ -24,6 +24,7 @@ export default class Player extends Prefab {
     //TODO: make it only visible to the current player
     //Load Hearts, Healthbar, Animations
 	  console.log('do we have sockets here', socket);
+    this.socketId = socket.id;
 
 
 

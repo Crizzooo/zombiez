@@ -99,11 +99,11 @@ io.on('connection', (socket) => {
   //   io.emit('updateLeaderboard', playerId, score);
   // })
 
-  socket.on('clientUpdate', (state) => {
+  socket.on('clientUpdate', (playerState) => {
     //TODO: break state down and dispatch to appropriate reducers
-    console.log('server heard client update with: ', state);
+    console.log('server heard client update with: ', playerState);
     console.log('this client told the server to update: ', socket.id);
-    store.dispatch(updatePlayer(state.player));
+    store.dispatch(updatePlayer(playerState));
   });
 
   socket.on('userFire', (fireObj) => {

@@ -61,6 +61,10 @@ const playerReducers = (state = initialState, action) => {
       console.log('Update received this action: ', action);
       let newPlayerStates = Object.assign({}, state.playerStates);
       newPlayerStates[action.playerToUpdate.socketId] = action.playerToUpdate;
+      if (action.playerToUpdate.fire){
+        console.log('server got a fire object!');
+        console.dir(action.playerToUpdate);
+      }
       if (!action.playerToUpdate.socketId){
         return state;
       }

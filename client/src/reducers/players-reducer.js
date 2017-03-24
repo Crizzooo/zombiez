@@ -11,6 +11,7 @@ const UPDATE_CURRENT_PLAYER = 'UPDATE_CURRENT_PLAYER';
 const PLAYER_LEAVE_GAME = 'PLAYER_LEAVE_GAME';
 const RESET_PLAYERS = 'RESET_PLAYERS';
 const REMOVE_CURRENT_PLAYER = 'REMOVE_CURRENT_PLAYER';
+const PLAYER_FIRED = 'PLAYER_FIRED';
 
 /* Action Creators */
 export const loadMessage = message => ({ type: CHANGE_MESSAGE, message });
@@ -36,7 +37,13 @@ export const resetPlayers = () => ({
 export const removeCurrentPlayer = () => ({
   type: REMOVE_CURRENT_PLAYER
 })
-
+export const playerFired = (toX, toY) => ({
+  type: PLAYER_FIRED,
+  fire: {
+    toX,
+    toY
+  }
+})
 //Note: addPlayer can probably be removed from file but will keep for now in case we change structure
 const initialState = {
   score: 0,
@@ -75,7 +82,9 @@ export default (state = initialState, action) => {
       break;
 
     case UPDATE_CURRENT_PLAYER:
-      newState.currentPlayer = action.currentPlayerState;
+      let updatedPlayerState = Object.assign({}, state.currentPlayer, action.currentPlayerState);
+      newState.currentPlayer = updatedPlayerState;
+      console.log('updated Current Player to: ', newState.currentPlayer);
       break;
 
     case PLAYER_LEAVE_GAME:
@@ -95,6 +104,16 @@ export default (state = initialState, action) => {
     case REMOVE_CURRENT_PLAYER:
       newState.currentPlayer = {};
       break;
+
+    case PLAYER_FIRED:
+      let newPlayerState = Object.assign({}, state.currentPlayer, {
+        fire: {
+          toX: action.fire.toX,
+          toY: action.fire.toY
+        }});
+        console.log('updated CP state to include fire: ', newPlayerState);
+        newState.currentPlayer = newPlayerState;
+        break;
 
     default:
       return state;

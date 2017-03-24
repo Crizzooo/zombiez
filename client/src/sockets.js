@@ -63,10 +63,12 @@ function dispatchServerState(serverState) {
       //If server has a different health for yourself, correct it
       //You will then update the server with the correct health on next broadcast
 
-      if( currentPlayerSprite.stats && (playerStateUpdate[socket.id].health !== serverState.players.playerHealths[socket.id])){
-          currentPlayerSprite.stats.health = serverState.players.playerHealths[socket.id];
-      }
-      // delete playerStateUpdate[socket.id];
+
+      //NOTE: reimplement if health issues
+      // if( currentPlayerSprite.stats && (playerStateUpdate[socket.id].health !== serverState.players.playerHealths[socket.id])){
+      //     currentPlayerSprite.stats.health = serverState.players.playerHealths[socket.id];
+      // }
+      delete playerStateUpdate[socket.id];
     }
     // console.log('and after deleting: ', playerStateUpdate);
     //TODO: if player state update has nothing, dont dispatch
@@ -97,6 +99,7 @@ function dispatchReducerReset(){
   store.dispatch(resetPlayers());
   store.dispatch(resetLobby());
   $('canvas').remove();
+  document.body.style.cursor = 'default';
   //TODO: reset zombies and other game related reducers
 }
 

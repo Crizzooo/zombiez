@@ -23,10 +23,11 @@ export default class Lighting extends Phaser.Plugin {
 
 		//Lighting mask and overlay
 		this.gameState.lighting.maskGraphics = this.gameState.game.add.graphics(0, 0);
-		this.gameState.lighting.blackness = this.gameState.game.add.sprite(0, 0, 'blackness');
+		this.gameState.lighting.blackness = this.gameState.game.add.sprite(0,0,'blackTile');
 		this.gameState.lighting.mapSprite = this.gameState.game.add.sprite(0,0,'mapOverlay');
 		this.gameState.lighting.mapSprite.blendMode = PIXI.blendModes.SCREEN
 		this.gameState.lighting.blackness.alpha = 0.7;
+	  this.gameState.lighting.blackness.scale.setTo(100,100);
 
 		console.log('this is lighting constructor', this.gameState)
 	}

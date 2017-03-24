@@ -104,6 +104,8 @@ const broadcastGameState = (io) => {
       console.log('Not enough players - ending game');
       endGame();
     } else {
+      console.log('server sending out: ', state);
+      console.dir(state, { depth: 3 });
       io.emit('serverUpdate', state);
     }
   }, SERVER_UPDATE_RATE);

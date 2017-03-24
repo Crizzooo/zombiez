@@ -1,6 +1,8 @@
 /**
  * Created by CharlieShi on 3/24/17.
  */
+import {playerFired} from '../../reducers/players-reducer.js';
+import store from '../../store.js';
 
 export function handleInput(player) {
 	if (player) {
@@ -13,15 +15,17 @@ export function handleInput(player) {
 		let cursors = player.cursors;
 
 		if (cursors.fire.isDown) {
-			//TODO: emit the shot to all clients
-			socket.emit('userFire', {
-				x: player.x,
-				y: player.y,
-				pointerX: player.pointerX,
-				pointerY: player.pointerY,
-				socketId: socket.id
-			});
+			//TODO: dispatch to the store with information on the shot
+			// socket.emit('userFire', {
+			// 	x: player.x,
+			// 	y: player.y,
+			// 	pointerX: player.pointerX,
+			// 	pointerY: player.pointerY,
+			// 	socketId: socket.id
+			// });
+
 			player.gun.shoot(player, player.gun.gunBullets);
+			store.dispatch(playerFired(player.pointerX, player.pointerY));
 		}
 
 		//TODO: use onDown instead? Need to set a previous animation

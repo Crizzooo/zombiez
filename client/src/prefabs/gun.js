@@ -25,11 +25,11 @@ export default class Gun extends GunPrefab {
     this.gunBullets.physicsBodyType = Phaser.Physics.ARCADE;
     this.gunBullets.setAll('outOfBoundsKill', true);
     this.gunBullets.setAll('checkWorldBounds', true);
+
     this.gunBullets.name = 'currentPlayerBulletGroup';
 
     this.gunBullets.bulletSpeed = 600;
 
-    this.bulletGroup = this.gunBullets;
 
     this.game = game;
   }
@@ -53,7 +53,7 @@ export default class Gun extends GunPrefab {
     let y = player.y;
     if(!bullet){
       bullet = new Bullet(this.game, 'bullet', {x : this.x , y: this.y}, {
-        group: 'player',
+        //NOTE: we can reimplement 'group' here if needed
         initial: 1,
         texture: 'pistolSpriteSheet'
       });
@@ -64,7 +64,7 @@ export default class Gun extends GunPrefab {
     } else {
       bullet.reset(x, y);
     }
-    bullet.rotation = this.game.physics.arcade.moveToXY(bullet, player.pointerX, player.pointerY, 600);
+    bullet.rotation = this.game.physics.arcade.moveToXY(bullet, player.pointerX, player.pointerY, this.gunBullets.bulletSpeed);
     bullet.shooterSocketId = player.socketId;
     this.ammo--;
   }

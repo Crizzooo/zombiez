@@ -1,4 +1,5 @@
 import store from '../store.js';
+import { updateCurrentPlayer } from '../reducers/players-reducer';
 
 const CLIENT_EMIT_INTERVAL = 1000 / 30;
 
@@ -13,10 +14,14 @@ export default (socket) => {
 
     let currentPlayerObj = state.players.currentPlayer;
     if (state.lobby.currentLobbyer.name && state.game.gamePlaying){
-      socket.emit('clientUpdate', {
-        player: currentPlayerObj
-      });
+      console.log('emitting this obj: ', currentPlayerObj);
+      socket.emit('clientUpdate', currentPlayerObj);
+      if (currentPlayerObj.fire && currentPlayerObj.fire.toX){
+        console.log('WE EMITTED WITH A FIRE OBJECT');
+      }
     }
+    console.log('CLEARING CURRENT PLAYER');
+    store.dispatch(updateCurrentPlayer({fire: {}}));
   }, CLIENT_EMIT_INTERVAL);
   return emitID;
 }
