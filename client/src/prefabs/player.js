@@ -23,9 +23,10 @@ export default class Player extends Prefab {
     this.loadHearts();
     this.loadHealthbar();
     this.loadAnimations();
+    this.loadControls();
 
 
-    this.animations.add('idle', [18], 10, true)
+
 
     //This might not be relevant since the world size is bigger than map size
     //To allow for camera pan
@@ -55,11 +56,23 @@ export default class Player extends Prefab {
     this.nextRoll = 0;
   }
 
+  loadControls () {
+	  this.gameState.game.cursors = {};
+	  this.gameState.game.cursors.up = this.gameState.input.keyboard.addKey(Phaser.Keyboard.W);
+	  this.gameState.game.cursors.down = this.gameState.input.keyboard.addKey(Phaser.Keyboard.S);
+	  this.gameState.game.cursors.left = this.gameState.input.keyboard.addKey(Phaser.Keyboard.A);
+	  this.gameState.game.cursors.right = this.gameState.input.keyboard.addKey(Phaser.Keyboard.D);
+	  this.gameState.game.cursors.jump = this.gameState.input.keyboard.addKey(Phaser.Keyboard.SPACEBAR);
+	  this.gameState.game.cursors.fire = this.gameState.input.activePointer;
+  }
+
   loadAnimations() {
     this.animations.add('right', [44, 8, 5, 31, 12, 13], 10, true);
     this.animations.add('left', [17, 10, 5, 19, 8, 9], 10, true);
     this.animations.add('up', [16, 0, 14, 6, 1], 10, true);
     this.animations.add('down', [43, 9, 34, 38, 7, 4], 10, true);
+	  this.animations.add('idle', [18], 10, true);
+
     this.rollup = this.animations.add('roll-up', [37, 33, 42, 32, 22, 23, 21], 10, false);
     this.rolldown = this.animations.add('roll-down', [39, 35, 41, 26, 27, 25], 10, false);
     this.rollright = this.animations.add('roll-right', [19, 20, 18, 45, 46, 29], 10, false);
