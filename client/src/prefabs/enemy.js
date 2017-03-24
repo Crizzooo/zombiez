@@ -32,7 +32,6 @@ export default class Enemy extends Prefab {
 
   moveTo (target) {
     if (this.hit === false) {
-      console.log('not hit')
       this.gameState.pathfinding.findPath(this.position, target, this.followPath, this);
     }
   }
@@ -43,15 +42,17 @@ export default class Enemy extends Prefab {
     movingTween = this.game.tweens.create(this);
     pathLength = path.length;
 
-    //If path is 0, attack the current target
-    if (pathLength <= 0) {
-      this.attackPlayer(this.currentTarget)
-      } else {
-        path.forEach( (position) => {
-          movingTween.to({x: position.x, y: position.y}, 250, Phaser.Easing.BOUNCE);
-        });
-        movingTween.start();
+    if (this.hit === false) {
+	    //If path is 0, attack the current target
+	    if (pathLength <= 0) {
+	      this.attackPlayer(this.currentTarget)
+	      } else {
+	        path.forEach( (position) => {
+	          movingTween.to({x: position.x, y: position.y}, 250, Phaser.Easing.BOUNCE);
+	        });
+	        movingTween.start();
       }
+    }
   }
 
   acquireTarget (playersAry) {

@@ -138,8 +138,6 @@ export default class Player extends Prefab {
 		  this.stats.health, style);
 
 	  //TODO: bullets collide with health?
-	  //Add to existing
-	  //this.gameState.add.existing(this.healthbar);
   }
 
   loadHearts () {
