@@ -87,11 +87,6 @@ export default class ZombieGameState extends TiledState {
     //This gets us the first player from the remote players
     console.log('this is remote player sprites', remotePlayerSprites);
 
-    //Set camera to follow, then make world big to allow camera to pan off
-    //this.camera.view = new Phaser.Rectangle(0, 0, this.currentPlayer.position.x, this.currentPlayer.position.y);
-    this.game.world.setBounds(-250, -250, 3200 + 250, 3200 + 250);
-
-
     //set interval to emit currentPlayer to server
     //if we have a current player
     if (this.currentPlayerSprite) {
@@ -114,8 +109,6 @@ export default class ZombieGameState extends TiledState {
       this.camera.follow(remotePlayerSprites[remotePlayerOneId]);
     }
 
-
-
     //Push all sprites in the world onto the child of the mapSpriteOverlay
     //All prefabs created with a pushToOverlay = true
     this.game.world.children.forEach((layer) => {
@@ -132,7 +125,7 @@ export default class ZombieGameState extends TiledState {
     }
 
 	  console.log('THIS IS WORLD', this.game.world.children)
-    console.log('THIS IS ', this)
+	  console.log('this is groups', this.groups)
   }
 
   update() {
@@ -158,17 +151,12 @@ export default class ZombieGameState extends TiledState {
     //collisions for remoteBulletGroups
     this.game.physics.arcade.collide(this.remoteBulletGroup, this.layers.wallCollision, this.bulletHitWall, null, this)
 	  this.game.physics.arcade.collide(this.remoteBulletGroup, this.playerSpriteGroup, this.bulletHitPlayer, null, this);
+	  this.game.physics.arcade.collide(this.currentEnemy, this.currentPlayerSprite.gun.gunBullets, this.bulletHitZombie, null, this);
 
     //Pathfinding
-	  //TODO: bug?
-    if(this.currentEnemy.exists) {
-			// console.log('still exists--------->')
-      this.currentEnemy.moveTo(this.currentEnemy.acquireTarget());
-      if (this.currentPlayerSprite){
-        //NOTE: sprite zombie will always go first when comparing a group of sprites with a sprite
-        this.game.physics.arcade.collide(this.currentEnemy, this.currentPlayerSprite.gun.gunBullets, this.bulletHitZombie, null, this);
-      }
-    }
+	  this.groups.enemies.forEachAlive((enemy) => {
+	  	enemy.moveTo(enemy.acquireTarget(this.groups.player));
+	  });
 
     //Server & Input
     //every 32ms send package to server with position
@@ -278,8 +266,6 @@ export default class ZombieGameState extends TiledState {
 	  //NOTE: check if own bullets hit playerSprites - emit a hit
 	  this.game.physics.arcade.collide(this.currentPlayerSprite.gun.gunBullets, this.playerSpriteGroup, this.bulletHitPlayer, null, this);
   }
-
-
 
   dispatchCurrentPlayer() {
     let currentPlayer = {

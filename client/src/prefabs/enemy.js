@@ -11,8 +11,9 @@ export default class Enemy extends Prefab {
       health: 10,
       movement: 10,
       attack: 5
-    }
+    };
 
+    this.currentTarget = null;
     this.hit = false;
 
   }
@@ -29,10 +30,10 @@ export default class Enemy extends Prefab {
 
   }
 
-  moveTo (position) {
+  moveTo (target) {
     if (this.hit === false) {
       console.log('not hit')
-      this.gameState.pathfinding.findPath(this.position, position, this.followPath, this);
+      this.gameState.pathfinding.findPath(this.position, target, this.followPath, this);
     }
   }
 
@@ -41,22 +42,34 @@ export default class Enemy extends Prefab {
     let movingTween, pathLength
     movingTween = this.game.tweens.create(this);
     pathLength = path.length;
-    //If path is 0, attack the player
-    //TODO: currently hardcoded player
+
+    //If path is 0, attack the current target
     if (pathLength <= 0) {
-      this.attackPlayer(this.gameState.groups.player.children[0])
+      this.attackPlayer(this.currentTarget)
       } else {
         path.forEach( (position) => {
-          movingTween.to({x: position.x, y: position.y}, 250);
-        })
+          movingTween.to({x: position.x, y: position.y}, 250, Phaser.Easing.BOUNCE);
+        });
         movingTween.start();
       }
   }
 
-  acquireTarget () {
-    //Loop through player group and find closest player
-    //console.log("find player", this.gameState.groups.player.children[0].position);
+  acquireTarget (playersAry) {
+  	//console.log('this.x and this.x', this.x, this.y)
 
-    return this.gameState.groups.player.children[0].position
+	  let newTarget = playersAry.getFirstAlive()
+	  let distance = 0;
+
+	  playersAry.forEachAlive((player) => {
+			  let playerDistance = Math.pow((player.x - this.x), 2) + Math.pow((player.y - this.y), 2);
+
+			  if (distance <= playerDistance) {
+				  distance = playerDistance;
+				  newTarget = player;
+			  }
+		  });
+
+	  this.currentTarget = newTarget;
+    return newTarget
   }
 }

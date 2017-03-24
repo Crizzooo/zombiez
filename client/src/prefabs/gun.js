@@ -80,7 +80,11 @@ export default class Gun extends GunPrefab {
 	  zombie.hit = true;
 	  bullet.kill();
 		zombie.animations.stop();
+
 	  zombie.animations.play('dead')
+	  console.log('zombie---------------->', zombie);
+	  console.log('zombie', zombie.zombDeath);
+
     zombie.zombDeath.onComplete.add(() => zombie.kill(), this);
   }
 }

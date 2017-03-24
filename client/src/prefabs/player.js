@@ -164,7 +164,7 @@ export default class Player extends Prefab {
   receiveDamage(damage) {
     //Change healthbar
     this.stats.health -= damage;
-    this.healthbar.text = this.stats.health;
+    //this.healthbar.text = this.stats.health;
 
     //Set tint to show damage
     this.tint = 0x0000ff;

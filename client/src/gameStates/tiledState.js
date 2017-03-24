@@ -25,6 +25,9 @@ export default class TiledState extends Phaser.State {
     init(levelData) {
       this.levelData = levelData;
 
+	    //Set camera to follow, then make world big to allow camera to pan off
+	    //this.camera.view = new Phaser.Rectangle(0, 0, this.currentPlayer.position.x, this.currentPlayer.position.y);
+	    this.game.world.setBounds(-250, -250, 3200 + 250, 3200 + 250);
 	    //Scaling the Game Window for a pixelated effect
 	    this.game.scale.scaleMode = Phaser.ScaleManager.USER_SCALE;
 	    this.game.scale.setGameSize($('#game').innerWidth()/2, $('#game').innerHeight()/2);
