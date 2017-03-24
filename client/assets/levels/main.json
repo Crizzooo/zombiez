@@ -15,8 +15,8 @@
 
     "playerSpriteSheet": {
       "type": "spriteSheetAtlas",
-      "sourcePNG": "../../assets/images/finalSheet.png",
-      "sourceJSON": "../../assets/images/finalSheet.json"
+      "sourcePNG": "../../assets/images/playerRolls.png",
+      "sourceJSON": "../../assets/images/playerRolls.json"
     },
 
     "zombieSpriteSheet": {

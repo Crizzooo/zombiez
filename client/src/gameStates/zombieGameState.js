@@ -29,6 +29,7 @@ export default class ZombieGameState extends TiledState {
     this.game.cursors.down = this.input.keyboard.addKey(Phaser.Keyboard.S);
     this.game.cursors.left = this.input.keyboard.addKey(Phaser.Keyboard.A);
     this.game.cursors.right = this.input.keyboard.addKey(Phaser.Keyboard.D);
+    this.game.cursors.jump = this.input.keyboard.addKey(Phaser.Keyboard.F);
     this.spacebar = this.input.keyboard.addKey(Phaser.Keyboard.SPACEBAR);
 
     //Attach and bind functions
@@ -346,72 +347,66 @@ export default class ZombieGameState extends TiledState {
         });
         this.currentPlayerSprite.gun.shoot(this.currentPlayerSprite, this.currentPlayerSprite.gun.gunBullets);
       }
-
-      if (this.game.cursors.left.isDown) {
+      if (this.game.cursors.down.isDown && this.game.cursors.right.isDown){
+        player.direction = 'down';
+        player.body.velocity.y = player.stats.movement;
+        player.body.velocity.x = player.stats.movement;
+        player.animations.play('down');
+      } else if(this.game.cursors.down.isDown && this.game.cursors.left.isDown){
+        player.direction = 'down';
+        player.body.velocity.y = player.stats.movement;
+        player.body.velocity.x = -player.stats.movement;
+        player.animations.play('down');
+      } else if(this.game.cursors.up.isDown && this.game.cursors.left.isDown){
+        player.direction = 'up';
+        player.body.velocity.y = -player.stats.movement;
+        player.body.velocity.x = -player.stats.movement;
+        player.animations.play('up');
+      } else if(this.game.cursors.up.isDown && this.game.cursors.right.isDown){
+        player.direction = 'up';
+        player.body.velocity.y = -player.stats.movement;
+        player.body.velocity.x = player.stats.movement;
+        player.animations.play('up');
+      } else if(this.game.cursors.up.isDown && this.game.cursors.jump.isDown){
+        player.animations.play('roll-up');
+        player.body.velocity.y = -player.stats.movement - 100;
+      } else if(this.game.cursors.down.isDown && this.game.cursors.jump.isDown){
+        player.body.velocity.y = player.stats.movement + 100;
+        player.animations.play('roll-down');
+      } else if(this.game.cursors.right.isDown && this.game.cursors.jump.isDown){
+        player.scale.setTo(1, 1);
+        player.animations.play('roll-right');
+        player.body.velocity.x = player.stats.movement + 100;
+      } else if(this.game.cursors.left.isDown && this.game.cursors.jump.isDown){
+        player.scale.setTo(-1, 1);
+        player.animations.play('roll-right');
+        player.body.velocity.x = -player.stats.movement - 100;
+      } else if (this.game.cursors.left.isDown && !player.rollright.isPlaying) {
         player.direction = 'left';
         player.animations.play('right');
         player.scale.setTo(-1, 1);
         player.body.velocity.x = -player.stats.movement;
         //this.handlePlayerRotation(player);
-
-        //Tween for bounce
-        switch (player.body.sprite._frame.name) {
-          case 'lookingRightRightLegUp.png':
-            player.body.velocity.y -= 80;
-            break;
-          case 'RightComingDown1.png':
-            player.body.velocity.y += 80;
-            break;
-          case 'movingRight4.png':
-            player.body.velocity.y += 50;
-            break;
-          case 'playerSprites_266 copy.png':
-            player.body.velocity.y -= 50
-        }
-      }
-
-      if (this.game.cursors.right.isDown) {
+      } else if (this.game.cursors.right.isDown && !player.rollright.isPlaying) {
         player.direction = 'right';
         player.scale.setTo(1, 1);
         player.animations.play('right');
         player.body.velocity.x = player.stats.movement;
         //this.handlePlayerRotation(player);
-
-        //Tween for bounce
-        switch (player.body.sprite._frame.name) {
-          case 'lookingRightRightLegUp.png':
-            player.body.velocity.y -= 80;
-            break;
-          case 'RightComingDown1.png':
-            player.body.velocity.y += 80;
-            break;
-          case 'movingRight4.png':
-            player.body.velocity.y += 50;
-            break;
-          case 'playerSprites_266 copy.png':
-            player.body.velocity.y -= 50
-        }
-      }
-
-      if (this.game.cursors.up.isDown) {
+      } else if (this.game.cursors.up.isDown && !player.rollup.isPlaying) {
         player.direction = 'up';
         player.body.velocity.y = -player.stats.movement;
         player.animations.play('up');
         //this.handlePlayerRotation(player);
-      }
-
-      if (this.game.cursors.down.isDown) {
+      } else if (this.game.cursors.down.isDown && !player.rolldown.isPlaying) {
         player.direction = 'down';
         player.body.velocity.y = player.stats.movement;
         player.animations.play('down');
         //this.handlePlayerRotation(player);
-      }
-
-      if (player.body.velocity.x === 0 && player.body.velocity.y === 0) {
+      } else if (player.body.velocity.x === 0 && player.body.velocity.y === 0) {
         player.direction = 'idle';
         player.animations.stop();
-
-        this.handlePlayerRotation(player);
+        player.frame = this.handlePlayerRotation(player).frame;
       }
     }
   }
@@ -422,24 +417,45 @@ export default class ZombieGameState extends TiledState {
 
 
     let playerX = player.x;
-    let playerY = player.y
+    let playerY = player.y;
+    let frame;
+    let animation;
+    let gunScale;
 
     player.scale.setTo(1, 1);
     if ((pointerY > playerY) && (pointerX < playerX)) {
-      player.frame = 17;
+      //bottom-left
+      if(player.body.velocity.x === 0 && player.body.velocity.y === 0) frame = 17;
       player.gun.scale.setTo(1, -1);
     }
     if ((pointerY > playerY) && (pointerX > playerX)) {
-      player.frame = 18;
-      player.gun.scale.setTo(1, 1);
+      //bottom-right
+      if(player.body.velocity.x === 0 && player.body.velocity.y === 0) frame = 28;
+      animation = 'down';
+      // if(this.game.cursors.up.isDown && this.game.cursors.right.isDown) {
+      //   animation = "right";
+      // } else if(this.game.cursors.down.isDown && this.game.cursors.right.isDown){
+      //   animation = "right";
+      // } else if(this.game.cursors.left.isDown && this.game.cursors.down.isDown){
+      //   animation = "right";
+      // }
+        player.gun.scale.setTo(1, 1);
     }
     if ((pointerY < playerY) && (pointerX > playerX)) {
-      player.frame = 14;
+      //top-right
+      if(player.body.velocity.x === 0 && player.body.velocity.y === 0) frame = 14;
+      animation = 'up';
       player.gun.scale.setTo(1, 1);
     }
     if ((pointerY < playerY) && (pointerX < playerX)) {
-      player.frame = 14;
+      //top-left
+      if(player.body.velocity.x === 0 && player.body.velocity.y === 0) frame = 14;
+      animation = 'up';
       player.gun.scale.setTo(1, -1);
+    }
+    return {
+      frame,
+      animation
     }
   }
 
@@ -501,17 +517,9 @@ export default class ZombieGameState extends TiledState {
 
   lockPointer() {
     document.body.style.cursor = 'none';
-
     this.game.canvas.addEventListener('mousemove', () => {
       this.pointer.x = this.game.input.activePointer.worldX;
       this.pointer.y = this.game.input.activePointer.worldY;
-    });
-
-    this.game.canvas.addEventListener('mousedown', () => {
-      this.game.canvas.addEventListener('mousemove', () => {
-        this.pointer.x = this.game.input.activePointer.worldX;
-        this.pointer.y = this.game.input.activePointer.worldY;
-      });
     });
   }
 
@@ -609,7 +617,6 @@ export default class ZombieGameState extends TiledState {
 
   bulletHitZombie(zombie, bullet){
     console.log("ZOMBZ", zombie);
-
     zombie.hit = true;
     zombie.animations.stop();
     zombie.animations.play('dead')
@@ -618,7 +625,6 @@ export default class ZombieGameState extends TiledState {
     zombie.animations.currentAnim.onComplete.add( () => {
       zombie.kill();
     })
-
     bullet.kill();
   }
 
