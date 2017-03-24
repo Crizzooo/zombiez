@@ -20,12 +20,12 @@ export default class Player extends Prefab {
 
     //TODO: make it only visible to the current player
     //Load Hearts, Healthbar, Animations
-    this.loadHearts();
-    this.loadHealthbar();
-    this.loadAnimations();
+	  console.log('do we have sockets here', socket);
 
 
-    this.animations.add('idle', [18], 10, true)
+
+
+	  this.loadAnimations();
 
     //This might not be relevant since the world size is bigger than map size
     //To allow for camera pan
@@ -48,11 +48,29 @@ export default class Player extends Prefab {
       }
     }, {x: 225, y: 225});
 
-	  this.loadGunUi();
+	  if (socket.id ===  properties.socketId) {
+		  this.loadHearts();
+		  this.loadGunUi();
+		  this.loadControls();
+	  }
+
+	  if (socket.id !==  properties.socketId) {
+		  this.loadHealthbar();
+	  }
 
     //how frequently a player can roll
     this.rateOfRoll = 10000;
     this.nextRoll = 0;
+  }
+
+  loadControls () {
+	  this.cursors = {};
+	  this.cursors.up = this.gameState.input.keyboard.addKey(Phaser.Keyboard.W);
+	  this.cursors.down = this.gameState.input.keyboard.addKey(Phaser.Keyboard.S);
+	  this.cursors.left = this.gameState.input.keyboard.addKey(Phaser.Keyboard.A);
+	  this.cursors.right = this.gameState.input.keyboard.addKey(Phaser.Keyboard.D);
+	  this.cursors.jump = this.gameState.input.keyboard.addKey(Phaser.Keyboard.SPACEBAR);
+	  this.cursors.fire = this.gameState.input.activePointer;
   }
 
   loadAnimations() {
@@ -60,6 +78,8 @@ export default class Player extends Prefab {
     this.animations.add('left', [17, 10, 5, 19, 8, 9], 10, true);
     this.animations.add('up', [16, 0, 14, 6, 1], 10, true);
     this.animations.add('down', [43, 9, 34, 38, 7, 4], 10, true);
+	  this.animations.add('idle', [18], 10, true);
+
     this.rollup = this.animations.add('roll-up', [37, 33, 42, 32, 22, 23, 21], 10, false);
     this.rolldown = this.animations.add('roll-down', [39, 35, 41, 26, 27, 25], 10, false);
     this.rollright = this.animations.add('roll-right', [19, 20, 18, 45, 46, 29], 10, false);
