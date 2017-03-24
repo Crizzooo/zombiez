@@ -24,6 +24,7 @@ export default class Player extends Prefab {
     this.loadHealthbar();
     this.loadAnimations();
 
+
     this.animations.add('idle', [18], 10, true)
 
     //This might not be relevant since the world size is bigger than map size
@@ -33,19 +34,22 @@ export default class Player extends Prefab {
     this.game.physics.arcade.enable(this);
 
     //Setup player's gun
+	  //Load starting gun pistol
     this.gun = this.gameState.createPrefab('gun', {
       type: 'guns',
       properties: {
         group: 'guns',
+	      name: 'pistol',
         initial: 0,
-        texture: 'gunSpriteSheet',
+        texture: 'pistolSpriteSheet',
         rateOfFire: 100,
         reloadSpeed: 2000,
         clip: 30
       }
     }, {x: 225, y: 225});
 
-    this.game.add.existing(this.gun);
+	  this.loadGunUi();
+
     //how frequently a player can roll
     this.rateOfRoll = 10000;
     this.nextRoll = 0;
@@ -62,41 +66,80 @@ export default class Player extends Prefab {
 
   }
 
-  loadHealthbar() {
-    //Health text, to be replaced by healthbar
-    const style = {
-      font: "bold 16px Arial",
-      fill: "#FFF",
-      stroke: "#000",
-      strokeThickness: 3
-    };
+  loadGunUi () {
+  	//TODO: Should base entire ui off gunFrame in order to center sprites
+		this.gunUiFrame = this.gameState.game.add.sprite(0, 25, 'gunUiFrame', 1);
+		this.gameState.game.add.existing(this.gunUiFrame);
+		this.gunUiFrame.fixedToCamera = true;
+	  this.gunUiFrame.alpha = 0.5
 
-    this.healthbar = this.game.add.text(
-      this.position.x - 10,
-      this.position.y - 10,
-      this.stats.health, style);
+	  this.gunUiFrame.gunSprite = this.gameState.game.add.sprite(90, 70, 'pistolSpriteSheet', 0);
+	  this.gameState.game.add.existing(this.gunUiFrame.gunSprite);
+	  this.gunUiFrame.gunSprite.scale.setTo(3, 3);
+	  this.gunUiFrame.gunSprite.smoothed = false;
+	  this.gunUiFrame.gunSprite.fixedToCamera = true;
+
+	  const style = {
+		  font: "bold 30px Arial",
+		  fill: "#FFF",
+		  stroke: "#000",
+		  strokeThickness: 3
+	  };
+
+	  this.gunUiFrame.gunClip = this.game.add.text(50, 25, this.gun.clip + '/' +  this.gun.clip, style);
+	  this.gunUiFrame.gunClip.fixedToCamera = true;
   }
 
-  loadHearts() {
-    //Health hearts, top left hearts
-    this.health = new HealthHeart(this.gameState, 'playerHealthHearts', {x: 0, y: 0},
-      {
-        group: 'ui'
-      }
-    );
-
-    for (let i = 0; i < 10; i++) {
-      this.health.addHearts(this.game.add.existing(new Heart(this.gameState, 'playerHeart' + i, {x: (32 * i), y: 0},
-        {
-          texture: 'playerHearts',
-          group: 'ui',
-          initial: 2
-        })
-      ))
-    }
-
-    this.game.add.existing(this.health);
+  loadGunIntoUi (gunName) {
+	  this.gunUiFrame.gunSprite = this.gameState.game.add.sprite(0, 25, gunName + 'SpriteSheet', 1);
   }
+
+  clipUpdate () {
+  	let clipText = +this.gunUiFrame.gunClip.text.split('/')[0]
+
+	  //console.log('clip text is ', clipText--)
+	  clipText--;
+
+	  this.gunUiFrame.gunClip.text = clipText + '/' + clipText;
+  }
+
+  loadHealthbar () {
+	  //Health text, to be replaced by healthbar
+	  const style = {
+		  font: "bold 16px Arial",
+		  fill: "#FFF",
+		  stroke: "#000",
+		  strokeThickness: 3
+	  };
+
+	  this.healthbar = this.game.add.text(
+		  this.position.x - 10,
+		  this.position.y - 10,
+		  this.stats.health, style);
+
+	  //TODO: bullets collide with health?
+	  //Add to existing
+	  //this.gameState.add.existing(this.healthbar);
+  }
+
+  loadHearts () {
+	  //Health hearts, top left hearts
+	  this.health = new HealthHeart(this.gameState, 'playerHealthHearts', {x: 0, y:0},
+		  {
+			  group: 'ui'
+		  }
+	  );
+
+	  for (let i = 0; i < 10; i++) {
+		  this.health.addHearts(this.game.add.existing(new Heart(this.gameState, 'playerHeart' + i, {x: (32 * i), y: 0},
+			  {
+				  texture: 'playerHearts',
+				  group: 'ui',
+				  initial: 2
+			  })
+		  ))
+	  }
+	}
 
   receiveDamage(damage) {
     //Change healthbar
@@ -109,10 +152,7 @@ export default class Player extends Prefab {
       this.tint = 0xffffff;
     }, 400)
 
-    //Change Health hearts
-    this.health.newHealth(this.stats.health);
-
+	  //Change Health hearts
+	  this.health.newHealth(this.stats.health);
   }
-
-
 }

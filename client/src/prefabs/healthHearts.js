@@ -14,6 +14,8 @@ export default class HealthHearts extends Phaser.Sprite {
 		this.gameState.groups[properties.group].children.push(this);
 		this.initial = +properties.initial;
 
+		this.fixedToCamera = true;
+
 		this.gameState.prefabs[name] = this;
 	}
 

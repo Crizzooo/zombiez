@@ -5,6 +5,7 @@ import {updateCurrentPlayer, playerLeaveGame} from '../reducers/players-reducer.
 import emitCurrentState from '../engine/emitCurrentState.js';
 import TiledState from './tiledState';
 import Pathfinding from '../plugins/Pathfinding';
+import Lighting from '../plugins/Lighting';
 import _ from 'lodash';
 
 //TODO: do we need this?
@@ -35,6 +36,11 @@ export default class ZombieGameState extends TiledState {
     //Attach and bind functions
     this.destroyCurrentPlayerSprite = this.destroyCurrentPlayerSprite.bind(this);
     this.handleRemotePlayerLeave = this.handleRemotePlayerLeave.bind(this);
+
+    //Throttled Console logs
+	  this.toggledRPS = throttle(this.logRemotePlayers, 20000);
+
+    //Sockets
     socket.on('destroyCurrentPlayerSprite', this.destroyCurrentPlayerSprite);
     socket.on('playerLeaveGame', this.handleRemotePlayerLeave);
     socket.on('remoteFire', this.handleRemotePlayerFire);
@@ -47,43 +53,36 @@ export default class ZombieGameState extends TiledState {
 
   create() {
     //Create game set up through tiled state by calling super
+    //Loads level tilemap
     super.create.call(this);
 
     //Create worldGrid and tile dimensions for pathfinding
+    //Load light plugin
     let worldGrid = this.createWorldGrid();
     this.tileDimensions = new Phaser.Point(this.map.tileWidth, this.map.tileHeight);
     this.pathfinding = this.game.plugins.add(Pathfinding, worldGrid, [-1], this.tileDimensions);
+    this.lightingPlugin = new Lighting(this);
 
-    //Create Players and Temp Objectsw
+    //Create Players and Temp Objects
     let crosshair = new Phaser.Sprite(this.game, 0, 0, 'crosshairSpriteSheet');
+
+	  //create game set up
+	  //This creates player prefab
+	  this.loadLevel();
 
     let enemyPrefab = this.createPrefab('zombie',
       {
         type: 'enemies',
         properties: {
-          group: 'enemies',
-          initial: 9,
-          texture: 'zombieSpriteSheet'
+	        group: 'enemies',
+	        initial: 9,
+	        texture: 'zombieSpriteSheet'
         }
       }, {x: 200, y: 200});
 
-    //create game set up
-    //This creates player prefab
-    console.log('Local state right before load level: ', store.getState())
-    this.loadLevel();
-
-
-    //NOTE: I moved these in to a loop that only runs IF we have a current Player
-    // this.currentPlayerSprite.gun.initializeWeapon(this);
-    // this.pointer = crosshair;
-    //
-    // //add to world
-    // this.game.add.existing(this.pointer);
 
     this.currentEnemy = enemyPrefab;
-    this.game.add.existing(this.currentEnemy);
 
-    //this.currentEnemy.acquireTarget = throttle(this.currentEnemy.acquireTarget, 200);
     this.currentEnemy.moveTo = throttle(this.currentEnemy.moveTo, 1000);
     ///////////TODO: WIP
     this.currentEnemy.animations.play('left');
@@ -94,7 +93,7 @@ export default class ZombieGameState extends TiledState {
 
     //Set camera to follow, then make world big to allow camera to pan off
     //this.camera.view = new Phaser.Rectangle(0, 0, this.currentPlayer.position.x, this.currentPlayer.position.y);
-    this.game.world.setBounds(-25, -25, 2500, 2500);
+    this.game.world.setBounds(-250, -250, 3200 + 250, 3200 + 250);
 
 
     //set interval to emit currentPlayer to server
@@ -106,8 +105,8 @@ export default class ZombieGameState extends TiledState {
       //add to world
       this.game.add.existing(this.pointer);
 
-
       const emitInterval = emitCurrentState(socket);
+
       //on click lock the users mouse for input
       this.game.input.onDown.add(this.lockPointer, this);
 
@@ -119,7 +118,25 @@ export default class ZombieGameState extends TiledState {
       this.camera.follow(remotePlayerSprites[remotePlayerOneId]);
     }
 
-    this.toggledRPS = throttle(this.logRemotePlayers, 20000);
+
+
+    //Push all sprites in the world onto the child of the mapSpriteOverlay
+    //All prefabs created with a pushToOverlay = true
+    this.game.world.children.forEach((layer) => {
+      if (layer.pushToOverlay) {
+	      this.lighting.mapSprite.addChild(layer)
+      }
+    });
+    //Also push all remote players and their assets onto the lighting layer
+	  for (let key in remotePlayerSprites) {
+	    if (remotePlayerSprites.hasOwnProperty(key)) {
+	      this.lighting.mapSprite.addChild(remotePlayerSprites[key])
+		    this.lighting.mapSprite.addChild(remotePlayerSprites[key].healthbar)
+      }
+    }
+
+	  console.log('THIS IS WORLD', this.game.world.children)
+    console.log('THIS IS ', this)
   }
 
   update() {
@@ -134,11 +151,13 @@ export default class ZombieGameState extends TiledState {
       //NOTE: check if remote bullets hit wallCollision - kill bullet
       this.game.physics.arcade.collide(this.currentPlayerSprite.gun.gunBullets, this.layers.wallCollision, this.bulletHitWall, null, this);
 
-
       //NOTE: check if own bullets hit playerSprites - emit a hit
       this.game.physics.arcade.collide(this.currentPlayerSprite.gun.gunBullets, this.playerSpriteGroup, this.bulletHitPlayer, null, this);
 
       //TODO: check if remote players hit any zombies - kill bullet, emit zombieHit
+
+      //Set up local client lighting
+      this.lightingPlugin.update();
 
       //Server & Input
       //every 32ms send package to server with position
@@ -152,10 +171,8 @@ export default class ZombieGameState extends TiledState {
 
     //collisions for remoteBulletGroups
     this.game.physics.arcade.collide(this.remoteBulletGroup, this.layers.wallCollision, this.bulletHitWall, null, this)
-
     this.game.physics.arcade.collide(this.remoteBulletGroup, this.playerSpriteGroup, this.bulletHitPlayer, null, this);
 
-	  // console.log("this is enemy", this.currentEnemy.exists);
     //Pathfinding
 	  //TODO: bug?
     if(this.currentEnemy.exists) {
@@ -166,8 +183,6 @@ export default class ZombieGameState extends TiledState {
         this.game.physics.arcade.collide(this.currentEnemy, this.currentPlayerSprite.gun.gunBullets, this.bulletHitZombie, null, this);
       }
     }
-
-
 
     //Server & Input
     //every 32ms send package to server with position
@@ -229,7 +244,7 @@ export default class ZombieGameState extends TiledState {
       }
 
       //add it to the world
-      this.game.add.existing(this.currentPlayerSprite);
+      //this.game.add.existing(this.currentPlayerSprite);
 
       store.dispatch(updateCurrentPlayer(currPlayerState));
       console.log('end of load level local store looks like: ', store.getState());

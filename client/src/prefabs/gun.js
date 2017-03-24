@@ -55,9 +55,12 @@ export default class Gun extends GunPrefab {
       bullet = new Bullet(this.game, 'bullet', {x : this.x , y: this.y}, {
         group: 'player',
         initial: 1,
-        texture: 'gunSpriteSheet'
+        texture: 'pistolSpriteSheet'
       });
       bulletGroup.add(bullet);
+
+      //Change bullet ui
+	    player.clipUpdate();
     } else {
       bullet.reset(x, y);
     }

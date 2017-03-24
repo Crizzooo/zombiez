@@ -3,12 +3,26 @@
     "defaultTileset": {"type": "image", "source": "../../assets/images/mapTiles/dungeon_tileset_32.png"},
     "miscTileset": {"type": "image", "source": "../../assets/images/mapTiles/objects_tilset_32.png"},
 
+    "blackness": {"type": "image", "source": "../../assets/images/mapTiles/blackness.jpg"},
+    "mapOverlay": {"type": "image", "source": "../../assets/images/mapTiles/map.png"},
+    "mapBitmap": {"type": "image", "source": "../../assets/images/mapTiles/mapbitmap.png"},
+
     "playerHearts": {
       "type": "spriteSheet",
       "source": "../../assets/images/ui/hearts.png",
       "frameWidth": 32,
       "frameHeight": 32,
       "frames": 3,
+      "margin": 0,
+      "spacing": 0
+    },
+
+    "gunUiFrame": {
+      "type": "spriteSheet",
+      "source": "../../assets/images/ui/gunContainer.png",
+      "frameWidth": 231,
+      "frameHeight": 128,
+      "frames": 1,
       "margin": 0,
       "spacing": 0
     },
@@ -31,11 +45,13 @@
       "sourceJSON": "../../assets/images/crosshair.json"
     },
 
-    "gunSpriteSheet": {
+    "pistolSpriteSheet": {
       "type": "spriteSheetAtlas",
       "sourcePNG": "../../assets/images/gunAndBulletTest.png",
       "sourceJSON": "../../assets/images/gunAndBulletTest.json"
     },
+
+
 
     "levelTilemap": {"type": "tilemap", "source": "../../assets/maps/main.json"}
   },
