@@ -46,7 +46,7 @@ export default class Player extends Prefab {
 	      name: 'pistol',
         initial: 0,
         texture: 'pistolSpriteSheet',
-        rateOfFire: 100,
+        rateOfFire: 350,
         reloadSpeed: 2000,
         clip: 30
       }
