@@ -4,6 +4,7 @@ const R = require('ramda');
 const resetPlayers = require('../reducers/players.js').resetPlayers;
 const addPlayer = require('../reducers/players.js').addPlayer;
 const removePlayer = require('../reducers/players.js').removePlayer;
+const resetPlayerFires = require('../reducers/players.js').resetPlayerFires;
 const gamePlaying = require('../reducers/engine.js').gamePlaying;
 const resetEngine = require('../reducers/engine.js').resetEngine;
 const resetLobby = require('../reducers/lobby.js').resetLobby;
@@ -107,6 +108,7 @@ const broadcastGameState = (io) => {
       // console.log('server sending out: ', state);
       // console.dir(state, { depth: 3 });
       io.emit('serverUpdate', state);
+      store.dispatch(resetPlayerFires());
     }
   }, SERVER_UPDATE_RATE);
 }

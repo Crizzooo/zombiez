@@ -181,9 +181,10 @@ export default class ZombieGameState extends TiledState {
     //every 32ms send package to server with position
 	  //If there are remote clients, update their stuff
     if (!_.isEmpty(remotePlayerSprites)) {
-	    this.throttledUpdateRemotePlayers();
+	    // this.throttledUpdateRemotePlayers();
+      this.updateRemotePlayers();
       this.throttledRPS();
-      store.dispatch(removeFireObjects);
+      store.dispatch(removeFireObjects());
       //remove all fire objects from remote player states
     }
   }
@@ -296,18 +297,20 @@ export default class ZombieGameState extends TiledState {
   updateRemotePlayers() {
     // console.log('updating remote players has been called');
     this.players = store.getState().players.playerStates;
-    console.log('player to update: ', this.players);
+    // console.log('player to update: ', this.players);
     if (this.players[socket.id]) delete this.players[socket.id];
     //then update each player from the server
-    console.log('after removing self?: ', this.players);
     R.forEachObjIndexed(this.updateRemotePlayer, this.players);
+    //then clear the fire objects from local state, so that they do not fire in the next update
+    //before next server update
+    // store.dispatch(removeFireObject());
   }
 
   updateRemotePlayer(playerState) {
     if (remotePlayerSprites[playerState.socketId]) {
       let playerToUpdate = remotePlayerSprites[playerState.socketId];
-      console.log('updating this player: ', playerToUpdate);
-      console.log('with this state from server: ', playerState);
+      // console.log('updating this player: ', playerToUpdate);
+      // console.log('with this state from server: ', playerState);
 
       //NOTE: what do I need to know from the players?
       //      Implement other properties
@@ -318,11 +321,11 @@ export default class ZombieGameState extends TiledState {
 
       //if fire
       if (playerState.fire && playerState.fire.toX) {
-        console.log('inspecting playerToUpdate: ');
+        // console.log('inspecting playerToUpdate: ');
         console.dir(playerToUpdate, { depth: 3 });
         playerToUpdate.pointerX = playerState.fire.toX;
         playerToUpdate.pointerY = playerState.fire.toY;
-        console.log('hes got a fire event for us!', playerState.fire);
+        // console.log('hes got a fire event for us!', playerState.fire);
         //Remote player shoot
         playerToUpdate.gun.shoot(playerToUpdate, self.remoteBulletGroup);
         //update that player fire to nothing
@@ -450,11 +453,11 @@ export default class ZombieGameState extends TiledState {
   }
 
   bulletHitWall(bullet, layer){
-    console.log('this bullet has hit a wall: ', bullet);
+    // console.log('this bullet has hit a wall: ', bullet);
     if (bullet.parent.name === 'currentPlayerBulletGroup'){
-      console.log('i just hit a fucking wall, I suck');
+      // console.log('i just hit a fucking wall, I suck');
     } else if (bullet.parent.name === 'remoteBulletGroup') {
-      console.log('remote player bullet just hit a fucking wall, ok??');
+      // console.log('remote player bullet just hit a fucking wall, ok??');
     }
     bullet.kill();
   }

@@ -38,12 +38,13 @@ export const resetPlayers = () => ({
 export const removeCurrentPlayer = () => ({
   type: REMOVE_CURRENT_PLAYER
 })
-export const playerFired = (toX, toY, socketId) => ({
+export const playerFired = (toX, toY, socketId, bulletId) => ({
   type: PLAYER_FIRED,
   fire: {
     toX,
     toY,
-    socketId
+    socketId,
+    bulletId
   }
 })
 export const removeFireObjects = () => ({
@@ -115,15 +116,26 @@ export default (state = initialState, action) => {
         fire: {
           toX: action.fire.toX,
           toY: action.fire.toY,
-          socketId: action.fire.socketId
+          socketId: action.fire.socketId,
+          bulletId: action.fire.bulletId
         }});
         // console.log('updated CP state to include fire: ', newPlayerState);
         newState.currentPlayer = newPlayerState;
         break;
 
     case REMOVE_FIRE_OBJECTS:
-      let newPlayerStates = Object.assign({}, state.playerStates);
-      R.forEachObjIndexed(newPlayerStates, removeFireObject);
+      // let newPlayerStates = Object.assign({}, state.playerStates);
+      // console.log('about to loop through NPS and remove fire: ', newPlayerStates);
+
+      R.forEachObjIndexed( (playerState) => {
+        // console.log('removing fire obj from this playerState');
+
+        // console.log('playerState pre remove fire: ', playerState);
+        newPlayerStates[playerState.socketId].fire = {};
+      }, newPlayerStates);
+      // console.log('after ramda');
+      newState.playerStates = newPlayerStates;
+      // console.log('newPlayerStates after remove: ', newState.playerStates);
       break;
 
     default:
@@ -133,6 +145,6 @@ export default (state = initialState, action) => {
   return newState;
 };
 
-function removeFireObject(playerState){
-  console.log('removing fire object from this playerState: ', playerState);
-}
+// function removeFireObject(playerState){
+//   console.log('removing fire object from this playerState: ', playerState);
+// }

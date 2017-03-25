@@ -3,6 +3,8 @@ import Bullet from './bullet';
 import {playerFired} from '../reducers/players-reducer.js';
 import store from '../store.js';
 
+
+let bulletCount = 0;
 export default class Gun extends GunPrefab {
   constructor(game, name, position, properties) {
     super(game, name, position, properties);
@@ -71,7 +73,9 @@ export default class Gun extends GunPrefab {
       console.log('my socket id: ', socket.id);
       console.log('current player fired a gun, so we will update our state with the fire obj');
       console.log('shooting with :', player.pointerX, player.pointerY);
-			store.dispatch(playerFired(player.pointerX, player.pointerY, socket.id));
+      let bulletId = socket.id + bulletCount;
+			store.dispatch(playerFired(player.pointerX, player.pointerY, socket.id, bulletId));
+      bulletCount++;
       //Change bullet ui for current player
       player.clipUpdate();
     } else {
