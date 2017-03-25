@@ -25,7 +25,6 @@ export default class Gun extends GunPrefab {
 
   //TODO: move bullet speed to the gun, and have shoot method go off of player.gun.bulletSpeed
   shoot(player) {
-    console.log('shoot received player: ', player);
     //NOTE: shoot gets called with currentPlayerSprite.gun.gunBullets OR game.remoteBulletGroup, if shoot is being called due to a server 'remoteFire' emit
     let bulletGroup = player.bulletGroup;
 

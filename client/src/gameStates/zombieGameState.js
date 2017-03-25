@@ -272,6 +272,8 @@ export default class ZombieGameState extends TiledState {
     this.remotePlayerSpriteGroup = this.game.add.group();
     this.remotePlayerSpriteGroup.name = 'remotePlayerSpriteGroup';
     R.forEachObjIndexed(this.createRemotePlayerSprite, state.players.playerStates);
+    this.remotePlayerSpriteGroup.enableBody = true;
+    this.remotePlayerSpriteGroup.physicsBodyType = Phaser.Physics.ARCADE;
 
     console.log('our remote player sprite group: ', this.remotePlayerSpriteGroup.length);
     console.dir(this.remotePlayerSpriteGroup);
@@ -283,9 +285,20 @@ export default class ZombieGameState extends TiledState {
 	  this.game.physics.arcade.collide(this.currentPlayerSprite, this.layers.waterCollision);
 	  this.game.physics.arcade.collide(this.currentPlayerSprite, this.layers.wallCollision);
 
-	  //NOTE: check if remote bullets hit wallCollision - kill bullet
+    //Note: not sure why this doesnt work
+    this.game.physics.arcade.collide(this.currentPlayerSprite, this.remotePlayerSpriteGroup, () => console.log('players colldiing') );
+
+
 	  this.game.physics.arcade.collide(this.currentPlayerBulletGroup, this.layers.wallCollision, this.bulletHitWall, null, this);
     this.game.physics.arcade.collide(this.remotePlayerBulletGroup, this.layers.wallCollision, this.bulletHitWall, null, this);
+
+    // this.game.physics.arcade.collide();
+    this.game.physics.arcade.collide(this.currentPlayerSprite, this.remotePlayerBulletGroup, this.bulletHitPlayer, null, this);
+
+    this.game.physics.arcade.collide(this.remotePlayerSpriteGroup, this.currentPlayerBulletGroup, this.bulletHitPlayer, null, this);
+
+    // this.game.physics.arcade.collide(this.remotePlayerSpriteGroup, this.remotePlayerBulletGroup, this.bulletHitPlayer, null, this);
+
   }
 
 
@@ -354,11 +367,11 @@ export default class ZombieGameState extends TiledState {
   }
 
   destroyCurrentPlayerSprite() {
-    if (currentPlayerSprite) {
-      currentPlayerSprite.destroy();
+    if (this.currentPlayerSprite) {
+      this.currentPlayerSprite.destroy();
       // this line was from before CPS became global
       // delete currentPlayerSprite;
-      currentPlayerSprite = null;
+      this.currentPlayerSprite = null;
       console.log('deleted and destroyed currentPlayerSprite');
       let state = store.getState();
       console.log('state after destroy current player');
@@ -406,7 +419,9 @@ export default class ZombieGameState extends TiledState {
       playerPrefab.bulletGroup = self.remotePlayerBulletGroup;
       //Add remote sprite to the remotePlayerSpriteGroup
       self.game.add.existing(playerPrefab);
+      console.log('p prefab', playerPrefab);
       self.remotePlayerSpriteGroup.add(playerPrefab);
+      console.log('RPSG, ', self.remotePlayerSpriteGroup);
 
 
       remotePlayerSprites[playerState.socketId] = playerPrefab;
@@ -463,9 +478,9 @@ export default class ZombieGameState extends TiledState {
   }
 
   logRemotePlayers(){
-    console.log('RPS: ', remotePlayerSprites);
-    console.log('Local State: ', store.getState());
-    console.log('CPS: ', currentPlayerSprite);
+    // console.log('RPS: ', remotePlayerSprites);
+    // console.log('Local State: ', store.getState());
+    // console.log('CPS: ', currentPlayerSprite);
   }
 
   // addRemotePlayerToGroup(remotePlayerSprite){
@@ -496,23 +511,26 @@ export default class ZombieGameState extends TiledState {
     bullet.kill();
   }
 
-  bulletHitPlayer(bullet, player){
+  bulletHitPlayer(player, bullet){
       console.log('bullet hit player');
       console.log('bullet: ', bullet );
-      console.log('player: ', player);
-      if (bullet.shooterSocketId === player.socketId){
-        console.log('CANNOT BE DAMAGED BY OWN BULLET');
-        return;
-      }
-      bullet.kill();
+      console.log('hit player: ', player);
+      // if (bullet.shooterSocketId === player.socketId){
+      //   console.log('CANNOT BE DAMAGED BY OWN BULLET');
+      //   return;
+      // }
       if (bullet.parent.name === 'currentPlayerBulletGroup'){
         //TODO: emit to server
-        console.log('my player:', currentPlayerSprite);
-        socket.emit('shotPlayer', player.socketId, currentPlayerSprite.gun.damage);
-        console.log('I HIT A MOTHERFUCKER');
-      } else if (bullet.parent.name === 'remoteBulletGroup') {
+        console.log('my player:', self.currentPlayerSprite);
+        // socket.emit('shotPlayer', player.socketId, currentPlayerSprite.gun.damage);
+        console.log('I HIT SOMEONE');
+      } else if (bullet.parent.name === 'remotePlayerBulletGroup') {
+        if (player.socketId === socket.id){
+          console.log(' I GOT HIT');
+        }
         console.log('eh someone else hit someone');
       }
+      bullet.kill();
   }
 
   handlePlayerDamage(playerSocketId, dmgToTake){
