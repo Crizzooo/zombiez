@@ -148,11 +148,6 @@ export default class ZombieGameState extends TiledState {
     //Check collisions
     //NOTE: only check CPS collissions if we do have a CPS
     if (this.currentPlayerSprite){
-      this.game.physics.arcade.collide(this.currentPlayerSprite, this.layers.backgroundDecCollision);
-      this.game.physics.arcade.collide(this.currentPlayerSprite, this.layers.backgroundDecCollision2);
-      this.game.physics.arcade.collide(this.currentPlayerSprite, this.layers.waterCollision);
-      this.game.physics.arcade.collide(this.currentPlayerSprite, this.layers.wallCollision);
-
       //NOTE: check if remote bullets hit wallCollision - kill bullet
       // this.game.physics.arcade.collide(currentPlayerSprite.gun.gunBullets, this.layers.wallCollision, this.bulletHitWall, null, this);
 
@@ -227,16 +222,16 @@ export default class ZombieGameState extends TiledState {
       //NOTE: Add bulletGroup to current player sprite
       //Create Bullet Groups
       //Current Player
-      let currentPlayerBulletGroup = this.game.add.group();
-      currentPlayerBulletGroup.enableBody = true;
-      currentPlayerBulletGroup.physicsBodyType = Phaser.Physics.ARCADE;
-      currentPlayerBulletGroup.setAll('outOfBoundsKill', true);
-      currentPlayerBulletGroup.setAll('checkWorldBounds', true);
-      currentPlayerBulletGroup.name = 'currentPlayerBulletGroup';
-      currentPlayerBulletGroup.bulletSpeed = 600;
+      this.currentPlayerBulletGroup = this.game.add.group();
+      this.currentPlayerBulletGroup.enableBody = true;
+      this.currentPlayerBulletGroup.physicsBodyType = Phaser.Physics.ARCADE;
+      this.currentPlayerBulletGroup.setAll('outOfBoundsKill', true);
+      this.currentPlayerBulletGroup.setAll('checkWorldBounds', true);
+      this.currentPlayerBulletGroup.name = 'currentPlayerBulletGroup';
+      this.currentPlayerBulletGroup.bulletSpeed = 600;
 
       //Attach it to player.bulletGroup
-      currentPlayerSprite.bulletGroup = currentPlayerBulletGroup;
+      currentPlayerSprite.bulletGroup = this.currentPlayerBulletGroup;
 
       //store on game Object
       this.currentPlayerSprite = currentPlayerSprite;
@@ -290,6 +285,7 @@ export default class ZombieGameState extends TiledState {
 
 	  //NOTE: check if remote bullets hit wallCollision - kill bullet
 	  this.game.physics.arcade.collide(this.currentPlayerBulletGroup, this.layers.wallCollision, this.bulletHitWall, null, this);
+    this.game.physics.arcade.collide(this.remotePlayerBulletGroup, this.layers.wallCollision, this.bulletHitWall, null, this);
   }
 
 
