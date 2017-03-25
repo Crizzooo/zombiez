@@ -3,7 +3,7 @@ import _ from 'lodash';
 const throttle = require('lodash.throttle');
 
 import store from '../store.js';
-import {updateCurrentPlayer, playerLeaveGame} from '../reducers/players-reducer.js';
+import {updateCurrentPlayer, playerLeaveGame, removeFireObjects} from '../reducers/players-reducer.js';
 import emitCurrentState from '../engine/emitCurrentState.js';
 
 //Import game plugins and tiledstate
@@ -182,9 +182,10 @@ export default class ZombieGameState extends TiledState {
 	  //If there are remote clients, update their stuff
     if (!_.isEmpty(remotePlayerSprites)) {
 	    this.throttledUpdateRemotePlayers();
+      this.throttledRPS();
+      store.dispatch(removeFireObjects);
+      //remove all fire objects from remote player states
     }
-
-    this.throttledRPS();
   }
 
   //////////////////////////
@@ -324,6 +325,7 @@ export default class ZombieGameState extends TiledState {
         console.log('hes got a fire event for us!', playerState.fire);
         //Remote player shoot
         playerToUpdate.gun.shoot(playerToUpdate, self.remoteBulletGroup);
+        //update that player fire to nothing
       }
 
       handleRemoteAnimation(playerToUpdate);

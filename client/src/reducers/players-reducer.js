@@ -12,6 +12,7 @@ const PLAYER_LEAVE_GAME = 'PLAYER_LEAVE_GAME';
 const RESET_PLAYERS = 'RESET_PLAYERS';
 const REMOVE_CURRENT_PLAYER = 'REMOVE_CURRENT_PLAYER';
 const PLAYER_FIRED = 'PLAYER_FIRED';
+const REMOVE_FIRE_OBJECTS = 'REMOVE_FIRE_OBJECTS';
 
 /* Action Creators */
 export const loadMessage = message => ({ type: CHANGE_MESSAGE, message });
@@ -44,6 +45,9 @@ export const playerFired = (toX, toY, socketId) => ({
     toY,
     socketId
   }
+})
+export const removeFireObjects = () => ({
+  type: REMOVE_FIRE_OBJECTS
 })
 //Note: addPlayer can probably be removed from file but will keep for now in case we change structure
 const initialState = {
@@ -117,9 +121,18 @@ export default (state = initialState, action) => {
         newState.currentPlayer = newPlayerState;
         break;
 
+    case REMOVE_FIRE_OBJECTS:
+      let newPlayerStates = Object.assign({}, state.playerStates);
+      R.forEachObjIndexed(newPlayerStates, removeFireObject);
+      break;
+
     default:
       return state;
   }
 
   return newState;
 };
+
+function removeFireObject(playerState){
+  console.log('removing fire object from this playerState: ', playerState);
+}
