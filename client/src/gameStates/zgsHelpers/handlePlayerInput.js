@@ -16,7 +16,7 @@ export function handleInput(player) {
 			//Shoot method will dispatch a fire obj to the store if its current player
 			//Store will send this out on next update, and then clear the obj
 			//Server should send it out and then clear the obj as well
-			player.gun.shoot(player, player.gun.gunBullets);
+			player.gun.shoot(player);
 		}
 
 		//TODO: use onDown instead? Need to set a previous animation

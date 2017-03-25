@@ -95,11 +95,36 @@ export default class ZombieGameState extends TiledState {
     //this.camera.view = new Phaser.Rectangle(0, 0, this.currentPlayer.position.x, this.currentPlayer.position.y);
     this.game.world.setBounds(-250, -250, 3200 + 250, 3200 + 250);
 
+    //Create Bullet Groups
+    //Current Player
+    //TODO: Rip out if loadLevel is working
+    // let currentPlayerBulletGroup = this.game.add.group();
+    // currentPlayerBulletGroup.enableBody = true;
+    // currentPlayerBulletGroup.physicsBodyType = Phaser.Physics.ARCADE;
+    // currentPlayerBulletGroup.setAll('outOfBoundsKill', true);
+    // currentPlayerBulletGroup.setAll('checkWorldBounds', true);
+    // currentPlayerBulletGroup.name = 'currentPlayerBulletGroup';
+    // currentPlayerBulletGroup.bulletSpeed = 600;
+    // //Remote Player
+    // let remotePlayerBulletGroup = this.game.add.group();
+    // remotePlayerBulletGroup.enableBody = true;
+    // remotePlayerBulletGroup.physicsBodyType = Phaser.Physics.ARCADE;
+    // remotePlayerBulletGroup.setAll('outOfBoundsKill', true);
+    // remotePlayerBulletGroup.setAll('checkWorldBounds', true);
+    // remotePlayerBulletGroup.name = 'remotePlayerBulletGroup';
+    // remotePlayerBulletGroup.bulletSpeed = 600;
+
+
+    // this.game = game;
+
 
     //set interval to emit currentPlayer to server
     //if we have a current player
     if (currentPlayerSprite) {
-      currentPlayerSprite.gun.initializeWeapon(this);
+      //No more initialize Weapon, just add bullet group to sprite instead
+      // currentPlayerSprite.gun.initializeWeapon(this);
+      // currentPlayerSprite.bulletGroup = currentPlayerBulletGroup;
+
       this.pointer = crosshair;
 
       //add to world
@@ -113,7 +138,9 @@ export default class ZombieGameState extends TiledState {
       //Only follow current player if we have a current player
       this.camera.follow(currentPlayerSprite);
     } else {
-      //follow the first remote player
+      //follow the first remote player if you are a spectator
+      //TODO: let spectators change who they are viewing
+      // OR:  set a timeout to switch between player views
       let remotePlayerOneId = Object.keys(remotePlayerSprites)[0];
       this.camera.follow(remotePlayerSprites[remotePlayerOneId]);
     }
@@ -184,7 +211,7 @@ export default class ZombieGameState extends TiledState {
 	    // this.throttledUpdateRemotePlayers();
       this.updateRemotePlayers();
       this.throttledRPS();
-      store.dispatch(removeFireObjects());
+      // store.dispatch(removeFireObjects());
       //remove all fire objects from remote player states
     }
   }
@@ -218,11 +245,24 @@ export default class ZombieGameState extends TiledState {
           },
         }, {x: 225, y: 225}); //change to new location from server
 
-      currentPlayerSprite = playerPrefab;
-      this.currentPlayerSprite = currentPlayerSprite;
+
+      //NOTE: Add bulletGroup to current player sprite
+      //Create Bullet Groups
+      //Current Player
+      let currentPlayerBulletGroup = this.game.add.group();
+      currentPlayerBulletGroup.enableBody = true;
+      currentPlayerBulletGroup.physicsBodyType = Phaser.Physics.ARCADE;
+      currentPlayerBulletGroup.setAll('outOfBoundsKill', true);
+      currentPlayerBulletGroup.setAll('checkWorldBounds', true);
+      currentPlayerBulletGroup.name = 'currentPlayerBulletGroup';
+      currentPlayerBulletGroup.bulletSpeed = 600;
+      //Attach it to player.bulletGroup
+      playerPrefab.bulletGroup = currentPlayerBulletGroup;
 
       //store on game Object
       console.log('created current Player: ', currentPlayerSprite);
+      currentPlayerSprite = playerPrefab;
+      this.currentPlayerSprite = currentPlayerSprite;
 
       //create currentPlayer
       let currPlayerState = {
@@ -242,6 +282,20 @@ export default class ZombieGameState extends TiledState {
       store.dispatch(updateCurrentPlayer(currPlayerState));
       console.log('end of load level local store looks like: ', store.getState());
     }
+
+    //Now initialize for Remote Player Sprites
+
+    //create group for remote bullets
+    //Remote Player
+    let remotePlayerBulletGroup = this.game.add.group();
+    remotePlayerBulletGroup.enableBody = true;
+    remotePlayerBulletGroup.physicsBodyType = Phaser.Physics.ARCADE;
+    remotePlayerBulletGroup.setAll('outOfBoundsKill', true);
+    remotePlayerBulletGroup.setAll('checkWorldBounds', true);
+    remotePlayerBulletGroup.name = 'remotePlayerBulletGroup';
+    remotePlayerBulletGroup.bulletSpeed = 600;
+    this.remotePlayerBulletGroup = remotePlayerBulletGroup;
+
 
     console.log('Creating Sprites for each player in this: ', state.players.playerStates);
     R.forEachObjIndexed(this.createRemotePlayerSprite, state.players.playerStates);
@@ -387,10 +441,18 @@ export default class ZombieGameState extends TiledState {
             socketId: playerState.socketId
           },
         }, {x: playerState.x, y: playerState.y});
+
+      //TODO: Add bullet group to the player prefab
+
       self.game.add.existing(playerPrefab);
+      //This can go
+      // remotePlayerSprites[playerState.socketId].gun.initializeWeapon(self);
+      playerPrefab.bulletGroup = self.remotePlayerBulletGroup;
+
+      //add it to our RPS global obj
       remotePlayerSprites[playerState.socketId] = playerPrefab;
-      remotePlayerSprites[playerState.socketId].gun.initializeWeapon(self);
-      console.log('the created player sprite: ', playerPrefab);
+      console.log('the created player sprite: ');
+      console.dir(playerPrefab, { depth: 4});
       console.log('updated RPS after add: ', remotePlayerSprites);
     }
   }

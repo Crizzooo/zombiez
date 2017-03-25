@@ -5,6 +5,7 @@ import store from '../store.js';
 
 
 let bulletCount = 0;
+let gameObj;
 export default class Gun extends GunPrefab {
   constructor(game, name, position, properties) {
     super(game, name, position, properties);
@@ -19,28 +20,14 @@ export default class Gun extends GunPrefab {
     this.nextFire = 0;
     this.isReloading = false;
     this.pivot.x = -10;
+    gameObj = this.game;
   }
 
-  initializeWeapon(game) {
-    // this.group = new Phaser.Group(game.game, game.world, 'Single Bullet', false, true, Phaser.Physics.ARCADE);
-    this.gunBullets = game.game.add.group();
-    this.gunBullets.enableBody = true;
-    // this.gunBullets.nextFire = 10000;
-    this.gunBullets.physicsBodyType = Phaser.Physics.ARCADE;
-    this.gunBullets.setAll('outOfBoundsKill', true);
-    this.gunBullets.setAll('checkWorldBounds', true);
-
-    this.gunBullets.name = 'currentPlayerBulletGroup';
-
-    this.gunBullets.bulletSpeed = 600;
-
-
-    this.game = game;
-  }
-
-  shoot(player, group) {
+  //TODO: move bullet speed to the gun, and have shoot method go off of player.gun.bulletSpeed
+  shoot(player) {
+    console.log('shoot received player: ', player);
     //NOTE: shoot gets called with currentPlayerSprite.gun.gunBullets OR game.remoteBulletGroup, if shoot is being called due to a server 'remoteFire' emit
-    let bulletGroup = group;
+    let bulletGroup = player.bulletGroup;
 
     if (this.ammo === 0 || this.game.time.time < this.nextFire) {
       if(this.isReloading) {
@@ -56,6 +43,7 @@ export default class Gun extends GunPrefab {
     let x = player.x;
     let y = player.y;
     if(!bullet){
+      console.log('game and cahce: ', this.game);
       bullet = new Bullet(this.game, 'bullet', {x : this.x , y: this.y}, {
         //NOTE: we can reimplement 'group' here if needed
         initial: 1,
@@ -65,7 +53,7 @@ export default class Gun extends GunPrefab {
     } else {
       bullet.reset(x, y);
     }
-    bullet.rotation = this.game.physics.arcade.moveToXY(bullet, player.pointerX, player.pointerY, this.gunBullets.bulletSpeed);
+    bullet.rotation = this.game.physics.arcade.moveToXY(bullet, player.pointerX, player.pointerY, bulletGroup.bulletSpeed);
     bullet.shooterSocketId = player.socketId;
     this.ammo--;
     if (player.socketId === socket.id){
