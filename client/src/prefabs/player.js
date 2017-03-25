@@ -24,7 +24,7 @@ export default class Player extends Prefab {
     //TODO: make it only visible to the current player
     //Load Hearts, Healthbar, Animations
 	  console.log('do we have sockets here', socket);
-    this.socketId = socket.id;
+    this.socketId = properties.socketId;
 
 
 

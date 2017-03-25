@@ -101,8 +101,8 @@ io.on('connection', (socket) => {
 
   socket.on('clientUpdate', (playerState) => {
     //TODO: break state down and dispatch to appropriate reducers
-    console.log('server heard client update with: ', playerState);
-    console.log('this client told the server to update: ', socket.id);
+    // console.log('server heard client update with: ', playerState);
+    // console.log('this client told the server to update: ', socket.id);/
     store.dispatch(updatePlayer(playerState));
   });
 

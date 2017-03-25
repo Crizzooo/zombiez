@@ -41,6 +41,7 @@ const damagePlayer = (dmgToTake, socketId) => ({
 
 const initialState = { playerStates: {}, playerHealths: {} };
 
+const bulletID = 0;
 const playerReducers = (state = initialState, action) => {
   let newState = Object.assign({}, state);
   switch (action.type) {
@@ -58,12 +59,12 @@ const playerReducers = (state = initialState, action) => {
     }
 
     case UPDATE_PLAYER: {
-      console.log('Update received this action: ', action);
+      // console.log('Update received this action: ', action);
       let newPlayerStates = Object.assign({}, state.playerStates);
       newPlayerStates[action.playerToUpdate.socketId] = action.playerToUpdate;
-      if (action.playerToUpdate.fire){
+      if (action.playerToUpdate.fire && action.playerToUpdate.fire.toX){
         console.log('server got a fire object!');
-        console.dir(action.playerToUpdate);
+        console.dir(action.playerToUpdate.fire, { depth: 4 });
       }
       if (!action.playerToUpdate.socketId){
         return state;

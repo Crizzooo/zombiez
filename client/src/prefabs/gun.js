@@ -1,5 +1,7 @@
 import GunPrefab from './GunPrefab';
 import Bullet from './bullet';
+import {playerFired} from '../reducers/players-reducer.js';
+import store from '../store.js';
 
 export default class Gun extends GunPrefab {
   constructor(game, name, position, properties) {
@@ -58,15 +60,23 @@ export default class Gun extends GunPrefab {
         texture: 'pistolSpriteSheet'
       });
       bulletGroup.add(bullet);
-
-      //Change bullet ui
-	    player.clipUpdate();
     } else {
       bullet.reset(x, y);
     }
     bullet.rotation = this.game.physics.arcade.moveToXY(bullet, player.pointerX, player.pointerY, this.gunBullets.bulletSpeed);
     bullet.shooterSocketId = player.socketId;
     this.ammo--;
+    if (player.socketId === socket.id){
+      console.log('player socketId: ', player.socketId);
+      console.log('my socket id: ', socket.id);
+      console.log('current player fired a gun, so we will update our state with the fire obj');
+      console.log('shooting with :', player.pointerX, player.pointerY);
+			store.dispatch(playerFired(player.pointerX, player.pointerY, socket.id));
+      //Change bullet ui for current player
+      player.clipUpdate();
+    } else {
+      console.log('remote player just fired!');
+    }
   }
 
 

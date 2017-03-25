@@ -35,7 +35,7 @@ export default class ZombieGameState extends TiledState {
     //Attach and bind functions
     this.destroyCurrentPlayerSprite = this.destroyCurrentPlayerSprite.bind(this);
     this.handleRemotePlayerLeave = this.handleRemotePlayerLeave.bind(this);
-    this.throttledUpdateRemotePlayers = throttle(this.updateRemotePlayers.bind(this), 32);
+    this.throttledUpdateRemotePlayers = throttle(this.updateRemotePlayers.bind(this), 34);
 
 
     //Throttled Console logs
@@ -293,10 +293,12 @@ export default class ZombieGameState extends TiledState {
 
   //TODO: move remote player updates to other file
   updateRemotePlayers() {
-    console.log('updating remote players has been called');
+    // console.log('updating remote players has been called');
     this.players = store.getState().players.playerStates;
+    console.log('player to update: ', this.players);
     if (this.players[socket.id]) delete this.players[socket.id];
     //then update each player from the server
+    console.log('after removing self?: ', this.players);
     R.forEachObjIndexed(this.updateRemotePlayer, this.players);
   }
 
@@ -314,9 +316,14 @@ export default class ZombieGameState extends TiledState {
       playerToUpdate.gun.rotation = playerState.gunRotation;
 
       //if fire
-      if (playerState.fire) {
-        console.log('hes got a fire event for us!');
+      if (playerState.fire && playerState.fire.toX) {
+        console.log('inspecting playerToUpdate: ');
+        console.dir(playerToUpdate, { depth: 3 });
+        playerToUpdate.pointerX = playerState.fire.toX;
+        playerToUpdate.pointerY = playerState.fire.toY;
+        console.log('hes got a fire event for us!', playerState.fire);
         //Remote player shoot
+        playerToUpdate.gun.shoot(playerToUpdate, self.remoteBulletGroup);
       }
 
       handleRemoteAnimation(playerToUpdate);

@@ -37,11 +37,12 @@ export const resetPlayers = () => ({
 export const removeCurrentPlayer = () => ({
   type: REMOVE_CURRENT_PLAYER
 })
-export const playerFired = (toX, toY) => ({
+export const playerFired = (toX, toY, socketId) => ({
   type: PLAYER_FIRED,
   fire: {
     toX,
-    toY
+    toY,
+    socketId
   }
 })
 //Note: addPlayer can probably be removed from file but will keep for now in case we change structure
@@ -109,7 +110,8 @@ export default (state = initialState, action) => {
       let newPlayerState = Object.assign({}, state.currentPlayer, {
         fire: {
           toX: action.fire.toX,
-          toY: action.fire.toY
+          toY: action.fire.toY,
+          socketId: action.fire.socketId
         }});
         // console.log('updated CP state to include fire: ', newPlayerState);
         newState.currentPlayer = newPlayerState;
