@@ -95,35 +95,13 @@ export default class ZombieGameState extends TiledState {
     //this.camera.view = new Phaser.Rectangle(0, 0, this.currentPlayer.position.x, this.currentPlayer.position.y);
     this.game.world.setBounds(-250, -250, 3200 + 250, 3200 + 250);
 
-    //Create Bullet Groups
-    //Current Player
-    //TODO: Rip out if loadLevel is working
-    // let currentPlayerBulletGroup = this.game.add.group();
-    // currentPlayerBulletGroup.enableBody = true;
-    // currentPlayerBulletGroup.physicsBodyType = Phaser.Physics.ARCADE;
-    // currentPlayerBulletGroup.setAll('outOfBoundsKill', true);
-    // currentPlayerBulletGroup.setAll('checkWorldBounds', true);
-    // currentPlayerBulletGroup.name = 'currentPlayerBulletGroup';
-    // currentPlayerBulletGroup.bulletSpeed = 600;
-    // //Remote Player
-    // let remotePlayerBulletGroup = this.game.add.group();
-    // remotePlayerBulletGroup.enableBody = true;
-    // remotePlayerBulletGroup.physicsBodyType = Phaser.Physics.ARCADE;
-    // remotePlayerBulletGroup.setAll('outOfBoundsKill', true);
-    // remotePlayerBulletGroup.setAll('checkWorldBounds', true);
-    // remotePlayerBulletGroup.name = 'remotePlayerBulletGroup';
-    // remotePlayerBulletGroup.bulletSpeed = 600;
-
 
     // this.game = game;
 
 
     //set interval to emit currentPlayer to server
     //if we have a current player
-    if (currentPlayerSprite) {
-      //No more initialize Weapon, just add bullet group to sprite instead
-      // currentPlayerSprite.gun.initializeWeapon(this);
-      // currentPlayerSprite.bulletGroup = currentPlayerBulletGroup;
+    if (this.currentPlayerSprite) {
 
       this.pointer = crosshair;
 
@@ -136,7 +114,7 @@ export default class ZombieGameState extends TiledState {
       this.game.input.onDown.add(this.lockPointer, this);
 
       //Only follow current player if we have a current player
-      this.camera.follow(currentPlayerSprite);
+      this.camera.follow(this.currentPlayerSprite);
     } else {
       //follow the first remote player if you are a spectator
       //TODO: let spectators change who they are viewing
@@ -169,11 +147,11 @@ export default class ZombieGameState extends TiledState {
   update() {
     //Check collisions
     //NOTE: only check CPS collissions if we do have a CPS
-    if (currentPlayerSprite){
-      this.game.physics.arcade.collide(currentPlayerSprite, this.layers.backgroundDecCollision);
-      this.game.physics.arcade.collide(currentPlayerSprite, this.layers.backgroundDecCollision2);
-      this.game.physics.arcade.collide(currentPlayerSprite, this.layers.waterCollision);
-      this.game.physics.arcade.collide(currentPlayerSprite, this.layers.wallCollision);
+    if (this.currentPlayerSprite){
+      this.game.physics.arcade.collide(this.currentPlayerSprite, this.layers.backgroundDecCollision);
+      this.game.physics.arcade.collide(this.currentPlayerSprite, this.layers.backgroundDecCollision2);
+      this.game.physics.arcade.collide(this.currentPlayerSprite, this.layers.waterCollision);
+      this.game.physics.arcade.collide(this.currentPlayerSprite, this.layers.wallCollision);
 
       //NOTE: check if remote bullets hit wallCollision - kill bullet
       // this.game.physics.arcade.collide(currentPlayerSprite.gun.gunBullets, this.layers.wallCollision, this.bulletHitWall, null, this);
@@ -189,12 +167,12 @@ export default class ZombieGameState extends TiledState {
 
       //Server & Input
       //every 32ms send package to server with position
-      handleInput(currentPlayerSprite);
+      handleInput(this.currentPlayerSprite);
       this.dispatchCurrentPlayer();
 
       //Tween all player assets
       //Remote and current
-      tweenCurrentPlayerAssets(currentPlayerSprite, this);
+      tweenCurrentPlayerAssets(this.currentPlayerSprite, this);
 
 
       //collisions for remoteBulletGroups
@@ -234,7 +212,7 @@ export default class ZombieGameState extends TiledState {
       currentPlayer = state.players.currentPlayer;
 
       //TODO: make server assign sprite keys
-      let playerPrefab = this.createPrefab(currentPlayer.name,
+      let currentPlayerSprite = this.createPrefab(currentPlayer.name,
         {
           type: 'player',
           properties: {
@@ -256,12 +234,11 @@ export default class ZombieGameState extends TiledState {
       currentPlayerBulletGroup.setAll('checkWorldBounds', true);
       currentPlayerBulletGroup.name = 'currentPlayerBulletGroup';
       currentPlayerBulletGroup.bulletSpeed = 600;
+
       //Attach it to player.bulletGroup
-      playerPrefab.bulletGroup = currentPlayerBulletGroup;
+      currentPlayerSprite.bulletGroup = currentPlayerBulletGroup;
 
       //store on game Object
-      console.log('created current Player: ', currentPlayerSprite);
-      currentPlayerSprite = playerPrefab;
       this.currentPlayerSprite = currentPlayerSprite;
 
       //create currentPlayer
@@ -287,60 +264,47 @@ export default class ZombieGameState extends TiledState {
 
     //create group for remote bullets
     //Remote Player
-    let remotePlayerBulletGroup = this.game.add.group();
-    remotePlayerBulletGroup.enableBody = true;
-    remotePlayerBulletGroup.physicsBodyType = Phaser.Physics.ARCADE;
-    remotePlayerBulletGroup.setAll('outOfBoundsKill', true);
-    remotePlayerBulletGroup.setAll('checkWorldBounds', true);
-    remotePlayerBulletGroup.name = 'remotePlayerBulletGroup';
-    remotePlayerBulletGroup.bulletSpeed = 600;
-    this.remotePlayerBulletGroup = remotePlayerBulletGroup;
+    this.remotePlayerBulletGroup = this.game.add.group();
+    this.remotePlayerBulletGroup.enableBody = true;
+    this.remotePlayerBulletGroup.physicsBodyType = Phaser.Physics.ARCADE;
+    this.remotePlayerBulletGroup.setAll('outOfBoundsKill', true);
+    this.remotePlayerBulletGroup.setAll('checkWorldBounds', true);
+    this.remotePlayerBulletGroup.name = 'remotePlayerBulletGroup';
+    this.remotePlayerBulletGroup.bulletSpeed = 600;
 
-
-    console.log('Creating Sprites for each player in this: ', state.players.playerStates);
-    R.forEachObjIndexed(this.createRemotePlayerSprite, state.players.playerStates);
 
     //TODO - create player sprite group using all in RPS, and CP sprite
-    this.playerSpriteGroup = this.game.add.group();
+    this.remotePlayerSpriteGroup = this.game.add.group();
+    this.remotePlayerSpriteGroup.name = 'remotePlayerSpriteGroup';
+    R.forEachObjIndexed(this.createRemotePlayerSprite, state.players.playerStates);
 
-    //if current player, add to group
-    if (currentPlayerSprite) {
-      this.playerSpriteGroup.add(currentPlayerSprite);
-    }
-
-    R.forEachObjIndexed(this.addRemotePlayerToGroup, remotePlayerSprites);
-
-    console.log('our player sprite group length: ', this.playerSpriteGroup.length);
-
-    //TODO initialize game.remoteBulletGroup
-    //TODO: call gun.shoot with this bulletGroup when a remote player is firing
-    this.remoteBulletGroup = this.game.add.group();
-    this.remoteBulletGroup.name = 'remoteBulletGroup';
+    console.log('our remote player sprite group: ', this.remotePlayerSpriteGroup.length);
+    console.dir(this.remotePlayerSpriteGroup);
   }
 
   updateCollisions () {
-	  this.game.physics.arcade.collide(currentPlayerSprite, this.layers.backgroundDecCollision);
-	  this.game.physics.arcade.collide(currentPlayerSprite, this.layers.backgroundDecCollision2);
-	  this.game.physics.arcade.collide(currentPlayerSprite, this.layers.waterCollision);
-	  this.game.physics.arcade.collide(currentPlayerSprite, this.layers.wallCollision);
+	  this.game.physics.arcade.collide(this.currentPlayerSprite, this.layers.backgroundDecCollision);
+	  this.game.physics.arcade.collide(this.currentPlayerSprite, this.layers.backgroundDecCollision2);
+	  this.game.physics.arcade.collide(this.currentPlayerSprite, this.layers.waterCollision);
+	  this.game.physics.arcade.collide(this.currentPlayerSprite, this.layers.wallCollision);
 
 	  //NOTE: check if remote bullets hit wallCollision - kill bullet
-	  this.game.physics.arcade.collide(currentPlayerSprite.gun.gunBullets, this.layers.wallCollision, this.bulletHitWall, null, this);
+	  this.game.physics.arcade.collide(this.currentPlayerBulletGroup, this.layers.wallCollision, this.bulletHitWall, null, this);
   }
 
 
 
   dispatchCurrentPlayer() {
     let currentPlayer = {
-      x: currentPlayerSprite.x,
-      y: currentPlayerSprite.y,
-      name: currentPlayerSprite.name,
-      animationDirection: currentPlayerSprite.direction,
-	    gunRotation: currentPlayerSprite.gun.rotation,
+      x: this.currentPlayerSprite.x,
+      y: this.currentPlayerSprite.y,
+      name: this.currentPlayerSprite.name,
+      animationDirection: this.currentPlayerSprite.direction,
+	    gunRotation: this.currentPlayerSprite.gun.rotation,
       socketId: socket.id,
-      pointerX: currentPlayerSprite.pointerX,
-      pointerY: currentPlayerSprite.pointerY,
-      health: currentPlayerSprite.stats.health
+      pointerX: this.currentPlayerSprite.pointerX,
+      pointerY: this.currentPlayerSprite.pointerY,
+      health: this.currentPlayerSprite.stats.health
     }
     // console.log('just attached socket.id', socket.id);
     // console.log('my new CP obj: ', currentPlayer.socketId);
@@ -443,17 +407,16 @@ export default class ZombieGameState extends TiledState {
         }, {x: playerState.x, y: playerState.y});
 
       //TODO: Add bullet group to the player prefab
-
-      self.game.add.existing(playerPrefab);
-      //This can go
-      // remotePlayerSprites[playerState.socketId].gun.initializeWeapon(self);
       playerPrefab.bulletGroup = self.remotePlayerBulletGroup;
+      //Add remote sprite to the remotePlayerSpriteGroup
+      self.game.add.existing(playerPrefab);
+      self.remotePlayerSpriteGroup.add(playerPrefab);
 
-      //add it to our RPS global obj
+
       remotePlayerSprites[playerState.socketId] = playerPrefab;
-      console.log('the created player sprite: ');
+
+
       console.dir(playerPrefab, { depth: 4});
-      console.log('updated RPS after add: ', remotePlayerSprites);
     }
   }
 
@@ -509,17 +472,17 @@ export default class ZombieGameState extends TiledState {
     console.log('CPS: ', currentPlayerSprite);
   }
 
-  addRemotePlayerToGroup(remotePlayerSprite){
-    console.log('adding this RP to group: ', remotePlayerSprite);
-    self.playerSpriteGroup.add(remotePlayerSprite);
-  }
+  // addRemotePlayerToGroup(remotePlayerSprite){
+  //   console.log('adding this RP to group: ', remotePlayerSprite);
+  //   self.remotePlayerSpriteGroup.add(remotePlayerSprite);
+  // }
 
   bulletHitWall(bullet, layer){
-    // console.log('this bullet has hit a wall: ', bullet);
+    console.log('this bullet has hit a wall: ', bullet);
     if (bullet.parent.name === 'currentPlayerBulletGroup'){
-      // console.log('i just hit a fucking wall, I suck');
-    } else if (bullet.parent.name === 'remoteBulletGroup') {
-      // console.log('remote player bullet just hit a fucking wall, ok??');
+      console.log('i just hit a fucking wall, I suck');
+    } else if (bullet.parent.name === 'remotePlayerBulletGroup') {
+      console.log('remote player bullet just hit a fucking wall, ok??');
     }
     bullet.kill();
   }
