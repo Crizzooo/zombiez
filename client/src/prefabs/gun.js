@@ -3,6 +3,8 @@ import Bullet from './bullet';
 import {playerFired} from '../reducers/players-reducer.js';
 import store from '../store.js';
 
+import { EVENT_LOOP_DELETE_TIME } from '../engine/gameConstants.js';
+
 
 let bulletCount = 0;
 let gameObj;
@@ -52,6 +54,7 @@ export default class Gun extends GunPrefab {
     } else {
       bullet.reset(x, y);
     }
+    console.log('what is my bullet speed: ', bulletGroup.bulletSpeed);
     bullet.rotation = this.game.physics.arcade.moveToXY(bullet, player.pointerX, player.pointerY, bulletGroup.bulletSpeed);
     bullet.shooterSocketId = player.socketId;
     this.ammo--;
@@ -70,7 +73,7 @@ export default class Gun extends GunPrefab {
 
       setTimeout( () => {
         delete this.game.currentPlayerSprite.bulletHash[bulletId];
-      }, 1000)
+      }, EVENT_LOOP_DELETE_TIME)
 			// store.dispatch(playerFired(player.pointerX, player.pointerY, socket.id, bulletId));
       //Change bullet ui for current player
       player.clipUpdate();

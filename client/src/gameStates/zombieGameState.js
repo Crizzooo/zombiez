@@ -15,7 +15,7 @@ import Lighting from '../plugins/Lighting';
 import { handleInput, tweenCurrentPlayerAssets } from './zgsHelpers/handlePlayerInput';
 import handleRemoteAnimation, { tweenRemoteAssets } from './zgsHelpers/handleRemoteAnimation'
 
- const PLAYER_HEALTH = require('../engine/gameConstants.js').PLAYER_HEALTH;
+ import { PLAYER_HEALTH, EVENT_LOOP_DELETE_TIME, STARTING_BULLET_SPEED } from '../engine/gameConstants.js';
 
 //TODO: do we need this?
 // currentPlayerSprite and remotePlayerSprites are on global window
@@ -230,7 +230,7 @@ export default class ZombieGameState extends TiledState {
       this.currentPlayerBulletGroup.setAll('outOfBoundsKill', true);
       this.currentPlayerBulletGroup.setAll('checkWorldBounds', true);
       this.currentPlayerBulletGroup.name = 'currentPlayerBulletGroup';
-      this.currentPlayerBulletGroup.bulletSpeed = 600;
+      this.currentPlayerBulletGroup.bulletSpeed = STARTING_BULLET_SPEED;
 
       //Attach it to player.bulletGroup
       currentPlayerSprite.bulletGroup = this.currentPlayerBulletGroup;
@@ -270,7 +270,7 @@ export default class ZombieGameState extends TiledState {
     this.remotePlayerBulletGroup.setAll('outOfBoundsKill', true);
     this.remotePlayerBulletGroup.setAll('checkWorldBounds', true);
     this.remotePlayerBulletGroup.name = 'remotePlayerBulletGroup';
-    this.remotePlayerBulletGroup.bulletSpeed = 600;
+    this.remotePlayerBulletGroup.bulletSpeed = STARTING_BULLET_SPEED;
 
 
     //TODO - create player sprite group using all in RPS, and CP sprite
@@ -506,11 +506,9 @@ export default class ZombieGameState extends TiledState {
       console.log('bullet hit player');
       console.log('bullet: ', bullet );
       console.log('hit player: ', player);
-      // if (bullet.shooterSocketId === player.socketId){
-      //   console.log('CANNOT BE DAMAGED BY OWN BULLET');
-      //   return;
-      // }
-      if (bullet.parent.name === 'currentPlayerBulletGroup'){
+      if (bullet.shooterSocketId === player.socketId){
+        return;
+      } else if (bullet.parent.name === 'currentPlayerBulletGroup'){
         //TODO: emit to server
         console.log('my player:', self.currentPlayerSprite);
         // socket.emit('shotPlayer', player.socketId, currentPlayerSprite.gun.damage);
@@ -543,13 +541,18 @@ export default class ZombieGameState extends TiledState {
     let playerWhoFired = remotePlayerSprites[bulletEvent.socketId];
     //value is our bullet event
     //key is our bullet ID
+
+    // we make the timeout a little longer than how long the client emits for, in case we getState
+    // a delayed server update after weve cleared our bullet process
+    // we do not want to process the bullet again
     if (this.bulletHash[bulletId] !== true){
       playerWhoFired.gun.shoot(playerWhoFired);
       this.bulletHash[bulletId] = true;
       setTimeout( () => {
         delete this.bulletHash[bulletId];
-      }, 2000);
+      }, EVENT_LOOP_DELETE_TIME * 1.5);
     }
+
 
     //if key is not in our hash map
         //call shoot
