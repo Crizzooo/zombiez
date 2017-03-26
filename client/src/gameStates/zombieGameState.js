@@ -287,7 +287,7 @@ export default class ZombieGameState extends TiledState {
 	  this.game.physics.arcade.collide(this.currentPlayerSprite, this.layers.wallCollision);
 
     //Note: not sure why this doesnt work - remotePlayerSpriteGroup?
-    this.game.physics.arcade.collide(this.currentPlayerSprite, this.remotePlayerSpriteGroup, () => console.log('players colldiing') );
+    this.game.physics.arcade.overlap(this.remotePlayerSpriteGroup, this.currentPlayerSprite, this.bulletHitWall );
 
     //this works
 	  this.game.physics.arcade.collide(this.currentPlayerBulletGroup, this.layers.wallCollision, this.bulletHitWall, null, this);
@@ -298,11 +298,11 @@ export default class ZombieGameState extends TiledState {
     //this works
     this.game.physics.arcade.collide(this.currentPlayerSprite, this.remotePlayerBulletGroup, this.bulletHitPlayer, null, this);
 
-    //this doesnt - problem with remotePlayerSprite group?
-    // console.log('what is RPSG looking like in collide: ', this.remotePlayerSpriteGroup);
+    //thjis works
     this.game.physics.arcade.collide(this.remotePlayerSpriteGroup, this.currentPlayerBulletGroup, this.bulletHitPlayer, null, this);
 
-    // this.game.physics.arcade.collide(this.remotePlayerSpriteGroup, this.remotePlayerBulletGroup, this.bulletHitPlayer, null, this);
+    //needs to be tested
+    this.game.physics.arcade.collide(this.remotePlayerSpriteGroup, this.remotePlayerBulletGroup, this.bulletHitPlayer, null, this);
 
   }
 
