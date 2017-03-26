@@ -92,6 +92,10 @@ export default class ZombieGameState extends TiledState {
     this.currentEnemy.moveTo = throttle(this.currentEnemy.moveTo, 1000);
     this.currentEnemy.animations.play('left');
 
+    this.enemyGroup = this.game.add.group();
+    this.enemyGroup.name = 'enemySpriteGroup';
+    this.enemyGroup.add(enemyPrefab);
+
     //Remote Player Movement
     //This gets us the first player from the remote players
     console.log('this is remote player sprites', remotePlayerSprites);
@@ -151,15 +155,7 @@ export default class ZombieGameState extends TiledState {
 
   update() {
     //Check collisions
-    //NOTE: only check CPS collissions if we do have a CPS
     if (this.currentPlayerSprite){
-      //NOTE: check if remote bullets hit wallCollision - kill bullet
-      // this.game.physics.arcade.collide(currentPlayerSprite.gun.gunBullets, this.layers.wallCollision, this.bulletHitWall, null, this);
-
-
-      //NOTE: check if own bullets hit playerSprites - emit a hit
-      // this.game.physics.arcade.collide(currentPlayerSprite.gun.gunBullets, this.playerSpriteGroup, this.bulletHitPlayer, null, this);
-
       this.updateCollisions();
 
       //Set up local client lighting
@@ -173,12 +169,6 @@ export default class ZombieGameState extends TiledState {
       //Tween all player assets
       //Remote and current
       tweenCurrentPlayerAssets(this.currentPlayerSprite, this);
-
-
-      //collisions for remoteBulletGroups
-      // this.game.physics.arcade.collide(this.remoteBulletGroup, this.layers.wallCollision, this.bulletHitWall, null, this)
-  	  // this.game.physics.arcade.collide(this.remoteBulletGroup, this.playerSpriteGroup, this.bulletHitPlayer, null, this);
-
     }
 
 
@@ -291,7 +281,7 @@ export default class ZombieGameState extends TiledState {
 	  this.game.physics.arcade.collide(this.currentPlayerSprite, this.layers.wallCollision);
 
     //Note: not sure why this doesnt work - remotePlayerSpriteGroup?
-    this.game.physics.arcade.overlap(this.remotePlayerSpriteGroup, this.currentPlayerSprite, this.bulletHitWall );
+    this.game.physics.arcade.collide(this.remotePlayerSpriteGroup, this.currentPlayerSprite );
 
     //this works
 	  this.game.physics.arcade.collide(this.currentPlayerBulletGroup, this.layers.wallCollision, this.bulletHitWall, null, this);
@@ -302,11 +292,17 @@ export default class ZombieGameState extends TiledState {
     //this works
     this.game.physics.arcade.collide(this.currentPlayerSprite, this.remotePlayerBulletGroup, this.bulletHitPlayer, null, this);
 
-    //thjis works
+    //this works
     this.game.physics.arcade.collide(this.remotePlayerSpriteGroup, this.currentPlayerBulletGroup, this.bulletHitPlayer, null, this);
 
-    //needs to be tested
+    //this works
     this.game.physics.arcade.collide(this.remotePlayerSpriteGroup, this.remotePlayerBulletGroup, this.bulletHitPlayer, null, this);
+
+    //CP Bullets & ZombieGameState
+    this.game.physics.arcade.collide(this.enemyGroup, this.currentPlayerBulletGroup,  this.bulletHitZombie, null, this);
+
+    //RP Bullets & Zombiez
+    this.game.physics.arcade.collide(this.enemyGroup, this.remotePlayerBulletGroup,  this.bulletHitZombie, null, this);
 
   }
 
@@ -480,46 +476,45 @@ export default class ZombieGameState extends TiledState {
   // }
 
   bulletHitWall(bullet, layer){
-    console.log('this bullet has hit a wall: ', bullet);
+    // console.log('this bullet has hit a wall: ', bullet);
     if (bullet.parent.name === 'currentPlayerBulletGroup'){
-      console.log('i just hit a fucking wall, I suck');
+      // console.log('i just hit a fucking wall, I suck');
     } else if (bullet.parent.name === 'remotePlayerBulletGroup') {
-      console.log('remote player bullet just hit a fucking wall, ok??');
+      // console.log('remote player bullet just hit a fucking wall, ok??');
     }
     bullet.kill();
   }
 
   bulletHitZombie(zombie, bullet){
-    console.log("ZOMBZ", zombie);
+    bullet.kill();
+    console.log("ZOMBIE HIT BY BULLET", zombie, bullet);
     zombie.hit = true;
     zombie.animations.stop();
     zombie.animations.play('dead')
-    //let animationRef = zombie.animations.play('dead').animationReference.isPlaying;
-
     zombie.animations.currentAnim.onComplete.add( () => {
       zombie.kill();
     })
-    bullet.kill();
   }
 
   bulletHitPlayer(player, bullet){
+      bullet.kill();
       console.log('bullet hit player');
       console.log('bullet: ', bullet );
       console.log('hit player: ', player);
       if (bullet.shooterSocketId === player.socketId){
         return;
       } else if (bullet.parent.name === 'currentPlayerBulletGroup'){
-        //TODO: emit to server
+        //TODO: add damage event
         console.log('my player:', self.currentPlayerSprite);
-        // socket.emit('shotPlayer', player.socketId, currentPlayerSprite.gun.damage);
         console.log('I HIT SOMEONE');
+
       } else if (bullet.parent.name === 'remotePlayerBulletGroup') {
         if (player.socketId === socket.id){
           console.log(' I GOT HIT');
+        } else {
+          console.log('eh someone else hit someone');
         }
-        console.log('eh someone else hit someone');
       }
-      bullet.kill();
   }
 
   handlePlayerDamage(playerSocketId, dmgToTake){
@@ -539,24 +534,17 @@ export default class ZombieGameState extends TiledState {
 
   handleRemoteBullet(bulletEvent, bulletId){
     let playerWhoFired = remotePlayerSprites[bulletEvent.socketId];
-    //value is our bullet event
-    //key is our bullet ID
-
-    // we make the timeout a little longer than how long the client emits for, in case we getState
-    // a delayed server update after weve cleared our bullet process
-    // we do not want to process the bullet again
+    //if key is not in our hash map
     if (this.bulletHash[bulletId] !== true){
       playerWhoFired.gun.shoot(playerWhoFired);
       this.bulletHash[bulletId] = true;
+      //set a timeout to remove it from hashmap after the client has taken it off their event loop
       setTimeout( () => {
         delete this.bulletHash[bulletId];
       }, EVENT_LOOP_DELETE_TIME * 1.5);
     }
-
-
-    //if key is not in our hash map
-        //call shoot
-        //set a timeout to remove it from hashmap in 1.5 seconds
-    //if it is, just return
+    // we make the timeout a little longer than how long the client emits for, in case we
+    // getState a delayed server update after weve cleared our bullet process
+    // we do not want to process the bullet again
   }
 }
