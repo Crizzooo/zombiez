@@ -36,6 +36,7 @@ export default class ZombieGameState extends TiledState {
     this.destroyCurrentPlayerSprite = this.destroyCurrentPlayerSprite.bind(this);
     this.handleRemotePlayerLeave = this.handleRemotePlayerLeave.bind(this);
     this.throttledUpdateRemotePlayers = throttle(this.updateRemotePlayers.bind(this), 34);
+    this.createRemotePlayerSprite = this.createRemotePlayerSprite.bind(this);
 
 
     //Throttled Console logs
@@ -271,9 +272,9 @@ export default class ZombieGameState extends TiledState {
     //TODO - create player sprite group using all in RPS, and CP sprite
     this.remotePlayerSpriteGroup = this.game.add.group();
     this.remotePlayerSpriteGroup.name = 'remotePlayerSpriteGroup';
+    // this.remotePlayerSpriteGroup.enableBody = true;
+    // this.remotePlayerSpriteGroup.physicsBodyType = Phaser.Physics.ARCADE;
     R.forEachObjIndexed(this.createRemotePlayerSprite, state.players.playerStates);
-    this.remotePlayerSpriteGroup.enableBody = true;
-    this.remotePlayerSpriteGroup.physicsBodyType = Phaser.Physics.ARCADE;
 
     console.log('our remote player sprite group: ', this.remotePlayerSpriteGroup.length);
     console.dir(this.remotePlayerSpriteGroup);
@@ -285,16 +286,20 @@ export default class ZombieGameState extends TiledState {
 	  this.game.physics.arcade.collide(this.currentPlayerSprite, this.layers.waterCollision);
 	  this.game.physics.arcade.collide(this.currentPlayerSprite, this.layers.wallCollision);
 
-    //Note: not sure why this doesnt work
+    //Note: not sure why this doesnt work - remotePlayerSpriteGroup?
     this.game.physics.arcade.collide(this.currentPlayerSprite, this.remotePlayerSpriteGroup, () => console.log('players colldiing') );
 
-
+    //this works
 	  this.game.physics.arcade.collide(this.currentPlayerBulletGroup, this.layers.wallCollision, this.bulletHitWall, null, this);
+
+    //this works
     this.game.physics.arcade.collide(this.remotePlayerBulletGroup, this.layers.wallCollision, this.bulletHitWall, null, this);
 
-    // this.game.physics.arcade.collide();
+    //this works
     this.game.physics.arcade.collide(this.currentPlayerSprite, this.remotePlayerBulletGroup, this.bulletHitPlayer, null, this);
 
+    //this doesnt - problem with remotePlayerSprite group?
+    // console.log('what is RPSG looking like in collide: ', this.remotePlayerSpriteGroup);
     this.game.physics.arcade.collide(this.remotePlayerSpriteGroup, this.currentPlayerBulletGroup, this.bulletHitPlayer, null, this);
 
     // this.game.physics.arcade.collide(this.remotePlayerSpriteGroup, this.remotePlayerBulletGroup, this.bulletHitPlayer, null, this);
@@ -418,10 +423,10 @@ export default class ZombieGameState extends TiledState {
       //TODO: Add bullet group to the player prefab
       playerPrefab.bulletGroup = self.remotePlayerBulletGroup;
       //Add remote sprite to the remotePlayerSpriteGroup
-      self.game.add.existing(playerPrefab);
+      this.game.add.existing(playerPrefab);
       console.log('p prefab', playerPrefab);
-      self.remotePlayerSpriteGroup.add(playerPrefab);
-      console.log('RPSG, ', self.remotePlayerSpriteGroup);
+      this.remotePlayerSpriteGroup.children.push(playerPrefab);
+      console.log('RPSG in create remotePlayerSprites ', this.remotePlayerSpriteGroup);
 
 
       remotePlayerSprites[playerState.socketId] = playerPrefab;
