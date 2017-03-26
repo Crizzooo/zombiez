@@ -56,15 +56,12 @@ export default (state = initialState, action) => {
 
     case LOAD_PLAYERS:
       //if there is a socket id, make it current player and remove him from playerStates
-      console.log('LOAD PLAYERS IN REDUCER RECIEVED ACTION: ');
-      console.dir(action.players);
-      console.log('before we delete current player: ', action.players);
       if (action.players[socket.id]) {
         newState.currentPlayer = action.players[socket.id];
         delete action.players[socket.id];
       }
       newState.playerStates = action.players;
-      console.log('LOAD PLAYERS REDUCER newState.PlayerStates: ', action.players);
+      console.log('State after loading players: ', action.players);
       break;
 
     case SET_GAME_PLAYING_BOOL:
