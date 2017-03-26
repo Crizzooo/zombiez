@@ -240,7 +240,6 @@ export default class ZombieGameState extends TiledState {
       //add it to the world
       this.game.add.existing(currentPlayerSprite);
       store.dispatch(updateCurrentPlayer(currPlayerState));
-      console.log('end of load level local store looks like: ', store.getState());
     }
 
     //Now initialize for Remote Player Sprites
