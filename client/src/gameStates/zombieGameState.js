@@ -26,6 +26,9 @@ export default class ZombieGameState extends TiledState {
 
     //set constants for game
     self = this;
+
+    //use this to keep track of bullet updates from server
+    this.bulletHash = {};
   }
 
   init(levelData) {
@@ -37,6 +40,7 @@ export default class ZombieGameState extends TiledState {
     this.handleRemotePlayerLeave = this.handleRemotePlayerLeave.bind(this);
     this.throttledUpdateRemotePlayers = throttle(this.updateRemotePlayers.bind(this), 34);
     this.createRemotePlayerSprite = this.createRemotePlayerSprite.bind(this);
+    this.updateRemotePlayer = this.updateRemotePlayer.bind(this);
 
 
     //Throttled Console logs
@@ -234,19 +238,22 @@ export default class ZombieGameState extends TiledState {
       //Attach it to player.bulletGroup
       currentPlayerSprite.bulletGroup = this.currentPlayerBulletGroup;
 
+      currentPlayerSprite.bulletHash = {};
+
       //store on game Object
       this.currentPlayerSprite = currentPlayerSprite;
 
       //create currentPlayer
       let currPlayerState = {
-        socketId: socket.id,
         x: currentPlayerSprite.x,
         y: currentPlayerSprite.y,
-        animationDirection: currentPlayerSprite.direction,
         name: currentPlayer.name,
-        health: PLAYER_HEALTH,
+        animationDirection: currentPlayerSprite.direction,
         gunRotation: currentPlayerSprite.gun.rotation,
-        socketId: currentPlayerSprite.socketId
+        socketId: socket.id,
+        health: PLAYER_HEALTH,
+        bulletHash: currentPlayerSprite.bulletHash
+        //NOTE: pointerX and pointerY are attached in dispatch CP
         //TODO: health, fire, guns, bullets, frame? etc
       }
 
@@ -316,9 +323,15 @@ export default class ZombieGameState extends TiledState {
       animationDirection: this.currentPlayerSprite.direction,
 	    gunRotation: this.currentPlayerSprite.gun.rotation,
       socketId: socket.id,
+      health: this.currentPlayerSprite.stats.health,
+      bulletHash: this.currentPlayerSprite.bulletHash,
       pointerX: this.currentPlayerSprite.pointerX,
-      pointerY: this.currentPlayerSprite.pointerY,
-      health: this.currentPlayerSprite.stats.health
+      pointerY: this.currentPlayerSprite.pointerY
+    }
+
+    if (Object.keys(currentPlayer.bulletHash).length > 0){
+      console.log('DISPATCHED A BULLET HASH!');
+      console.dir(currentPlayer.bulletHash);
     }
     // console.log('just attached socket.id', socket.id);
     // console.log('my new CP obj: ', currentPlayer.socketId);
@@ -338,7 +351,10 @@ export default class ZombieGameState extends TiledState {
     // store.dispatch(removeFireObject());
   }
 
+
   updateRemotePlayer(playerState) {
+
+    console.log('what is this in URP? ZGS? :', this);
     if (remotePlayerSprites[playerState.socketId]) {
       let playerToUpdate = remotePlayerSprites[playerState.socketId];
       // console.log('updating this player: ', playerToUpdate);
@@ -353,6 +369,13 @@ export default class ZombieGameState extends TiledState {
 
       //if fire
       if (playerState.fire && playerState.fire.toX) {
+        //TODO: check bullet hash for bulletId
+
+            //TODO: if it doesnt exist as true, fire the bullet
+                    //then add it to hash map
+
+            //If it does exist then continue to looping
+
         // console.log('inspecting playerToUpdate: ');
         console.dir(playerToUpdate, { depth: 3 });
         playerToUpdate.pointerX = playerState.fire.toX;

@@ -55,14 +55,31 @@ export default class Gun extends GunPrefab {
     bullet.rotation = this.game.physics.arcade.moveToXY(bullet, player.pointerX, player.pointerY, bulletGroup.bulletSpeed);
     bullet.shooterSocketId = player.socketId;
     this.ammo--;
+    let bulletId;
     if (player.socketId === socket.id){
-      console.log('player socketId: ', player.socketId);
-      console.log('my socket id: ', socket.id);
-      console.log('current player fired a gun, so we will update our state with the fire obj');
-      console.log('shooting with :', player.pointerX, player.pointerY);
-      let bulletId = socket.id + bulletCount;
-			store.dispatch(playerFired(player.pointerX, player.pointerY, socket.id, bulletId));
+      bulletId = socket.id + bulletCount;
+      console.log('current player fired a gun: ');
+      console.dir(player);
+      console.log('bullet.game? :', this.game.currentPlayerSprite);
+      this.game.currentPlayerSprite.bulletHash[bulletId] = {
+        toX:      player.pointerX,
+        toY:      player.pointerY,
+        socketId: socket.id,
+        bulletId: bulletId
+      }
+      console.log('cps after adding bullet: ');
+      console.dir(this.game.currentPlayerSprite.bulletHash);
       bulletCount++;
+
+      setTimeout( () => {
+        console.log('bullet hash pre delete for socket id', bulletId);
+        console.log('this: ', this);
+        console.dir(this.game.currentPlayerSprite.bulletHash);
+        console.log('deleted?', delete this.game.currentPlayerSprite.bulletHash[bulletId]);
+        console.log('after: ');
+        console.dir(this.game.currentPlayerSprite.bulletHash);
+      }, 1000)
+			// store.dispatch(playerFired(player.pointerX, player.pointerY, socket.id, bulletId));
       //Change bullet ui for current player
       player.clipUpdate();
     } else {

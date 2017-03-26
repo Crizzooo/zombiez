@@ -40,7 +40,7 @@ export const removeCurrentPlayer = () => ({
 })
 export const playerFired = (toX, toY, socketId, bulletId) => ({
   type: PLAYER_FIRED,
-  fire: {
+  bulletObj: {
     toX,
     toY,
     socketId,
@@ -54,7 +54,9 @@ export const removeFireObjects = () => ({
 const initialState = {
   score: 0,
   playerStates: {},
-  currentPlayer: {}
+  currentPlayer: {
+    bulletHash: {}
+  }
 };
 
 /* Reducer */
@@ -88,8 +90,9 @@ export default (state = initialState, action) => {
       break;
 
     case UPDATE_CURRENT_PLAYER:
-      let updatedPlayerState = Object.assign({}, state.currentPlayer, action.currentPlayerState);
+      let updatedPlayerState = Object.assign({}, state.currentPlayer, action.currentPlayerState, { bulletHash: action.currentPlayerState.bulletHash});
       newState.currentPlayer = updatedPlayerState;
+      // console.log('updated CP to ', newState.currentPlayer);
       // console.log('updated Current Player to: ', newState.currentPlayer);
       break;
 
@@ -112,13 +115,24 @@ export default (state = initialState, action) => {
       break;
 
     case PLAYER_FIRED:
-      let newPlayerState = Object.assign({}, state.currentPlayer, {
-        fire: {
-          toX: action.fire.toX,
-          toY: action.fire.toY,
-          socketId: action.fire.socketId,
-          bulletId: action.fire.bulletId
-        }});
+      // let newPlayerState = Object.assign({}, state.currentPlayer/*, {
+      //   fire: {
+      //     toX: action.fire.toX,
+      //     toY: action.fire.toY,
+      //     socketId: action.fire.socketId,
+      //     bulletId: action.fire.bulletId
+      //   }}*/);
+        let newPlayerState = Object.assign({}, state.currentPlayer, { bulletHash: state.currentPlayer.bulletHash });
+        console.log('newPlayuerState in playerFired: ', newPlayerState);
+        let bulletId = action.bulletObj.bulletId;
+        newPlayerState.bulletHash[bulletId] = action.bulletObj;
+        setTimeout( () => {
+          console.log('bullet hash pre delete for socket id', bulletId);
+          console.dir(newPlayerState.bulletHash);
+          delete newPlayerState.bulletHash[bulletId];
+          console.log('after: ');
+          console.dir(newState.bulletHash);
+        }, 1000)
         // console.log('updated CP state to include fire: ', newPlayerState);
         newState.currentPlayer = newPlayerState;
         break;

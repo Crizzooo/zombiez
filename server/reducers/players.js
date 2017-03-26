@@ -1,4 +1,5 @@
 const R = require('ramda');
+const throttle = require('lodash').throttle;
 
 // Constants
  const PLAYER_HEALTH = require('../../client/src/engine/gameConstants.js').PLAYER_HEALTH;
@@ -47,9 +48,15 @@ const resetPlayerFires = () => ({
   type: RESET_PLAYER_FIRES
 })
 
-const initialState = { playerStates: {}, playerHealths: {} };
 
-const bulletID = 0;
+const initialState = { playerStates: {}, playerHealths: {}, bulletHash: {} };
+
+const throttleLog = throttle( () => console.log('did not recieve a hash'), 1000);
+const throttleReceiveBulletHash = throttle( (action) => {
+  console.log('server received bullet hash: ', action);
+  console.log('at :', new Date());
+}, 1000)
+
 const playerReducers = (state = initialState, action) => {
   let newState = Object.assign({}, state);
   switch (action.type) {
@@ -58,6 +65,7 @@ const playerReducers = (state = initialState, action) => {
       // console.log("Server is adding a player from: ", action.playerState);
       let newPlayerStates = Object.assign({}, state.playerStates);
       newPlayerStates[action.playerState.socketId] = action.playerState;
+      newState.bulletHash[action.playerState.socketId] = {};
       // let newPlayerHealths = Object.assign({}, state.playerHealths);
       // newPlayerHealths[action.playerState.socketId] = PLAYER_HEALTH;
       newState.playerStates = newPlayerStates;
@@ -70,10 +78,24 @@ const playerReducers = (state = initialState, action) => {
       // console.log('Update received this action: ', action);
       let newPlayerStates = Object.assign({}, state.playerStates);
       newPlayerStates[action.playerToUpdate.socketId] = action.playerToUpdate;
-      if (action.playerToUpdate.fire && action.playerToUpdate.fire.toX){
-        // console.log('server got a fire object!');
-        console.dir(action.playerToUpdate.fire, { depth: 4 });
+      if (Object.keys(action.playerToUpdate.bulletHash).length > 0){
+        throttleReceiveBulletHash(action.playerToUpdate);
+      } else {
+        throttleLog();
       }
+      // if (action.playerToUpdate.fire && action.playerToUpdate.fire.toX){
+      //   console.log('server got a fire object!');
+      //   console.dir(action.playerToUpdate.fire, { depth: 4 });
+      //   let bulletId = action.playerToUpdate.fire.bulletId;
+      //   newState.bulletHash[bulletId] = true;
+      //   setTimeout( () => {
+      //     console.log('bullet hash pre delete for socket id', bulletId);
+      //     console.dir(newState.bulletHash);
+      //     delete newState.bulletHash[bulletId];
+      //     console.log('after: ');
+      //     console.dir(newState.bulletHash);
+      //   }, 1000)
+      // }
       if (!action.playerToUpdate.socketId){
         return state;
       }
