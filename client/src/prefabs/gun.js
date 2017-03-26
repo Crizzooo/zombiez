@@ -56,33 +56,26 @@ export default class Gun extends GunPrefab {
     bullet.shooterSocketId = player.socketId;
     this.ammo--;
     let bulletId;
+
+    //Handle bullet if shot by CP so that it gets emitted to server correctly
     if (player.socketId === socket.id){
       bulletId = socket.id + bulletCount;
-      console.log('current player fired a gun: ');
-      console.dir(player);
-      console.log('bullet.game? :', this.game.currentPlayerSprite);
       this.game.currentPlayerSprite.bulletHash[bulletId] = {
         toX:      player.pointerX,
         toY:      player.pointerY,
         socketId: socket.id,
         bulletId: bulletId
       }
-      console.log('cps after adding bullet: ');
-      console.dir(this.game.currentPlayerSprite.bulletHash);
       bulletCount++;
 
       setTimeout( () => {
-        console.log('bullet hash pre delete for socket id', bulletId);
-        console.log('this: ', this);
-        console.dir(this.game.currentPlayerSprite.bulletHash);
-        console.log('deleted?', delete this.game.currentPlayerSprite.bulletHash[bulletId]);
-        console.log('after: ');
-        console.dir(this.game.currentPlayerSprite.bulletHash);
+        delete this.game.currentPlayerSprite.bulletHash[bulletId];
       }, 1000)
 			// store.dispatch(playerFired(player.pointerX, player.pointerY, socket.id, bulletId));
       //Change bullet ui for current player
       player.clipUpdate();
     } else {
+      //Render the bullet for the remote player
       console.log('remote player just fired!');
     }
   }

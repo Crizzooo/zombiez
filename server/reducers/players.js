@@ -44,7 +44,7 @@ const damagePlayer = (dmgToTake, socketId) => ({
 })
 
 
-const initialState = { playerStates: {}, playerHealths: {}, bulletHash: {} };
+const initialState = { playerStates: {}, playerHealths: {} };
 
 const throttleLog = throttle( () => console.log('did not recieve a hash'), 1000);
 const throttleReceiveBulletHash = throttle( (action) => {
@@ -60,7 +60,6 @@ const playerReducers = (state = initialState, action) => {
       // console.log("Server is adding a player from: ", action.playerState);
       let newPlayerStates = Object.assign({}, state.playerStates);
       newPlayerStates[action.playerState.socketId] = action.playerState;
-      newState.bulletHash[action.playerState.socketId] = {};
       // let newPlayerHealths = Object.assign({}, state.playerHealths);
       // newPlayerHealths[action.playerState.socketId] = PLAYER_HEALTH;
       newState.playerStates = newPlayerStates;
@@ -74,7 +73,7 @@ const playerReducers = (state = initialState, action) => {
       let newPlayerStates = Object.assign({}, state.playerStates);
       newPlayerStates[action.playerToUpdate.socketId] = action.playerToUpdate;
       if (Object.keys(action.playerToUpdate.bulletHash).length > 0){
-        throttleReceiveBulletHash(action.playerToUpdate);
+        throttleReceiveBulletHash(newPlayerStates);
       } else {
         throttleLog();
       }

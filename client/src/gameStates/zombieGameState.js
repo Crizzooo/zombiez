@@ -41,11 +41,11 @@ export default class ZombieGameState extends TiledState {
     this.throttledUpdateRemotePlayers = throttle(this.updateRemotePlayers.bind(this), 34);
     this.logRemotePlayer = throttle( (playerState) => console.log('URP update: ', playerState), 1000);
     this.createRemotePlayerSprite = this.createRemotePlayerSprite.bind(this);
+
+    //For updating remote players
     this.updateRemotePlayer = this.updateRemotePlayer.bind(this);
+    this.handleRemoteBullet = this.handleRemoteBullet.bind(this);
 
-
-    //Throttled Console logs
-	  this.throttledRPS = throttle(this.logRemotePlayers, 20000);
 
     //Sockets
     socket.on('destroyCurrentPlayerSprite', this.destroyCurrentPlayerSprite);
@@ -188,7 +188,6 @@ export default class ZombieGameState extends TiledState {
     if (!_.isEmpty(remotePlayerSprites)) {
 	    // this.throttledUpdateRemotePlayers();
       this.updateRemotePlayers();
-      this.throttledRPS();
     }
   }
 
@@ -327,12 +326,6 @@ export default class ZombieGameState extends TiledState {
       pointerY: this.currentPlayerSprite.pointerY
     }
 
-    if (Object.keys(currentPlayer.bulletHash).length > 0){
-      console.log('DISPATCHED A BULLET HASH!');
-      console.dir(currentPlayer.bulletHash);
-    }
-    // console.log('just attached socket.id', socket.id);
-    // console.log('my new CP obj: ', currentPlayer.socketId);
     store.dispatch(updateCurrentPlayer(currentPlayer));
   }
 
@@ -351,7 +344,7 @@ export default class ZombieGameState extends TiledState {
 
     if (remotePlayerSprites[playerState.socketId]) {
       let playerToUpdate = remotePlayerSprites[playerState.socketId];
-      this.logRemotePlayer(playerState);
+      // this.logRemotePlayer(playerState);
       // console.log('updating this player: ', playerToUpdate);
       // console.log('with this state from server: ', playerState);
 
@@ -361,6 +354,18 @@ export default class ZombieGameState extends TiledState {
       playerToUpdate.y = playerState.y;
       playerToUpdate.direction = playerState.animationDirection;
       playerToUpdate.gun.rotation = playerState.gunRotation;
+
+      if (playerState.bulletHash && Object.keys(playerState.bulletHash).length > 0){
+        // console.dir(this.bulletHash)
+        playerToUpdate.pointerX = playerState.pointerX;
+        playerToUpdate.pointerY = playerState.pointerY;
+
+        //Update the player pointerX and pointerY so that player.gun.shoot
+
+
+        //Loop through playerState.bulletHash and handle events that have not been handled
+        R.forEachObjIndexed(this.handleRemoteBullet, playerState.bulletHash);
+      }
 
       handleRemoteAnimation(playerToUpdate);
       tweenRemoteAssets(playerToUpdate, self);
@@ -469,12 +474,6 @@ export default class ZombieGameState extends TiledState {
 	  currentPlayerSprite.gun.rotation = this.game.physics.arcade.angleToPointer(currentPlayerSprite.gun);
   }
 
-  logRemotePlayers(){
-    // console.log('RPS: ', remotePlayerSprites);
-    // console.log('Local State: ', store.getState());
-    // console.log('CPS: ', currentPlayerSprite);
-  }
-
   // addRemotePlayerToGroup(remotePlayerSprite){
   //   console.log('adding this RP to group: ', remotePlayerSprite);
   //   self.remotePlayerSpriteGroup.add(remotePlayerSprite);
@@ -538,5 +537,23 @@ export default class ZombieGameState extends TiledState {
     }
     console.log(`this player will be hit for ${dmgToTake}`, playerToDamage);
     playerToDamage.receiveDamage(dmgToTake);
+  }
+
+  handleRemoteBullet(bulletEvent, bulletId){
+    let playerWhoFired = remotePlayerSprites[bulletEvent.socketId];
+    //value is our bullet event
+    //key is our bullet ID
+    if (this.bulletHash[bulletId] !== true){
+      playerWhoFired.gun.shoot(playerWhoFired);
+      this.bulletHash[bulletId] = true;
+      setTimeout( () => {
+        delete this.bulletHash[bulletId];
+      }, 2000);
+    }
+
+    //if key is not in our hash map
+        //call shoot
+        //set a timeout to remove it from hashmap in 1.5 seconds
+    //if it is, just return
   }
 }
