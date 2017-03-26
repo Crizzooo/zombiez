@@ -26,6 +26,5 @@ export default class Prefab extends Phaser.Sprite {
 		this.game.physics.arcade.enable(this);
 
 		this.gameState.prefabs[name] = this;
-    console.log("FUCKING ANIMATIONS", this);
 	}
 }

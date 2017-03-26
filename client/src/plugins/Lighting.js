@@ -28,8 +28,6 @@ export default class Lighting extends Phaser.Plugin {
 		this.gameState.lighting.mapSprite.blendMode = PIXI.blendModes.SCREEN
 		this.gameState.lighting.blackness.alpha = 0.7;
 	  this.gameState.lighting.blackness.scale.setTo(100,100);
-
-		console.log('this is lighting constructor', this.gameState)
 	}
 
 	update () {

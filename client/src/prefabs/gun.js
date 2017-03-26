@@ -44,7 +44,6 @@ export default class Gun extends GunPrefab {
     let x = player.x;
     let y = player.y;
     if(!bullet){
-      console.log('game and cahce: ', this.game);
       bullet = new Bullet(this.game, 'bullet', {x : this.x , y: this.y}, {
         //NOTE: we can reimplement 'group' here if needed
         initial: 1,

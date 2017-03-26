@@ -148,9 +148,6 @@ export default class ZombieGameState extends TiledState {
 		    this.lighting.mapSprite.addChild(remotePlayerSprites[key].healthbar)
       }
     }
-
-	  console.log('THIS IS WORLD', this.game.world.children)
-    console.log('THIS IS ', this)
   }
 
   update() {
@@ -188,14 +185,10 @@ export default class ZombieGameState extends TiledState {
   loadLevel() {
     let state = store.getState();
 
-    console.log('load level begin with this state', state);
-    console.log('what is state.players.playerStates on loadLevel', state.players.playerStates);
-
     //create a current player
     let currentPlayer;
 
     if (state.players.currentPlayer.name) {
-      console.log('we have a current player so we shall call him: ', state.players.currentPlayer.name);
       currentPlayer = state.players.currentPlayer;
 
       //TODO: make server assign sprite keys
