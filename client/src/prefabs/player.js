@@ -6,7 +6,10 @@ import Prefab from './Prefab';
 import HealthHeart from './healthbar';
 import Heart from './healthHearts';
 
+const PLAYER_HEALTH = require('../engine/gameConstants.js').PLAYER_HEALTH;
+
 export default class Player extends Prefab {
+
   constructor(game, name, position, properties) {
     super(game, name, position, properties);
 
@@ -20,7 +23,7 @@ export default class Player extends Prefab {
 
     //TODO: make it only visible to the current player
     //Load Hearts, Healthbar, Animations
-	  console.log('do we have sockets here', socket);
+    this.socketId = properties.socketId;
 
 
 
@@ -29,6 +32,7 @@ export default class Player extends Prefab {
 
     //This might not be relevant since the world size is bigger than map size
     //To allow for camera pan
+    this.body.enable = true;
     this.body.collideWorldBounds = true;
     this.body.immovable = true;
     this.game.physics.arcade.enable(this);
@@ -42,7 +46,7 @@ export default class Player extends Prefab {
 	      name: 'pistol',
         initial: 0,
         texture: 'pistolSpriteSheet',
-        rateOfFire: 100,
+        rateOfFire: 350,
         reloadSpeed: 2000,
         clip: 30
       }

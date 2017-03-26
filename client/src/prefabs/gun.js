@@ -1,6 +1,13 @@
 import GunPrefab from './GunPrefab';
 import Bullet from './bullet';
+import {playerFired} from '../reducers/players-reducer.js';
+import store from '../store.js';
 
+import { EVENT_LOOP_DELETE_TIME } from '../engine/gameConstants.js';
+
+
+let bulletCount = 0;
+let gameObj;
 export default class Gun extends GunPrefab {
   constructor(game, name, position, properties) {
     super(game, name, position, properties);
@@ -15,28 +22,13 @@ export default class Gun extends GunPrefab {
     this.nextFire = 0;
     this.isReloading = false;
     this.pivot.x = -10;
+    gameObj = this.game;
   }
 
-  initializeWeapon(game) {
-    // this.group = new Phaser.Group(game.game, game.world, 'Single Bullet', false, true, Phaser.Physics.ARCADE);
-    this.gunBullets = game.game.add.group();
-    this.gunBullets.enableBody = true;
-    // this.gunBullets.nextFire = 10000;
-    this.gunBullets.physicsBodyType = Phaser.Physics.ARCADE;
-    this.gunBullets.setAll('outOfBoundsKill', true);
-    this.gunBullets.setAll('checkWorldBounds', true);
-    this.gunBullets.name = 'currentPlayerBulletGroup';
-
-    this.gunBullets.bulletSpeed = 600;
-
-    this.bulletGroup = this.gunBullets;
-
-    this.game = game;
-  }
-
-  shoot(player, group) {
+  //TODO: move bullet speed to the gun, and have shoot method go off of player.gun.bulletSpeed
+  shoot(player) {
     //NOTE: shoot gets called with currentPlayerSprite.gun.gunBullets OR game.remoteBulletGroup, if shoot is being called due to a server 'remoteFire' emit
-    let bulletGroup = group;
+    let bulletGroup = player.bulletGroup;
 
     if (this.ammo === 0 || this.game.time.time < this.nextFire) {
       if(this.isReloading) {
@@ -53,20 +45,43 @@ export default class Gun extends GunPrefab {
     let y = player.y;
     if(!bullet){
       bullet = new Bullet(this.game, 'bullet', {x : this.x , y: this.y}, {
-        group: 'player',
+        //NOTE: we can reimplement 'group' here if needed
         initial: 1,
         texture: 'pistolSpriteSheet'
       });
       bulletGroup.add(bullet);
-
-      //Change bullet ui
-	    player.clipUpdate();
     } else {
       bullet.reset(x, y);
     }
-    bullet.rotation = this.game.physics.arcade.moveToXY(bullet, player.pointerX, player.pointerY, 600);
+    console.log('what is my bullet speed: ', bulletGroup.bulletSpeed);
+    bullet.rotation = this.game.physics.arcade.moveToXY(bullet, player.pointerX, player.pointerY, bulletGroup.bulletSpeed);
+    bullet.shooterSocketId = player.socketId;
     this.ammo--;
+    let bulletId;
+
+    //Handle bullet if shot by CP so that it gets emitted to server correctly
+    if (player.socketId === socket.id){
+      bulletId = socket.id + bulletCount;
+      this.game.currentPlayerSprite.bulletHash[bulletId] = {
+        toX:      player.pointerX,
+        toY:      player.pointerY,
+        socketId: socket.id,
+        bulletId: bulletId
+      }
+      bulletCount++;
+
+      setTimeout( () => {
+        delete this.game.currentPlayerSprite.bulletHash[bulletId];
+      }, EVENT_LOOP_DELETE_TIME)
+			// store.dispatch(playerFired(player.pointerX, player.pointerY, socket.id, bulletId));
+      //Change bullet ui for current player
+      player.clipUpdate();
+    } else {
+      //Render the bullet for the remote player
+      console.log('remote player just fired!');
+    }
   }
+
 
   reloadGun(){
     setTimeout(() => {

@@ -13,20 +13,6 @@ export default function handleRemoteAnimation(player) {
 		player.body.velocity.x = 0;
 		player.body.velocity.y = 0;
 
-		// let cursors = player.game.cursors;
-		//
-		// if (cursors.fire.isDown) {
-		// 	//TODO: emit the shot to all clients
-		// 	socket.emit('userFire', {
-		// 		x: player.x,
-		// 		y: player.y,
-		// 		pointerX: player.pointerX,
-		// 		pointerY: player.pointerY,
-		// 		socketId: socket.id
-		// 	});
-		// 	player.gun.shoot(player, player.gun.gunBullets);
-		// }
-
 		//TODO: use onDown instead? Need to set a previous animation
 		if (player.direction === 'down') {
 			player.body.velocity.y = player.stats.movement;

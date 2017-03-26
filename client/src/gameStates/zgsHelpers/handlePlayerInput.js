@@ -13,37 +13,30 @@ export function handleInput(player) {
 		let cursors = player.cursors;
 
 		if (cursors.fire.isDown) {
-			//TODO: emit the shot to all clients
-			socket.emit('userFire', {
-				x: player.x,
-				y: player.y,
-				pointerX: player.pointerX,
-				pointerY: player.pointerY,
-				socketId: socket.id
-			});
-			player.gun.shoot(player, player.gun.gunBullets);
+			//Shoot method will add the bullet obj to the hash map on store and then dispatch to server for 1s!
+			player.gun.shoot(player);
 		}
 
 		//TODO: use onDown instead? Need to set a previous animation
 		if (cursors.down.isDown && cursors.right.isDown){
 			player.direction = 'down';
-			player.body.velocity.y = player.stats.movement;
-			player.body.velocity.x = player.stats.movement;
+			player.body.velocity.y = player.stats.movement / 1.65;
+			player.body.velocity.x = player.stats.movement / 1.65;
 			player.animations.play('down');
 		} else if(cursors.down.isDown && cursors.left.isDown){
 			player.direction = 'down';
-			player.body.velocity.y = player.stats.movement;
-			player.body.velocity.x = -player.stats.movement;
+			player.body.velocity.y = player.stats.movement / 1.65;
+			player.body.velocity.x = -player.stats.movement / 1.65;
 			player.animations.play('down');
 		} else if(cursors.up.isDown && cursors.left.isDown){
 			player.direction = 'up';
-			player.body.velocity.y = -player.stats.movement;
-			player.body.velocity.x = -player.stats.movement;
+			player.body.velocity.y = -player.stats.movement / 1.65;
+			player.body.velocity.x = -player.stats.movement / 1.65;
 			player.animations.play('up');
 		} else if(cursors.up.isDown && cursors.right.isDown){
 			player.direction = 'up';
-			player.body.velocity.y = -player.stats.movement;
-			player.body.velocity.x = player.stats.movement;
+			player.body.velocity.y = -player.stats.movement / 1.65;
+			player.body.velocity.x = player.stats.movement / 1.65;
 			player.animations.play('up');
 		} else if(cursors.up.isDown && cursors.jump.isDown){
 			player.direction = 'roll-up';
@@ -81,7 +74,8 @@ export function handleInput(player) {
 			player.direction = 'down';
 			player.body.velocity.y = player.stats.movement;
 			player.animations.play('down');
-		} else if (player.body.velocity.x === 0 && player.body.velocity.y === 0) {
+		}
+		if (player.body.velocity.x === 0 && player.body.velocity.y === 0) {
 			player.direction = 'idle';
 			player.animations.stop();
 			player.frame = handlePlayerRotation(player).frame;

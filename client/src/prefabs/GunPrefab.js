@@ -1,10 +1,13 @@
 export default class GunPrefab extends Phaser.Sprite {
   constructor(game, name, position, properties) {
-    super(game.game, position.x, position.y, properties.texture, +properties.initial);
+    super(game, position.x, position.y, properties.texture, +properties.initial);
     this.gameState = game;
     this.name = name;
 
-
+    this.damage = properties.damage ? properties.damage : 10;
+    //Add prefab to its group
+    //this.gameState.groups[properties.group].add(this);
+    //this.gameState.groups[properties.group].children.push(this);
     this.initial = +properties.initial;
 	  this.smoothed = false;
 

@@ -41,7 +41,9 @@ export const removeCurrentPlayer = () => ({
 const initialState = {
   score: 0,
   playerStates: {},
-  currentPlayer: {}
+  currentPlayer: {
+    bulletHash: {}
+  }
 };
 
 /* Reducer */
@@ -75,7 +77,10 @@ export default (state = initialState, action) => {
       break;
 
     case UPDATE_CURRENT_PLAYER:
-      newState.currentPlayer = action.currentPlayerState;
+      let updatedPlayerState = Object.assign({}, state.currentPlayer, action.currentPlayerState, { bulletHash: action.currentPlayerState.bulletHash});
+      newState.currentPlayer = updatedPlayerState;
+      // console.log('updated CP to ', newState.currentPlayer);
+      // console.log('updated Current Player to: ', newState.currentPlayer);
       break;
 
     case PLAYER_LEAVE_GAME:
