@@ -25,9 +25,6 @@ export default class Player extends Prefab {
     //Load Hearts, Healthbar, Animations
     this.socketId = properties.socketId;
 
-
-
-
 	  this.loadAnimations();
 
     //This might not be relevant since the world size is bigger than map size

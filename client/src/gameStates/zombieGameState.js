@@ -29,6 +29,7 @@ export default class ZombieGameState extends TiledState {
 
     //use this to keep track of bullet updates from server
     this.bulletHash = {};
+    this.playerDamageHash = {};
   }
 
   init(levelData) {
@@ -50,8 +51,6 @@ export default class ZombieGameState extends TiledState {
     //Sockets
     socket.on('destroyCurrentPlayerSprite', this.destroyCurrentPlayerSprite);
     socket.on('playerLeaveGame', this.handleRemotePlayerLeave);
-    socket.on('damagePlayer', this.handlePlayerDamage);
-    // socket.on('remoteReceiveDamage', this.handleRemotePlayerReceiveDamage)
   }
 
   preload() {
@@ -215,12 +214,14 @@ export default class ZombieGameState extends TiledState {
       this.currentPlayerBulletGroup.name = 'currentPlayerBulletGroup';
       this.currentPlayerBulletGroup.bulletSpeed = STARTING_BULLET_SPEED;
 
-      //Attach it to player.bulletGroup
+      // Attach bulletGroup to the CPS
       currentPlayerSprite.bulletGroup = this.currentPlayerBulletGroup;
 
+      // Attach event hashes to the CPS obj
       currentPlayerSprite.bulletHash = {};
+      currentPlayerSprite.playerDamageHash = {};
 
-      //store on game Object
+      // Store on game Object
       this.currentPlayerSprite = currentPlayerSprite;
 
       //create currentPlayer
@@ -232,9 +233,10 @@ export default class ZombieGameState extends TiledState {
         gunRotation: currentPlayerSprite.gun.rotation,
         socketId: socket.id,
         health: PLAYER_HEALTH,
-        bulletHash: currentPlayerSprite.bulletHash
+        bulletHash: currentPlayerSprite.bulletHash,
+        playerDamageHash: currentPlayerSprite.playerDamageHash
         //NOTE: pointerX and pointerY are attached in dispatch CP
-        //TODO: health, gun, bullets, frame? etc
+        //TODO: gun, bullets, frame? etc
       }
 
       //add it to the world
@@ -310,6 +312,7 @@ export default class ZombieGameState extends TiledState {
       socketId: socket.id,
       health: this.currentPlayerSprite.stats.health,
       bulletHash: this.currentPlayerSprite.bulletHash,
+      playerDamageHash: this.currentPlayerSprite.playerDamageHash,
       pointerX: this.currentPlayerSprite.pointerX,
       pointerY: this.currentPlayerSprite.pointerY
     }
@@ -497,8 +500,8 @@ export default class ZombieGameState extends TiledState {
         return;
       } else if (bullet.parent.name === 'currentPlayerBulletGroup'){
         //TODO: add damage event
-        console.log('my player:', self.currentPlayerSprite);
-        console.log('I HIT SOMEONE');
+        console.log('This is me:', self.currentPlayerSprite);
+        console.log('I hit player: ', player);
 
       } else if (bullet.parent.name === 'remotePlayerBulletGroup') {
         if (player.socketId === socket.id){
