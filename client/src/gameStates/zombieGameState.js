@@ -3,7 +3,7 @@ import _ from 'lodash';
 const throttle = require('lodash.throttle');
 
 import store from '../store.js';
-import {updateCurrentPlayer, playerLeaveGame, removeFireObjects} from '../reducers/players-reducer.js';
+import {updateCurrentPlayer, playerLeaveGame} from '../reducers/players-reducer.js';
 import emitCurrentState from '../engine/emitCurrentState.js';
 
 //Import game plugins and tiledstate
@@ -39,6 +39,7 @@ export default class ZombieGameState extends TiledState {
     this.destroyCurrentPlayerSprite = this.destroyCurrentPlayerSprite.bind(this);
     this.handleRemotePlayerLeave = this.handleRemotePlayerLeave.bind(this);
     this.throttledUpdateRemotePlayers = throttle(this.updateRemotePlayers.bind(this), 34);
+    this.logRemotePlayer = throttle( (playerState) => console.log('URP update: ', playerState), 1000);
     this.createRemotePlayerSprite = this.createRemotePlayerSprite.bind(this);
     this.updateRemotePlayer = this.updateRemotePlayer.bind(this);
 
@@ -49,7 +50,6 @@ export default class ZombieGameState extends TiledState {
     //Sockets
     socket.on('destroyCurrentPlayerSprite', this.destroyCurrentPlayerSprite);
     socket.on('playerLeaveGame', this.handleRemotePlayerLeave);
-    socket.on('remoteFire', this.handleRemotePlayerFire);
     socket.on('damagePlayer', this.handlePlayerDamage);
     // socket.on('remoteReceiveDamage', this.handleRemotePlayerReceiveDamage)
   }
@@ -189,8 +189,6 @@ export default class ZombieGameState extends TiledState {
 	    // this.throttledUpdateRemotePlayers();
       this.updateRemotePlayers();
       this.throttledRPS();
-      // store.dispatch(removeFireObjects());
-      //remove all fire objects from remote player states
     }
   }
 
@@ -254,7 +252,7 @@ export default class ZombieGameState extends TiledState {
         health: PLAYER_HEALTH,
         bulletHash: currentPlayerSprite.bulletHash
         //NOTE: pointerX and pointerY are attached in dispatch CP
-        //TODO: health, fire, guns, bullets, frame? etc
+        //TODO: health, gun, bullets, frame? etc
       }
 
       //add it to the world
@@ -346,17 +344,14 @@ export default class ZombieGameState extends TiledState {
     if (this.players[socket.id]) delete this.players[socket.id];
     //then update each player from the server
     R.forEachObjIndexed(this.updateRemotePlayer, this.players);
-    //then clear the fire objects from local state, so that they do not fire in the next update
-    //before next server update
-    // store.dispatch(removeFireObject());
   }
 
 
   updateRemotePlayer(playerState) {
 
-    console.log('what is this in URP? ZGS? :', this);
     if (remotePlayerSprites[playerState.socketId]) {
       let playerToUpdate = remotePlayerSprites[playerState.socketId];
+      this.logRemotePlayer(playerState);
       // console.log('updating this player: ', playerToUpdate);
       // console.log('with this state from server: ', playerState);
 
@@ -366,25 +361,6 @@ export default class ZombieGameState extends TiledState {
       playerToUpdate.y = playerState.y;
       playerToUpdate.direction = playerState.animationDirection;
       playerToUpdate.gun.rotation = playerState.gunRotation;
-
-      //if fire
-      if (playerState.fire && playerState.fire.toX) {
-        //TODO: check bullet hash for bulletId
-
-            //TODO: if it doesnt exist as true, fire the bullet
-                    //then add it to hash map
-
-            //If it does exist then continue to looping
-
-        // console.log('inspecting playerToUpdate: ');
-        console.dir(playerToUpdate, { depth: 3 });
-        playerToUpdate.pointerX = playerState.fire.toX;
-        playerToUpdate.pointerY = playerState.fire.toY;
-        // console.log('hes got a fire event for us!', playerState.fire);
-        //Remote player shoot
-        playerToUpdate.gun.shoot(playerToUpdate, self.remoteBulletGroup);
-        //update that player fire to nothing
-      }
 
       handleRemoteAnimation(playerToUpdate);
       tweenRemoteAssets(playerToUpdate, self);
@@ -491,18 +467,6 @@ export default class ZombieGameState extends TiledState {
 
     //Gun rotation tween
 	  currentPlayerSprite.gun.rotation = this.game.physics.arcade.angleToPointer(currentPlayerSprite.gun);
-  }
-
-  handleRemotePlayerFire(fireObj) {
-    if (fireObj.socketId === socket.id){
-      console.log('i got into handleRemotePlayerFire with my own socket id?');
-      return;
-    }
-    let playerWhoFired = remotePlayerSprites[fireObj.socketId];
-    remotePlayerSprites[fireObj.socketId].pointerX = fireObj.pointerX;
-    remotePlayerSprites[fireObj.socketId].pointerY = fireObj.pointerY;
-    console.log('this motherfucker just fired: ', playerWhoFired);
-    remotePlayerSprites[fireObj.socketId].gun.shoot(remotePlayerSprites[fireObj.socketId], self.remoteBulletGroup);
   }
 
   logRemotePlayers(){

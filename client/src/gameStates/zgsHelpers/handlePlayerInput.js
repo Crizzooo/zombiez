@@ -13,9 +13,7 @@ export function handleInput(player) {
 		let cursors = player.cursors;
 
 		if (cursors.fire.isDown) {
-			//Shoot method will dispatch a fire obj to the store if its current player
-			//Store will send this out on next update, and then clear the obj
-			//Server should send it out and then clear the obj as well
+			//Shoot method will add the bullet obj to the hash map on store and then dispatch to server for 1s!
 			player.gun.shoot(player);
 		}
 

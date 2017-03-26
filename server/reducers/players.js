@@ -10,7 +10,6 @@ const RECEIVE_CLIENT_DATA = 'RECEIVE_CLIENT_DATA';
 const RESET_PLAYERS = 'RESET_PLAYERS';
 const UPDATE_PLAYER = 'UPDATE_PLAYER';
 const DAMAGE_PLAYER = 'DAMAGE_PLAYER';
-const RESET_PLAYER_FIRES = 'RESET_PLAYER_FIRES';
 
 // Action Creators
 const addPlayer = playerState => ({
@@ -42,10 +41,6 @@ const damagePlayer = (dmgToTake, socketId) => ({
   type: DAMAGE_PLAYER,
   amount: dmgToTake,
   socketId
-})
-
-const resetPlayerFires = () => ({
-  type: RESET_PLAYER_FIRES
 })
 
 
@@ -83,19 +78,6 @@ const playerReducers = (state = initialState, action) => {
       } else {
         throttleLog();
       }
-      // if (action.playerToUpdate.fire && action.playerToUpdate.fire.toX){
-      //   console.log('server got a fire object!');
-      //   console.dir(action.playerToUpdate.fire, { depth: 4 });
-      //   let bulletId = action.playerToUpdate.fire.bulletId;
-      //   newState.bulletHash[bulletId] = true;
-      //   setTimeout( () => {
-      //     console.log('bullet hash pre delete for socket id', bulletId);
-      //     console.dir(newState.bulletHash);
-      //     delete newState.bulletHash[bulletId];
-      //     console.log('after: ');
-      //     console.dir(newState.bulletHash);
-      //   }, 1000)
-      // }
       if (!action.playerToUpdate.socketId){
         return state;
       }
@@ -130,23 +112,10 @@ const playerReducers = (state = initialState, action) => {
       newState.playerHealths = newPlayerHealths;
     }
 
-    case RESET_PLAYER_FIRES: {
-      let newPlayerStates = Object.assign({}, state.playerStates);
-      R.forEachObjIndexed( (playerState) => {
-        // console.log('removing fire obj from this playerState');
-
-        // console.log('playerState pre remove fire: ', playerState);
-        newPlayerStates[playerState.socketId].fire = {};
-      }, newPlayerStates);
-      // console.log('after ramda');
-      newState.playerStates = newPlayerStates;
-      // console.log('server player states after emitting and resetting: ', newState.playerStates);
-    }
-
     default:
       return state;
   }
   return newState;
 }
 
-module.exports = { playerReducers, removePlayer, receiveClientData, resetPlayers, addPlayer, updatePlayer, resetPlayerFires };
+module.exports = { playerReducers, removePlayer, receiveClientData, resetPlayers, addPlayer, updatePlayer };

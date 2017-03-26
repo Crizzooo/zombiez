@@ -14,17 +14,8 @@ export default (socket) => {
 
     let currentPlayerObj = state.players.currentPlayer;
     if (state.lobby.currentLobbyer.name && state.game.gamePlaying){
-      // console.log('emitting this obj: ', currentPlayerObj);
       socket.emit('clientUpdate', currentPlayerObj);
-      // console.log('client just sent out: ', currentPlayerObj);
-      if (currentPlayerObj.fire && currentPlayerObj.fire.toX){
-        console.log('WE EMITTED WITH A FIRE OBJECT', currentPlayerObj);
-        store.dispatch(updateCurrentPlayer({fire: {}}));
-        console.log('store after wiping fire: ');
-        console.log(store.getState());
-      }
     }
-    // console.log('CLEARING CURRENT PLAYER');
   }, CLIENT_EMIT_INTERVAL);
   return emitID;
 }

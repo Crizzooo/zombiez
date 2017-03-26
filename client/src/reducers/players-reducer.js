@@ -11,8 +11,6 @@ const UPDATE_CURRENT_PLAYER = 'UPDATE_CURRENT_PLAYER';
 const PLAYER_LEAVE_GAME = 'PLAYER_LEAVE_GAME';
 const RESET_PLAYERS = 'RESET_PLAYERS';
 const REMOVE_CURRENT_PLAYER = 'REMOVE_CURRENT_PLAYER';
-const PLAYER_FIRED = 'PLAYER_FIRED';
-const REMOVE_FIRE_OBJECTS = 'REMOVE_FIRE_OBJECTS';
 
 /* Action Creators */
 export const loadMessage = message => ({ type: CHANGE_MESSAGE, message });
@@ -38,18 +36,7 @@ export const resetPlayers = () => ({
 export const removeCurrentPlayer = () => ({
   type: REMOVE_CURRENT_PLAYER
 })
-export const playerFired = (toX, toY, socketId, bulletId) => ({
-  type: PLAYER_FIRED,
-  bulletObj: {
-    toX,
-    toY,
-    socketId,
-    bulletId
-  }
-})
-export const removeFireObjects = () => ({
-  type: REMOVE_FIRE_OBJECTS
-})
+
 //Note: addPlayer can probably be removed from file but will keep for now in case we change structure
 const initialState = {
   score: 0,
@@ -114,51 +101,9 @@ export default (state = initialState, action) => {
       newState.currentPlayer = {};
       break;
 
-    case PLAYER_FIRED:
-      // let newPlayerState = Object.assign({}, state.currentPlayer/*, {
-      //   fire: {
-      //     toX: action.fire.toX,
-      //     toY: action.fire.toY,
-      //     socketId: action.fire.socketId,
-      //     bulletId: action.fire.bulletId
-      //   }}*/);
-        let newPlayerState = Object.assign({}, state.currentPlayer, { bulletHash: state.currentPlayer.bulletHash });
-        console.log('newPlayuerState in playerFired: ', newPlayerState);
-        let bulletId = action.bulletObj.bulletId;
-        newPlayerState.bulletHash[bulletId] = action.bulletObj;
-        setTimeout( () => {
-          console.log('bullet hash pre delete for socket id', bulletId);
-          console.dir(newPlayerState.bulletHash);
-          delete newPlayerState.bulletHash[bulletId];
-          console.log('after: ');
-          console.dir(newState.bulletHash);
-        }, 1000)
-        // console.log('updated CP state to include fire: ', newPlayerState);
-        newState.currentPlayer = newPlayerState;
-        break;
-
-    case REMOVE_FIRE_OBJECTS:
-      // let newPlayerStates = Object.assign({}, state.playerStates);
-      // console.log('about to loop through NPS and remove fire: ', newPlayerStates);
-
-      R.forEachObjIndexed( (playerState) => {
-        // console.log('removing fire obj from this playerState');
-
-        // console.log('playerState pre remove fire: ', playerState);
-        newPlayerStates[playerState.socketId].fire = {};
-      }, newPlayerStates);
-      // console.log('after ramda');
-      newState.playerStates = newPlayerStates;
-      // console.log('newPlayerStates after remove: ', newState.playerStates);
-      break;
-
     default:
       return state;
   }
 
   return newState;
 };
-
-// function removeFireObject(playerState){
-//   console.log('removing fire object from this playerState: ', playerState);
-// }
