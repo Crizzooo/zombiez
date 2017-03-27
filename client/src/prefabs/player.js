@@ -6,7 +6,7 @@ import Prefab from './Prefab';
 import HealthHeart from './healthbar';
 import Heart from './healthHearts';
 
-const {PLAYER_HEALTH, PLAYER_DAMAGE_TINT} = require('../engine/gameConstants.js');
+const {PLAYER_HEALTH, PLAYER_DAMAGE_TINT, TIME_BETWEEN_ROLLS} = require('../engine/gameConstants.js');
 
 export default class Player extends Prefab {
 
@@ -61,8 +61,9 @@ export default class Player extends Prefab {
 
     //used to store currently playing animations
     this.rolling = null
+
     //how frequently a player can roll
-    this.rateOfRoll = 500;
+    this.rateOfRoll = TIME_BETWEEN_ROLLS;
     this.canRoll = true;
   }
 

@@ -44,29 +44,28 @@ export function handleInput(player) {
 			player.body.velocity.y = -player.stats.movement * .7071;
 			player.body.velocity.x = player.stats.movement * .7071;
 			player.animations.play('up');
-		} else if(cursors.up.isDown && cursors.jump.isDown){
-			//check roll time
-			player.direction = 'roll-up';
-			player.rolling = player.animations.play('roll-up');
-			player.body.velocity.y = -player.stats.movement - 100;
-		} else if(cursors.down.isDown && cursors.jump.isDown){
-			//check roll time
-			player.direction = 'roll-up';
-			player.body.velocity.y = player.stats.movement + 100;
-			player.rolling = player.animations.play('roll-down');
-		} else if(cursors.right.isDown && cursors.jump.isDown){
-			//check roll time
-			player.direction = 'roll-right';
-			player.scale.setTo(1, 1);
-			player.rolling = player.animations.play('roll-right');
-			player.body.velocity.x = player.stats.movement + 100;
-		} else if(cursors.left.isDown && cursors.jump.isDown){
-			//check roll time
-			player.direction = 'roll-left';
-			player.scale.setTo(-1, 1);
-			player.rolling = player.animations.play('roll-right');
-			player.body.velocity.x = -player.stats.movement - 100;
-		} else if (cursors.left.isDown && !player.rollright.isPlaying) {
+		}
+
+		if (player.canRoll){
+			//Roll Up
+			if(cursors.up.isDown && cursors.jump.isDown){
+				startRoll(player, 'roll-up');
+
+				//Roll Down
+			} else if(cursors.down.isDown && cursors.jump.isDown){
+				startRoll(player, 'roll-down');
+
+				//Roll Right
+			} else if(cursors.right.isDown && cursors.jump.isDown){
+				startRoll(player, 'roll-right');
+
+				//Roll Left
+			} else if(cursors.left.isDown && cursors.jump.isDown){
+				startRoll(player, 'roll-left');
+			}
+		}
+
+		if (cursors.left.isDown && !player.rollright.isPlaying) {
 			player.direction = 'left';
 			player.animations.play('right');
 			player.scale.setTo(-1, 1);
@@ -159,5 +158,32 @@ export function tweenCurrentPlayerAssets(player, context) {
 }
 
 function startRoll(player, direction) {
-
+		player.direction = direction;
+		let animation = direction;
+		if (direction === 'roll-left'){
+			//switch animation for roll-left direction to be roll-right / flipped scale
+			animation = 'roll-right';
+		}
+		player.rolling = player.animations.play(animation);
+		player.canRoll = false;
+		switch (direction) {
+			case 'roll-right':
+				player.scale.setTo(1, 1);
+				player.body.velocity.x = player.stats.movement + 100;
+				break;
+			case 'roll-left':
+				console.log('in roll left case');
+				player.scale.setTo(-1, 1);
+				player.body.velocity.x = -player.stats.movement - 100;
+				break;
+			case 'roll-up':
+				player.body.velocity.y = -player.stats.movement - 100;
+				break;
+			case 'roll-down':
+				player.body.velocity.y = player.stats.movement + 100;
+				break;
+		}
+		setTimeout( () => {
+			player.canRoll = true;
+		}, player.rateOfRoll);
 }
