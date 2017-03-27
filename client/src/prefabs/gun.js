@@ -31,7 +31,6 @@ export default class Gun extends GunPrefab {
 
   playSound (player, whatSound, volume)  {
     player.game.state.callbackContext[whatSound].play('',0,volume,false);
-    gameObj = this.game;
   }
 
   //TODO: move bullet speed to the gun, and have shoot method go off of player.gun.bulletSpeed
@@ -70,7 +69,7 @@ export default class Gun extends GunPrefab {
 
     //Handle bullet if shot by CP so that it gets emitted to server correctly
     if (player.socketId === socket.id){
-      this.playSound(player,'shootSound',1);
+      this.playSound(player,'heavyPistol',1);
       player.gameState.camera.shake(0.005,40);
       bulletId = socket.id + bulletCount;
       this.game.currentPlayerSprite.bulletHash[bulletId] = {
@@ -93,9 +92,9 @@ export default class Gun extends GunPrefab {
       const distance = Math.sqrt(Math.pow(distX,2)+Math.pow(distY,2));
       const perc = 1 - ((distance-this.minDistanceSound)/this.maxDistanceSound);
       console.log('perc',perc)
-      if (perc > 1) this.playSound(player,'shootSound',1);
+      if (perc > 1) this.playSound(player,'heavyPistol',1);
       else if(perc <= 0);
-      else this.playSound(player,'shootSound',perc);
+      else this.playSound(player,'heavyPistol',perc);
       //Render the bullet for the remote player
       // console.log('remote player just fired!');
     }

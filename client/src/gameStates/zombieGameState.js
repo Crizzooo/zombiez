@@ -71,6 +71,7 @@ export default class ZombieGameState extends TiledState {
     this.soundLoop = this.game.add.audio('soundLoop',1,true);
     this.shootSound = this.game.add.audio('shootSound');
     this.pistolReload = this.game.add.audio('pistolReload');
+    this.lightPistolShot = this.game.add.audio('lightPistolShot');
     this.zombieSound = this.game.add.audio('zombie');
     this.zombieHit = this.game.add.audio('zombieHit');
     this.heavyPistol = this.game.add.audio('heavyPistol');
