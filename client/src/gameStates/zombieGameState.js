@@ -502,6 +502,7 @@ export default class ZombieGameState extends TiledState {
       // console.log('bullet: ', bullet );
       // console.log('hit player: ', player);
       if (bullet.shooterSocketId === player.socketId){
+        console.log('cant damage self');
         return;
       } else if (bullet.parent.name === 'currentPlayerBulletGroup'){
         //TODO: add damage event
