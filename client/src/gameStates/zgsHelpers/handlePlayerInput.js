@@ -3,11 +3,11 @@
  */
 import _ from 'lodash';
 
-function playSound (player, whatSound)  {
-  player.game.state.callbackContext[whatSound].play();
-}
-
-let throttledSound = _.throttle(playSound,50);
+// function playSound (player, whatSound)  {
+//   player.game.state.callbackContext[whatSound].play();
+// }
+//
+// let throttledSound = _.throttle(playSound,50);
 
 export function handleInput(player) {
 
@@ -35,7 +35,7 @@ export function handleInput(player) {
 			});
 			player.gun.shoot(player, player.gun.gunBullets);
 
-			throttledSound(player,'shootSound');
+			//throttledSound(player,'shootSound');
 			//console.log(player.game.state.callbackContext.shootSound)
       //player.game.state.callbackContext['shootSound'].play('',0,1,false,false);
       //player.game.state.callbackContext['shootSound'].play();

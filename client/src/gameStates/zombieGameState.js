@@ -54,6 +54,7 @@ export default class ZombieGameState extends TiledState {
     //this.load.audio('themeLoop','../../assets/sounds/themeLoop.wav');
     //this.load.audio('shoot','../../assets/sounds/shoot.ogg');
     //load assets that are specific for this level
+
   }
 
   create() {
@@ -62,9 +63,15 @@ export default class ZombieGameState extends TiledState {
     super.create.call(this);
 
     //adding sound here?
-    this.soundLoop = this.game.add.audio('themeLoop',1,true);
-    this.shootSound = this.game.add.audio('shoot');
-
+    this.soundLoop = this.game.add.audio('soundLoop',1,true);
+    this.shootSound = this.game.add.audio('shootSound');
+    this.pistolReload = this.game.add.audio('pistolReload');
+    this.zombieSound = this.game.add.audio('zombie');
+    this.zombieHit = this.game.add.audio('zombieHit');
+    this.heavyPistol = this.game.add.audio('heavyPistol');
+    this.levelUp = this.game.add.audio('levelUp');
+    this.playerHurt = this.game.add.audio('playerHurt');
+    let x = true;
 
     //Create worldGrid and tile dimensions for pathfinding
     //Load light plugin
@@ -143,8 +150,9 @@ export default class ZombieGameState extends TiledState {
       }
     }
 
-
+    //background music. commented out now to test
     this.soundLoop.play();
+
 	  console.log('THIS IS WORLD', this.game.world.children)
     console.log('THIS IS ', this)
   }

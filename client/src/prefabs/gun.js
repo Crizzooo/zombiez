@@ -1,6 +1,12 @@
 import GunPrefab from './GunPrefab';
 import Bullet from './bullet';
 
+
+// function playSound (player, whatSound, volume)  {
+//   player.game.state.callbackContext[whatSound].play('',0,volume,false);
+// }
+
+
 export default class Gun extends GunPrefab {
   constructor(game, name, position, properties) {
     super(game, name, position, properties);
@@ -15,6 +21,12 @@ export default class Gun extends GunPrefab {
     this.nextFire = 0;
     this.isReloading = false;
     this.pivot.x = -10;
+    this.minDistanceSound = 30;
+    this.maxDistanceSound = 600;
+  }
+
+  playSound (player, whatSound, volume)  {
+    player.game.state.callbackContext[whatSound].play('',0,volume,false);
   }
 
   initializeWeapon(game) {
@@ -44,6 +56,7 @@ export default class Gun extends GunPrefab {
       } else if (this.ammo === 0 && !this.isReloading){
       this.isReloading = true;
       this.reloadGun();
+      this.playSound(player,'pistolReload',1);
       }
       return;
     }
@@ -59,11 +72,33 @@ export default class Gun extends GunPrefab {
       });
       bulletGroup.add(bullet);
 
+
       //Change bullet ui
 	    player.clipUpdate();
     } else {
       bullet.reset(x, y);
     }
+    if(player.socketId === socket.id){
+      this.playSound(player,'shootSound',1);
+      player.gameState.camera.shake(0.01,40);
+    }
+    else {
+      const distX = x - player.gameState.currentPlayerSprite.x;
+      const distY = y - player.gameState.currentPlayerSprite.y;
+      const distance = Math.sqrt(Math.pow(distX,2)+Math.pow(distY,2));
+      const perc = 1 - ((distance-this.minDistanceSound)/this.maxDistanceSound);
+      console.log('perc',perc)
+      if (perc > 1) thisplaySound(player,'shootSound',1);
+      else if(perc <= 0);
+      else this.playSound(player,'shootSound',perc);
+
+
+
+
+
+    }
+
+
     bullet.rotation = this.game.physics.arcade.moveToXY(bullet, player.pointerX, player.pointerY, 600);
     this.ammo--;
   }

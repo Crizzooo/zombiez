@@ -52,16 +52,34 @@
       "sourceJSON": "../../assets/images/gunAndBulletTest.json"
     },
 
-    "themeLoop": {
+    "soundLoop": {
       "type": "sound",
       "source": "../../assets/sounds/themeLoop.wav"
     },
-    "shoot": {
+    "shootSound": {
       "type": "sound",
       "source": "../../assets/sounds/shoot.ogg"
     },
-
-
+    "pistolReload": {
+      "type": "sound",
+      "source": "../../assets/sounds/pistolReload.mp3"
+    },
+    "heavyPistol": {
+      "type": "sound",
+      "source": "../../assets/sounds/heavyPistol.wav"
+    },
+    "zombie": {
+      "type": "sound",
+      "source": "../../assets/sounds/zombie.wav"
+    },
+    "levelUp": {
+      "type": "sound",
+      "source": "../../assets/sounds/levelUp.wav"
+    },
+    "playerHurt": {
+      "type": "sound",
+      "source": "../../assets/sounds/playerHurt.wav"
+    },
 
     "levelTilemap": {"type": "tilemap", "source": "../../assets/maps/main.json"}
   },

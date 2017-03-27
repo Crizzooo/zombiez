@@ -48,6 +48,8 @@ export default class Player extends Prefab {
       }
     }, {x: 225, y: 225});
 
+    this.socketId = properties.socketId;
+
 	  if (socket.id ===  properties.socketId) {
 		  this.loadHearts();
 		  this.loadGunUi();
