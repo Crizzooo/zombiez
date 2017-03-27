@@ -8,6 +8,7 @@ const gamePlaying = require('../reducers/engine.js').gamePlaying;
 const resetEngine = require('../reducers/engine.js').resetEngine;
 const resetLobby = require('../reducers/lobby.js').resetLobby;
 const playerReducer = require('../reducers/players.js');
+ const PLAYER_HEALTH = require('../../client/src/engine/gameConstants.js').PLAYER_HEALTH;
 
 
 const SERVER_UPDATE_RATE = 1000 / 30;
@@ -34,11 +35,11 @@ const convertLobbyers = (lobbyers) => {
     return {
       x: playerPositions[index].x,
       y: playerPositions[index].y,
-      health: 100,
       animationDirection: 'still',
       spriteKey,
       socketId: lobbyObj.socketId,
-      name: lobbyObj.name
+      name: lobbyObj.name,
+      health: PLAYER_HEALTH
     };
   });
 };
@@ -90,7 +91,7 @@ const endGame = () => {
   //end the broadcastInterval
   clearInterval(broadcastInterval);
 
-  //reset client reducers
+  //reset client reducers & remove canvas from DOM
   io.emit('resetGame');
 }
 
@@ -100,7 +101,7 @@ const broadcastGameState = (io) => {
 
     //TODO: check if win condition is hit and endgame
     if (state.lobby.lobbyers.length <= 0) {
-      console.log('we should end game ');
+      console.log('Not enough players - ending game');
       endGame();
     } else {
       io.emit('serverUpdate', state);
@@ -108,9 +109,4 @@ const broadcastGameState = (io) => {
   }, SERVER_UPDATE_RATE);
 }
 
-const checkPlayerStates = (playerObjVal, playerObjKey) => {
-  if (!playerObjVal.socketId) {
-
-  }
-}
 module.exports = { startGame, endGame };

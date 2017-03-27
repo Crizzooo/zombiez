@@ -6,7 +6,10 @@ import Prefab from './Prefab';
 import HealthHeart from './healthbar';
 import Heart from './healthHearts';
 
+const {PLAYER_HEALTH, PLAYER_DAMAGE_TINT} = require('../engine/gameConstants.js');
+
 export default class Player extends Prefab {
+
   constructor(game, name, position, properties) {
     super(game, name, position, properties);
 
@@ -20,15 +23,13 @@ export default class Player extends Prefab {
 
     //TODO: make it only visible to the current player
     //Load Hearts, Healthbar, Animations
-	  console.log('do we have sockets here', socket);
-
-
-
+    this.socketId = properties.socketId;
 
 	  this.loadAnimations();
 
     //This might not be relevant since the world size is bigger than map size
     //To allow for camera pan
+    this.body.enable = true;
     this.body.collideWorldBounds = true;
     this.body.immovable = true;
     this.game.physics.arcade.enable(this);
@@ -42,7 +43,7 @@ export default class Player extends Prefab {
 	      name: 'pistol',
         initial: 0,
         texture: 'pistolSpriteSheet',
-        rateOfFire: 100,
+        rateOfFire: 350,
         reloadSpeed: 2000,
         clip: 30
       }
@@ -60,9 +61,11 @@ export default class Player extends Prefab {
 		  this.loadHealthbar();
 	  }
 
+    //used to store currently playing animations
+    this.rolling = null
     //how frequently a player can roll
-    this.rateOfRoll = 10000;
-    this.nextRoll = 0;
+    this.rateOfRoll = 500;
+    this.canRoll = true;
   }
 
   loadControls () {
@@ -108,7 +111,7 @@ export default class Player extends Prefab {
 		  strokeThickness: 3
 	  };
 
-	  this.gunUiFrame.gunClip = this.game.add.text(50, 25, this.gun.clip + '/' +  this.gun.clip, style);
+	  this.gunUiFrame.gunClip = this.game.add.text(50, 25, this.gun.ammo + '/' +  this.gun.clip, style);
 	  this.gunUiFrame.gunClip.fixedToCamera = true;
   }
 
@@ -117,12 +120,7 @@ export default class Player extends Prefab {
   }
 
   clipUpdate () {
-  	let clipText = +this.gunUiFrame.gunClip.text.split('/')[0]
-
-	  //console.log('clip text is ', clipText--)
-	  clipText--;
-
-	  this.gunUiFrame.gunClip.text = clipText + '/' + clipText;
+	  this.gunUiFrame.gunClip.text = this.gun.ammo + '/' + this.gun.clip;
   }
 
   loadHealthbar () {
@@ -167,15 +165,17 @@ export default class Player extends Prefab {
   	console.log(this);
     //Change healthbar
     this.stats.health -= damage;
-    this.healthbar.text = this.stats.health;
+    if (socket.id !== this.socketId){
+      this.healthbar.text = this.stats.health;
+    } else {
+  	  this.health.newHealth(this.stats.health);
+    }
 
     //Set tint to show damage
-    this.tint = 0x0000ff;
+    //TODO: change to a red tint
+    this.tint = PLAYER_DAMAGE_TINT;
     setTimeout(() => {
       this.tint = 0xffffff;
-    }, 400)
-
-	  //Change Health hearts
-	  this.health.newHealth(this.stats.health);
+    }, 250)
   }
 }

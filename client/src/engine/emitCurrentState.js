@@ -1,4 +1,5 @@
 import store from '../store.js';
+import { updateCurrentPlayer } from '../reducers/players-reducer';
 
 const CLIENT_EMIT_INTERVAL = 1000 / 30;
 
@@ -13,9 +14,7 @@ export default (socket) => {
 
     let currentPlayerObj = state.players.currentPlayer;
     if (state.lobby.currentLobbyer.name && state.game.gamePlaying){
-      socket.emit('clientUpdate', {
-        player: currentPlayerObj
-      });
+      socket.emit('clientUpdate', currentPlayerObj);
     }
   }, CLIENT_EMIT_INTERVAL);
   return emitID;

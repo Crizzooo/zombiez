@@ -7,7 +7,6 @@ export default class Preload extends Phaser.State {
     //TODO: remove Atlases for Player Character
     let assets, assetKey, asset;
 
-    console.log(this.levelData);
     //Access assets object from level json
     assets = this.levelData.assets;
 

@@ -24,12 +24,15 @@ export default class Enemy extends Prefab {
   }
 
   attackPlayer (player) {
-    socket.emit('playerReceiveDamage', {
-      socketId: socket.id,
-      newDamage: this.stats.attack
-    });
+
     this.playSound(this.game.state.callbackContext, 'zombieHit', 1);
     player.receiveDamage(this.stats.attack);
+    
+    //NOTE: No longer using sockets like this
+    // socket.emit('playerReceiveDamage', {
+    //   socketId: socket.id,
+    //   newDamage: this.stats.attack
+    // });
   }
 
   receiveDamage (damage) {
