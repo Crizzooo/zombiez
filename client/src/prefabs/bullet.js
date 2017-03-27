@@ -6,5 +6,6 @@ export default class Bullet extends GunPrefab {
         this.body.immovable = true;
         this.game.physics.arcade.enable(this);
         this.tracking = false;
+        this.anchor.setTo(0.5);
     }
 }

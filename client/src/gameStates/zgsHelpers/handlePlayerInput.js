@@ -102,8 +102,8 @@ export function handleInput(player) {
 }
 
 export function handlePlayerRotation(player) {
-	let pointerX = player.game.input.activePointer.worldX;
-	let pointerY = player.game.input.activePointer.worldY;
+	let pointerX = player.pointerX;
+	let pointerY = player.pointerY;
 
 
 	let playerX = player.x;
@@ -122,13 +122,6 @@ export function handlePlayerRotation(player) {
 		//bottom-right
 		if(player.body.velocity.x === 0 && player.body.velocity.y === 0) frame = 28;
 		animation = 'down';
-		// if(cursors.up.isDown && cursors.right.isDown) {
-		//   animation = "right";
-		// } else if(cursors.down.isDown && this.game.cursors.right.isDown){
-		//   animation = "right";
-		// } else if(this.game.cursors.left.isDown && this.game.cursors.down.isDown){
-		//   animation = "right";
-		// }
 		player.gun.scale.setTo(1, 1);
 	}
 	if ((pointerY < playerY) && (pointerX > playerX)) {
@@ -155,12 +148,6 @@ export function tweenCurrentPlayerAssets(player, context) {
 		x: player.x,
 		y: player.y
 	}, 10, Phaser.Easing.Linear.None, true);
-
-	//Add tween for health
-	// context.add.tween(player.healthbar).to({
-	// 	x: player.x - 10,
-	// 	y: player.y - 30
-	// }, 10, Phaser.Easing.Linear.None, true);
 
 	//Gun rotation tween
 	player.gun.rotation = context.game.physics.arcade.angleToPointer(player.gun);

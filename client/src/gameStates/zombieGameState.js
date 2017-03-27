@@ -114,6 +114,7 @@ export default class ZombieGameState extends TiledState {
     if (this.currentPlayerSprite) {
 
       this.pointer = crosshair;
+      this.pointer.anchor.setTo(0.5);
 
       //add to world
       this.game.add.existing(this.pointer);
@@ -347,6 +348,8 @@ export default class ZombieGameState extends TiledState {
       playerToUpdate.y = playerState.y;
       playerToUpdate.direction = playerState.animationDirection;
       playerToUpdate.gun.rotation = playerState.gunRotation;
+      playerToUpdate.pointerX = playerState.pointerX;
+      playerToUpdate.pointerY = playerState.pointerY;
 
       if (playerState.bulletHash && Object.keys(playerState.bulletHash).length > 0){
         // console.dir(this.bulletHash)
@@ -365,14 +368,12 @@ export default class ZombieGameState extends TiledState {
 
       handleRemoteAnimation(playerToUpdate);
       tweenRemoteAssets(playerToUpdate, self);
-
-      //TODO: not sure why they had this in here
-      // this.game.physics.arcade.collide(this.remoteBulletGroup, this.playerSpriteGroup, this.bulletHitPlayer, null, this);
     }
   }
 
   destroyCurrentPlayerSprite() {
     if (this.currentPlayerSprite) {
+      this.currentPlayerSprite.gun.destroy();
       this.currentPlayerSprite.destroy();
       // this line was from before CPS became global
       // delete currentPlayerSprite;
@@ -392,6 +393,8 @@ export default class ZombieGameState extends TiledState {
     if (remotePlayerSprites[playerSocketId]) {
       console.log('we are removing remote player sprite');
       remotePlayerSprites[playerSocketId].destroy();
+      remotePlayerSprites[playerSocketId].healthbar.destroy();
+      remotePlayerSprites[playerSocketId].gun.destroy();
       delete remotePlayerSprites[playerSocketId];
     }
   }
@@ -434,23 +437,6 @@ export default class ZombieGameState extends TiledState {
 
       console.dir(playerPrefab, { depth: 4});
     }
-  }
-
-  tweenRemoteAssets() {
-	  //Remote Player Tweens
-	  //TODO: refactor for 4 players
-	  this.add.tween(remotePlayerSprites[Object.keys(remotePlayerSprites)[0]].healthbar).to({
-		  x: remotePlayerSprites[Object.keys(remotePlayerSprites)[0]].x - 10,
-		  y: remotePlayerSprites[Object.keys(remotePlayerSprites)[0]].y - 30
-	  }, 10, Phaser.Easing.Linear.None, true);
-
-	  this.add.tween(remotePlayerSprites[Object.keys(remotePlayerSprites)[0]].gun).to({
-		  x: remotePlayerSprites[Object.keys(remotePlayerSprites)[0]].x,
-		  y: remotePlayerSprites[Object.keys(remotePlayerSprites)[0]].y
-	  }, 10, Phaser.Easing.Linear.None, true);
-
-	  //TODO: send rotation angle of player to server, server sends it back and we use it to tween
-	  remotePlayerSprites[Object.keys(remotePlayerSprites)[0]].gun.rotation = remotePlayerSprites[Object.keys(remotePlayerSprites)[0]].gunRotation;
   }
 
   tweenCurrentPlayerAssets() {

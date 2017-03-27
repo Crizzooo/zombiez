@@ -1,7 +1,7 @@
 /**
  * Created by CharlieShi on 3/24/17.
  */
-
+import { throttle } from 'lodash';
 import { handlePlayerRotation } from './handlePlayerInput'
 
 //TODO: refactor
@@ -57,9 +57,17 @@ export default function handleRemoteAnimation(player) {
 	}
 }
 
+let throttledClog =	throttle(clog, 1000);
+
+function clog(player, context){
+	console.log('player to tween: ', player);
+	console.log('context ', context);
+}
+
 export function tweenRemoteAssets(player, context) {
 	//Remote Player Tweens
 	//TODO: refactor for 4 players
+	throttledClog(player, context);
 	context.add.tween(player.healthbar).to({
 		x: player.x - 10,
 		y: player.y - 30
@@ -69,6 +77,8 @@ export function tweenRemoteAssets(player, context) {
 		x: player.x,
 		y: player.y
 	}, 10, Phaser.Easing.Linear.None, true);
+
+	player.gun.angle = player.gun.angle * 2;
 
 	//console.log('player remote tween', player)
 	//TODO: send rotation angle of player to server, server sends it back and we use it to tween
