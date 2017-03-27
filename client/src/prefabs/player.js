@@ -59,9 +59,11 @@ export default class Player extends Prefab {
 		  this.loadHealthbar();
 	  }
 
+    //used to store currently playing animations
+    this.rolling = null
     //how frequently a player can roll
-    this.rateOfRoll = 10000;
-    this.nextRoll = 0;
+    this.rateOfRoll = 500;
+    this.canRoll = true;
   }
 
   loadControls () {

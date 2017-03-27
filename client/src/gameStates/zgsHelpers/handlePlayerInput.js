@@ -7,10 +7,16 @@ export function handleInput(player) {
 		player.pointerX = player.game.input.activePointer.worldX;
 		player.pointerY = player.game.input.activePointer.worldY;
 
-		player.body.velocity.x = 0;
-		player.body.velocity.y = 0;
-
 		let cursors = player.cursors;
+
+		//if player is rolling, return
+		//roll up, roll down, roll-right, roll-left
+		if (player.rolling && player.rolling.isPlaying){
+			return;
+		} else {
+			player.body.velocity.x = 0;
+			player.body.velocity.y = 0;
+		}
 
 		if (cursors.fire.isDown) {
 			//Shoot method will add the bullet obj to the hash map on store and then dispatch to server for 1s!
@@ -39,22 +45,26 @@ export function handleInput(player) {
 			player.body.velocity.x = player.stats.movement / 1.65;
 			player.animations.play('up');
 		} else if(cursors.up.isDown && cursors.jump.isDown){
+			//check roll time
 			player.direction = 'roll-up';
-			player.animations.play('roll-up');
+			player.rolling = player.animations.play('roll-up');
 			player.body.velocity.y = -player.stats.movement - 100;
 		} else if(cursors.down.isDown && cursors.jump.isDown){
+			//check roll time
 			player.direction = 'roll-up';
 			player.body.velocity.y = player.stats.movement + 100;
-			player.animations.play('roll-down');
+			player.rolling = player.animations.play('roll-down');
 		} else if(cursors.right.isDown && cursors.jump.isDown){
+			//check roll time
 			player.direction = 'roll-right';
 			player.scale.setTo(1, 1);
-			player.animations.play('roll-right');
+			player.rolling = player.animations.play('roll-right');
 			player.body.velocity.x = player.stats.movement + 100;
 		} else if(cursors.left.isDown && cursors.jump.isDown){
+			//check roll time
 			player.direction = 'roll-left';
 			player.scale.setTo(-1, 1);
-			player.animations.play('roll-right');
+			player.rolling = player.animations.play('roll-right');
 			player.body.velocity.x = -player.stats.movement - 100;
 		} else if (cursors.left.isDown && !player.rollright.isPlaying) {
 			player.direction = 'left';
@@ -146,4 +156,8 @@ export function tweenCurrentPlayerAssets(player, context) {
 
 	//Gun rotation tween
 	player.gun.rotation = context.game.physics.arcade.angleToPointer(player.gun);
+}
+
+function startRoll(player, direction) {
+
 }
