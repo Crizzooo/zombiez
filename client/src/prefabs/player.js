@@ -6,7 +6,7 @@ import Prefab from './Prefab';
 import HealthHeart from './healthbar';
 import Heart from './healthHearts';
 
-const {PLAYER_HEALTH, PLAYER_DAMAGE_TINT} = require('../engine/gameConstants.js');
+const {PLAYER_HEALTH, PLAYER_DAMAGE_TINT, TIME_BETWEEN_ROLLS} = require('../engine/gameConstants.js');
 
 export default class Player extends Prefab {
 
@@ -45,11 +45,10 @@ export default class Player extends Prefab {
         texture: 'pistolSpriteSheet',
         rateOfFire: 350,
         reloadSpeed: 2000,
-        clip: 30
+        clip: 10
       }
     }, {x: 225, y: 225});
 
-    this.socketId = properties.socketId;
 
 	  if (socket.id ===  properties.socketId) {
 		  this.loadHearts();
@@ -63,8 +62,12 @@ export default class Player extends Prefab {
 
     //used to store currently playing animations
     this.rolling = null
+
+    // used to slow roll speed when diagonal
+    this.walkingDiagionally = false;
+    
     //how frequently a player can roll
-    this.rateOfRoll = 500;
+    this.rateOfRoll = TIME_BETWEEN_ROLLS;
     this.canRoll = true;
   }
 
