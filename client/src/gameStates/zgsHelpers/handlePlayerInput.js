@@ -29,21 +29,53 @@ export function handleInput(player) {
 			player.body.velocity.y = player.stats.movement * .7071;
 			player.body.velocity.x = player.stats.movement * .7071;
 			player.animations.play('down');
+			player.walkingDiagionally = true;
 		} else if(cursors.down.isDown && cursors.left.isDown){
 			player.direction = 'down';
 			player.body.velocity.y = player.stats.movement * .7071;
 			player.body.velocity.x = -player.stats.movement * .7071;
 			player.animations.play('down');
+			player.walkingDiagionally = true;
 		} else if(cursors.up.isDown && cursors.left.isDown){
 			player.direction = 'up';
 			player.body.velocity.y = -player.stats.movement * .7071;
 			player.body.velocity.x = -player.stats.movement * .7071;
 			player.animations.play('up');
+			player.walkingDiagionally = true;
 		} else if(cursors.up.isDown && cursors.right.isDown){
 			player.direction = 'up';
 			player.body.velocity.y = -player.stats.movement * .7071;
 			player.body.velocity.x = player.stats.movement * .7071;
 			player.animations.play('up');
+			player.walkingDiagionally = true;
+		} else if (cursors.left.isDown && !player.rollright.isPlaying) {
+			player.direction = 'left';
+			player.animations.play('right');
+			player.scale.setTo(-1, 1);
+			player.body.velocity.x = -player.stats.movement;
+			player.walkingDiagionally = false;
+		} else if (cursors.right.isDown && !player.rollright.isPlaying) {
+			player.direction = 'right';
+			player.scale.setTo(1, 1);
+			player.animations.play('right');
+			player.body.velocity.x = player.stats.movement;
+			player.walkingDiagionally = false;
+		} else if (cursors.up.isDown && !player.rollup.isPlaying) {
+			player.direction = 'up';
+			player.body.velocity.y = -player.stats.movement;
+			player.animations.play('up');
+			player.walkingDiagionally = false;
+		} else if (cursors.down.isDown && !player.rolldown.isPlaying) {
+			player.direction = 'down';
+			player.body.velocity.y = player.stats.movement;
+			player.animations.play('down');
+			player.walkingDiagionally = false;
+		}
+		if (player.body.velocity.x === 0 && player.body.velocity.y === 0) {
+			player.direction = 'idle';
+			player.animations.stop();
+			player.frame = handlePlayerRotation(player).frame;
+			player.walkingDiagionally = false;
 		}
 
 		if (player.canRoll){
@@ -65,30 +97,7 @@ export function handleInput(player) {
 			}
 		}
 
-		if (cursors.left.isDown && !player.rollright.isPlaying) {
-			player.direction = 'left';
-			player.animations.play('right');
-			player.scale.setTo(-1, 1);
-			player.body.velocity.x = -player.stats.movement;
-		} else if (cursors.right.isDown && !player.rollright.isPlaying) {
-			player.direction = 'right';
-			player.scale.setTo(1, 1);
-			player.animations.play('right');
-			player.body.velocity.x = player.stats.movement;
-		} else if (cursors.up.isDown && !player.rollup.isPlaying) {
-			player.direction = 'up';
-			player.body.velocity.y = -player.stats.movement;
-			player.animations.play('up');
-		} else if (cursors.down.isDown && !player.rolldown.isPlaying) {
-			player.direction = 'down';
-			player.body.velocity.y = player.stats.movement;
-			player.animations.play('down');
-		}
-		if (player.body.velocity.x === 0 && player.body.velocity.y === 0) {
-			player.direction = 'idle';
-			player.animations.stop();
-			player.frame = handlePlayerRotation(player).frame;
-		}
+
 	}
 }
 
@@ -169,18 +178,17 @@ function startRoll(player, direction) {
 		switch (direction) {
 			case 'roll-right':
 				player.scale.setTo(1, 1);
-				player.body.velocity.x = player.stats.movement + 100;
+				player.body.velocity.x = player.walkingDiagionally ?  player.stats.movement + 100 * .7071 :  player.stats.movement + 100;
 				break;
 			case 'roll-left':
-				console.log('in roll left case');
 				player.scale.setTo(-1, 1);
-				player.body.velocity.x = -player.stats.movement - 100;
+				player.body.velocity.x = player.walkingDiagionally ? -player.stats.movement - 100 * .7071 : -player.stats.movement - 100;
 				break;
 			case 'roll-up':
-				player.body.velocity.y = -player.stats.movement - 100;
+				player.body.velocity.y = player.walkingDiagionally ? -player.stats.movement - 100 * .7071 : -player.stats.movement - 100;
 				break;
 			case 'roll-down':
-				player.body.velocity.y = player.stats.movement + 100;
+				player.body.velocity.y = player.walkingDiagionally ?  player.stats.movement + 100 * .7071 :  player.stats.movement + 100;
 				break;
 		}
 		setTimeout( () => {

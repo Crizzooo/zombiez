@@ -12,6 +12,7 @@ export default class Prefab extends Phaser.Sprite {
 		//Add prefab to its group
 		//Set smoothed to false for crisp pixel rendering
 		//this.gameState.groups[properties.group].add(this);
+		//this.gameState.groups[properties.group].add(this);
     this.gameState.groups[properties.group].children.push(this);
 		this.initial = +properties.initial;
 		this.smoothed = false;
@@ -20,7 +21,7 @@ export default class Prefab extends Phaser.Sprite {
 		this.gameState.add.existing(this);
 
 		//Push all prefabs to the mapSprite lighting overlay
-		this.pushToOverlay = true;
+		// this.pushToOverlay = true;
 
 		//Enable physics for each prefab, we enable it in other prefabs but this is a check
 		this.game.physics.arcade.enable(this);

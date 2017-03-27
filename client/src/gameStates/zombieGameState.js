@@ -143,12 +143,12 @@ export default class ZombieGameState extends TiledState {
       }
     });
     //Also push all remote players and their assets onto the lighting layer
-	  for (let key in remotePlayerSprites) {
-	    if (remotePlayerSprites.hasOwnProperty(key)) {
-	      this.lighting.mapSprite.addChild(remotePlayerSprites[key])
-		    this.lighting.mapSprite.addChild(remotePlayerSprites[key].healthbar)
-      }
-    }
+	  // for (let key in remotePlayerSprites) {
+	  //   if (remotePlayerSprites.hasOwnProperty(key)) {
+	  //     this.lighting.mapSprite.addChild(remotePlayerSprites[key])
+		//     this.lighting.mapSprite.addChild(remotePlayerSprites[key].healthbar)
+    //   }
+    // }
   }
 
   update() {

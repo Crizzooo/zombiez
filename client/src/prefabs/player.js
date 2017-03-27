@@ -45,9 +45,11 @@ export default class Player extends Prefab {
         texture: 'pistolSpriteSheet',
         rateOfFire: 350,
         reloadSpeed: 2000,
-        clip: 30
+        clip: 10
       }
     }, {x: 225, y: 225});
+
+    // this.gun.setScale(0.5, 0.5);ds
 
 	  if (socket.id ===  properties.socketId) {
 		  this.loadHearts();
@@ -62,6 +64,9 @@ export default class Player extends Prefab {
     //used to store currently playing animations
     this.rolling = null
 
+    // used to slow roll speed when diagonal
+    this.walkingDiagionally = false;
+    
     //how frequently a player can roll
     this.rateOfRoll = TIME_BETWEEN_ROLLS;
     this.canRoll = true;
