@@ -6,7 +6,7 @@ import Prefab from './Prefab';
 import HealthHeart from './healthbar';
 import Heart from './healthHearts';
 
-const PLAYER_HEALTH = require('../engine/gameConstants.js').PLAYER_HEALTH;
+const {PLAYER_HEALTH, PLAYER_DAMAGE_TINT} = require('../engine/gameConstants.js');
 
 export default class Player extends Prefab {
 
@@ -173,7 +173,7 @@ export default class Player extends Prefab {
 
     //Set tint to show damage
     //TODO: change to a red tint
-    this.tint = 0x0000ff;
+    this.tint = PLAYER_DAMAGE_TINT;
     setTimeout(() => {
       this.tint = 0xffffff;
     }, 250)
