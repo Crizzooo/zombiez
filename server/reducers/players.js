@@ -72,7 +72,7 @@ const playerReducers = (state = initialState, action) => {
       // console.log('Update received this action: ', action);
       let newPlayerStates = Object.assign({}, state.playerStates);
       newPlayerStates[action.playerToUpdate.socketId] = action.playerToUpdate;
-      if (Object.keys(action.playerToUpdate.bulletHash).length > 0){
+      if (action.playerToUpdate.bulletHash && Object.keys(action.playerToUpdate.bulletHash).length > 0){
         throttleReceiveBulletHash(newPlayerStates);
       } else {
         throttleLog();

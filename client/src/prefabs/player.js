@@ -110,7 +110,7 @@ export default class Player extends Prefab {
 		  strokeThickness: 3
 	  };
 
-	  this.gunUiFrame.gunClip = this.game.add.text(50, 25, this.gun.clip + '/' +  this.gun.clip, style);
+	  this.gunUiFrame.gunClip = this.game.add.text(50, 25, this.gun.ammo + '/' +  this.gun.clip, style);
 	  this.gunUiFrame.gunClip.fixedToCamera = true;
   }
 
@@ -119,12 +119,7 @@ export default class Player extends Prefab {
   }
 
   clipUpdate () {
-  	let clipText = +this.gunUiFrame.gunClip.text.split('/')[0]
-
-	  //console.log('clip text is ', clipText--)
-	  clipText--;
-
-	  this.gunUiFrame.gunClip.text = clipText + '/' + clipText;
+	  this.gunUiFrame.gunClip.text = this.gun.ammo + '/' + this.gun.clip;
   }
 
   loadHealthbar () {
