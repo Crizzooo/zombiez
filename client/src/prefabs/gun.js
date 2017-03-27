@@ -84,7 +84,7 @@ export default class Gun extends GunPrefab {
 
   reloadGun(){
     setTimeout(() => {
-      this.ammo = 30;
+      this.ammo = this.clip;
       this.isReloading = false;
       this.game.currentPlayerSprite.clipUpdate();
     }, this.reloadSpeed)
