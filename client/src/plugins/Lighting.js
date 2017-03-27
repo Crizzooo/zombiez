@@ -6,7 +6,7 @@ export default class Lighting extends Phaser.Plugin {
 	constructor (gameState) {
 		super(gameState.game);
 
-		this.gameState = gameState
+		this.gameState = gameState;
 
 		//Lighting Variables
 		this.lightAngle = Math.PI/2;

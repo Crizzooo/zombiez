@@ -49,7 +49,6 @@ export default class Player extends Prefab {
       }
     }, {x: 225, y: 225});
 
-    // this.gun.setScale(0.5, 0.5);ds
 
 	  if (socket.id ===  properties.socketId) {
 		  this.loadHearts();
@@ -166,6 +165,7 @@ export default class Player extends Prefab {
 	}
 
   receiveDamage(damage) {
+  	console.log(this);
     //Change healthbar
     this.stats.health -= damage;
     if (socket.id !== this.socketId){
