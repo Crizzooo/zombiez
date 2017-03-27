@@ -1,4 +1,5 @@
 import Prefab from './Prefab';
+import _ from 'lodash';
 
 export default class Enemy extends Prefab {
   constructor (game, name, position, properties) {
@@ -14,13 +15,17 @@ export default class Enemy extends Prefab {
     }
 
     this.hit = false;
+    this.playSound = _.throttle(this.playSound,5000);
 
   }
 
-  attackPlayer (player) {
-    // TODO: when zombies are implemented, let them create an event out of this
-    //     :  or let the GM handle this type of event
+  playSound (game, whatSound, volume)  {
+    game[whatSound].play('',0,volume,false);
+  }
 
+  attackPlayer (player) {
+
+    this.playSound(this.game.state.callbackContext, 'zombieHit', 1);
     player.receiveDamage(this.stats.attack);
     
     //NOTE: No longer using sockets like this
@@ -35,8 +40,26 @@ export default class Enemy extends Prefab {
   }
 
   moveTo (position) {
+
+
+    //putting sound in here for now, with dropoff
+    //sound continues one time after zombie dies...
+
+    const distX = this.position.x - this.game.state.callbackContext.currentPlayerSprite.x;
+    const distY = this.position.y - this.game.state.callbackContext.currentPlayerSprite.y;
+    const distance = Math.sqrt(Math.pow(distX,2)+Math.pow(distY,2));
+    const perc = 1 - ((distance-30)/150) - 0.2;
+    console.log('perc',perc);
+
+    if (perc > 1) thisplaySound(this.game.state.callbackContext,'zombieSound',0.8);
+    else if(perc <= 0);
+    else this.playSound(this.game.state.callbackContext,'zombieSound',perc);
+
+
+
+
     if (this.hit === false) {
-      console.log('not hit')
+      //console.log('not hit')
       this.gameState.pathfinding.findPath(this.position, position, this.followPath, this);
     }
   }

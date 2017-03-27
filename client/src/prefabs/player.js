@@ -2,7 +2,7 @@ import Prefab from './Prefab';
 import HealthHeart from './healthbar';
 import Heart from './healthHearts';
 
-const {PLAYER_HEALTH, PLAYER_DAMAGE_TINT} = require('../engine/gameConstants.js');
+const {PLAYER_HEALTH, PLAYER_DAMAGE_TINT, TIME_BETWEEN_ROLLS} = require('../engine/gameConstants.js');
 
 export default class Player extends Prefab {
 
@@ -45,15 +45,16 @@ export default class Player extends Prefab {
         texture: 'pistolSpriteSheet',
         rateOfFire: 350,
         reloadSpeed: 2000,
-        clip: 30
+        clip: 10
       }
     }, {x: 225, y: 225});
 
-    if (socket.id === properties.socketId) {
-      this.loadHearts();
-      this.loadGunUi();
-      this.loadControls();
-    }
+
+	  if (socket.id ===  properties.socketId) {
+		  this.loadHearts();
+		  this.loadGunUi();
+		  this.loadControls();
+	  }
 
     if (socket.id !== properties.socketId) {
       this.loadHealthbar();
@@ -61,8 +62,12 @@ export default class Player extends Prefab {
 
     //used to store currently playing animations
     this.rolling = null
+
+    // used to slow roll speed when diagonal
+    this.walkingDiagionally = false;
+    
     //how frequently a player can roll
-    this.rateOfRoll = 500;
+    this.rateOfRoll = TIME_BETWEEN_ROLLS;
     this.canRoll = true;
   }
 
@@ -183,8 +188,18 @@ export default class Player extends Prefab {
       ))
     }
   }
+  resetHealth(){
+    this.stats.health += 100;
+    if (socket.id !== this.socketId){
+      this.healthbar.text = this.stats.health;
+    } else {
+      this.health.newHealth(this.stats.health);
+    }
+    // this.health.newHealth(this.stats.health);
+  }
 
   receiveDamage(damage) {
+  	console.log(this);
     //Change healthbar
     this.stats.health -= damage;
     if (socket.id !== this.socketId){
@@ -198,8 +213,8 @@ export default class Player extends Prefab {
     this.tint = PLAYER_DAMAGE_TINT;
     setTimeout(() => {
       this.tint = 0xffffff;
-    //Change Health hearts
-    this.health.newHealth(this.stats.health);
+      //Change Health hearts
+      this.health.newHealth(this.stats.health);
     }, 250)
   }
 }
