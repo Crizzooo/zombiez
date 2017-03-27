@@ -497,7 +497,6 @@ export default class ZombieGameState extends TiledState {
   }
 
   bulletHitPlayer(player, bullet){
-      bullet.kill();
       // console.log('bullet hit player');
       // console.log('bullet: ', bullet );
       // console.log('hit player: ', player);
@@ -536,6 +535,7 @@ export default class ZombieGameState extends TiledState {
           // console.log('eh someone else hit someone');
         }
       }
+      bullet.kill();
   }
 
   //TODO: I can probably scrap this function and just use the other one
