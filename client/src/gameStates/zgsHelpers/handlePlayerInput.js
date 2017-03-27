@@ -26,23 +26,23 @@ export function handleInput(player) {
 		//TODO: use onDown instead? Need to set a previous animation
 		if (cursors.down.isDown && cursors.right.isDown){
 			player.direction = 'down';
-			player.body.velocity.y = player.stats.movement / 1.65;
-			player.body.velocity.x = player.stats.movement / 1.65;
+			player.body.velocity.y = player.stats.movement * .7071;
+			player.body.velocity.x = player.stats.movement * .7071;
 			player.animations.play('down');
 		} else if(cursors.down.isDown && cursors.left.isDown){
 			player.direction = 'down';
-			player.body.velocity.y = player.stats.movement / 1.65;
-			player.body.velocity.x = -player.stats.movement / 1.65;
+			player.body.velocity.y = player.stats.movement * .7071;
+			player.body.velocity.x = -player.stats.movement * .7071;
 			player.animations.play('down');
 		} else if(cursors.up.isDown && cursors.left.isDown){
 			player.direction = 'up';
-			player.body.velocity.y = -player.stats.movement / 1.65;
-			player.body.velocity.x = -player.stats.movement / 1.65;
+			player.body.velocity.y = -player.stats.movement * .7071;
+			player.body.velocity.x = -player.stats.movement * .7071;
 			player.animations.play('up');
 		} else if(cursors.up.isDown && cursors.right.isDown){
 			player.direction = 'up';
-			player.body.velocity.y = -player.stats.movement / 1.65;
-			player.body.velocity.x = player.stats.movement / 1.65;
+			player.body.velocity.y = -player.stats.movement * .7071;
+			player.body.velocity.x = player.stats.movement * .7071;
 			player.animations.play('up');
 		} else if(cursors.up.isDown && cursors.jump.isDown){
 			//check roll time
