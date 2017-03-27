@@ -165,15 +165,17 @@ export default class Player extends Prefab {
   receiveDamage(damage) {
     //Change healthbar
     this.stats.health -= damage;
-    this.healthbar.text = this.stats.health;
+    if (socket.id !== this.socketId){
+      this.healthbar.text = this.stats.health;
+    } else {
+  	  this.health.newHealth(this.stats.health);
+    }
 
     //Set tint to show damage
+    //TODO: change to a red tint
     this.tint = 0x0000ff;
     setTimeout(() => {
       this.tint = 0xffffff;
-    }, 400)
-
-	  //Change Health hearts
-	  this.health.newHealth(this.stats.health);
+    }, 250)
   }
 }
