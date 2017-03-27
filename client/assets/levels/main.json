@@ -47,8 +47,8 @@
 
     "pistolSpriteSheet": {
       "type": "spriteSheetAtlas",
-      "sourcePNG": "../../assets/images/gunAndBulletTest.png",
-      "sourceJSON": "../../assets/images/gunAndBulletTest.json"
+      "sourcePNG": "../../assets/images/updatedGunSheet.png",
+      "sourceJSON": "../../assets/images/updatedGunSheet.json"
     },
 
 

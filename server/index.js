@@ -108,6 +108,10 @@ io.on('connection', (socket) => {
     socket.emit('playerUpdate', players);
   })
 
+  socket.on('endGame', (player) => {
+    socket.broadcast.emit('gameOver', player)
+  })
+
 
   socket.on('playerMoving', (playerObj) => {
     console.log('looking for ', playerObj);

@@ -54,18 +54,18 @@ export default class Gun extends GunPrefab {
     if(!bullet){
       bullet = new Bullet(this.game, 'bullet', {x : this.x , y: this.y}, {
         group: 'player',
-        initial: 1,
+        initial: 9,
         texture: 'pistolSpriteSheet'
       });
       bulletGroup.add(bullet);
-
       //Change bullet ui
-	    player.clipUpdate();
     } else {
       bullet.reset(x, y);
     }
     bullet.rotation = this.game.physics.arcade.moveToXY(bullet, player.pointerX, player.pointerY, 600);
     this.ammo--;
+    player.clipUpdate(this.clip, this.ammo);
+    console.log("AMMO", this.ammo);
   }
 
   reloadGun(){
@@ -75,12 +75,13 @@ export default class Gun extends GunPrefab {
     }, this.reloadSpeed)
   }
 
-  hitZombie(zombie, bullet){
+  hitZombie(zombie, bullet, player){
     console.log("ZOMBZ", zombie);
 	  zombie.hit = true;
 	  bullet.kill();
 		zombie.animations.stop();
-	  zombie.animations.play('dead')
+	  zombie.animations.play('dead');
+
     zombie.zombDeath.onComplete.add(() => zombie.kill(), this);
   }
 }

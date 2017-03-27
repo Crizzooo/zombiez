@@ -42,11 +42,13 @@ export default class ZombieGameState extends TiledState {
     socket.on('destroyCurrentPlayerSprite', this.destroyCurrentPlayerSprite);
     socket.on('playerLeaveGame', this.handleRemotePlayerLeave);
     socket.on('remoteFire', this.handleRemotePlayerFire);
-    socket.on('remoteReceiveDamage', this.handleRemotePlayerReceiveDamage)
+    socket.on('remoteReceiveDamage', this.handleRemotePlayerReceiveDamage);
+    // socket.on('gameOver', this.handleRemoteGameOver);
   }
 
   preload() {
     //load assets that are specific for this level
+    this.load.bitmapFont('carrier_command', '../../assets/fonts/carrier_command.png', '../../assets/fonts/carrier_command.xml');
   }
 
   create() {
@@ -61,6 +63,7 @@ export default class ZombieGameState extends TiledState {
     this.pathfinding = this.game.plugins.add(Pathfinding, worldGrid, [-1], this.tileDimensions);
     this.lightingPlugin = new Lighting(this);
 
+    // this.bmpText.inputEnabled = true;
     //Create Players and Temp Objects
     let crosshair = new Phaser.Sprite(this.game, 0, 0, 'crosshairSpriteSheet');
 
@@ -78,7 +81,6 @@ export default class ZombieGameState extends TiledState {
 	        texture: 'zombieSpriteSheet'
         }
       }, {x: 200, y: 200});
-
     this.currentEnemy = enemyPrefab;
     this.currentEnemy.moveTo = throttle(this.currentEnemy.moveTo, 1000);
     this.currentEnemy.animations.play('left');
@@ -131,7 +133,6 @@ export default class ZombieGameState extends TiledState {
       }
     }
 
-	  console.log('THIS IS WORLD', this.game.world.children)
     console.log('THIS IS ', this)
   }
 
@@ -153,6 +154,20 @@ export default class ZombieGameState extends TiledState {
       //Tween all player assets
       //Remote and current
       tweenCurrentPlayerAssets(this.currentPlayerSprite, this);
+
+      //check to see if current player won
+      if(this.currentPlayerSprite.checkIfWin()){
+        // this.bmpText.inputEnabled = true;
+        console.log("I FUCKING WON!!!");
+        this.bmpText = this.game.add.bitmapText(100, 100, 'carrier_command',`You won!!`, 34);
+        this.bmpText.fixedToCamera = true;
+        document.body.style.cursor = 'pointer';
+        // socket.broadcast('endGame', {player:this.currentPlayerSprite});
+        // setTimeout(function(){
+        // this.game.state.start('ZombieGameState',true,false);
+        // }, 5000);
+        // this.bmpText.inputEnabled = true;
+      }
     }
 
     //collisions for remoteBulletGroups
@@ -250,7 +265,9 @@ export default class ZombieGameState extends TiledState {
 
     //TODO - create player sprite group using all in RPS, and CP sprite
     this.playerSpriteGroup = this.game.add.group();
+    Object.values(remotePlayerSprites).forEach((player) => {
 
+    })
     //if current player, add to group
     if (this.currentPlayerSprite) {
       this.playerSpriteGroup.add(this.currentPlayerSprite);
@@ -382,6 +399,15 @@ export default class ZombieGameState extends TiledState {
     remotePlayerSprites[damageObj.socketId].receiveDamage(damageObj.newDamage);
   }
 
+  handleRemoteGameOver(playerWhoWon){
+    this.bmpText = this.game.add.bitmapText(100, 100, 'carrier_command',`${playerWhoWon.name} won!!`, 34);
+    this.bmpText.fixedToCamera = true;
+    document.body.style.cursor = 'pointer';
+    setTimeout(function(){
+      this.game.state.start('ZombieGameState',true,false);
+    }, 5000);
+  }
+
   logRemotePlayers(){
     console.log('RPS: ', remotePlayerSprites);
     console.log('Local State: ', store.getState());
@@ -407,11 +433,25 @@ export default class ZombieGameState extends TiledState {
     console.log("ZOMBZ", zombie);
     zombie.hit = true;
     zombie.animations.stop();
-    zombie.animations.play('dead')
+    zombie.animations.play('dead');
+    if(bullet.id === socket.id){
+      // socket.emit('nextGunLevel', {socketId: socket.id, });
+      this.currentPlayerSprite.currentGunLevel++;
+      this.currentPlayerSprite.loadGun(this.currentPlayerSprite.currentGunLevel);
+    }
     //let animationRef = zombie.animations.play('dead').animationReference.isPlaying;
 
     zombie.animations.currentAnim.onComplete.add( () => {
       zombie.kill();
+      this.currentEnemy = this.createPrefab('zombie',
+        {
+          type: 'enemies',
+          properties: {
+            group: 'enemies',
+            initial: 9,
+            texture: 'zombieSpriteSheet'
+          }
+        }, {x: 200, y: 200});
     })
     bullet.kill();
   }
@@ -422,6 +462,7 @@ export default class ZombieGameState extends TiledState {
     //   socketId: socket.id,
     //   newDamage: player.gun.damage
     // });
+    console.log("PLAYER COLLISION");
       if (bullet.parent.name === 'currentPlayerBulletGroup'){
         //TODO: emit to server
         console.log('I HIT A MOTHERFUCKER');
