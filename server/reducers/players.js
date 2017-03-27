@@ -2,7 +2,7 @@ const R = require('ramda');
 const throttle = require('lodash').throttle;
 
 // Constants
- const PLAYER_HEALTH = require('../../client/src/engine/gameConstants.js').PLAYER_HEALTH;
+ const {PLAYER_HEALTH, EVENT_LOOP_DELETE_TIME } = require('../../client/src/engine/gameConstants.js');
 // Action Types
 const ADD_PLAYER = 'ADD_PLAYER';
 const REMOVE_PLAYER = 'REMOVE_PLAYER';
@@ -47,10 +47,10 @@ const damagePlayer = (dmgToTake, socketId) => ({
 const initialState = { playerStates: {}, playerHealths: {} };
 
 const throttleLog = throttle( () => console.log('did not recieve a hash'), 1000);
-const throttleReceiveBulletHash = throttle( (action) => {
-  console.log('server received bullet hash: ', action);
+const throttleReceiveEventHash = throttle( (action) => {
+  console.log('server received an event in the player hash: ', action);
   console.log('at :', new Date());
-}, 1000)
+}, EVENT_LOOP_DELETE_TIME / 10)
 
 const playerReducers = (state = initialState, action) => {
   let newState = Object.assign({}, state);
@@ -72,17 +72,15 @@ const playerReducers = (state = initialState, action) => {
       // console.log('Update received this action: ', action);
       let newPlayerStates = Object.assign({}, state.playerStates);
       newPlayerStates[action.playerToUpdate.socketId] = action.playerToUpdate;
-      if (action.playerToUpdate.bulletHash && Object.keys(action.playerToUpdate.bulletHash).length > 0){
-        throttleReceiveBulletHash(newPlayerStates);
+      if (Object.keys(action.playerToUpdate.bulletHash).length > 0 || Object.keys(action.playerToUpdate.playerDamageHash).length > 0){
+        //we've received an event
+        throttleReceiveEventHash(newPlayerStates);
       } else {
         throttleLog();
       }
       if (!action.playerToUpdate.socketId){
         return state;
       }
-      // if (newPlayerStates[action.playerToUpdate.socketId].health !== state.playerHealths[action.playerToUpdate.socketId]){
-      //   newPlayerStates[action.playerToUpdate.socketId].health = state.playerHealths[action.playerToUpdate.socketId];
-      // }
       newState.playerStates = newPlayerStates;
       break;
     }

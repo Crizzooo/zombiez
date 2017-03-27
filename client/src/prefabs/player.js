@@ -6,7 +6,7 @@ import Prefab from './Prefab';
 import HealthHeart from './healthbar';
 import Heart from './healthHearts';
 
-const PLAYER_HEALTH = require('../engine/gameConstants.js').PLAYER_HEALTH;
+const {PLAYER_HEALTH, PLAYER_DAMAGE_TINT} = require('../engine/gameConstants.js');
 
 export default class Player extends Prefab {
 
@@ -24,9 +24,6 @@ export default class Player extends Prefab {
     //TODO: make it only visible to the current player
     //Load Hearts, Healthbar, Animations
     this.socketId = properties.socketId;
-
-
-
 
 	  this.loadAnimations();
 
@@ -163,15 +160,17 @@ export default class Player extends Prefab {
   receiveDamage(damage) {
     //Change healthbar
     this.stats.health -= damage;
-    this.healthbar.text = this.stats.health;
+    if (socket.id !== this.socketId){
+      this.healthbar.text = this.stats.health;
+    } else {
+  	  this.health.newHealth(this.stats.health);
+    }
 
     //Set tint to show damage
-    this.tint = 0x0000ff;
+    //TODO: change to a red tint
+    this.tint = PLAYER_DAMAGE_TINT;
     setTimeout(() => {
       this.tint = 0xffffff;
-    }, 400)
-
-	  //Change Health hearts
-	  this.health.newHealth(this.stats.health);
+    }, 250)
   }
 }

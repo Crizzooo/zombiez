@@ -77,7 +77,7 @@ export default class Gun extends GunPrefab {
       player.clipUpdate();
     } else {
       //Render the bullet for the remote player
-      console.log('remote player just fired!');
+      // console.log('remote player just fired!');
     }
   }
 
