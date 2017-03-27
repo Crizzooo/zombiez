@@ -29,6 +29,11 @@ export default class TiledState extends Phaser.State {
 	    this.game.scale.scaleMode = Phaser.ScaleManager.USER_SCALE;
 	    this.game.scale.setGameSize($('#game').innerWidth()/2, $('#game').innerHeight()/2);
 	    this.game.scale.setUserScale(2, 2);
+
+      this.game.stage.disableVisibilityChange = true;
+
+      this.game.time.advancedTiming = true;
+      this.game.desiredFps = 30;
 	    //this.game.scale.setUserScale(6, 6);
 	    // this.game.scale.setResizeCallback( (scale, parentBounds) => {
 	    // })

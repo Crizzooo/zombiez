@@ -2,7 +2,10 @@ import Prefab from './Prefab';
 import HealthHeart from './healthbar';
 import Heart from './healthHearts';
 
+const {PLAYER_HEALTH, PLAYER_DAMAGE_TINT} = require('../engine/gameConstants.js');
+
 export default class Player extends Prefab {
+
   constructor(game, name, position, properties) {
     super(game, name, position, properties);
 
@@ -16,7 +19,7 @@ export default class Player extends Prefab {
 
     //TODO: make it only visible to the current player
     //Load Hearts, Healthbar, Animations
-    console.log('do we have sockets here', socket);
+    this.socketId = properties.socketId;
 
 
     this.loadAnimations();
@@ -24,6 +27,7 @@ export default class Player extends Prefab {
     this.currentGunLevel = 1;
       //This might not be relevant since the world size is bigger than map size
     //To allow for camera pan
+    this.body.enable = true;
     this.body.collideWorldBounds = true;
     this.body.immovable = true;
     this.game.physics.arcade.enable(this);
@@ -39,7 +43,7 @@ export default class Player extends Prefab {
         name: 'pistol',
         initial: 8,
         texture: 'pistolSpriteSheet',
-        rateOfFire: 100,
+        rateOfFire: 350,
         reloadSpeed: 2000,
         clip: 30
       }
@@ -55,9 +59,11 @@ export default class Player extends Prefab {
       this.loadHealthbar();
     }
 
+    //used to store currently playing animations
+    this.rolling = null
     //how frequently a player can roll
-    this.rateOfRoll = 10000;
-    this.nextRoll = 0;
+    this.rateOfRoll = 500;
+    this.canRoll = true;
   }
 
   loadControls() {
@@ -110,13 +116,12 @@ export default class Player extends Prefab {
     this.gunUiFrame.gunSprite = this.gameState.game.add.sprite(0, 25, gunName + 'SpriteSheet', 1);
   }
 
-  clipUpdate(clip, ammo) {
-    // let clipText = +this.gunUiFrame.gunClip.text.split('/')[0]
+  clipUpdate () {
+	  this.gunUiFrame.gunClip.text = this.gun.clip + '/' + this.gun.ammo;
+  }
 
-    //console.log('clip text is ', clipText--)
-    // clipText--;
+  dispatchHasWon(player){
 
-    this.gunUiFrame.gunClip.text = clip + '/' + ammo;
   }
 
   loadHealthbar() {
@@ -138,22 +143,24 @@ export default class Player extends Prefab {
     //this.gameState.add.existing(this.healthbar);
   }
 
-  loadGun(gunLevel){
-    switch(gunLevel){
+  upgradeGun(player){
+    player.currentGunLevel++;
+    console.log("INSIDE OF LOAD GUN!!", player);
+    switch(player.currentGunLevel){
       case 1:
-        this.gun.frame = 8;
-        this.gunUiFrame.gunSprite.frame = 8;
+        player.gun.frame = 8;
+        player.gunUiFrame.gunSprite.frame = 8;
         break;
       case 2:
-        this.gun.frame = 6;
-        this.gunUiFrame.gunSprite.frame = 6;
+        player.gun.frame = 6;
+        player.gunUiFrame.gunSprite.frame = 6;
         break;
       case 3:
-        this.gun.frame = 1;
-        this.gunUiFrame.gunSprite.frame = 1;
+        player.gun.frame = 1;
+        player.gunUiFrame.gunSprite.frame = 1;
         break;
       case 4:
-        this.hasWon = true;
+        player.hasWon = true;
         break;
     }
   }
@@ -177,25 +184,22 @@ export default class Player extends Prefab {
     }
   }
 
-  checkIfWin(){
-    if(this.hasWon){
-      console.log("III WWIIIIIIINNNNNN!!!!!---------------------------->")
-      return true;
-    }
-  }
-
   receiveDamage(damage) {
     //Change healthbar
     this.stats.health -= damage;
-    this.healthbar.text = this.stats.health;
+    if (socket.id !== this.socketId){
+      this.healthbar.text = this.stats.health;
+    } else {
+  	  this.health.newHealth(this.stats.health);
+    }
 
     //Set tint to show damage
-    this.tint = 0x0000ff;
+    //TODO: change to a red tint
+    this.tint = PLAYER_DAMAGE_TINT;
     setTimeout(() => {
       this.tint = 0xffffff;
-    }, 400)
-
     //Change Health hearts
     this.health.newHealth(this.stats.health);
+    }, 250)
   }
 }

@@ -20,12 +20,11 @@ export default class Prefab extends Phaser.Sprite {
 		this.gameState.add.existing(this);
 
 		//Push all prefabs to the mapSprite lighting overlay
-		this.pushToOverlay = true;
+		// this.pushToOverlay = true;
 
 		//Enable physics for each prefab, we enable it in other prefabs but this is a check
 		this.game.physics.arcade.enable(this);
 
 		this.gameState.prefabs[name] = this;
-    console.log("FUCKING ANIMATIONS", this);
 	}
 }

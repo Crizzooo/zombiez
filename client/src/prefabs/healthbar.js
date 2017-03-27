@@ -42,8 +42,11 @@ export default class HealthBar extends Phaser.Sprite {
 
 		//Determines how many hearts and half hearts to show
 		let numHearts = Math.floor((health / 10)  % 10);
-		let halfHeart = health % 10 >= 5 ? true : false;
+		let halfHeart = health % 10 > 5 ? true : false;
 
+		if (health < 0){
+			return;
+		}
 		//Loops through hearts and sets them appropriately
 		for (let i = this.currentHeart; i >= numHearts; i--) {
 			if (i > numHearts) {
@@ -52,9 +55,6 @@ export default class HealthBar extends Phaser.Sprite {
 				(halfHeart ? this.hearts[i].changeHeart('half') : this.hearts[i].changeHeart('empty'))
 			}
 		}
-
 	}
-
-
 
 }

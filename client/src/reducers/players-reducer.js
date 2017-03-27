@@ -41,7 +41,10 @@ export const removeCurrentPlayer = () => ({
 const initialState = {
   score: 0,
   playerStates: {},
-  currentPlayer: {}
+  currentPlayer: {
+    bulletHash: {},
+    playerDamageHash: {}
+  }
 };
 
 /* Reducer */
@@ -54,15 +57,12 @@ export default (state = initialState, action) => {
 
     case LOAD_PLAYERS:
       //if there is a socket id, make it current player and remove him from playerStates
-      console.log('LOAD PLAYERS IN REDUCER RECIEVED ACTION: ');
-      console.dir(action.players);
-      console.log('before we delete current player: ', action.players);
       if (action.players[socket.id]) {
         newState.currentPlayer = action.players[socket.id];
         delete action.players[socket.id];
       }
       newState.playerStates = action.players;
-      console.log('LOAD PLAYERS REDUCER newState.PlayerStates: ', action.players);
+      console.log('State after loading players: ', action.players);
       break;
 
     case SET_GAME_PLAYING_BOOL:
@@ -75,7 +75,10 @@ export default (state = initialState, action) => {
       break;
 
     case UPDATE_CURRENT_PLAYER:
-      newState.currentPlayer = action.currentPlayerState;
+      let updatedPlayerState = Object.assign({}, state.currentPlayer, action.currentPlayerState, { bulletHash: action.currentPlayerState.bulletHash}, { playerDamageHash: action.currentPlayerState.playerDamageHash});
+      newState.currentPlayer = updatedPlayerState;
+      // console.log('updated CP to ', newState.currentPlayer);
+      // console.log('updated Current Player to: ', newState.currentPlayer);
       break;
 
     case PLAYER_LEAVE_GAME:
