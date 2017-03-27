@@ -83,6 +83,10 @@
       "type": "sound",
       "source": "../../assets/sounds/playerHurt.wav"
     },
+    "gameWin": {
+      "type": "sound",
+      "source": "../../assets/sounds/gameWin.wav"
+    },
 
     "levelTilemap": {"type": "tilemap", "source": "../../assets/maps/main.json"}
   },

@@ -118,7 +118,7 @@ export default class TiledState extends Phaser.State {
 			  if (obstaclesLayer.data[rowIndex][columnIndex].collides){
           worldGrid[rowIndex].push(obstaclesLayer.data[rowIndex][columnIndex].index);
         }
-        if(litObstaclesLayer.data[rowIndex][columnIndex].collides){
+        else if(litObstaclesLayer.data[rowIndex][columnIndex].collides){
 			    console.log('does the lit work');
           worldGrid[rowIndex].push(litObstaclesLayer.data[rowIndex][columnIndex].index);
         }

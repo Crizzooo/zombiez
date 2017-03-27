@@ -11,7 +11,7 @@ export default class Lighting extends Phaser.Plugin {
 		//Lighting Variables
 		this.lightAngle = Math.PI/2;
 		this.numberOfRays = 300;
-		this.rayLength = 300;
+		this.rayLength = 180;
 
 		this.gameState.lighting = {};
 

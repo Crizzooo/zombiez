@@ -77,6 +77,7 @@ export default class ZombieGameState extends TiledState {
     this.heavyPistol = this.game.add.audio('heavyPistol');
     this.levelUp = this.game.add.audio('levelUp');
     this.playerHurt = this.game.add.audio('playerHurt');
+    this.gameWin = this.game.add.audio('gameWin');
     let x = true;
 
     //Create worldGrid and tile dimensions for pathfinding
