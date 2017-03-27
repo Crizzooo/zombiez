@@ -88,39 +88,12 @@ io.on('connection', (socket) => {
     startGame(io);
   });
 
-  //revisit below socket methods
-  // socket.on('getPlayers', () => {
-  //   //emiting player.state
-  //   console.log("server heard 'getPlayers' ");
-  //   socket.emit('playerUpdate', players);
-  // })
-  //
-  // socket.on('playerScored', (playerId, score) => {
-  //   io.emit('updateLeaderboard', playerId, score);
-  // })
-
   socket.on('clientUpdate', (playerState) => {
     //TODO: break state down and dispatch to appropriate reducers
     // console.log('server heard client update with: ', playerState);
     // console.log('this client told the server to update: ', socket.id);/
     store.dispatch(updatePlayer(playerState));
   });
-
-  socket.on('userFire', (fireObj) => {
-    socket.broadcast.emit('remoteFire', fireObj);
-  })
-
-
-  socket.on('shotPlayer', (hitPlayerSocketId, dmgToTake) => {
-      //NOTE: We could validate the hit by checking location of players here
-      //When validated, tell all players to damage the hit players
-      io.emit('damagePlayer', hitPlayerSocketId, dmgToTake);
-  });
-
-  //TODO: folllow skinners chain here and evaluate
-  // socket.on('playerReceiveDamage', (damageObj) => {
-  //   socket.broadcast.emit('remoteReceiveDamage', damageObj);
-  // })
 
 })
 

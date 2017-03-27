@@ -42,7 +42,8 @@ const initialState = {
   score: 0,
   playerStates: {},
   currentPlayer: {
-    bulletHash: {}
+    bulletHash: {},
+    playerDamageHash: {}
   }
 };
 
@@ -74,7 +75,7 @@ export default (state = initialState, action) => {
       break;
 
     case UPDATE_CURRENT_PLAYER:
-      let updatedPlayerState = Object.assign({}, state.currentPlayer, action.currentPlayerState, { bulletHash: action.currentPlayerState.bulletHash});
+      let updatedPlayerState = Object.assign({}, state.currentPlayer, action.currentPlayerState, { bulletHash: action.currentPlayerState.bulletHash}, { playerDamageHash: action.currentPlayerState.playerDamageHash});
       newState.currentPlayer = updatedPlayerState;
       // console.log('updated CP to ', newState.currentPlayer);
       // console.log('updated Current Player to: ', newState.currentPlayer);
