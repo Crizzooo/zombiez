@@ -182,9 +182,10 @@ export default class ZombieGameState extends TiledState {
       handleInput(this.currentPlayerSprite);
       this.dispatchCurrentPlayer();
       if (this.currentPlayerSprite.stats.health === 0) {
+        //could be random spots on map for now it's here for debugging
         this.currentPlayerSprite.x = 250;
         this.currentPlayerSprite.y = 250;
-        this.currentPlayerSprite.resetHealth()
+        this.currentPlayerSprite.resetHealth();
       }
       //Tween all player assets
       //Remote and current
@@ -192,17 +193,10 @@ export default class ZombieGameState extends TiledState {
 
       //check to see if current player won
       if (this.currentPlayerSprite.hasWon) {
-        console.log("I FUCKING WON!!!");
         this.bmpText = this.game.add.bitmapText(100, 100, 'carrier_command', `You won!!`, 34);
         this.bmpText.fixedToCamera = true;
         document.body.style.cursor = 'pointer';
       }
-
-      // if(this.currentPlayerSprite.stats.health === 0){
-      //   this.currentPlayerSprite.x = 250;
-      //   this.currentPlayerSprite.y = 250;
-      //   this.currentPlayerSprite.stats.health = 100
-      // }
     }
 
 
@@ -303,7 +297,6 @@ export default class ZombieGameState extends TiledState {
     R.forEachObjIndexed(this.createRemotePlayerSprite, state.players.playerStates);
 
     console.log('our remote player sprite group: ', this.remotePlayerSpriteGroup.length);
-    console.dir(this.remotePlayerSpriteGroup);
   }
 
   updateCollisions() {
@@ -361,9 +354,7 @@ export default class ZombieGameState extends TiledState {
 
   //TODO: move remote player updates to other file
   updateRemotePlayers() {
-    // console.log('updating remote players has been called');
     this.players = store.getState().players.playerStates;
-    // console.log('player to update: ', this.players);
     if (this.players[socket.id]) delete this.players[socket.id];
     //then update each player from the server
     R.forEachObjIndexed(this.updateRemotePlayer, this.players);
@@ -374,10 +365,6 @@ export default class ZombieGameState extends TiledState {
 
     if (remotePlayerSprites[playerState.socketId]) {
       let playerToUpdate = remotePlayerSprites[playerState.socketId];
-      // this.logRemotePlayer(playerState);
-      // console.log('updating this player: ', playerToUpdate);
-      // console.log('with this state from server: ', playerState);
-
       //NOTE: what do I need to know from the players?
       //      Implement other properties
       playerToUpdate.x = playerState.x;
@@ -405,7 +392,6 @@ export default class ZombieGameState extends TiledState {
       handleRemoteAnimation(playerToUpdate);
       tweenRemoteAssets(playerToUpdate, self);
       if(playerToUpdate.hasWon){
-        console.log("Another player FUCKING WON!!!");
         this.bmpText = this.game.add.bitmapText(100, 100, 'carrier_command', `${playerToUpdate.name} won!!`, 34);
         this.bmpText.fixedToCamera = true;
         document.body.style.cursor = 'pointer';
@@ -452,7 +438,6 @@ export default class ZombieGameState extends TiledState {
     //TODO: name needs to be unique for each remote player
     //TODO: take name from server
     if (playerState.socketId !== socket.id) {
-      console.log('creating prefab for player', playerState)
       let playerPrefab = self.createPrefab(playerState.name,
         {
           type: 'player',
@@ -468,7 +453,6 @@ export default class ZombieGameState extends TiledState {
       playerPrefab.bulletGroup = self.remotePlayerBulletGroup;
       //Add remote sprite to the remotePlayerSpriteGroup
       this.game.add.existing(playerPrefab);
-      console.log('p prefab', playerPrefab);
       this.remotePlayerSpriteGroup.children.push(playerPrefab);
       console.log('RPSG in create remotePlayerSprites ', this.remotePlayerSpriteGroup);
 
@@ -595,7 +579,7 @@ export default class ZombieGameState extends TiledState {
     playerToDamage.receiveDamage(playerWhoDealtDamage.gun.damage);
     if(playerToDamage.stats.health === 0){
       playerWhoDealtDamage.upgradeGun(self.currentPlayerSprite);
-      playerToDamage.resetHealth();
+      playerToDamage.resetHealth(playerSocketId);
     }
   }
 

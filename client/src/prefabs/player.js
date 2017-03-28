@@ -25,7 +25,7 @@ export default class Player extends Prefab {
     this.loadAnimations();
     //reference for which frame the gun should be on
     this.currentGunLevel = 1;
-      //This might not be relevant since the world size is bigger than map size
+    //This might not be relevant since the world size is bigger than map size
     //To allow for camera pan
     this.body.enable = true;
     this.body.collideWorldBounds = true;
@@ -50,11 +50,11 @@ export default class Player extends Prefab {
     }, {x: 225, y: 225});
 
 
-	  if (socket.id ===  properties.socketId) {
-		  this.loadHearts();
-		  this.loadGunUi();
-		  this.loadControls();
-	  }
+    if (socket.id === properties.socketId) {
+      this.loadHearts();
+      this.loadGunUi();
+      this.loadControls();
+    }
 
     if (socket.id !== properties.socketId) {
       this.loadHealthbar();
@@ -65,10 +65,11 @@ export default class Player extends Prefab {
 
     // used to slow roll speed when diagonal
     this.walkingDiagionally = false;
-    
+
     //how frequently a player can roll
     this.rateOfRoll = TIME_BETWEEN_ROLLS;
     this.canRoll = true;
+    // this.justRespawned = false;
   }
 
   loadControls() {
@@ -100,7 +101,7 @@ export default class Player extends Prefab {
     this.gameState.game.add.existing(this.gunUiFrame);
     this.gunUiFrame.fixedToCamera = true;
     this.gunUiFrame.alpha = 0.5;
-      this.gunUiFrame.gunSprite = this.gameState.game.add.sprite(90, 70, 'pistolSpriteSheet', this.gun.frame);
+    this.gunUiFrame.gunSprite = this.gameState.game.add.sprite(90, 70, 'pistolSpriteSheet', this.gun.frame);
     this.gameState.game.add.existing(this.gunUiFrame.gunSprite);
     this.gunUiFrame.gunSprite.scale.setTo(3, 3);
     this.gunUiFrame.gunSprite.smoothed = false;
@@ -121,11 +122,11 @@ export default class Player extends Prefab {
     this.gunUiFrame.gunSprite = this.gameState.game.add.sprite(0, 25, gunName + 'SpriteSheet', 1);
   }
 
-  clipUpdate () {
-	  this.gunUiFrame.gunClip.text = this.gun.clip + '/' + this.gun.ammo;
+  clipUpdate() {
+    this.gunUiFrame.gunClip.text = this.gun.clip + '/' + this.gun.ammo;
   }
 
-  dispatchHasWon(player){
+  dispatchHasWon(player) {
 
   }
 
@@ -148,10 +149,10 @@ export default class Player extends Prefab {
     //this.gameState.add.existing(this.healthbar);
   }
 
-  upgradeGun(player){
+  upgradeGun(player) {
     player.currentGunLevel++;
     console.log("INSIDE OF LOAD GUN!!", player);
-    switch(player.currentGunLevel){
+    switch (player.currentGunLevel) {
       case 1:
         player.gun.frame = 8;
         player.gunUiFrame.gunSprite.frame = 8;
@@ -188,33 +189,40 @@ export default class Player extends Prefab {
       ))
     }
   }
-  resetHealth(){
+
+  resetHealth(id) {
     this.stats.health += 100;
-    if (socket.id !== this.socketId){
+    if (socket.id !== this.socketId) {
       this.healthbar.text = this.stats.health;
     } else {
-      this.health.newHealth(this.stats.health);
+      this.health.hearts.forEach((heartSprite) => {
+        heartSprite.changeHeart("full");
+      })
     }
+
+
     // this.health.newHealth(this.stats.health);
   }
 
   receiveDamage(damage) {
-  	console.log(this);
+    console.log(this);
     //Change healthbar
     this.stats.health -= damage;
-    if (socket.id !== this.socketId){
+    if (socket.id !== this.socketId) {
       this.healthbar.text = this.stats.health;
     } else {
-  	  this.health.newHealth(this.stats.health);
+      this.health.newHealth(this.stats.health);
     }
 
     //Set tint to show damage
     //TODO: change to a red tint
-    this.tint = PLAYER_DAMAGE_TINT;
-    setTimeout(() => {
-      this.tint = 0xffffff;
-      //Change Health hearts
-      this.health.newHealth(this.stats.health);
-    }, 250)
+    if (this.stats.health !== 0) {
+      this.tint = PLAYER_DAMAGE_TINT;
+      setTimeout(() => {
+        this.tint = 0xffffff;
+        //Change Health hearts <----- WHY CHARLIE, WHY IN A setTimeout?! I FOUND THIS AFTER 4 HOURS
+        this.health.newHealth(this.stats.health);
+      }, 250)
+    }
   }
 }
