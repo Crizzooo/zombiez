@@ -54,7 +54,11 @@ export default class ZombieGameState extends TiledState {
 
     console.log(this.game.onBlur);
 
+    document.getElementsByClassName("container")[0].style.visibility = "hidden";
+
+    //console.log('ay',document.getElementsByClassName("container"))
     this.isInChat = false;
+
     //Sockets
     socket.on('destroyCurrentPlayerSprite', this.destroyCurrentPlayerSprite);
     socket.on('playerLeaveGame', this.handleRemotePlayerLeave);

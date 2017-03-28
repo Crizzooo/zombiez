@@ -39,13 +39,12 @@ class ChatApp extends React.Component {
     //const textInput = document.getElementById("createMessage");
     //textInput.blur();
     console.log('enabled', ZG.game.input.enabled)
-    //ZG.game.input.enabled = true;
     $(".messageForm").blur();
     $("#createMessage").blur();
     $("#game").focus();
-    //ZG.game.input.enabled = true;
     console.log('was the chat active before it was changed on enter:', ZG.game.isInChat)
     ZG.game.isInChat = false;
+    setTimeout(()=>{document.getElementsByClassName("container")[0].style.visibility = "hidden";},1000)
   }
 
   render() {
