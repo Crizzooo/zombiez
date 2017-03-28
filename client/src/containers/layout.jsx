@@ -10,6 +10,9 @@ class Layout extends Component {
 
   constructor(props) {
     super(props);
+    this.state = {
+
+    }
   }
 
   render () {
@@ -17,10 +20,10 @@ class Layout extends Component {
       <div className="siteContainer">
         <div className="gc">
           <GameContainer />
-        </div>
-        <div className="container mainContainer">
+          <div className="container mainContainer">
             <Leaderboard />
             { this.props.children }
+          </div>
         </div>
       </div>
     );

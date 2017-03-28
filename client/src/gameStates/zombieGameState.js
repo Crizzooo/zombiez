@@ -34,6 +34,8 @@ export default class ZombieGameState extends TiledState {
   }
 
   init(levelData) {
+
+
     //Call super init to load in data;
     super.init.call(this, levelData);
 
@@ -50,6 +52,9 @@ export default class ZombieGameState extends TiledState {
     this.handleRemotePlayerDamageEvent = this.handleRemotePlayerDamageEvent.bind(this);
 
 
+    console.log(this.game.onBlur);
+
+    this.isInChat = false;
     //Sockets
     socket.on('destroyCurrentPlayerSprite', this.destroyCurrentPlayerSprite);
     socket.on('playerLeaveGame', this.handleRemotePlayerLeave);
@@ -162,7 +167,7 @@ export default class ZombieGameState extends TiledState {
 
 
     //background music
-    this.soundLoop.play();
+    //this.soundLoop.play();
 	  // for (let key in remotePlayerSprites) {
 	  //   if (remotePlayerSprites.hasOwnProperty(key)) {
 	  //     this.lighting.mapSprite.addChild(remotePlayerSprites[key])

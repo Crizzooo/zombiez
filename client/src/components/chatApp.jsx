@@ -33,6 +33,19 @@ class ChatApp extends React.Component {
       height += parseInt($(this).height());
     });
     $('#messageDisplay').animate({scrollTop: height});
+    //document.getElementById("game").focus();
+
+    $('#createMessage').blur();
+    //const textInput = document.getElementById("createMessage");
+    //textInput.blur();
+    console.log('enabled', ZG.game.input.enabled)
+    //ZG.game.input.enabled = true;
+    $(".messageForm").blur();
+    $("#createMessage").blur();
+    $("#game").focus();
+    //ZG.game.input.enabled = true;
+    console.log('was the chat active before it was changed on enter:', ZG.game.isInChat)
+    ZG.game.isInChat = false;
   }
 
   render() {
@@ -55,18 +68,9 @@ class ChatApp extends React.Component {
             </div>
             <div className="chatFooter">
               <form onSubmit={this.handleSubmit} id="chatForm">
-                <div className="messageForm">
+                <div className="messageForm" >
                   <input id="createMessage" autoComplete="off" placeholder="Talk some smack here..." onChange={this.handleChange} />
-                  {
-                    this.state.messageToSend && this.state.messageToSend.length >= 1 ?
-                    <button type="submit" id="sendMessage" className="btn btn-primary btn-sm">
-                      Send!
-                    </button>
-                    :
-                    <button type="submit" id="sendMessage" className="btn btn-primary btn-sm" disabled>
-                      Send!
-                    </button>
-                  }
+
                 </div>
               </form>
             </div>
