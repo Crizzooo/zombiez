@@ -51,6 +51,12 @@
       "sourceJSON": "../../assets/images/updatedGunSheet.json"
     },
 
+    "medalSpriteSheet": {
+      "type": "spriteSheetAtlas",
+      "sourcePNG": "../../assets/images/medals.png",
+      "sourceJSON": "../../assets/images/medals.json"
+    },
+
     "soundLoop": {
       "type": "sound",
       "source": "../../assets/sounds/themeLoop.wav"

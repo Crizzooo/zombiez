@@ -69,7 +69,7 @@ export default class ZombieGameState extends TiledState {
     super.create.call(this);
 
     //adding sound here?
-    this.soundLoop = this.game.add.audio('soundLoop',1,true);
+    this.soundLoop = this.game.add.audio('soundLoop', 1, true);
     this.shootSound = this.game.add.audio('shootSound');
     this.pistolReload = this.game.add.audio('pistolReload');
     this.lightPistolShot = this.game.add.audio('lightPistolShot');
@@ -161,10 +161,10 @@ export default class ZombieGameState extends TiledState {
 
     //background music
     this.soundLoop.play();
-	  // for (let key in remotePlayerSprites) {
-	  //   if (remotePlayerSprites.hasOwnProperty(key)) {
-	  //     this.lighting.mapSprite.addChild(remotePlayerSprites[key])
-		//     this.lighting.mapSprite.addChild(remotePlayerSprites[key].healthbar)
+    // for (let key in remotePlayerSprites) {
+    //   if (remotePlayerSprites.hasOwnProperty(key)) {
+    //     this.lighting.mapSprite.addChild(remotePlayerSprites[key])
+    //     this.lighting.mapSprite.addChild(remotePlayerSprites[key].healthbar)
     //   }
     // }
   }
@@ -187,6 +187,8 @@ export default class ZombieGameState extends TiledState {
         this.currentPlayerSprite.y = 250;
         this.currentPlayerSprite.resetHealth();
       }
+      //not ideal, but gets the job done, will refactor later
+      this.currentPlayerSprite.checkForRankUp(remotePlayerSprites);
       //Tween all player assets
       //Remote and current
       tweenCurrentPlayerAssets(this.currentPlayerSprite, this);
@@ -346,7 +348,8 @@ export default class ZombieGameState extends TiledState {
       pointerX: this.currentPlayerSprite.pointerX,
       pointerY: this.currentPlayerSprite.pointerY,
       gunFrame: this.currentPlayerSprite.gun.frame,
-      hasWon: this.currentPlayerSprite.hasWon
+      hasWon: this.currentPlayerSprite.hasWon,
+      currentGunLevel: this.currentPlayerSprite.currentGunLevel
     }
 
     store.dispatch(updateCurrentPlayer(currentPlayer));
@@ -373,6 +376,7 @@ export default class ZombieGameState extends TiledState {
       playerToUpdate.gun.rotation = playerState.gunRotation;
       playerToUpdate.gun.frame = playerState.gunFrame;
       playerToUpdate.hasWon = playerState.hasWon;
+      playerToUpdate.currentGunLevel = playerState.currentGunLevel;
 
       if (playerState.bulletHash && Object.keys(playerState.bulletHash).length > 0) {
         // console.dir(this.bulletHash)
@@ -388,16 +392,13 @@ export default class ZombieGameState extends TiledState {
       if (playerState.playerDamageHash && Object.keys(playerState.playerDamageHash).length > 0) {
         R.forEachObjIndexed(this.handleRemotePlayerDamageEvent, playerState.playerDamageHash);
       }
-
       handleRemoteAnimation(playerToUpdate);
       tweenRemoteAssets(playerToUpdate, self);
-      if(playerToUpdate.hasWon){
+      if (playerToUpdate.hasWon) {
         this.bmpText = this.game.add.bitmapText(100, 100, 'carrier_command', `${playerToUpdate.name} won!!`, 34);
         this.bmpText.fixedToCamera = true;
         document.body.style.cursor = 'pointer';
       }
-      //TODO: not sure why they had this in here
-      // this.game.physics.arcade.collide(this.remoteBulletGroup, this.playerSpriteGroup, this.bulletHitPlayer, null, this);
     }
   }
 
@@ -577,9 +578,10 @@ export default class ZombieGameState extends TiledState {
     }
     // console.log(`this player will be hit for ${playerWhoDealtDamage}`, playerToDamage);
     playerToDamage.receiveDamage(playerWhoDealtDamage.gun.damage);
-    if(playerToDamage.stats.health === 0){
+    if (playerToDamage.stats.health === 0) {
       playerWhoDealtDamage.upgradeGun(self.currentPlayerSprite);
-      playerToDamage.resetHealth(playerSocketId);
+      playerToDamage.resetHealth();
+      playerWhoDealtDamage.checkForRankUp(remotePlayerSprites);
     }
   }
 

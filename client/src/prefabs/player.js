@@ -54,6 +54,7 @@ export default class Player extends Prefab {
       this.loadHearts();
       this.loadGunUi();
       this.loadControls();
+      this.loadMedalUi();
     }
 
     if (socket.id !== properties.socketId) {
@@ -118,16 +119,19 @@ export default class Player extends Prefab {
     this.gunUiFrame.gunClip.fixedToCamera = true;
   }
 
+  loadMedalUi(){
+    let canvas = document.getElementsByTagName("canvas")[0];
+    this.medal = this.gameState.game.add.sprite((canvas.width/2), 0, 'medalSpriteSheet', 3);
+    this.gameState.game.add.existing(this.medal);
+    this.medal.fixedToCamera = true;
+  }
+
   loadGunIntoUi(gunName) {
     this.gunUiFrame.gunSprite = this.gameState.game.add.sprite(0, 25, gunName + 'SpriteSheet', 1);
   }
 
   clipUpdate() {
     this.gunUiFrame.gunClip.text = this.gun.clip + '/' + this.gun.ammo;
-  }
-
-  dispatchHasWon(player) {
-
   }
 
   loadHealthbar() {
@@ -190,7 +194,7 @@ export default class Player extends Prefab {
     }
   }
 
-  resetHealth(id) {
+  resetHealth() {
     this.stats.health += 100;
     if (socket.id !== this.socketId) {
       this.healthbar.text = this.stats.health;
@@ -199,9 +203,24 @@ export default class Player extends Prefab {
         heartSprite.changeHeart("full");
       })
     }
+  }
 
-
-    // this.health.newHealth(this.stats.health);
+  checkForRankUp(remotePlayers){
+    //sort by gun level
+    let arr = [{id: socket.id, num: this.currentGunLevel}];
+    for(let key in remotePlayers){
+      arr.push({id: key, num: remotePlayers[key].currentGunLevel})
+    }
+    let sortedArr = arr.sort((obj, obj2) => {
+      return obj2.num - obj.num;
+    });
+    console.log("SORTED", sortedArr);
+    sortedArr.forEach((obj, i) => {
+      if(obj.id === socket.id) {
+        this.medal.frame = i;
+      }
+      //else possibly dispatch and update all other medals?
+    })
   }
 
   receiveDamage(damage) {

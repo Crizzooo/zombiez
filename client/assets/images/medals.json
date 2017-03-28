@@ -1,0 +1,44 @@
+{"frames": {
+
+"medals_01.png":
+{
+	"frame": {"x":2,"y":2,"w":23,"h":31},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":23,"h":31},
+	"sourceSize": {"w":23,"h":31}
+},
+"medals_02.png":
+{
+	"frame": {"x":2,"y":35,"w":23,"h":31},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":23,"h":31},
+	"sourceSize": {"w":23,"h":31}
+},
+"medals_03.png":
+{
+	"frame": {"x":2,"y":68,"w":23,"h":31},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":23,"h":31},
+	"sourceSize": {"w":23,"h":31}
+},
+"medals_04.png":
+{
+	"frame": {"x":2,"y":101,"w":23,"h":31},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":23,"h":31},
+	"sourceSize": {"w":23,"h":31}
+}},
+"meta": {
+	"app": "http://www.codeandweb.com/texturepacker",
+	"version": "1.0",
+	"image": "medals.png",
+	"format": "RGBA8888",
+	"size": {"w":27,"h":134},
+	"scale": "1",
+	"smartupdate": "$TexturePacker:SmartUpdate:cae2d3a8adfd7d6569ce13d811b4b76e:cae55c4632158a6c6fbc241a3f25cba3:3178908f785729df6cfbd8503ce1dbfc$"
+}
+}
