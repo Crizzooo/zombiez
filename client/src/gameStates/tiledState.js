@@ -81,9 +81,11 @@ export default class TiledState extends Phaser.State {
       this.layers[layer.name] = this.map.createLayer(layer.name);
 
       if (layer.properties.collision) {
+      	console.log('collision layer', layer.name);
         this.map.setCollisionByExclusion([], true, layer.name);
       }
     });
+
   }
 
 	//Use this method to create prefabs
@@ -104,23 +106,17 @@ export default class TiledState extends Phaser.State {
 	createWorldGrid () {
 		let litObstaclesLayer, obstaclesLayer, rowIndex, columnIndex, worldGrid;
 
-		console.log('layers',this.map.layers)
 		obstaclesLayer = this.map.layers[1];
     litObstaclesLayer = this.map.layers[2];
-
-		//todo: need to add other obstacles to worldGrid
-		//console.log('obstacles layer', obstaclesLayer)
 
 		worldGrid = [];
 		for (rowIndex = 0; rowIndex < this.map.height; rowIndex += 1) {
 			worldGrid.push([]);
 			for (columnIndex = 0; columnIndex < this.map.width; columnIndex += 1) {
-			  if (obstaclesLayer.data[rowIndex][columnIndex].collides){
-          worldGrid[rowIndex].push(obstaclesLayer.data[rowIndex][columnIndex].index);
-        }
-        if(litObstaclesLayer.data[rowIndex][columnIndex].collides){
-			    console.log('does the lit work');
-          worldGrid[rowIndex].push(litObstaclesLayer.data[rowIndex][columnIndex].index);
+			  if (obstaclesLayer.data[rowIndex][columnIndex].collides || litObstaclesLayer.data[rowIndex][columnIndex].collides){
+			  	//|| litObstaclesLayer.data[rowIndex][columnIndex].collides
+          worldGrid[rowIndex].push(1);
+			  	//worldGrid[rowIndex].push((obstaclesLayer.data[rowIndex][columnIndex].index));
         }
 			}
 		}

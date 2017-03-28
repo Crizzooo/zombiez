@@ -21,6 +21,7 @@ import handleRemoteAnimation, { tweenRemoteAssets } from './zgsHelpers/handleRem
 // currentPlayerSprite and remotePlayerSprites are on global window
 var self;
 let playerDamageEventCount = 0;
+
 export default class ZombieGameState extends TiledState {
   constructor(game) {
     super(game);
@@ -48,7 +49,6 @@ export default class ZombieGameState extends TiledState {
     this.updateRemotePlayer = this.updateRemotePlayer.bind(this);
     this.handleRemoteBullet = this.handleRemoteBullet.bind(this);
     this.handleRemotePlayerDamageEvent = this.handleRemotePlayerDamageEvent.bind(this);
-
 
     //Sockets
     socket.on('destroyCurrentPlayerSprite', this.destroyCurrentPlayerSprite);
@@ -154,33 +154,32 @@ export default class ZombieGameState extends TiledState {
     //Push all sprites in the world onto the child of the mapSpriteOverlay
     //All prefabs created with a pushToOverlay = true
 
-    //maybe we can add a showInDarkness property and show things with that property
-    // put on RPS< butset to true for currentPlayerSprite
-    this.game.world.children.forEach((layer) => {
-      console.log('pushing this layer to overlay', layer);
-      if (!layer.socketId || layer.socketId === socket.id){
-        console.log('layer has no socket id or its not player');
-        if (typeof layer === 'player' || layer.socketId !== socket.id){
-          console.log('layer is type of player');
-          return;
-        }
-        if (layer.pushToOverlay) {
-          this.lighting.mapSprite.addChild(layer);
-        }
-      }
-    });
-    //Also push all remote players and their assets onto the lighting layer
+		//This is lighting layers done manually
+		this.game.world.children.forEach((layer) => {
+			if (layer.name === 'remotePlayerSpriteGroup' || layer.name === 'enemySpriteGroup') {
+				console.log('LAYER NAME', layer.name);
+				this.lighting.mapSprite.addChild(layer);
+			}
+		})
+
+	  for (let key in remotePlayerSprites) {
+		  if (remotePlayerSprites.hasOwnProperty(key)) {
+			  console.log('remote player sprite of key', remotePlayerSprites[key])
+			  this.lighting.mapSprite.addChild(remotePlayerSprites[key])
+			  this.lighting.mapSprite.addChild(remotePlayerSprites[key].healthbar)
+			  this.lighting.mapSprite.addChild(remotePlayerSprites[key].gun)
+		  }
+	  }
 
 
     //background music
     this.soundLoop.play();
-	  for (let key in remotePlayerSprites) {
-	    if (remotePlayerSprites.hasOwnProperty(key)) {
-	      this.lighting.mapSprite.addChild(remotePlayerSprites[key])
-		    this.lighting.mapSprite.addChild(remotePlayerSprites[key].healthbar)
-      }
-    }
+
+
+	  console.log('this is game world', this.game.world)
   }
+
+
 
   update() {
     //Check collisions
@@ -306,6 +305,7 @@ export default class ZombieGameState extends TiledState {
 	  this.game.physics.arcade.collide(this.currentPlayerSprite, this.layers.backgroundDecCollision2);
 	  this.game.physics.arcade.collide(this.currentPlayerSprite, this.layers.waterCollision);
 	  this.game.physics.arcade.collide(this.currentPlayerSprite, this.layers.wallCollision);
+	  this.game.physics.arcade.collide(this.currentPlayerSprite, this.layers.litWallCollision);
 
     //Note: not sure why this doesnt work - remotePlayerSpriteGroup?
     this.game.physics.arcade.collide(this.remotePlayerSpriteGroup, this.currentPlayerSprite );
@@ -376,7 +376,7 @@ export default class ZombieGameState extends TiledState {
       //      Implement other properties
       // console.log('CPS rotation', self.currentPlayerSprite.gun.rotation);
       // console.log('REM PLAYER GUN ROTATION: ', playerState.gun.rotation);
-      console.log('RPS gunRotation in update: ', playerState.gunRotation);
+      // console.log('RPS gunRotation in update: ', playerState.gunRotation);
       playerToUpdate.x = playerState.x;
       playerToUpdate.y = playerState.y;
       playerToUpdate.direction = playerState.animationDirection;
@@ -385,7 +385,7 @@ export default class ZombieGameState extends TiledState {
       // playerToUpdate.gun.rotation = playerState.gunRotation;
       playerToUpdate.pointer.x = playerToUpdate.pointerX;
       playerToUpdate.pointer.y = playerToUpdate.pointerY;
-      console.log('After updating RPS: ', playerState.gunRotation);
+      // console.log('After updating RPS: ', playerState.gunRotation);
 
 
 
