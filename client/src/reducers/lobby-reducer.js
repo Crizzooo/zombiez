@@ -30,7 +30,6 @@ export default (state = initialState, action) => {
       break;
 
     case RESET_LOBBY:
-      console.log('resetting client lobby');
       newState.lobbyers = initialState.lobbyers;
       break;
 

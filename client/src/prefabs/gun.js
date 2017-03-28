@@ -111,13 +111,4 @@ export default class Gun extends GunPrefab {
       this.game.currentPlayerSprite.clipUpdate();
     }, this.reloadSpeed)
   }
-
-  hitZombie(zombie, bullet){
-    console.log("ZOMBZ", zombie);
-	  zombie.hit = true;
-	  bullet.kill();
-		zombie.animations.stop();
-	  zombie.animations.play('dead')
-    zombie.zombDeath.onComplete.add(() => zombie.kill(), this);
-  }
 }

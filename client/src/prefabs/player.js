@@ -141,8 +141,6 @@ export default class Player extends Prefab {
 		  this.stats.health, style);
 
 	  //TODO: bullets collide with health?
-	  //Add to existing
-	  //this.gameState.add.existing(this.healthbar);
   }
 
   loadHearts () {
@@ -168,11 +166,13 @@ export default class Player extends Prefab {
   	console.log(this);
     //Change healthbar
     this.stats.health -= damage;
+
     if (socket.id !== this.socketId){
       this.healthbar.text = this.stats.health;
     } else {
   	  this.health.newHealth(this.stats.health);
     }
+    //this.healthbar.text = this.stats.health;
 
     //Set tint to show damage
     //TODO: change to a red tint

@@ -13,7 +13,8 @@ import Lighting from '../plugins/Lighting';
 
 //Import Helpers
 import { handleInput, tweenCurrentPlayerAssets } from './zgsHelpers/handlePlayerInput';
-import handleRemoteAnimation, { tweenRemoteAssets } from './zgsHelpers/handleRemoteAnimation'
+import handleRemoteAnimation, { tweenRemoteAssets } from './zgsHelpers/handleRemoteAnimation';
+import { enemyGeneratorInitial, enemyGenerator } from './zgsHelpers/enemyGenerator';
 
  import { PLAYER_HEALTH, EVENT_LOOP_DELETE_TIME, STARTING_BULLET_SPEED } from '../engine/gameConstants.js';
 
@@ -120,6 +121,9 @@ export default class ZombieGameState extends TiledState {
     //this.camera.view = new Phaser.Rectangle(0, 0, this.currentPlayer.position.x, this.currentPlayer.position.y);
     this.game.world.setBounds(-250, -250, 3200 + 250, 3200 + 250);
 
+		//Enemy Generator Initial
+	  enemyGeneratorInitial(this,  10);
+		console.log('enemy group', this.groups.enemies);
 
     // this.game = game;
 
@@ -149,18 +153,20 @@ export default class ZombieGameState extends TiledState {
       this.camera.follow(remotePlayerSprites[remotePlayerOneId]);
     }
 
-
-
     //Push all sprites in the world onto the child of the mapSpriteOverlay
-    //All prefabs created with a pushToOverlay = true
-
 		//This is lighting layers done manually
+	  //ADD ALL LIGHTING MANUALLY FOR NOW UNTIL FINAL GROUPS ARE SET
 		this.game.world.children.forEach((layer) => {
 			if (layer.name === 'remotePlayerSpriteGroup' || layer.name === 'enemySpriteGroup') {
-				console.log('LAYER NAME', layer.name);
+				//console.log('LAYER NAME', layer.name);
 				this.lighting.mapSprite.addChild(layer);
 			}
 		})
+
+	  //Loop through enemies group and add manually, adding by group fails
+    this.groups.enemies.forEach( (enemy) => {
+    	this.lighting.mapSprite.addChild(enemy);
+    })
 
 	  for (let key in remotePlayerSprites) {
 		  if (remotePlayerSprites.hasOwnProperty(key)) {
@@ -175,14 +181,18 @@ export default class ZombieGameState extends TiledState {
     //background music
     this.soundLoop.play();
 
-
 	  console.log('this is game world', this.game.world)
+	  console.log('this is groups', this.groups)
+
+	  this.game.time.advancedTiming = true;
   }
 
 
 
   update() {
     //Check collisions
+    //NOTE: only check CPS collissions if we do have a CPS
+
     if (this.currentPlayerSprite){
       this.updateCollisions();
 
@@ -199,6 +209,10 @@ export default class ZombieGameState extends TiledState {
       tweenCurrentPlayerAssets(this.currentPlayerSprite, this);
     }
 
+    //Pathfinding
+	  this.groups.enemies.forEachExists((enemy) => {
+	  	enemy.moveTo(enemy.acquireTarget(this.groups.player));
+	  });
 
     //Server & Input
     //every 32ms send package to server with position
@@ -207,6 +221,10 @@ export default class ZombieGameState extends TiledState {
 	    // this.throttledUpdateRemotePlayers();
       this.updateRemotePlayers();
     }
+  }
+
+  render() {
+	  this.game.debug.text(this.game.time.fps || '--', 2, 14, "#00ff00");
   }
 
   //////////////////////////
@@ -333,8 +351,6 @@ export default class ZombieGameState extends TiledState {
 
   }
 
-
-
   dispatchCurrentPlayer() {
     let currentPlayer = {
       x: this.currentPlayerSprite.x,
@@ -448,6 +464,7 @@ export default class ZombieGameState extends TiledState {
   createRemotePlayerSprite(playerState) {
     //TODO: name needs to be unique for each remote player
     //TODO: take name from server
+
     if (playerState.socketId !== socket.id) {
       console.log('creating prefab for player', playerState)
       let playerPrefab = self.createPrefab(playerState.name,
@@ -474,8 +491,6 @@ export default class ZombieGameState extends TiledState {
 
 
       remotePlayerSprites[playerState.socketId] = playerPrefab;
-
-
       console.dir(playerPrefab, { depth: 4});
     }
   }
@@ -498,14 +513,31 @@ export default class ZombieGameState extends TiledState {
   }
 
   bulletHitZombie(zombie, bullet){
-    bullet.kill();
-    console.log("ZOMBIE HIT BY BULLET", zombie, bullet);
-    zombie.hit = true;
-    zombie.animations.stop();
-    zombie.animations.play('dead')
-    zombie.animations.currentAnim.onComplete.add( () => {
-      zombie.kill();
-    })
+    console.log("ZOMBZ", zombie.x, zombie.y);
+
+		const zX =  zombie.x;
+	  const zY =  zombie.y;
+
+	  zombie.hit = true;
+	  bullet.kill();
+	  zombie.kill();
+
+	  let zombieDyingPrefab = this.createPrefab('zombieDead',
+		  {
+			  type: 'enemies',
+			  properties: {
+				  initial: 9,
+				  texture: 'zombieSpriteSheet'
+			  }
+		  }, {x: zX, y: zY});
+
+	  this.lighting.mapSprite.addChild(zombieDyingPrefab);
+	  zombieDyingPrefab.animations.play('dead');
+
+
+	  this.game.time.events.add(Phaser.Timer.SECOND * 4, () => {
+	  	zombieDyingPrefab.destroy();
+	  });
   }
 
   bulletHitPlayer(player, bullet){
