@@ -56,13 +56,28 @@ export default class ZombieGameState extends TiledState {
   }
 
   preload() {
+    //this.load.audio('themeLoop','../../assets/sounds/themeLoop.wav');
+    //this.load.audio('shoot','../../assets/sounds/shoot.ogg');
     //load assets that are specific for this level
+
   }
 
   create() {
     //Create game set up through tiled state by calling super
     //Loads level tilemap
     super.create.call(this);
+
+    //adding sound here?
+    this.soundLoop = this.game.add.audio('soundLoop',1,true);
+    this.shootSound = this.game.add.audio('shootSound');
+    this.pistolReload = this.game.add.audio('pistolReload');
+    this.lightPistolShot = this.game.add.audio('lightPistolShot');
+    this.zombieSound = this.game.add.audio('zombie');
+    this.zombieHit = this.game.add.audio('zombieHit');
+    this.heavyPistol = this.game.add.audio('heavyPistol');
+    this.levelUp = this.game.add.audio('levelUp');
+    this.playerHurt = this.game.add.audio('playerHurt');
+    let x = true;
 
     //Create worldGrid and tile dimensions for pathfinding
     //Load light plugin
@@ -138,18 +153,33 @@ export default class ZombieGameState extends TiledState {
 
     //Push all sprites in the world onto the child of the mapSpriteOverlay
     //All prefabs created with a pushToOverlay = true
+
+    //maybe we can add a showInDarkness property and show things with that property
+    // put on RPS< butset to true for currentPlayerSprite
     this.game.world.children.forEach((layer) => {
-      if (layer.pushToOverlay) {
-	      this.lighting.mapSprite.addChild(layer)
+      console.log('pushing this layer to overlay', layer);
+      if (!layer.socketId || layer.socketId === socket.id){
+        console.log('layer has no socket id or its not player');
+        if (typeof layer === 'player' || layer.socketId !== socket.id){
+          console.log('layer is type of player');
+          return;
+        }
+        if (layer.pushToOverlay) {
+          this.lighting.mapSprite.addChild(layer);
+        }
       }
     });
     //Also push all remote players and their assets onto the lighting layer
-	  // for (let key in remotePlayerSprites) {
-	  //   if (remotePlayerSprites.hasOwnProperty(key)) {
-	  //     this.lighting.mapSprite.addChild(remotePlayerSprites[key])
-		//     this.lighting.mapSprite.addChild(remotePlayerSprites[key].healthbar)
-    //   }
-    // }
+
+
+    //background music
+    this.soundLoop.play();
+	  for (let key in remotePlayerSprites) {
+	    if (remotePlayerSprites.hasOwnProperty(key)) {
+	      this.lighting.mapSprite.addChild(remotePlayerSprites[key])
+		    this.lighting.mapSprite.addChild(remotePlayerSprites[key].healthbar)
+      }
+    }
   }
 
   update() {
@@ -352,7 +382,7 @@ export default class ZombieGameState extends TiledState {
       playerToUpdate.direction = playerState.animationDirection;
       playerToUpdate.pointerX = playerState.pointerX;
       playerToUpdate.pointerY = playerState.pointerY;
-      playerToUpdate.gun.rotation = playerState.gunRotation;
+      // playerToUpdate.gun.rotation = playerState.gunRotation;
       playerToUpdate.pointer.x = playerToUpdate.pointerX;
       playerToUpdate.pointer.y = playerToUpdate.pointerY;
       console.log('After updating RPS: ', playerState.gunRotation);

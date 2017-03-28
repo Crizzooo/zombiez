@@ -1,9 +1,20 @@
 /**
  * Created by CharlieShi on 3/24/17.
  */
+import _ from 'lodash';
+
+// function playSound (player, whatSound)  {
+//   player.game.state.callbackContext[whatSound].play();
+// }
+//
+// let throttledSound = _.throttle(playSound,50);
 
 export function handleInput(player) {
+
+
 	if (player) {
+
+
 		player.pointerX = player.game.input.activePointer.worldX;
 		player.pointerY = player.game.input.activePointer.worldY;
 
@@ -116,25 +127,25 @@ export function handlePlayerRotation(player) {
 	if ((pointerY > playerY) && (pointerX < playerX)) {
 		//bottom-left
 		if(player.body.velocity.x === 0 && player.body.velocity.y === 0) frame = 17;
-		player.gun.scale.setTo(1, -1);
+		// player.gun.scale.setTo(1, -1);
 	}
 	if ((pointerY > playerY) && (pointerX > playerX)) {
 		//bottom-right
 		if(player.body.velocity.x === 0 && player.body.velocity.y === 0) frame = 28;
 		animation = 'down';
-		player.gun.scale.setTo(1, 1);
+		// player.gun.scale.setTo(1, 1);
 	}
 	if ((pointerY < playerY) && (pointerX > playerX)) {
 		//top-right
 		if(player.body.velocity.x === 0 && player.body.velocity.y === 0) frame = 14;
 		animation = 'up';
-		player.gun.scale.setTo(1, 1);
+		// player.gun.scale.setTo(1, 1);
 	}
 	if ((pointerY < playerY) && (pointerX < playerX)) {
 		//top-left
 		if(player.body.velocity.x === 0 && player.body.velocity.y === 0) frame = 14;
 		animation = 'up';
-		player.gun.scale.setTo(1, -1);
+		// player.gun.scale.setTo(1, -1);
 	}
 	return {
 		frame,

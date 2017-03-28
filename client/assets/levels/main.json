@@ -2,10 +2,9 @@
   "assets": {
     "defaultTileset": {"type": "image", "source": "../../assets/images/mapTiles/dungeon_tileset_32.png"},
     "miscTileset": {"type": "image", "source": "../../assets/images/mapTiles/objects_tilset_32.png"},
-
-     "blackTile": {"type": "image", "source": "../../assets/images/mapTiles/blacktile.jpg"},
     "mapOverlay": {"type": "image", "source": "../../assets/images/mapTiles/map.png"},
     "mapBitmap": {"type": "image", "source": "../../assets/images/mapTiles/mapbitmap.png"},
+    "blackTile": {"type": "image", "source": "../../assets/images/mapTiles/blacktile.jpg"},
 
     "playerHearts": {
       "type": "spriteSheet",
@@ -33,6 +32,7 @@
       "sourceJSON": "../../assets/images/playerRolls.json"
     },
 
+
     "zombieSpriteSheet": {
       "type": "spriteSheetAtlas",
       "sourcePNG": "../../assets/images/zombieSprite.png",
@@ -51,7 +51,38 @@
       "sourceJSON": "../../assets/images/gunAndBulletTest.json"
     },
 
-
+    "soundLoop": {
+      "type": "sound",
+      "source": "../../assets/sounds/themeLoop.wav"
+    },
+    "shootSound": {
+      "type": "sound",
+      "source": "../../assets/sounds/shoot.ogg"
+    },
+    "pistolReload": {
+      "type": "sound",
+      "source": "../../assets/sounds/pistolReload.mp3"
+    },
+    "heavyPistol": {
+      "type": "sound",
+      "source": "../../assets/sounds/heavyPistol.wav"
+    },
+    "lightPistolShot": {
+      "type": "sound",
+      "source": "../../assets/sounds/lightPistolShot.wav"
+    },
+    "zombie": {
+      "type": "sound",
+      "source": "../../assets/sounds/zombie.wav"
+    },
+    "levelUp": {
+      "type": "sound",
+      "source": "../../assets/sounds/levelUp.wav"
+    },
+    "playerHurt": {
+      "type": "sound",
+      "source": "../../assets/sounds/playerHurt.wav"
+    },
 
     "levelTilemap": {"type": "tilemap", "source": "../../assets/maps/main.json"}
   },
@@ -71,4 +102,5 @@
 
 
   }
+
 }

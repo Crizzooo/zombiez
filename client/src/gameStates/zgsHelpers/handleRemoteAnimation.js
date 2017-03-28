@@ -85,7 +85,7 @@ export function tweenRemoteAssets(player, context) {
 	console.log('gun', player.gun);
 	console.log('pointer', player.pointer);
 	console.log('player.gun before: ', player.gun.rotation);
-	// player.gun.rotation = context.game.physics.arcade.angleToPointer(player.gun.body, player.pointer);
-	// player.gun.rotation = context.game.physics.arcade.angleToXY(player.gun.body, player.pointerX, player.pointerY);
+	player.gun.rotation = context.game.physics.arcade.angleToPointer(player.gun.body, player.pointer);
+	// player.gun.rotation = context.game.physics.arcade.angleToXY(player.gun, player.pointerX, player.pointerY);
 	console.log('player.gun after', player.gun.rotation);
 }
