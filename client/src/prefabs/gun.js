@@ -11,6 +11,7 @@ let gameObj;
 export default class Gun extends GunPrefab {
   constructor(game, name, position, properties) {
     super(game, name, position, properties);
+    this.enableBody = true;
     this.game.physics.arcade.enable(this);
     this.body.collideWorldBounds = true;
     this.anchor.setTo(0.5);
@@ -22,7 +23,9 @@ export default class Gun extends GunPrefab {
     this.nextFire = 0;
     this.isReloading = false;
     this.pivot.x = -10;
+    this.rotation = .5;
     gameObj = this.game;
+    console.log('HOW MANY TIMES DOES THIS SHIT HAPPEN');
   }
 
   //TODO: move bullet speed to the gun, and have shoot method go off of player.gun.bulletSpeed

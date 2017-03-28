@@ -150,7 +150,7 @@ export function tweenCurrentPlayerAssets(player, context) {
 	}, 10, Phaser.Easing.Linear.None, true);
 
 	//Gun rotation tween
-	player.gun.rotation = context.game.physics.arcade.angleToPointer(player.gun);
+ player.gun.rotation = context.game.physics.arcade.angleToPointer(player.gun);
 }
 
 function startRoll(player, direction) {

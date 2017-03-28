@@ -344,12 +344,20 @@ export default class ZombieGameState extends TiledState {
 
       //NOTE: what do I need to know from the players?
       //      Implement other properties
+      // console.log('CPS rotation', self.currentPlayerSprite.gun.rotation);
+      // console.log('REM PLAYER GUN ROTATION: ', playerState.gun.rotation);
+      console.log('RPS gunRotation in update: ', playerState.gunRotation);
       playerToUpdate.x = playerState.x;
       playerToUpdate.y = playerState.y;
       playerToUpdate.direction = playerState.animationDirection;
-      playerToUpdate.gun.rotation = playerState.gunRotation;
       playerToUpdate.pointerX = playerState.pointerX;
       playerToUpdate.pointerY = playerState.pointerY;
+      playerToUpdate.gun.rotation = playerState.gunRotation;
+      playerToUpdate.pointer.x = playerToUpdate.pointerX;
+      playerToUpdate.pointer.y = playerToUpdate.pointerY;
+      console.log('After updating RPS: ', playerState.gunRotation);
+
+
 
       if (playerState.bulletHash && Object.keys(playerState.bulletHash).length > 0){
         // console.dir(this.bulletHash)
@@ -426,10 +434,13 @@ export default class ZombieGameState extends TiledState {
       //TODO: Add bullet group to the player prefab
       playerPrefab.bulletGroup = self.remotePlayerBulletGroup;
       //Add remote sprite to the remotePlayerSpriteGroup
+      playerPrefab.pointer = new Phaser.Pointer(this.game, playerState.name);
+      playerPrefab.gun.rotation = 1;
       this.game.add.existing(playerPrefab);
       console.log('p prefab', playerPrefab);
       this.remotePlayerSpriteGroup.children.push(playerPrefab);
       console.log('RPSG in create remotePlayerSprites ', this.remotePlayerSpriteGroup);
+
 
 
       remotePlayerSprites[playerState.socketId] = playerPrefab;
@@ -439,22 +450,7 @@ export default class ZombieGameState extends TiledState {
     }
   }
 
-  tweenCurrentPlayerAssets() {
-    //gun follow does not work as a child of the player sprite.. had to tween gun to players x, y position
-    this.add.tween(currentPlayerSprite.gun).to({
-      x: currentPlayerSprite.x,
-      y: currentPlayerSprite.y
-    }, 10, Phaser.Easing.Linear.None, true);
 
-    //Add tween for health
-    this.add.tween(currentPlayerSprite.healthbar).to({
-      x: currentPlayerSprite.x - 10,
-      y: currentPlayerSprite.y - 30
-    }, 10, Phaser.Easing.Linear.None, true);
-
-    //Gun rotation tween
-	  currentPlayerSprite.gun.rotation = this.game.physics.arcade.angleToPointer(currentPlayerSprite.gun);
-  }
 
   // addRemotePlayerToGroup(remotePlayerSprite){
   //   console.log('adding this RP to group: ', remotePlayerSprite);

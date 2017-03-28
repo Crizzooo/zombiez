@@ -57,7 +57,7 @@ export default function handleRemoteAnimation(player) {
 	}
 }
 
-let throttledClog =	throttle(clog, 1000);
+let throttledClog =	throttle(clog, 10000);
 
 function clog(player, context){
 	console.log('player to tween: ', player);
@@ -67,7 +67,7 @@ function clog(player, context){
 export function tweenRemoteAssets(player, context) {
 	//Remote Player Tweens
 	//TODO: refactor for 4 players
-	throttledClog(player, context);
+	// throttledClog(player, context);
 	context.add.tween(player.healthbar).to({
 		x: player.x - 10,
 		y: player.y - 30
@@ -78,9 +78,14 @@ export function tweenRemoteAssets(player, context) {
 		y: player.y
 	}, 10, Phaser.Easing.Linear.None, true);
 
-	player.gun.angle = player.gun.angle * 2;
 
 	//console.log('player remote tween', player)
 	//TODO: send rotation angle of player to server, server sends it back and we use it to tween
-	player.gun.rotation = player.gunRotation;
+	// console.log('player', player);
+	console.log('gun', player.gun);
+	console.log('pointer', player.pointer);
+	console.log('player.gun before: ', player.gun.rotation);
+	// player.gun.rotation = context.game.physics.arcade.angleToPointer(player.gun.body, player.pointer);
+	// player.gun.rotation = context.game.physics.arcade.angleToXY(player.gun.body, player.pointerX, player.pointerY);
+	console.log('player.gun after', player.gun.rotation);
 }
