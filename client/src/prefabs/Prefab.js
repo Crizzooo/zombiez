@@ -12,8 +12,21 @@ export default class Prefab extends Phaser.Sprite {
 		//Add prefab to its group
 		//Set smoothed to false for crisp pixel rendering
 		//this.gameState.groups[properties.group].add(this);
-		//this.gameState.groups[properties.group].add(this);
-    this.gameState.groups[properties.group].children.push(this);
+		// this.gameState.groups[properties.group].add(this);
+		console.log('game', game);
+		console.log('this', this);
+		console.log('gameState', this.gameState);
+		console.log('properties', properties);
+		console.log('properties.group', properties.group);
+		// if (properties.type == 'enemies'){
+		// 		if (properties.group == 'localZombieSpriteGroup'){
+		// 			this.gameState.localZombieGroup.add(this);
+		// 		} else if (properties.group == 'remoteZombieSpriteGroup'){
+		// 			console.log('creating remote zombie');
+		// 		}
+		// } else {
+			this.gameState.groups[properties.group].children.push(this);
+		// }
 		this.initial = +properties.initial;
 		this.smoothed = false;
 

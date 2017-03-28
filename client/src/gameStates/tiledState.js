@@ -9,6 +9,7 @@ import Player from '../prefabs/player';
 import Enemy from '../prefabs/enemy';
 import Gun from '../prefabs/gun'
 
+var self;
 export default class TiledState extends Phaser.State {
     constructor(game) {
         super(game);
@@ -20,6 +21,8 @@ export default class TiledState extends Phaser.State {
             "enemies": Enemy.prototype.constructor,
             "guns": Gun.prototype.constructor
         }
+
+        self = this;
     }
 
     init(levelData) {
@@ -34,6 +37,8 @@ export default class TiledState extends Phaser.State {
 
       this.game.time.advancedTiming = true;
       this.game.desiredFps = 30;
+
+      // self = this.game;
 	    //this.game.scale.setUserScale(6, 6);
 	    // this.game.scale.setResizeCallback( (scale, parentBounds) => {
 	    // })
@@ -90,12 +95,13 @@ export default class TiledState extends Phaser.State {
 	createPrefab(prefabName, prefabData, position) {
 		let prefab;
 
+    console.log('self in createPrefab', self);
 		//Pass prefab data into the constructor of that type defined in this constructor
-		if (this.prefabClasses.hasOwnProperty(prefabData.type)) {
-			prefab = new this.prefabClasses[prefabData.type](this, prefabName, position, prefabData.properties);
+		if (self.prefabClasses.hasOwnProperty(prefabData.type)) {
+			prefab = new self.prefabClasses[prefabData.type](self, prefabName, position, prefabData.properties);
 		}
 
-		this.prefabs[prefabName] = prefab;
+		self.prefabs[prefabName] = prefab;
 
 		return prefab;
 	}
