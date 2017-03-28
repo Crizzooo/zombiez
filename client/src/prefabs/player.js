@@ -214,7 +214,6 @@ export default class Player extends Prefab {
     let sortedArr = arr.sort((obj, obj2) => {
       return obj2.num - obj.num;
     });
-    console.log("SORTED", sortedArr);
     sortedArr.forEach((obj, i) => {
       if(obj.id === socket.id) {
         this.medal.frame = i;
