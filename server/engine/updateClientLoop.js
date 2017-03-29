@@ -103,9 +103,6 @@ const broadcastGameState = (io) => {
   broadcastInterval = setInterval(() => {
     let state = store.getState();
     // console.log('dispatching state: ', state);
-    if (state.zombies){
-      console.log('got zombies: ', state.zombies);
-    }
 
     //TODO: check if win condition is hit and endgame
     if (state.lobby.lobbyers.length <= 0) {

@@ -39,10 +39,6 @@ export default class Enemy extends Prefab {
     // });
   }
 
-  receiveDamage (damage) {
-
-  }
-
   moveTo (position) {
     //putting sound in here for now, with dropoff
     //sound continues one time after zombie dies...

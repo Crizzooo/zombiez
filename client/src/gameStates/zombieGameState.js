@@ -56,6 +56,8 @@ export default class ZombieGameState extends TiledState {
     this.handleRemoteBullet = this.handleRemoteBullet.bind(this);
     this.handleRemotePlayerDamageEvent = this.handleRemotePlayerDamageEvent.bind(this);
 
+    this.displayEndGameText = R.once(this.displayEndGameText.bind(this));
+
     console.log(this.game.onBlur);
 
     document.getElementsByClassName("container")[0].style.visibility = "hidden";
@@ -227,9 +229,7 @@ export default class ZombieGameState extends TiledState {
 
       //check to see if current player won
       if (this.currentPlayerSprite.hasWon) {
-        this.bmpText = this.game.add.bitmapText(100, 100, 'carrier_command', `You won!!`, 34);
-        this.bmpText.fixedToCamera = true;
-        document.body.style.cursor = 'pointer';
+        this.displayEndGameText('You');
       }
     }
 
@@ -476,9 +476,7 @@ export default class ZombieGameState extends TiledState {
       handleRemoteAnimation(playerToUpdate);
       tweenRemoteAssets(playerToUpdate, self);
       if (playerToUpdate.hasWon) {
-        this.bmpText = this.game.add.bitmapText(100, 100, 'carrier_command', `${playerToUpdate.name} won!!`, 34);
-        this.bmpText.fixedToCamera = true;
-        document.body.style.cursor = 'pointer';
+        this.displayEndGameText(playerToUpdate.name);
       }
     }
   }
@@ -707,6 +705,12 @@ export default class ZombieGameState extends TiledState {
     // we make the timeout a little longer than how long the client emits for, in case we
     // getState a delayed server update after weve cleared our bullet process
     // we do not want to process the bullet again
+  }
+
+  displayEndGameText(name){
+    this.bmpText = this.game.add.bitmapText(100, 100, 'carrier_command', name + ' won!!', 34);
+    this.bmpText.fixedToCamera = true;
+    document.body.style.cursor = 'pointer';
   }
 
 }
