@@ -8,108 +8,141 @@ import _ from 'lodash';
 // }
 //
 // let throttledSound = _.throttle(playSound,50);
-
-export function handleInput(player) {
-
-
-	if (player) {
+let tween;
+export let handleInput = (player) => {
 
 
-		player.pointerX = player.game.input.activePointer.worldX;
-		player.pointerY = player.game.input.activePointer.worldY;
-
-		let cursors = player.cursors;
-
-		//if player is rolling, return
-		//roll up, roll down, roll-right, roll-left
-		if (player.rolling && player.rolling.isPlaying){
-			return;
-		} else {
-			player.body.velocity.x = 0;
-			player.body.velocity.y = 0;
-		}
-
-		if (cursors.fire.isDown) {
-			//Shoot method will add the bullet obj to the hash map on store and then dispatch to server for 1s!
-			player.gun.shoot(player);
-		}
-
-		//TODO: use onDown instead? Need to set a previous animation
-		if (cursors.down.isDown && cursors.right.isDown){
-			player.direction = 'down';
-			player.body.velocity.y = player.stats.movement * .7071;
-			player.body.velocity.x = player.stats.movement * .7071;
-			player.animations.play('down');
-			player.walkingDiagionally = true;
-		} else if(cursors.down.isDown && cursors.left.isDown){
-			player.direction = 'down';
-			player.body.velocity.y = player.stats.movement * .7071;
-			player.body.velocity.x = -player.stats.movement * .7071;
-			player.animations.play('down');
-			player.walkingDiagionally = true;
-		} else if(cursors.up.isDown && cursors.left.isDown){
-			player.direction = 'up';
-			player.body.velocity.y = -player.stats.movement * .7071;
-			player.body.velocity.x = -player.stats.movement * .7071;
-			player.animations.play('up');
-			player.walkingDiagionally = true;
-		} else if(cursors.up.isDown && cursors.right.isDown){
-			player.direction = 'up';
-			player.body.velocity.y = -player.stats.movement * .7071;
-			player.body.velocity.x = player.stats.movement * .7071;
-			player.animations.play('up');
-			player.walkingDiagionally = true;
-		} else if (cursors.left.isDown && !player.rollright.isPlaying) {
-			player.direction = 'left';
-			player.animations.play('right');
-			player.scale.setTo(-1, 1);
-			player.body.velocity.x = -player.stats.movement;
-			player.walkingDiagionally = false;
-		} else if (cursors.right.isDown && !player.rollright.isPlaying) {
-			player.direction = 'right';
-			player.scale.setTo(1, 1);
-			player.animations.play('right');
-			player.body.velocity.x = player.stats.movement;
-			player.walkingDiagionally = false;
-		} else if (cursors.up.isDown && !player.rollup.isPlaying) {
-			player.direction = 'up';
-			player.body.velocity.y = -player.stats.movement;
-			player.animations.play('up');
-			player.walkingDiagionally = false;
-		} else if (cursors.down.isDown && !player.rolldown.isPlaying) {
-			player.direction = 'down';
-			player.body.velocity.y = player.stats.movement;
-			player.animations.play('down');
-			player.walkingDiagionally = false;
-		}
-		if (player.body.velocity.x === 0 && player.body.velocity.y === 0) {
-			player.direction = 'idle';
-			player.animations.stop();
-			player.frame = handlePlayerRotation(player).frame;
-			player.walkingDiagionally = false;
-		}
-
-		if (player.canRoll){
-			//Roll Up
-			if(cursors.up.isDown && cursors.jump.isDown){
-				startRoll(player, 'roll-up');
-
-				//Roll Down
-			} else if(cursors.down.isDown && cursors.jump.isDown){
-				startRoll(player, 'roll-down');
-
-				//Roll Right
-			} else if(cursors.right.isDown && cursors.jump.isDown){
-				startRoll(player, 'roll-right');
-
-				//Roll Left
-			} else if(cursors.left.isDown && cursors.jump.isDown){
-				startRoll(player, 'roll-left');
-			}
-		}
+  if (player) {
 
 
-	}
+    player.pointerX = player.game.input.activePointer.worldX;
+    player.pointerY = player.game.input.activePointer.worldY;
+
+    let cursors = player.cursors;
+
+    if (player.rolling && player.rolling.isPlaying) {
+      return;
+    } else {
+      player.body.velocity.x = 0;
+      player.body.velocity.y = 0;
+    }
+
+    if (cursors.fire.isDown) {
+      //Shoot method will add the bullet obj to the hash map on store and then dispatch to server for 1s!
+      player.gun.shoot(player);
+    }
+
+    if(player.gun.isReloading){
+      player.reloadBar.visible = true;
+      // player.reloadTween.start();
+      player.reloadBar.animations.play('playReload');
+      if(cursors.reload.justPressed() && player.reloadBar.frame === 22){
+        console.log("ACTIVE RELOAD ACTIVATED");
+        player.reloadBar.animations.stop();
+        player.reloadBar.frame = 22;
+        player.reloadBar.alpha = 0;
+        tween = player.game.add.tween(player.reloadBar).to( { alpha: 1 }, 200, Phaser.Easing.Linear.None, true, 0, 500, true);
+        player.gun.damage += 10;
+        setTimeout(() => {
+          player.gun.damage -= 10;
+          player.reloadBar.animations.resume = true;
+        }, 5000)
+      } else if(cursors.reload.justPressed() && player.reloadBar.frame !== 22) {
+        console.log("YOU MISSED IT");
+        clearInterval(player.gun.reloadInterval);
+        player.reloadBar.animations.paused = true;
+        player.gun.reloadSpeed += 3000;
+        player.gun.isJammed = true;
+        player.gun.reloadGun();
+        // setTimeout(() => {
+        //   player.gun.reloadSpeed -= 5000;
+        //   player.reloadBar.animations.resume = true;
+        // }, 5000)
+      }
+    } else {
+      player.reloadBar.visible = false;
+      player.reloadBar.animations.stop();
+      if(tween) {
+        tween.stop();
+        player.reloadBar.alpha = 1;
+      }
+
+    }
+
+    //TODO: use onDown instead? Need to set a previous animation
+    if (cursors.down.isDown && cursors.right.isDown) {
+      player.direction = 'down';
+      player.body.velocity.y = player.stats.movement * .7071;
+      player.body.velocity.x = player.stats.movement * .7071;
+      player.animations.play('down');
+      player.walkingDiagionally = true;
+    } else if (cursors.down.isDown && cursors.left.isDown) {
+      player.direction = 'down';
+      player.body.velocity.y = player.stats.movement * .7071;
+      player.body.velocity.x = -player.stats.movement * .7071;
+      player.animations.play('down');
+      player.walkingDiagionally = true;
+    } else if (cursors.up.isDown && cursors.left.isDown) {
+      player.direction = 'up';
+      player.body.velocity.y = -player.stats.movement * .7071;
+      player.body.velocity.x = -player.stats.movement * .7071;
+      player.animations.play('up');
+      player.walkingDiagionally = true;
+    } else if (cursors.up.isDown && cursors.right.isDown) {
+      player.direction = 'up';
+      player.body.velocity.y = -player.stats.movement * .7071;
+      player.body.velocity.x = player.stats.movement * .7071;
+      player.animations.play('up');
+      player.walkingDiagionally = true;
+    } else if (cursors.left.isDown && !player.rollright.isPlaying) {
+      player.direction = 'left';
+      player.animations.play('right');
+      player.scale.setTo(-1, 1);
+      player.body.velocity.x = -player.stats.movement;
+      player.walkingDiagionally = false;
+    } else if (cursors.right.isDown && !player.rollright.isPlaying) {
+      player.direction = 'right';
+      player.scale.setTo(1, 1);
+      player.animations.play('right');
+      player.body.velocity.x = player.stats.movement;
+      player.walkingDiagionally = false;
+    } else if (cursors.up.isDown && !player.rollup.isPlaying) {
+      player.direction = 'up';
+      player.body.velocity.y = -player.stats.movement;
+      player.animations.play('up');
+      player.walkingDiagionally = false;
+    } else if (cursors.down.isDown && !player.rolldown.isPlaying) {
+      player.direction = 'down';
+      player.body.velocity.y = player.stats.movement;
+      player.animations.play('down');
+      player.walkingDiagionally = false;
+    }
+    if (player.body.velocity.x === 0 && player.body.velocity.y === 0) {
+      player.direction = 'idle';
+      player.animations.stop();
+      player.frame = handlePlayerRotation(player).frame;
+      player.walkingDiagionally = false;
+    }
+
+    if (player.canRoll) {
+      //Roll Up
+      if (cursors.up.isDown && cursors.jump.isDown) {
+        startRoll(player, 'roll-up');
+
+        //Roll Down
+      } else if (cursors.down.isDown && cursors.jump.isDown) {
+        startRoll(player, 'roll-down');
+
+        //Roll Right
+      } else if (cursors.right.isDown && cursors.jump.isDown) {
+        startRoll(player, 'roll-right');
+
+        //Roll Left
+      } else if (cursors.left.isDown && cursors.jump.isDown) {
+        startRoll(player, 'roll-left');
+      }
+    }
+  }
 }
 
 export function handlePlayerRotation(player) {
@@ -165,31 +198,35 @@ export function tweenCurrentPlayerAssets(player, context) {
 }
 
 function startRoll(player, direction) {
-		player.direction = direction;
-		let animation = direction;
-		if (direction === 'roll-left'){
-			//switch animation for roll-left direction to be roll-right / flipped scale
-			animation = 'roll-right';
-		}
-		player.rolling = player.animations.play(animation);
-		player.canRoll = false;
-		switch (direction) {
-			case 'roll-right':
-				player.scale.setTo(1, 1);
-				player.body.velocity.x = player.walkingDiagionally ?  player.stats.movement + 100 * .7071 :  player.stats.movement + 100;
-				break;
-			case 'roll-left':
-				player.scale.setTo(-1, 1);
-				player.body.velocity.x = player.walkingDiagionally ? -player.stats.movement - 100 * .7071 : -player.stats.movement - 100;
-				break;
-			case 'roll-up':
-				player.body.velocity.y = player.walkingDiagionally ? -player.stats.movement - 100 * .7071 : -player.stats.movement - 100;
-				break;
-			case 'roll-down':
-				player.body.velocity.y = player.walkingDiagionally ?  player.stats.movement + 100 * .7071 :  player.stats.movement + 100;
-				break;
-		}
-		setTimeout( () => {
-			player.canRoll = true;
-		}, player.rateOfRoll);
+  player.direction = direction;
+  let animation = direction;
+  if (direction === 'roll-left') {
+    //switch animation for roll-left direction to be roll-right / flipped scale
+    animation = 'roll-right';
+  }
+  player.rolling = player.animations.play(animation);
+  player.canRoll = false;
+  switch (direction) {
+    case 'roll-right':
+      player.scale.setTo(1, 1);
+      player.body.velocity.x = player.walkingDiagionally ? player.stats.movement + 100 * .7071 : player.stats.movement + 100;
+      break;
+    case 'roll-left':
+      player.scale.setTo(-1, 1);
+      player.body.velocity.x = player.walkingDiagionally ? -player.stats.movement - 100 * .7071 : -player.stats.movement - 100;
+      break;
+    case 'roll-up':
+      player.body.velocity.y = player.walkingDiagionally ? -player.stats.movement - 100 * .7071 : -player.stats.movement - 100;
+      break;
+    case 'roll-down':
+      player.body.velocity.y = player.walkingDiagionally ? player.stats.movement + 100 * .7071 : player.stats.movement + 100;
+      break;
+  }
+  setTimeout(() => {
+    player.canRoll = true;
+  }, player.rateOfRoll);
+}
+
+function activeReload(player){
+
 }
