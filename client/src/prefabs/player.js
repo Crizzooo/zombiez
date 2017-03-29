@@ -17,9 +17,21 @@ export default class Player extends Prefab {
       movement: 100
     };
 
+    this.spawnLocations = [
+      {x: 160, y: 128},
+      {x: 480, y: 544},
+      {x: 608, y: 1088},
+      {x: 224, y: 1440},
+      {x: 1376, y: 1408},
+      {x: 1120, y: 1088},
+      {x: 1088, y: 576},
+      {x: 1376, y: 160}
+    ];
+
     //TODO: make it only visible to the current player
     //Load Hearts, Healthbar, Animations
     this.socketId = properties.socketId;
+
 
 
     this.loadAnimations();
@@ -278,8 +290,9 @@ export default class Player extends Prefab {
         // this.health.newHealth(this.stats.health);
       }, 250)
     if (this.stats.health <= 0){
-      this.x = 200;
-      this.y = 200;
+      let index = Math.floor(Math.random() * 8);
+      this.x = this.spawnLocations[index].x;
+      this.y = this.spawnLocations[index].y;
       this.resetHealth();
     }
   }

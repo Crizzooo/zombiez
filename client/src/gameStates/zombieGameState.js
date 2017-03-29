@@ -68,6 +68,8 @@ export default class ZombieGameState extends TiledState {
     socket.on('destroyCurrentPlayerSprite', this.destroyCurrentPlayerSprite);
     socket.on('playerLeaveGame', this.handleRemotePlayerLeave);
 
+
+
     // this.logPreZombie = throttle( () => { console.log('pre Zombie update',  store.getState()) }, 15000);
     // this.logPostZombie = throttle( () => { console.log('post Zombie update', store.getState()) }, 15000);
   }
@@ -216,12 +218,12 @@ export default class ZombieGameState extends TiledState {
       //every 32ms send package to server with position
       handleInput(this.currentPlayerSprite);
       this.dispatchCurrentPlayer();
-      if (this.currentPlayerSprite.stats.health === 0) {
-        //could be random spots on map for now it's here for debugging
-        this.currentPlayerSprite.x = 250;
-        this.currentPlayerSprite.y = 250;
-        this.currentPlayerSprite.resetHealth();
-      }
+      // if (this.currentPlayerSprite.stats.health === 0) {
+      //   let index = Math.floor(Math.random() * 8);
+      //   this.currentPlayerSprite.x = this.spawnLocations[index].x;
+      //   this.currentPlayerSprite.y = this.spawnLocations[index].y;
+      //   this.currentPlayerSprite.resetHealth();
+      // }
       //not ideal, but gets the job done, will refactor later
       this.currentPlayerSprite.checkForRankUp(remotePlayerSprites);
       //Tween all player assets
@@ -274,6 +276,7 @@ export default class ZombieGameState extends TiledState {
     if (state.players.currentPlayer.name) {
       currentPlayer = state.players.currentPlayer;
 
+
       //TODO: make server assign sprite keys
       currentPlayerSprite = this.createPrefab(currentPlayer.name,
         {
@@ -285,7 +288,7 @@ export default class ZombieGameState extends TiledState {
             name: currentPlayer.name,
             socketId: socket.id
           },
-        }, {x: 225, y: 225}); //change to new location from server
+        }, {x: currentPlayer.x, y: currentPlayer.y}); //change to new location from server
 
 
       //NOTE: Add bulletGroup to current player sprite
