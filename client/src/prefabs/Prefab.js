@@ -18,21 +18,18 @@ export default class Prefab extends Phaser.Sprite {
 		console.log('gameState', this.gameState);
 		console.log('properties', properties);
 		console.log('properties.group', properties.group);
-		// if (properties.type == 'enemies'){
-		// 		if (properties.group == 'localZombieSpriteGroup'){
-		// 			this.gameState.localZombieGroup.add(this);
-		// 		} else if (properties.group == 'remoteZombieSpriteGroup'){
-		// 			console.log('creating remote zombie');
-		// 		}
-		// } else {
+
+		if (properties.group) {
 			this.gameState.groups[properties.group].children.push(this);
-		// }
+		}
+
 		this.initial = +properties.initial;
 		this.smoothed = false;
 
 		//Add all as children of lighting sprite
 		this.gameState.add.existing(this);
 
+		//TODO: final word from charlie on this?
 		//Push all prefabs to the mapSprite lighting overlay
 		// this.pushToOverlay = true;
 

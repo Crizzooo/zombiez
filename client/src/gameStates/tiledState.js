@@ -28,6 +28,9 @@ export default class TiledState extends Phaser.State {
     init(levelData) {
       this.levelData = levelData;
 
+	    //Set camera to follow, then make world big to allow camera to pan off
+	    //this.camera.view = new Phaser.Rectangle(0, 0, this.currentPlayer.position.x, this.currentPlayer.position.y);
+	    this.game.world.setBounds(-250, -250, 3200 + 250, 3200 + 250);
 	    //Scaling the Game Window for a pixelated effect
 	    this.game.scale.scaleMode = Phaser.ScaleManager.USER_SCALE;
 	    this.game.scale.setGameSize($('#game').innerWidth()/2, $('#game').innerHeight()/2);
@@ -86,9 +89,11 @@ export default class TiledState extends Phaser.State {
       this.layers[layer.name] = this.map.createLayer(layer.name);
 
       if (layer.properties.collision) {
+      	console.log('collision layer', layer.name);
         this.map.setCollisionByExclusion([], true, layer.name);
       }
     });
+
   }
 
 	//Use this method to create prefabs
@@ -113,20 +118,14 @@ export default class TiledState extends Phaser.State {
 		console.log('layers',this.map.layers)
 		obstaclesLayer = this.map.layers[1];
     litObstaclesLayer = this.map.layers[2];
-
-		//todo: need to add other obstacles to worldGrid
-		//console.log('obstacles layer', obstaclesLayer)
-
 		worldGrid = [];
 		for (rowIndex = 0; rowIndex < this.map.height; rowIndex += 1) {
 			worldGrid.push([]);
 			for (columnIndex = 0; columnIndex < this.map.width; columnIndex += 1) {
-			  if (obstaclesLayer.data[rowIndex][columnIndex].collides){
-          worldGrid[rowIndex].push(obstaclesLayer.data[rowIndex][columnIndex].index);
-        }
-        if(litObstaclesLayer.data[rowIndex][columnIndex].collides){
-			    console.log('does the lit work');
-          worldGrid[rowIndex].push(litObstaclesLayer.data[rowIndex][columnIndex].index);
+			  if (obstaclesLayer.data[rowIndex][columnIndex].collides || litObstaclesLayer.data[rowIndex][columnIndex].collides){
+			  	//|| litObstaclesLayer.data[rowIndex][columnIndex].collides
+          worldGrid[rowIndex].push(1);
+			  	//worldGrid[rowIndex].push((obstaclesLayer.data[rowIndex][columnIndex].index));
         }
 			}
 		}

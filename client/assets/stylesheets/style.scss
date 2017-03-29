@@ -1,7 +1,7 @@
 /* Variables */
 $button-height: 40px;
 $container-height: 100%;
-$gameContainer-height: 66vh;
+$gameContainer-height: 99.5vh;
 
 * {
   box-sizing: border-box;
@@ -40,6 +40,7 @@ body {
 
 .mainContainer {
   height: 100 - $gameContainer-height;
+  z-index: 10;
 }
 
 #mainRow {
@@ -57,13 +58,16 @@ body {
 
 .gameContainer {
   height: $container-height;
-  max-width: 80%;
+  max-width: 100%;
   margin: auto;
   display: block;
   // padding-top: calc(100% - $button-height);
   padding: 0px;
-  background-color: pink;
+  background-image: url('../../assets/images/splashScreen.jpg');
+  background-size: 100%;
   box-sizing: border-box;
+  margin-bottom: -220px;
+  z-index: 1;
 }
 
 .gc {
@@ -106,7 +110,7 @@ canvas {
 }
 
 #joinButtonHolder {
-  height: 10%;
+  height: 25px;
   margin-bottom: 1%;
   margin-top: 1%;
 }
@@ -119,6 +123,7 @@ canvas {
 /* TODO: Resize Leaderboard Components by wrapping in Div with same VH as gameContainer
 Then, give all components a relative height */
 .chatContainer {
+  min-height: 210px;
   height: 100%;
   padding: .5%;
   // border: 1px solid black;
@@ -132,7 +137,6 @@ Then, give all components a relative height */
 
 .messageForm {
   padding: 1.5px;
-  border: 1px dashed rgba(0, 0, 0, 0.2);
   height: 100%;
 }
 
@@ -153,13 +157,17 @@ Then, give all components a relative height */
 
 .messageText {
   margin-bottom: 0px;
+  color: whitesmoke;
+
 }
 
 #createMessage {
   border: 0;
   padding: 10px;
-  width: 75%;
+  width: 100%;
   margin-right: 0.5%;
+  background-color: rgba(255,255,255,0.2);
+  color: whitesmoke;
 }
 #chatForm {
   height: 100%;
@@ -180,5 +188,10 @@ Then, give all components a relative height */
 
 /* Table Style */
 .table td, .table th {
+  background: rgba(0,0,0,0.2);
   padding: 5px;
+}
+
+.table-inverse {
+  background-color: transparent;
 }

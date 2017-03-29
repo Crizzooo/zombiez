@@ -25,9 +25,9 @@ export default class Gun extends GunPrefab {
     this.nextFire = 0;
     this.isReloading = false;
     this.pivot.x = -10;
+    this.isJammed = false;
     this.rotation;
     gameObj = this.game;
-    console.log('HOW MANY TIMES DOES THIS SHIT HAPPEN');
     this.minDistanceSound = 30;
     this.maxDistanceSound = 600;
   }
@@ -103,19 +103,14 @@ export default class Gun extends GunPrefab {
 
 
   reloadGun(){
-    setTimeout(() => {
+    this.reloadInterval = setTimeout(() => {
       this.ammo = this.clip;
       this.isReloading = false;
       this.game.currentPlayerSprite.clipUpdate();
+      if(this.isJammed) {
+        this.isJammed = false;
+        this.reloadSpeed = 2000;
+      }
     }, this.reloadSpeed)
-  }
-
-  hitZombie(zombie, bullet){
-    console.log("ZOMBZ", zombie);
-	  zombie.hit = true;
-	  bullet.kill();
-		zombie.animations.stop();
-	  zombie.animations.play('dead')
-    zombie.zombDeath.onComplete.add(() => zombie.kill(), this);
   }
 }
