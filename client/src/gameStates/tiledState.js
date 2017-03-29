@@ -30,23 +30,17 @@ export default class TiledState extends Phaser.State {
 
 	    //Set camera to follow, then make world big to allow camera to pan off
 	    //this.camera.view = new Phaser.Rectangle(0, 0, this.currentPlayer.position.x, this.currentPlayer.position.y);
-	    this.game.world.setBounds(-250, -250, 3200 + 250, 3200 + 250);
+	    this.game.world.setBounds(0, 0, 3200, 3200);
 	    //Scaling the Game Window for a pixelated effect
 	    this.game.scale.scaleMode = Phaser.ScaleManager.USER_SCALE;
-	    this.game.scale.setGameSize($('#game').innerWidth()/2, $('#game').innerHeight()/2);
-	    this.game.scale.setUserScale(2, 2);
+	    this.game.scale.setGameSize($('#game').innerWidth()/2.1, $('#game').innerHeight()/2.1);
+	    this.game.scale.setUserScale(2.1, 2.1);
 
       this.game.stage.disableVisibilityChange = true;
 
       this.game.time.advancedTiming = true;
       this.game.desiredFps = 30;
 
-      // self = this.game;
-	    //this.game.scale.setUserScale(6, 6);
-	    // this.game.scale.setResizeCallback( (scale, parentBounds) => {
-	    // })
-	    // this.game.scale.setMinMax($('#game').innerWidth(), $('#game').innerHeight(),
-	    //                           $('#game').innerWidth(), $('#game').innerHeight());
 
 	    //this.game.renderer.renderSession.roundPixels = true;
 	    Phaser.Canvas.setImageRenderingCrisp(this.game.canvas);

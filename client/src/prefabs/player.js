@@ -126,7 +126,7 @@ export default class Player extends Prefab {
     console.log('this', this);
     console.log('game ', this.game);
     let canvas = document.getElementsByTagName("canvas")[0];
-    this.reloadBar = this.gameState.game.add.sprite( (canvas.width/2), this.top, 'reloadBarSpriteSheet', 0);
+    this.reloadBar = this.gameState.game.add.sprite( (canvas.width/2), (canvas.height/2) - 25, 'reloadBarSpriteSheet', 0);
     this.reloadBar.anchor.setTo(0.5);
     this.gameState.game.add.existing(this.reloadBar);
     this.reloadBar.visible = false;
