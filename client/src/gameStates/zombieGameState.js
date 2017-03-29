@@ -187,27 +187,6 @@ export default class ZombieGameState extends TiledState {
 
     //Push all sprites in the world onto the child of the mapSpriteOverlay
 
-//TODO: Not sure which set is working
-// <<<<<<< HEAD
-//     //All prefabs created with a pushToOverlay = true
-//
-//     //maybe we can add a showInDarkness property and show things with that property
-//     // put on RPS< butset to true for currentPlayerSprite
-//     this.game.world.children.forEach((layer) => {
-//       // console.log('pushing this layer to overlay', layer);
-//       if (!layer.socketId || layer.socketId === socket.id){
-//         // console.log('layer has no socket id or its not player');
-//         if (typeof layer === 'player' || layer.socketId !== socket.id){
-//           // console.log('layer is type of player');
-//           return;
-//         }
-//         if (layer.pushToOverlay) {
-//           this.lighting.mapSprite.addChild(layer);
-//         }
-//       }
-//     });
-//     //Also push all remote players and their assets onto the lighting layer
-// =======
 		//This is lighting layers done manually
 	  //ADD ALL LIGHTING MANUALLY FOR NOW UNTIL FINAL GROUPS ARE SET
 		this.game.world.children.forEach((layer) => {
@@ -221,7 +200,6 @@ export default class ZombieGameState extends TiledState {
     this.groups.enemies.forEach( (enemy) => {
     	this.lighting.mapSprite.addChild(enemy);
     })
-// === end of cohen commit
 
 	  for (let key in remotePlayerSprites) {
 		  if (remotePlayerSprites.hasOwnProperty(key)) {
@@ -673,13 +651,12 @@ export default class ZombieGameState extends TiledState {
       return;
     } else if (bullet.parent.name === 'currentPlayerBulletGroup') {
       //TODO: add damage event
-
       let eventId = socket.id + playerDamageEventCount;
-
+      console.log('bullet hit player for X damage: ', currentPlayerSprite.gun.damage);
       //dmg was set to 10 before, now is it gun damage?
       self.currentPlayerSprite.playerDamageHash[eventId] = {
         damagedPlayerSocketId: player.socketId,
-        damage: player.gun.damage
+        damage: currentPlayerSprite.gun.damage
       }
       setTimeout(() => {
         delete self.currentPlayerSprite.playerDamageHash[eventId];
@@ -716,7 +693,7 @@ export default class ZombieGameState extends TiledState {
     // console.log(`this player will be hit for ${playerWhoDealtDamage}`, playerToDamage);
     playerToDamage.receiveDamage(playerWhoDealtDamage.gun.damage);
     if (playerToDamage.stats.health === 0) {
-      playerWhoDealtDamage.upgradeGun(self.currentPlayerSprite);
+      playerWhoDealtDamage.upgradeGun();
       playerToDamage.resetHealth();
       playerWhoDealtDamage.checkForRankUp(remotePlayerSprites);
     }
