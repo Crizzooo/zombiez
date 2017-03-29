@@ -11,7 +11,7 @@ function Leaderboard(props) {
     return (<tr key={'player' + (index + 1)}>
       <th scope="row">{1 + index}</th>
       <td>{player.name}</td>
-      <td>{player.score}</td>
+      <td>{player.gunLvl}</td>
     </tr>);
   })
   playerRows.push(...livePlayers);
@@ -35,7 +35,7 @@ function Leaderboard(props) {
             <tr>
               <th>#</th>
               <th>Username</th>
-              <th>Score</th>
+              <th>Gun Level</th>
             </tr>
           </thead>
           <tbody>
