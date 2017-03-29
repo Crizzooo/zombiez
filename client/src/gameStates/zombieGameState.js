@@ -220,7 +220,10 @@ export default class ZombieGameState extends TiledState {
   update() {
     //Check collisions
     //NOTE: only check CPS collissions if we do have a CPS
+
     if (this.currentPlayerSprite){
+      this.pointer.x = this.game.input.mousePointer.worldX;
+      this.pointer.y = this.game.input.mousePointer.worldY;
       this.updateCollisions();
 
       //Set up local client lighting

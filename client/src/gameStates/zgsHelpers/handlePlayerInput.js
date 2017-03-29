@@ -48,9 +48,8 @@ export let handleInput = (player) => {
     }
     else{
 
-
-      player.pointerX = player.game.input.activePointer.worldX;
-      player.pointerY = player.game.input.activePointer.worldY;
+      player.pointerX = player.game.input.mousePointer.worldX;
+      player.pointerY = player.game.input.mousePointer.worldY;
 
       let cursors = player.cursors;
 
