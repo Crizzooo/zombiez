@@ -11,6 +11,7 @@ const store = require('./store.js');
 //Store Dispatchers
 const {receiveJoinLobby, receiveLobbyerLeave} = require('./reducers/lobby.js');
 const {updatePlayer, removePlayer} = require('./reducers/players.js');
+const {updateZombiesFromClient} = require('./reducers/zombies.js');
 
 //Import helper functions
 const startGame = require('./engine/updateClientLoop.js').startGame;
@@ -136,11 +137,17 @@ io.on('connection', (socket) => {
 //
 //   socket.on('clientUpdate', (state) => {
 // =======
-  socket.on('clientUpdate', (playerState) => {
+  socket.on('clientUpdate', (clientState) => {
     //TODO: break state down and dispatch to appropriate reducers
     // console.log('server heard client update with: ', playerState);
     // console.log('this client told the server to update: ', socket.id);/
+    let zombies = clientState.zombies;
+    let playerState = clientState.player;
+    // console.log('server received CS: ', clientState);
+    // console.log('server received player: ', clientState.player);
     store.dispatch(updatePlayer(playerState));
+    store.dispatch(updateZombiesFromClient(playerState.socketId, zombies));
+    // console.log('received zombies: ', zombies);
   });
 
 })

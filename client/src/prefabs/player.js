@@ -73,15 +73,16 @@ export default class Player extends Prefab {
     this.canRoll = true;
   }
 
-  loadControls() {
-    this.cursors = {};
-    this.cursors.up = this.gameState.input.keyboard.addKey(Phaser.Keyboard.W);
-    this.cursors.down = this.gameState.input.keyboard.addKey(Phaser.Keyboard.S);
-    this.cursors.left = this.gameState.input.keyboard.addKey(Phaser.Keyboard.A);
-    this.cursors.right = this.gameState.input.keyboard.addKey(Phaser.Keyboard.D);
+  loadControls () {
+	  this.cursors = {};
+	  this.cursors.up = this.gameState.input.keyboard.addKey(Phaser.Keyboard.W);
+	  this.cursors.down = this.gameState.input.keyboard.addKey(Phaser.Keyboard.S);
+	  this.cursors.left = this.gameState.input.keyboard.addKey(Phaser.Keyboard.A);
+	  this.cursors.right = this.gameState.input.keyboard.addKey(Phaser.Keyboard.D);
+	  this.cursors.jump = this.gameState.input.keyboard.addKey(Phaser.Keyboard.SPACEBAR);
+	  this.cursors.chat = this.gameState.input.keyboard.addKey(Phaser.Keyboard.TAB);
     this.cursors.reload = this.gameState.input.keyboard.addKey(Phaser.Keyboard.R);
-    this.cursors.jump = this.gameState.input.keyboard.addKey(Phaser.Keyboard.SPACEBAR);
-    this.cursors.fire = this.gameState.input.activePointer;
+	  this.cursors.fire = this.gameState.input.activePointer;
   }
 
   loadAnimations() {
@@ -118,6 +119,106 @@ export default class Player extends Prefab {
 
     this.gunUiFrame.gunClip = this.game.add.text(50, 25, this.gun.ammo + '/' + this.gun.clip, style);
     this.gunUiFrame.gunClip.fixedToCamera = true;
+// <<<<<<< HEAD
+//   }
+//
+//   loadReloadBar(){
+//     this.reloadBar = this.gameState.game.add.sprite(this.x + 120, this.y - 90, 'reloadBarSpriteSheet', 0);
+//     // this.reloadBar.add.tween
+//     // console.log("PLAYER?", this);
+//     this.gameState.game.add.existing(this.reloadBar);
+//     this.reloadBar.visible = false;
+//     this.reloadBar.fixedToCamera = true;
+//     this.reloadBar.animations.add('playReload', [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29], 15, false);
+//   }
+//
+//   loadMedalUi(){
+//     let canvas = document.getElementsByTagName("canvas")[0];
+//     this.medal = this.gameState.game.add.sprite((canvas.width/2), 0, 'medalSpriteSheet', 3);
+//     this.gameState.game.add.existing(this.medal);
+//     this.medal.fixedToCamera = true;
+//   }
+//
+//   loadGunIntoUi(gunName) {
+//     this.gunUiFrame.gunSprite = this.gameState.game.add.sprite(0, 25, gunName + 'SpriteSheet', 1);
+//   }
+//
+//   clipUpdate() {
+//     this.gunUiFrame.gunClip.text = this.gun.clip + '/' + this.gun.ammo;
+//   }
+//
+//   loadHealthbar() {
+//     //Health text, to be replaced by healthbar
+//     const style = {
+//       font: "bold 16px Arial",
+//       fill: "#FFF",
+//       stroke: "#000",
+//       strokeThickness: 3
+//     };
+//
+//     this.healthbar = this.game.add.text(
+//       this.position.x - 10,
+//       this.position.y - 10,
+//       this.stats.health, style);
+//
+//     //TODO: bullets collide with health?
+//     //Add to existing
+//     //this.gameState.add.existing(this.healthbar);
+//   }
+//
+//   upgradeGun(player) {
+//     player.currentGunLevel++;
+//     console.log("INSIDE OF LOAD GUN!!", player);
+//     switch (player.currentGunLevel) {
+//       case 1:
+//         player.gun.frame = 8;
+//         player.gunUiFrame.gunSprite.frame = 8;
+//         break;
+//       case 2:
+//         player.gun.frame = 6;
+//         player.gunUiFrame.gunSprite.frame = 6;
+//         break;
+//       case 3:
+//         player.gun.frame = 1;
+//         player.gunUiFrame.gunSprite.frame = 1;
+//         break;
+//       case 4:
+//         player.hasWon = true;
+//         break;
+//     }
+//   }
+//
+//   loadHearts() {
+//     //Health hearts, top left hearts
+//     this.health = new HealthHeart(this.gameState, 'playerHealthHearts', {x: 0, y: 0},
+//       {
+//         group: 'ui'
+//       }
+//     );
+//
+//     for (let i = 0; i < 10; i++) {
+//       this.health.addHearts(this.game.add.existing(new Heart(this.gameState, 'playerHeart' + i, {x: (32 * i), y: 0},
+//         {
+//           texture: 'playerHearts',
+//           group: 'ui',
+//           initial: 2
+//         })
+//       ))
+//     }
+//   }
+//
+//   resetHealth() {
+//     this.stats.health += 100;
+//     if (socket.id !== this.socketId) {
+//       this.healthbar.text = this.stats.health;
+//     } else {
+//       this.health.hearts.forEach((heartSprite) => {
+//         heartSprite.changeHeart("full");
+//       })
+//     }
+//   }
+//
+// =======
   }
 
   loadReloadBar(){
@@ -216,6 +317,7 @@ export default class Player extends Prefab {
     }
   }
 
+// >>>>>>> origin/master
   checkForRankUp(remotePlayers){
     //sort by gun level
     let arr = [{id: socket.id, num: this.currentGunLevel}];
@@ -234,20 +336,20 @@ export default class Player extends Prefab {
   }
 
   receiveDamage(damage) {
-    console.log(this);
     //Change healthbar
     this.stats.health -= damage;
-    if (socket.id !== this.socketId) {
+
+    if (socket.id !== this.socketId){
       this.healthbar.text = this.stats.health;
     } else {
       this.health.newHealth(this.stats.health);
     }
+    //this.healthbar.text = this.stats.health;
 
     //Set tint to show damage
     //TODO: change to a red tint
     if (this.stats.health !== 0) {
       this.tint = PLAYER_DAMAGE_TINT;
-
       setTimeout(() => {
         this.tint = 0xffffff;
         //Change Health hearts <----- WHY CHARLIE, WHY IN A setTimeout?! I FOUND THIS AFTER 4 HOURS

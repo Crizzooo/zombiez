@@ -9,6 +9,7 @@ import Player from '../prefabs/player';
 import Enemy from '../prefabs/enemy';
 import Gun from '../prefabs/gun'
 
+var self;
 export default class TiledState extends Phaser.State {
     constructor(game) {
         super(game);
@@ -20,11 +21,16 @@ export default class TiledState extends Phaser.State {
             "enemies": Enemy.prototype.constructor,
             "guns": Gun.prototype.constructor
         }
+
+        self = this;
     }
 
     init(levelData) {
       this.levelData = levelData;
 
+	    //Set camera to follow, then make world big to allow camera to pan off
+	    //this.camera.view = new Phaser.Rectangle(0, 0, this.currentPlayer.position.x, this.currentPlayer.position.y);
+	    this.game.world.setBounds(-250, -250, 3200 + 250, 3200 + 250);
 	    //Scaling the Game Window for a pixelated effect
 	    this.game.scale.scaleMode = Phaser.ScaleManager.USER_SCALE;
 	    this.game.scale.setGameSize($('#game').innerWidth()/2, $('#game').innerHeight()/2);
@@ -34,6 +40,8 @@ export default class TiledState extends Phaser.State {
 
       this.game.time.advancedTiming = true;
       this.game.desiredFps = 30;
+
+      // self = this.game;
 	    //this.game.scale.setUserScale(6, 6);
 	    // this.game.scale.setResizeCallback( (scale, parentBounds) => {
 	    // })
@@ -81,21 +89,24 @@ export default class TiledState extends Phaser.State {
       this.layers[layer.name] = this.map.createLayer(layer.name);
 
       if (layer.properties.collision) {
+      	console.log('collision layer', layer.name);
         this.map.setCollisionByExclusion([], true, layer.name);
       }
     });
+
   }
 
 	//Use this method to create prefabs
 	createPrefab(prefabName, prefabData, position) {
 		let prefab;
 
+    console.log('self in createPrefab', self);
 		//Pass prefab data into the constructor of that type defined in this constructor
-		if (this.prefabClasses.hasOwnProperty(prefabData.type)) {
-			prefab = new this.prefabClasses[prefabData.type](this, prefabName, position, prefabData.properties);
+		if (self.prefabClasses.hasOwnProperty(prefabData.type)) {
+			prefab = new self.prefabClasses[prefabData.type](self, prefabName, position, prefabData.properties);
 		}
 
-		this.prefabs[prefabName] = prefab;
+		self.prefabs[prefabName] = prefab;
 
 		return prefab;
 	}
@@ -107,20 +118,14 @@ export default class TiledState extends Phaser.State {
 		console.log('layers',this.map.layers)
 		obstaclesLayer = this.map.layers[1];
     litObstaclesLayer = this.map.layers[2];
-
-		//todo: need to add other obstacles to worldGrid
-		//console.log('obstacles layer', obstaclesLayer)
-
 		worldGrid = [];
 		for (rowIndex = 0; rowIndex < this.map.height; rowIndex += 1) {
 			worldGrid.push([]);
 			for (columnIndex = 0; columnIndex < this.map.width; columnIndex += 1) {
-			  if (obstaclesLayer.data[rowIndex][columnIndex].collides){
-          worldGrid[rowIndex].push(obstaclesLayer.data[rowIndex][columnIndex].index);
-        }
-        if(litObstaclesLayer.data[rowIndex][columnIndex].collides){
-			    console.log('does the lit work');
-          worldGrid[rowIndex].push(litObstaclesLayer.data[rowIndex][columnIndex].index);
+			  if (obstaclesLayer.data[rowIndex][columnIndex].collides || litObstaclesLayer.data[rowIndex][columnIndex].collides){
+			  	//|| litObstaclesLayer.data[rowIndex][columnIndex].collides
+          worldGrid[rowIndex].push(1);
+			  	//worldGrid[rowIndex].push((obstaclesLayer.data[rowIndex][columnIndex].index));
         }
 			}
 		}

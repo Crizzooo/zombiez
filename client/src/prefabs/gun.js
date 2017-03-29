@@ -13,6 +13,7 @@ let gameObj;
 export default class Gun extends GunPrefab {
   constructor(game, name, position, properties) {
     super(game, name, position, properties);
+    this.enableBody = true;
     this.game.physics.arcade.enable(this);
     this.body.collideWorldBounds = true;
     this.anchor.setTo(0.5);
@@ -25,6 +26,8 @@ export default class Gun extends GunPrefab {
     this.isReloading = false;
     this.pivot.x = -10;
     this.isJammed = false;
+    this.rotation;
+    gameObj = this.game;
     this.minDistanceSound = 30;
     this.maxDistanceSound = 600;
   }
@@ -82,7 +85,7 @@ export default class Gun extends GunPrefab {
 
       setTimeout( () => {
         delete this.game.currentPlayerSprite.bulletHash[bulletId];
-    }, EVENT_LOOP_DELETE_TIME)
+      }, EVENT_LOOP_DELETE_TIME)
       // store.dispatch(playerFired(player.pointerX, player.pointerY, socket.id, bulletId));
       //Change bullet ui for current player
       player.clipUpdate();
@@ -95,8 +98,6 @@ export default class Gun extends GunPrefab {
       if (perc > 1) this.playSound(player,'heavyPistol',1);
       else if(perc <= 0);
       else this.playSound(player,'heavyPistol',perc);
-      //Render the bullet for the remote player
-      // console.log('remote player just fired!');
     }
   }
 
@@ -112,6 +113,7 @@ export default class Gun extends GunPrefab {
       }
     }, this.reloadSpeed)
   }
+// <<<<<<< HEAD
 
   hitZombie(zombie, bullet, player){
     console.log("ZOMBZ", zombie);
@@ -122,4 +124,6 @@ export default class Gun extends GunPrefab {
 
     zombie.zombDeath.onComplete.add(() => zombie.kill(), this);
   }
+// =======
+// >>>>>>> origin/master
 }

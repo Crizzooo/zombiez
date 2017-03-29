@@ -10,6 +10,7 @@ import { loadPlayers, changeGamePlaying, updatePlayers, playerLeaveGame, resetPl
 import { loadMessages, addMessage } from './reducers/chatApp-reducer.js';
 import { dispatchLobbyUpdate, dispatchSetCurrentLobbyer, resetLobby } from './reducers/lobby-reducer.js';
 import { dispatchGamePlaying } from './reducers/gameState-reducer';
+import { updateRemoteZombies } from './reducers/zombies-reducer';
 
 
 //We attach all functions to a socket in here
@@ -70,11 +71,23 @@ function dispatchServerState(serverState) {
       // }
       delete playerStateUpdate[socket.id];
     }
+
+    if (serverState.zombies.zombieSprites && serverState.zombies.zombieSprites[socket.id]){
+      // console.log('received this zombie update pre remove: ', serverState.zombies.zombieSprites);
+      delete serverState.zombies.zombieSprites[socket.id];
+      // console.log('after remove, ready to dispatch: ', serverState.zombies.zombieSprites);
+      store.dispatch(updateRemoteZombies(serverState.zombies.zombieSprites));
+    }
     // console.log('and after deleting: ', playerStateUpdate);
     //TODO: if player state update has nothing, dont dispatch
     if (!(Object.keys(playerStateUpdate) === [] || Object.keys(playerStateUpdate) === ['undefined'])){
         store.dispatch(updatePlayers(playerStateUpdate));
-      }
+    }
+
+    //TODO: pull off zombies and dispatch to local store
+    //TODO: filter out zombies under player socket Id
+
+
   }
   throttledLog();
 }
