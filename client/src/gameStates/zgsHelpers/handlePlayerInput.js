@@ -49,6 +49,9 @@ export let handleInput = (player) => {
       if (cursors.right.justPressed()) {
         logWASD('d');
       }
+      if (cursors.reload.justPressed()) {
+        logWASD('r');
+      }
       if (cursors.jump.justPressed()) {
         logWASD(' ');
       }
