@@ -123,9 +123,11 @@ export default class Player extends Prefab {
   }
 
   loadReloadBar(){
-    this.reloadBar = this.gameState.game.add.sprite(this.x + 120, this.y - 90, 'reloadBarSpriteSheet', 0);
-    // this.reloadBar.add.tween
-    // console.log("PLAYER?", this);
+    console.log('this', this);
+    console.log('game ', this.game);
+    let canvas = document.getElementsByTagName("canvas")[0];
+    this.reloadBar = this.gameState.game.add.sprite( (canvas.width/2), (canvas.height/2) - 25, 'reloadBarSpriteSheet', 0);
+    this.reloadBar.anchor.setTo(0.5);
     this.gameState.game.add.existing(this.reloadBar);
     this.reloadBar.visible = false;
     this.reloadBar.fixedToCamera = true;
@@ -144,7 +146,7 @@ export default class Player extends Prefab {
   }
 
   clipUpdate() {
-    this.gunUiFrame.gunClip.text = this.gun.clip + '/' + this.gun.ammo;
+    this.gunUiFrame.gunClip.text = this.gun.ammo + '/' + this.gun.clip;
   }
 
   loadHealthbar() {

@@ -5,6 +5,7 @@ const throttle = require('lodash.throttle');
 
 import store from '../store.js';
 import {updateCurrentPlayer, playerLeaveGame} from '../reducers/players-reducer.js';
+import { dispatchZombieHitEvent } from '../reducers/zombies-reducer.js';
 import emitCurrentState from '../engine/emitCurrentState.js';
 
 //Import game plugins and tiledstate
@@ -24,7 +25,7 @@ import {PLAYER_HEALTH, EVENT_LOOP_DELETE_TIME, STARTING_BULLET_SPEED} from '../e
 // currentPlayerSprite and remotePlayerSprites are on global window
 var self;
 let playerDamageEventCount = 0;
-
+let zombieHitCount = 0;
 export default class ZombieGameState extends TiledState {
   constructor(game) {
     super(game);
@@ -65,8 +66,8 @@ export default class ZombieGameState extends TiledState {
     socket.on('destroyCurrentPlayerSprite', this.destroyCurrentPlayerSprite);
     socket.on('playerLeaveGame', this.handleRemotePlayerLeave);
 
-    this.logPreZombie = throttle( () => { console.log('pre Zombie update',  store.getState()) }, 15000);
-    this.logPostZombie = throttle( () => { console.log('post Zombie update', store.getState()) }, 15000);
+    // this.logPreZombie = throttle( () => { console.log('pre Zombie update',  store.getState()) }, 15000);
+    // this.logPostZombie = throttle( () => { console.log('post Zombie update', store.getState()) }, 15000);
   }
 
   preload() {
@@ -121,7 +122,7 @@ export default class ZombieGameState extends TiledState {
     this.game.world.setBounds(-250, -250, 3200 + 250, 3200 + 250);
 
 		//Enemy Generator Initial
-	  enemyGeneratorInitial(this,  10);
+	  // enemyGeneratorInitial(this,  10);
 		console.log('enemy group', this.groups.enemies);
 
     // this.game = game;
@@ -269,10 +270,10 @@ export default class ZombieGameState extends TiledState {
 
     //update zombies
     //move to one 'updateLocalZombies function'
-    this.logPreZombie();
+    // this.logPreZombie();
     R.forEach(updateLocalZombie, this.localZombieSpriteGroup.children);
     dispatchZombieUpdate();
-    this.logPostZombie();
+    // this.logPostZombie();
     updateRemoteZombies();
     //dispatch zombies
   }
@@ -588,16 +589,23 @@ export default class ZombieGameState extends TiledState {
   bulletHitZombie(zombie, bullet){
     bullet.kill();
     console.log("ZOMBIE HIT BY BULLET", zombie, bullet);
-    console.log('we need to dispatch an event to let others know');
-    if (zombie.ownerId === socket.id){
-      console.log('my zombie has been shot', zombie);
-      //TODO: update zombie stat
-    }
     if (bullet.shooterSocketId === socket.id){
       //TODO: dispatch event and let everyone know its been hit
+      //dispatch event and let everyone know its been hit
       console.log('i hit a zombie so I should let other people know ');
+      let eventId =  'shotZombie' + socket.id + zombieHitCount;
+      store.dispatch(dispatchZombieHitEvent({
+          zombieId: zombie.id,
+          damage: currentPlayerSprite.gun.damage,
+          shooterId: socket.id,
+          zombieOwnerId: zombie.ownerId
+      }, eventId));
+      zombieHitCount++;
+      this.killZombie(zombie);
     }
-    //TODO: move to separate function where zombies take damage and may die
+  }
+
+  killZombie(zombie){
     zombie.hit = true;
     zombie.animations.stop();
     zombie.animations.play('dead')
@@ -605,13 +613,7 @@ export default class ZombieGameState extends TiledState {
       zombie.kill();
     });
 
-    //TODO: if bullet shooterId = socket.id
-        //dispatch event and let everyone know its been hit
-            //if not your zombie, just play damage animation
-            //if you own the zombie thats been hit, you update its health for everyone
-    console.log("ZOMBZ", zombie.x, zombie.y);
-
-		const zX =  zombie.x;
+    const zX =  zombie.x;
 	  const zY =  zombie.y;
 
 	  let zombieDyingPrefab = this.createPrefab('zombieDead',
