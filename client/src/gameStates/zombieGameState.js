@@ -19,7 +19,7 @@ import handleRemoteAnimation, { tweenRemoteAssets } from './zgsHelpers/handleRem
 import { enemyGeneratorInitial, enemyGenerator } from './zgsHelpers/enemyGenerator';
 import {PLAYER_HEALTH, EVENT_LOOP_DELETE_TIME, STARTING_BULLET_SPEED} from '../engine/gameConstants.js';
 
- import { localZombieSprites, remoteZombieSprites, initializeZombies, createLocalZombie, updateLocalZombie, dispatchZombieUpdate, updateRemoteZombies } from '../engine/manageZombies.js';}
+ import { localZombieSprites, remoteZombieSprites, initializeZombies, createLocalZombie, updateLocalZombie, dispatchZombieUpdate, updateRemoteZombies } from '../engine/manageZombies.js';
 
 //TODO: do we need this?
 // currentPlayerSprite and remotePlayerSprites are on global window
