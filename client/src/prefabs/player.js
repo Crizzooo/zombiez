@@ -270,7 +270,7 @@ export default class Player extends Prefab {
 
   upgradeGun() {
     this.currentGunLevel++;
-    console.log("INSIDE OF LOAD GUN!!", this);
+    //console.log("INSIDE OF LOAD GUN!!", this);
     switch (this.currentGunLevel) {
       case 1:
         this.gun.frame = 8;
@@ -288,6 +288,9 @@ export default class Player extends Prefab {
         this.hasWon = true;
         break;
     }
+
+    console.log('should be emitting gun to the back end with ',this.currentGunLevel);
+    socket.emit('upgradeGun', this.currentGunLevel);
   }
 
   loadHearts() {
@@ -354,7 +357,7 @@ export default class Player extends Prefab {
 
     //Set tint to show damage
     //TODO: change to a red tint
-    if (this.stats.health !== 0) {
+    if (this.stats.health <= 0) {
       this.tint = PLAYER_DAMAGE_TINT;
       setTimeout(() => {
         this.tint = 0xffffff;

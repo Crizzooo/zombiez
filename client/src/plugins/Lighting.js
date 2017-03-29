@@ -27,7 +27,7 @@ export default class Lighting extends Phaser.Plugin {
 		this.gameState.lighting.mapSprite = this.gameState.game.add.sprite(0,0,'mapOverlay');
 		this.gameState.lighting.mapSprite.blendMode = PIXI.blendModes.SCREEN
 		this.gameState.lighting.blackness.alpha = 0.7;
-	  this.gameState.lighting.blackness.scale.setTo(100,100);
+	  this.gameState.lighting.blackness.scale.setTo(50,50);
 	}
 
 	update () {

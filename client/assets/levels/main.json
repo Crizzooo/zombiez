@@ -81,7 +81,7 @@
       "type": "sound",
       "source": "../../assets/sounds/lightPistolShot.wav"
     },
-    "zombie": {
+    "zombieSound": {
       "type": "sound",
       "source": "../../assets/sounds/zombie.wav"
     },

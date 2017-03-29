@@ -9,7 +9,7 @@ const throttle = require('lodash.throttle');
 const store = require('./store.js');
 
 //Store Dispatchers
-const {receiveJoinLobby, receiveLobbyerLeave} = require('./reducers/lobby.js');
+const {receiveJoinLobby, receiveLobbyerLeave, upgradeGun} = require('./reducers/lobby.js');
 const {updatePlayer, removePlayer} = require('./reducers/players.js');
 const {updateZombiesFromClient} = require('./reducers/zombies.js');
 
@@ -52,6 +52,7 @@ io.on('connection', (socket) => {
     let state = store.getState();
     lobbyObj.playerNumber = state.lobby.lobbyers.length + 1;
     lobbyObj.host = lobbyObj.playerNumber === 1 ? true : false;
+    lobbyObj.gunLvl = 1;
     store.dispatch(receiveJoinLobby(lobbyObj));
     state = store.getState();
     io.emit('lobbyUpdate', state.lobby.lobbyers);
@@ -70,6 +71,12 @@ io.on('connection', (socket) => {
   socket.on('getGameState', () => {
     let state = store.getState();
     socket.emit('gamePlayingUpdate', state.game.gamePlaying);
+  })
+
+  socket.on('upgradeGun', (gunLvl) => {
+    store.dispatch(upgradeGun(gunLvl, socket.id));
+    state = store.getState();
+    io.emit('lobbyUpdate', state.lobby.lobbyers);
   })
 
   socket.on('getLobby', () => {
