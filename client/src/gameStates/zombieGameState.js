@@ -605,8 +605,6 @@ export default class ZombieGameState extends TiledState {
         //dispatch event and let everyone know its been hit
             //if not your zombie, just play damage animation
             //if you own the zombie thats been hit, you update its health for everyone
-    }
-
     console.log("ZOMBZ", zombie.x, zombie.y);
 
 		const zX =  zombie.x;

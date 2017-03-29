@@ -82,7 +82,8 @@ export function createRemoteZombie(zombieFromServer, clientId, zombieId) {
 
 export function updateLocalZombie(zombie, key){
   // console.log('ULZ received Zombie: ', zombie);
-  let newPosition = zombie.acquireTarget();
+  //NOTE: Reimplement new position from astar
+  // let newPosition = zombie.acquireTarget();
   // zombie.moveTo(newPosition);
   zombie.position.x += 1;
   zombie.position.y -= 1;

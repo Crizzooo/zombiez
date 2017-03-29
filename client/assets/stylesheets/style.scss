@@ -1,7 +1,7 @@
 /* Variables */
 $button-height: 40px;
 $container-height: 100%;
-$gameContainer-height: 99.5vh;
+$gameContainer-height: 100vh;
 
 * {
   box-sizing: border-box;
@@ -102,7 +102,7 @@ body {
 }
 
 canvas {
-  margin: 0;
+  margin-top: 0;
 }
 
 .playBtnText {
