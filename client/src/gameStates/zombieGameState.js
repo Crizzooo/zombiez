@@ -121,7 +121,7 @@ export default class ZombieGameState extends TiledState {
     this.game.world.setBounds(-250, -250, 3200 + 250, 3200 + 250);
 
 		//Enemy Generator Initial
-	  enemyGeneratorInitial(this,  10);
+	  // enemyGeneratorInitial(this,  10);
 		console.log('enemy group', this.groups.enemies);
 
     // this.game = game;
