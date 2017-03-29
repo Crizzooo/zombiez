@@ -21,10 +21,14 @@ let broadcastInterval;
 
 //TODO: Implement actual spawn positions from map
 let playerPositions = [
-  {x: 210, y: 210},
-  {x: 230, y: 230},
-  {x: 250, y: 250},
-  {x: 270, y: 270}
+  {x: 160, y: 128},
+  {x: 480, y: 544},
+  {x: 608, y: 1088},
+  {x: 224, y: 1440},
+  {x: 1376, y: 1408},
+  {x: 1120, y: 1088},
+  {x: 1088, y: 576},
+  {x: 1376, y: 160}
 ]
 //TODO: Implement correct sprite keys for ZOMBIE GUN GAME
 let playerSpriteKeys = [ 'playerSpriteSheet', 'playerSpriteSheet'];
@@ -33,9 +37,10 @@ let playerSpriteKeys = [ 'playerSpriteSheet', 'playerSpriteSheet'];
 const convertLobbyers = (lobbyers) => {
   return lobbyers.map( (lobbyObj, index) => {
     let spriteKey = playerSpriteKeys[index % 2];
+    let zeroOrOne = Math.round(Math.random());
     return {
-      x: playerPositions[index].x,
-      y: playerPositions[index].y,
+      x: playerPositions[(index*2) + zeroOrOne].x,
+      y: playerPositions[(index*2) + zeroOrOne].y,
       animationDirection: 'still',
       spriteKey,
       socketId: lobbyObj.socketId,
