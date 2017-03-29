@@ -245,7 +245,7 @@ export default class ZombieGameState extends TiledState {
       //every 32ms send package to server with position
       handleInput(this.currentPlayerSprite);
       this.dispatchCurrentPlayer();
-      if (this.currentPlayerSprite.stats.health === 0) {
+      if (this.currentPlayerSprite.stats.health <= 0) {
         //could be random spots on map for now it's here for debugging
         this.currentPlayerSprite.x = 250;
         this.currentPlayerSprite.y = 250;
