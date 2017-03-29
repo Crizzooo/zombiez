@@ -69,49 +69,56 @@ export let handleInput = (player) => {
         player.body.velocity.y = 0;
       }
 
-      if (cursors.fire.isDown) {
+      if (cursors.fire.isDown && !player.gun.isReloading) {
         //Shoot method will add the bullet obj to the hash map on store and then dispatch to server for 1s!
         player.gun.shoot(player);
       }
 
-      if(player.gun.isReloading){
-        player.reloadBar.visible = true;
-        // player.reloadTween.start();
-        player.reloadBar.animations.play('playReload');
-        if(cursors.reload.justPressed() && player.reloadBar.frame === 22){
-          console.log("ACTIVE RELOAD ACTIVATED");
-          player.gameState['reloadSuccess'].play();
-          player.reloadBar.animations.stop();
-          player.reloadBar.frame = 22;
-          player.reloadBar.alpha = 0;
-          tween = player.game.add.tween(player.reloadBar).to( { alpha: 1 }, 200, Phaser.Easing.Linear.None, true, 0, 500, true);
-          player.gun.damage += 10;
-          setTimeout(() => {
-            player.gun.damage -= 10;
-            player.reloadBar.animations.resume = true;
-          }, 5000)
-        } else if(cursors.reload.justPressed() && player.reloadBar.frame !== 22) {
-          console.log("YOU MISSED IT");
-          player.gameState['reloadFail'].play();
-          clearInterval(player.gun.reloadInterval);
-          player.reloadBar.animations.paused = true;
-          player.gun.reloadSpeed += 3000;
-          player.gun.isJammed = true;
-          player.gun.reloadGun();
-          // setTimeout(() => {
-          //   player.gun.reloadSpeed -= 5000;
-          //   player.reloadBar.animations.resume = true;
-          // }, 5000)
+      if(player.gun.isReloading && !player.gun.isJammed){
+          player.reloadBar.visible = true;
+          // player.reloadTween.start();
+          // player.reloadBar.animations.play('playReload');
+          if(cursors.reload.justPressed() && (player.reloadBar.frame < 24 && player.reloadBar.frame > 20)){
+            player.gameState['reloadSuccess'].play();
+            player.gun.isReloading = false;
+            player.gun.activeReloaded = true;
+            player.gun.ammo = player.gun.clip
+            player.clipUpdate();
+            player.reloadBar.frame = 22;
+            player.reloadBar.tint = 0x00FF7F;
+            player.reloadBar.alpha = 0;
+            tween = player.game.add.tween(player.reloadBar).to( { alpha: 1 }, 200, Phaser.Easing.Linear.None, true, 0, 500, true);
+            console.log('gun dmg pre AR: ', player.gun.damage);
+            player.gun.damage += 10;
+            console.log('gun dmg post AR: ', player.gun.damage);
+            player.reloadBar.animations.paused = true;
+            let activeInterval = setTimeout(() => {
+              player.reloadBar.tint = 0xffffff;
+              console.log('gun dmg pre AR finish: ', player.gun.damage);
+              player.gun.damage -= 10;
+              console.log('gun dmg post AR finish: ', player.gun.damage);  
+              tween.stop();
+              player.reloadBar.alpha = 1;
+              player.reloadingAnim.complete();
+              clearInterval(activeInterval);
+            }, 2500)
+          } else if(cursors.reload.justPressed() && (player.reloadBar.frame >= 24 || player.reloadBar.frame <= 20)) {
+            player.gameState['reloadFail'].play();
+            player.reloadBar.animations.paused = true;
+            player.reloadBar.tint = 0xFF0000;
+            player.gun.isJammed = true;
+            player.reloadBar.alpha = 0;
+            tween = player.game.add.tween(player.reloadBar).to( { alpha: 1 }, 200, Phaser.Easing.Linear.None, true, 0, 500, true);
+            let jamInterval = setTimeout(() => {
+              tween.stop();
+              player.reloadBar.alpha = 1;
+              // player.reloadBar.animations.paused = false;
+              player.reloadingAnim.complete();
+              clearInterval(jamInterval); }, 3500)
         }
-      } else {
-        player.reloadBar.visible = false;
-        player.reloadBar.animations.stop();
-        if(tween) {
-          tween.stop();
-          player.reloadBar.alpha = 1;
-        }
-
-      }
+    } else if (cursors.reload.isDown && player.gun.ammo !== player.gun.clip){
+      player.gun.reloadGun();
+    }
 
       //TODO: use onDown instead? Need to set a previous animation
       if (cursors.down.isDown && cursors.right.isDown) {
@@ -238,6 +245,11 @@ export function tweenCurrentPlayerAssets(player, context) {
 		y: player.y
 	}, 10, Phaser.Easing.Linear.None, true);
 
+  // context.add.tween(player.reloadBar).to({
+  //   x: player.x,
+  //   y: player.top - 50
+  // }, 10, Phaser.Easing.Linear.None, true);
+
 	//Gun rotation tween
  player.gun.rotation = context.game.physics.arcade.angleToPointer(player.gun);
 }
@@ -270,8 +282,4 @@ function startRoll(player, direction) {
   setTimeout(() => {
     player.canRoll = true;
   }, player.rateOfRoll);
-}
-
-function activeReload(player){
-
 }

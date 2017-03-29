@@ -5,6 +5,7 @@ const throttle = require('lodash.throttle');
 
 import store from '../store.js';
 import {updateCurrentPlayer, playerLeaveGame} from '../reducers/players-reducer.js';
+import { dispatchZombieHitEvent } from '../reducers/zombies-reducer.js';
 import emitCurrentState from '../engine/emitCurrentState.js';
 
 //Import game plugins and tiledstate
@@ -24,7 +25,7 @@ import {PLAYER_HEALTH, EVENT_LOOP_DELETE_TIME, STARTING_BULLET_SPEED} from '../e
 // currentPlayerSprite and remotePlayerSprites are on global window
 var self;
 let playerDamageEventCount = 0;
-
+let zombieHitCount = 0;
 export default class ZombieGameState extends TiledState {
   constructor(game) {
     super(game);
@@ -65,8 +66,8 @@ export default class ZombieGameState extends TiledState {
     socket.on('destroyCurrentPlayerSprite', this.destroyCurrentPlayerSprite);
     socket.on('playerLeaveGame', this.handleRemotePlayerLeave);
 
-    this.logPreZombie = throttle( () => { console.log('pre Zombie update',  store.getState()) }, 15000);
-    this.logPostZombie = throttle( () => { console.log('post Zombie update', store.getState()) }, 15000);
+    // this.logPreZombie = throttle( () => { console.log('pre Zombie update',  store.getState()) }, 15000);
+    // this.logPostZombie = throttle( () => { console.log('post Zombie update', store.getState()) }, 15000);
   }
 
   preload() {
@@ -121,7 +122,7 @@ export default class ZombieGameState extends TiledState {
     this.game.world.setBounds(-250, -250, 3200 + 250, 3200 + 250);
 
 		//Enemy Generator Initial
-	  enemyGeneratorInitial(this,  10);
+	  // enemyGeneratorInitial(this,  10);
 		console.log('enemy group', this.groups.enemies);
 
     // this.game = game;
@@ -154,27 +155,6 @@ export default class ZombieGameState extends TiledState {
 
     //Push all sprites in the world onto the child of the mapSpriteOverlay
 
-//TODO: Not sure which set is working
-// <<<<<<< HEAD
-//     //All prefabs created with a pushToOverlay = true
-//
-//     //maybe we can add a showInDarkness property and show things with that property
-//     // put on RPS< butset to true for currentPlayerSprite
-//     this.game.world.children.forEach((layer) => {
-//       // console.log('pushing this layer to overlay', layer);
-//       if (!layer.socketId || layer.socketId === socket.id){
-//         // console.log('layer has no socket id or its not player');
-//         if (typeof layer === 'player' || layer.socketId !== socket.id){
-//           // console.log('layer is type of player');
-//           return;
-//         }
-//         if (layer.pushToOverlay) {
-//           this.lighting.mapSprite.addChild(layer);
-//         }
-//       }
-//     });
-//     //Also push all remote players and their assets onto the lighting layer
-// =======
 		//This is lighting layers done manually
 	  //ADD ALL LIGHTING MANUALLY FOR NOW UNTIL FINAL GROUPS ARE SET
 		this.game.world.children.forEach((layer) => {
@@ -188,7 +168,6 @@ export default class ZombieGameState extends TiledState {
     this.groups.enemies.forEach( (enemy) => {
     	this.lighting.mapSprite.addChild(enemy);
     })
-// === end of cohen commit
 
 	  for (let key in remotePlayerSprites) {
 		  if (remotePlayerSprites.hasOwnProperty(key)) {
@@ -269,10 +248,10 @@ export default class ZombieGameState extends TiledState {
 
     //update zombies
     //move to one 'updateLocalZombies function'
-    this.logPreZombie();
+    // this.logPreZombie();
     R.forEach(updateLocalZombie, this.localZombieSpriteGroup.children);
     dispatchZombieUpdate();
-    this.logPostZombie();
+    // this.logPostZombie();
     updateRemoteZombies();
     //dispatch zombies
   }
@@ -588,16 +567,23 @@ export default class ZombieGameState extends TiledState {
   bulletHitZombie(zombie, bullet){
     bullet.kill();
     console.log("ZOMBIE HIT BY BULLET", zombie, bullet);
-    console.log('we need to dispatch an event to let others know');
-    if (zombie.ownerId === socket.id){
-      console.log('my zombie has been shot', zombie);
-      //TODO: update zombie stat
-    }
     if (bullet.shooterSocketId === socket.id){
       //TODO: dispatch event and let everyone know its been hit
+      //dispatch event and let everyone know its been hit
       console.log('i hit a zombie so I should let other people know ');
+      let eventId =  'shotZombie' + socket.id + zombieHitCount;
+      store.dispatch(dispatchZombieHitEvent({
+          zombieId: zombie.id,
+          damage: currentPlayerSprite.gun.damage,
+          shooterId: socket.id,
+          zombieOwnerId: zombie.ownerId
+      }, eventId));
+      zombieHitCount++;
+      this.killZombie(zombie);
     }
-    //TODO: move to separate function where zombies take damage and may die
+  }
+
+  killZombie(zombie){
     zombie.hit = true;
     zombie.animations.stop();
     zombie.animations.play('dead')
@@ -605,13 +591,7 @@ export default class ZombieGameState extends TiledState {
       zombie.kill();
     });
 
-    //TODO: if bullet shooterId = socket.id
-        //dispatch event and let everyone know its been hit
-            //if not your zombie, just play damage animation
-            //if you own the zombie thats been hit, you update its health for everyone
-    console.log("ZOMBZ", zombie.x, zombie.y);
-
-		const zX =  zombie.x;
+    const zX =  zombie.x;
 	  const zY =  zombie.y;
 
 	  let zombieDyingPrefab = this.createPrefab('zombieDead',
@@ -639,13 +619,12 @@ export default class ZombieGameState extends TiledState {
       return;
     } else if (bullet.parent.name === 'currentPlayerBulletGroup') {
       //TODO: add damage event
-
       let eventId = socket.id + playerDamageEventCount;
-
+      console.log('bullet hit player for X damage: ', currentPlayerSprite.gun.damage);
       //dmg was set to 10 before, now is it gun damage?
       self.currentPlayerSprite.playerDamageHash[eventId] = {
         damagedPlayerSocketId: player.socketId,
-        damage: player.gun.damage
+        damage: currentPlayerSprite.gun.damage
       }
       setTimeout(() => {
         delete self.currentPlayerSprite.playerDamageHash[eventId];
@@ -683,7 +662,7 @@ export default class ZombieGameState extends TiledState {
     // console.log(`this player will be hit for ${playerWhoDealtDamage}`, playerToDamage);
     playerToDamage.receiveDamage(playerWhoDealtDamage.gun.damage);
     if (playerToDamage.stats.health === 0) {
-      playerWhoDealtDamage.upgradeGun(self.currentPlayerSprite);
+      playerWhoDealtDamage.upgradeGun();
       playerToDamage.resetHealth();
       playerWhoDealtDamage.checkForRankUp(remotePlayerSprites);
     }
