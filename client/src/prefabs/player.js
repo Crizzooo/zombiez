@@ -31,6 +31,7 @@ export default class Player extends Prefab {
     this.body.collideWorldBounds = true;
     this.body.immovable = true;
     this.game.physics.arcade.enable(this);
+    this.name = properties.name;
     //flag for telling whether or not the player has won
     this.hasWon = false;
     //Setup player's gun
@@ -154,20 +155,30 @@ export default class Player extends Prefab {
   loadHealthbar() {
     //Health text, to be replaced by healthbar
     const style = {
-      font: "bold 16px Arial",
+      font: "9px Arial",
+      fill: "#FFF",
+      stroke: "#000",
+      strokeThickness: 3
+    };
+
+    const style2 = {
+      font: "11px Arial",
       fill: "#FFF",
       stroke: "#000",
       strokeThickness: 3
     };
 
     this.healthbar = this.game.add.text(
-      this.position.x - 10,
-      this.position.y - 10,
+      this.position.x - 12,
+      this.top - 15,
       this.stats.health, style);
 
-    //TODO: bullets collide with health?
-    //Add to existing
-    //this.gameState.add.existing(this.healthbar);
+    this.namebar = this.game.add.text(
+      this.position.x - 20,
+      this.top - 24,
+      this.name, style2
+    );
+
   }
 
   upgradeGun() {

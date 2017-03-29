@@ -87,7 +87,7 @@ export let handleInput = (player) => {
             player.reloadBar.frame = 22;
             player.reloadBar.tint = 0x00FF7F;
             player.reloadBar.alpha = 0;
-            tween = player.game.add.tween(player.reloadBar).to( { alpha: 1 }, 200, Phaser.Easing.Linear.None, true, 0, 500, true);
+            tween = player.game.add.tween(player.reloadBar).to( { alpha: 1 }, 250, Phaser.Easing.Linear.None, true, 0, 500, true);
             console.log('gun dmg pre AR: ', player.gun.damage);
             player.gun.damage += 10;
             console.log('gun dmg post AR: ', player.gun.damage);
@@ -96,7 +96,7 @@ export let handleInput = (player) => {
               player.reloadBar.tint = 0xffffff;
               console.log('gun dmg pre AR finish: ', player.gun.damage);
               player.gun.damage -= 10;
-              console.log('gun dmg post AR finish: ', player.gun.damage);  
+              console.log('gun dmg post AR finish: ', player.gun.damage);
               tween.stop();
               player.reloadBar.alpha = 1;
               player.reloadingAnim.complete();
@@ -108,7 +108,7 @@ export let handleInput = (player) => {
             player.reloadBar.tint = 0xFF0000;
             player.gun.isJammed = true;
             player.reloadBar.alpha = 0;
-            tween = player.game.add.tween(player.reloadBar).to( { alpha: 1 }, 200, Phaser.Easing.Linear.None, true, 0, 500, true);
+            tween = player.game.add.tween(player.reloadBar).to( { alpha: 1 }, 250, Phaser.Easing.Linear.None, true, 0, 500, true);
             let jamInterval = setTimeout(() => {
               tween.stop();
               player.reloadBar.alpha = 1;

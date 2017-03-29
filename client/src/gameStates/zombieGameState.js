@@ -177,6 +177,7 @@ export default class ZombieGameState extends TiledState {
 			  this.lighting.mapSprite.addChild(remotePlayerSprites[key])
 			  this.lighting.mapSprite.addChild(remotePlayerSprites[key].healthbar)
 			  this.lighting.mapSprite.addChild(remotePlayerSprites[key].gun)
+        this.lighting.mapSprite.addChild(remotePlayerSprites[key].namebar)
 		  }
 	  }
 
@@ -281,6 +282,7 @@ export default class ZombieGameState extends TiledState {
             group: 'player',
             initial: 18,
             texture: 'playerSpriteSheet',
+            name: currentPlayer.name,
             socketId: socket.id
           },
         }, {x: 225, y: 225}); //change to new location from server
@@ -529,6 +531,7 @@ export default class ZombieGameState extends TiledState {
             group: 'player',
             initial: 18,
             texture: 'playerSpriteSheet',
+            name: playerState.name,
             socketId: playerState.socketId
           },
         }, {x: playerState.x, y: playerState.y});
