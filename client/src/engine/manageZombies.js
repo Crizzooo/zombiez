@@ -125,7 +125,18 @@ export function handleRemoteZombie(zombie, zombieId){
   let zombieToUpdate = remoteZombieSprites[clientId][zombieId];
   if (!zombieToUpdate){
     // console.log('no zombie to update, we shall create him!');
-    createRemoteZombie(zombie, clientId, zombieId);
+    console.log(remoteZombieSprites);
+    let newZombie = gameState.remoteZombieSpriteGroup.getFirstExists(false);
+    if (!newZombie){
+      console.log('have to create a new zombie')
+      createRemoteZombie(zombie, clientId, zombieId);
+    } else {
+      newZombie.x = zombie.x;
+      newZombie.y = zombie.y;
+      newZombie.health = zombie.health;
+      newZombie.dir = zombie.dir;
+      remoteZombieSprites[clientId][zombieId] = newZombie;
+    }
   } else {
     // console.log('heres the zombie we update, ', zombieToUpdate);
     zombieToUpdate.x = zombie.x;
@@ -134,13 +145,4 @@ export function handleRemoteZombie(zombie, zombieId){
     zombieToUpdate.dir = zombie.dir;
     // zombieToUpdate.frame = zombie.frame;
   }
-  // console.log('updating this zombie: ', zombie);
-  // if(!remoteZombieSprites[zombieId]){
-  //   console.log('no zombie sprite, need to create');
-  //   console.log('creating zombie for: ', zombieId);
-  //   remoteZombieSprites[zombieId] = 'we have this zombiee!';
-  //   console.log('RZS after adding: ', remoteZombieSprites);
-  // }
-  // console.log('handling zombieID: ', zombieId);
-  // console.log('handling zombie: ', zombie);
 }

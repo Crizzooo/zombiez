@@ -11,8 +11,6 @@ export const updateLocalZombies = zombieStates => ({ type: UPDATE_LOCAL_ZOMBIES,
 export const updateRemoteZombies = serverZombieStates => ({ type: UPDATE_REMOTE_ZOMBIES, serverZombieStates});
 // export const updateRemoteZombies =
 
-//add localZombie
-
 
 //Note: addPlayer can probably be removed from file but will keep for now in case we change structure
 const initialState = {
@@ -24,9 +22,7 @@ const initialState = {
   }
 };
 
-//NOTE: Up next - dispatch zombies to server, and receive zombies from clients to update remote store
-//NOTE: then update remote zomvie sprites based on the store
-//NOTE: create any zombies you dont have!
+//NOTE: create action creators to create events and attach them
 
 /* Reducer */
 export default (state = initialState, action) => {
@@ -43,15 +39,9 @@ export default (state = initialState, action) => {
       break;
 
     case UPDATE_REMOTE_ZOMBIES:
-      // console.log('received action: ', action);
-      // console.dir(action.serverZombieStates, {depth: 3});
-      // console.log('old zombies from server: ', state.remote);
       let newRemoteZombies = Object.assign({}, action.serverZombieStates);
       newState.remote = newRemoteZombies;
-      // console.log(' new zombies from server: ', newState.remote);
       break;
-
-
 
     default:
       return state;

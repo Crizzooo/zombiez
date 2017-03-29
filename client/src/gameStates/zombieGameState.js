@@ -529,11 +529,14 @@ export default class ZombieGameState extends TiledState {
     console.log("ZOMBIE HIT BY BULLET", zombie, bullet);
     console.log('we need to dispatch an event to let others know');
     if (zombie.ownerId === socket.id){
-      console.log('i have shot my own zombie son :(', zombie);
+      console.log('my zombie has been shot', zombie);
+      //TODO: update zombie stat
     }
     if (bullet.shooterSocketId === socket.id){
+      //TODO: dispatch event and let everyone know its been hit
       console.log('i hit a zombie so I should let other people know ');
     }
+    //TODO: move to separate function where zombies take damage and may die
     zombie.hit = true;
     zombie.animations.stop();
     zombie.animations.play('dead')
@@ -549,18 +552,11 @@ export default class ZombieGameState extends TiledState {
 
 
   bulletHitPlayer(player, bullet){
-      // console.log('bullet hit player');
-      // console.log('bullet: ', bullet );
-      // console.log('hit player: ', player);
       if (bullet.shooterSocketId === player.socketId){
         console.log('cant damage self');
         return;
       } else if (bullet.parent.name === 'currentPlayerBulletGroup'){
-        //TODO: add damage event
-        // console.log('This is me:', self.currentPlayerSprite);
-        // console.log('&& this is my gun: ', self.currentPlayerSprite);
-        // console.log('I hit player: ', player);
-
+        //add damage event
         let eventId = socket.id + playerDamageEventCount;
 
 
@@ -573,28 +569,17 @@ export default class ZombieGameState extends TiledState {
           delete self.currentPlayerSprite.playerDamageHash[eventId];
         }, EVENT_LOOP_DELETE_TIME);
 
-        // console.log('the event Im creating: ', self.currentPlayerSprite.playerDamageHash);
-
         //get the remote player sprite and invoke its damage function
         this.handlePlayerDamage(player.socketId, self.currentPlayerSprite.gun.damage);
+
         //increment playerDamageCount
         playerDamageEventCount++;
-
-      } else if (bullet.parent.name === 'remotePlayerBulletGroup') {
-        if (player.socketId === socket.id){
-          // console.log(' I GOT HIT');
-        } else {
-          // console.log('eh someone else hit someone');
-        }
       }
       bullet.kill();
   }
 
   //TODO: I can probably scrap this function and just use the other one
   handlePlayerDamage(playerSocketId, dmgToTake){
-    // console.log('handle player damage');
-    // console.log('RPS in HPD: ', remotePlayerSprites);
-    // console.log('looking for: ', playerSocketId);
     let playerToDamage = remotePlayerSprites[playerSocketId];
     if (!playerToDamage){
       if (playerSocketId === socket.id){
@@ -603,7 +588,6 @@ export default class ZombieGameState extends TiledState {
       }
       console.error('player not found');
     }
-    // console.log(`this player will be hit for ${dmgToTake}`, playerToDamage);
     playerToDamage.receiveDamage(dmgToTake);
   }
 
@@ -635,7 +619,6 @@ export default class ZombieGameState extends TiledState {
       console.error('could not find the id of the player to take damage from event: ', damageEvent);
     }
     //if key is not in our hash map)
-    // console.log('pre damage: ', playerToDamage.stats.health);
     if (this.playerDamageHash[damageEventId] !== true){
       playerToDamage.receiveDamage(damageEvent.damage);
       this.playerDamageHash[damageEventId] = true;
@@ -644,7 +627,6 @@ export default class ZombieGameState extends TiledState {
         delete this.playerDamageHash[damageEventId];
       }, EVENT_LOOP_DELETE_TIME * 1.5);
     }
-    // console.log('post damage: ', playerToDamage.stats.health);
     // we make the timeout a little longer than how long the client emits for, in case we
     // getState a delayed server update after weve cleared our bullet process
     // we do not want to process the bullet again

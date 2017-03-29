@@ -85,7 +85,7 @@ export default class Gun extends GunPrefab {
 
       setTimeout( () => {
         delete this.game.currentPlayerSprite.bulletHash[bulletId];
-    }, EVENT_LOOP_DELETE_TIME)
+      }, EVENT_LOOP_DELETE_TIME)
       // store.dispatch(playerFired(player.pointerX, player.pointerY, socket.id, bulletId));
       //Change bullet ui for current player
       player.clipUpdate();
@@ -98,8 +98,6 @@ export default class Gun extends GunPrefab {
       if (perc > 1) this.playSound(player,'heavyPistol',1);
       else if(perc <= 0);
       else this.playSound(player,'heavyPistol',perc);
-      //Render the bullet for the remote player
-      // console.log('remote player just fired!');
     }
   }
 
