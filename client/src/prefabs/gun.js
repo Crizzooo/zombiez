@@ -116,11 +116,7 @@ export default class Gun extends GunPrefab {
       //if active reloaded do something
       if (this.activeReloaded){
         //take off activeReloaded
-        console.log('active reload finished');
         this.activeReloaded = false;
-        // this.game.currentPlayerSprite.reloadBar.visible = false;
-        // this.game.currentPlayerSprite.reloadBar.tint = 0xffffff;
-        // this.game.currentPlayerSprite.reloadBar.animations.stop();
         this.game.currentPlayerSprite.reloadBar.visible = false;
         this.game.currentPlayerSprite.reloadBar.tint = 0xffffff;
         // this.game.currentPlayerSprite.reloadBar.animations.stop();
@@ -130,44 +126,17 @@ export default class Gun extends GunPrefab {
         this.game.currentPlayerSprite.clipUpdate();
         this.isJammed = false;
         this.isReloading = false;
-         console.log('jammed reload finished');
         //update clip to full
         this.game.currentPlayerSprite.reloadBar.visible = false;
         this.game.currentPlayerSprite.reloadBar.tint = 0xffffff;
-        // this.game.currentPlayerSprite.reloadBar.animations.stop();
       } else {
         //let the reload finish
         this.ammo = this.clip;
         this.game.currentPlayerSprite.clipUpdate();
         this.isReloading = false;
-        console.log('reload finished');
         this.game.currentPlayerSprite.reloadBar.visible = false;
         this.game.currentPlayerSprite.reloadBar.tint = 0xffffff;
-        // this.game.currentPlayerSprite.reloadBar.animations.stop();
       }
-      // this.game.currentPlayerSprite.reloadingAnim.destroy();
-      // this.game.currentPlayerSprite.reloadBar.visible = false;
-      // this.game.currentPlayerSprite.reloadBar.tint = 0xffffff;
-      // this.game.currentPlayerSprite.reloadBar.animations.stop();
-      console.log('anim completed');
     });
-    // this.reloadInterval = setTimeout(() => {
-    //   if (this.activeReloaded === true){
-    //     this.activeReloaded = false;
-    //     return;
-    //   }
-    //   this.ammo = this.clip;
-    //   this.isReloading = false;
-    //   this.game.currentPlayerSprite.clipUpdate();
-    //   clearInterval(reloadInterval);
-    //   if (this.isJammed) {
-    //     this.isJammed = false;
-    //     this.reloadSpeed = 2000;
-    //     player.reloadBar.tint = 0xffffff;
-    //     player.reloadBar.animations.resume = true;
-    //     player.reloadBar.visible = false;
-    //     player.reloadBar.animations.stop();
-    //   }
-    // }, this.reloadSpeed)
   }
 }

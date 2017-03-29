@@ -77,55 +77,37 @@ export let handleInput = (player) => {
           // player.reloadTween.start();
           // player.reloadBar.animations.play('playReload');
           if(cursors.reload.justPressed() && (player.reloadBar.frame < 24 && player.reloadBar.frame > 20)){
-            console.log("ACTIVE RELOAD ACTIVATED");
             player.gun.isReloading = false;
             player.gun.activeReloaded = true;
             player.gun.ammo = player.gun.clip
             player.clipUpdate();
             player.reloadBar.frame = 22;
             player.reloadBar.tint = 0x00FF7F;
-            // player.reloadBar.animations.paused = true;
             player.reloadBar.alpha = 0;
             tween = player.game.add.tween(player.reloadBar).to( { alpha: 1 }, 200, Phaser.Easing.Linear.None, true, 0, 500, true);
             player.gun.damage += 10;
             player.reloadBar.animations.paused = true;
-            console.log('pauseing for AR interval');
             let activeInterval = setTimeout(() => {
-              console.log('THIS AR SHOULD FINISH BEFORE ANIM');
               player.reloadBar.tint = 0xffffff;
               player.gun.damage -= 10;
               tween.stop();
               player.reloadBar.alpha = 1;
-              // player.reloadBar.visible = false;
-              // player.reloadBar.animations.paused = false;
-              // player.gun.activeReloaded = false;
               player.reloadingAnim.complete();
               clearInterval(activeInterval);
             }, 2500)
           } else if(cursors.reload.justPressed() && (player.reloadBar.frame >= 24 || player.reloadBar.frame <= 20)) {
-            console.log("YOU MISSED IT");
             player.reloadBar.animations.paused = true;
             player.reloadBar.tint = 0xFF0000;
-            // player.reloadBar.animations.stop();
-            // let jamTime = player.gun.reloadSpeed + 3000;s
             player.gun.isJammed = true;
             player.reloadBar.alpha = 0;
             tween = player.game.add.tween(player.reloadBar).to( { alpha: 1 }, 200, Phaser.Easing.Linear.None, true, 0, 500, true);
-            console.log('starting tween...');
             let jamInterval = setTimeout(() => {
-              console.log('unpausing jam anim: ')
               tween.stop();
               player.reloadBar.alpha = 1;
               // player.reloadBar.animations.paused = false;
               player.reloadingAnim.complete();
               clearInterval(jamInterval); }, 3500)
         }
-        // } else if (tween){
-        //   // player.reloadBar.visible = false;
-        //   // player.reloadBar.animations.stop();
-        //   tween.stop();
-        //   player.reloadBar.alpha = 1;
-        // }
     } else if (cursors.reload.isDown && player.gun.ammo !== player.gun.clip){
       player.gun.reloadGun();
     }
