@@ -168,10 +168,10 @@ export default class Player extends Prefab {
     //this.gameState.add.existing(this.healthbar);
   }
 
-  upgradeGun(player) {
-    player.currentGunLevel++;
-    //console.log("INSIDE OF LOAD GUN!!", player);
-    switch (player.currentGunLevel) {
+  upgradeGun() {
+    this.currentGunLevel++;
+    //console.log("INSIDE OF LOAD GUN!!", this);
+    switch (this.currentGunLevel) {
       case 1:
         this.gun.frame = 8;
         this.gunUiFrame.gunSprite.frame = 8;
@@ -189,8 +189,8 @@ export default class Player extends Prefab {
         break;
     }
 
-    console.log('should be emitting gun to the back end with ',player.currentGunLevel);
-    socket.emit('upgradeGun', player.currentGunLevel);
+    console.log('should be emitting gun to the back end with ',this.currentGunLevel);
+    socket.emit('upgradeGun', this.currentGunLevel);
   }
 
   loadHearts() {
