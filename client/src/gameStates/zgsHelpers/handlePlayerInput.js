@@ -237,6 +237,11 @@ export function tweenCurrentPlayerAssets(player, context) {
 		y: player.y
 	}, 10, Phaser.Easing.Linear.None, true);
 
+  // context.add.tween(player.reloadBar).to({
+  //   x: player.x,
+  //   y: player.top - 50
+  // }, 10, Phaser.Easing.Linear.None, true);
+
 	//Gun rotation tween
  player.gun.rotation = context.game.physics.arcade.angleToPointer(player.gun);
 }

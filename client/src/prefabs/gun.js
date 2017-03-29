@@ -108,9 +108,7 @@ export default class Gun extends GunPrefab {
     // console.log(this);
     // console.dir(this.game.currentPlayerSprite, { depth: 3 });
     // console.log(this.game.currentPlayerSprite.reloadBar);
-    console.log('CPS.reloading', this.game.currentPlayerSprite.reloadingAnim);
     this.game.currentPlayerSprite.reloadingAnim = this.game.currentPlayerSprite.reloadBar.animations.play('playReload');
-    console.log('CPS.reloading after', this.game.currentPlayerSprite.reloadingAnim);
 
     this.game.currentPlayerSprite.reloadingAnim.onComplete.addOnce( () => {
       //if active reloaded do something
