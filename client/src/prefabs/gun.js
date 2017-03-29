@@ -48,7 +48,7 @@ export default class Gun extends GunPrefab {
         return null;
       } else if (this.ammo === 0 && !this.isReloading){
         this.reloadGun();
-        this.playSound(player, 'pistolReload', 1);
+        if (player.socketId === socket.id)  this.playSound(player, 'pistolReload', 1);
       }
       return;
     }

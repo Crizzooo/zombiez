@@ -22,7 +22,7 @@ export let handleInput = (player) => {
     const textInput = document.getElementById("createMessage");
     const gameDiv = document.getElementById("game");
 
-    if (cursors.esc.justPressed()) {
+    if(cursors.esc.justPressed()){
       document.getElementsByClassName("container")[0].style.visibility = "hidden";
       textInput.blur();
       gameDiv.focus();
@@ -54,7 +54,6 @@ export let handleInput = (player) => {
       }
     }
     else{
-
       player.pointerX = player.game.input.mousePointer.worldX;
       player.pointerY = player.game.input.mousePointer.worldY;
 
@@ -72,6 +71,7 @@ export let handleInput = (player) => {
         player.gun.shoot(player);
       }
 
+<<<<<<< HEAD
       if(player.gun.isReloading && !player.gun.isJammed){
           player.reloadBar.visible = true;
           // player.reloadTween.start();
