@@ -29,9 +29,7 @@ export let handleInput = (player) => {
       ZG.game.isInChat = true;
     }
 
-    console.log('is it in chat', ZG.game.isInChat)
     if (ZG.game.isInChat) {
-      console.log('WHAT IS THIS', cursors.down)
       if (cursors.down.justPressed()) {
         logWASD('s');
       }

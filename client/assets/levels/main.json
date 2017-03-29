@@ -109,7 +109,9 @@
     "enemies",
     "bullets",
     "guns",
-    "ui"
+    "ui",
+    "localZombieSpriteGroup",
+    "remoteZombieSpriteGroup"
   ],
   "map": {
     "key": "levelTilemap",

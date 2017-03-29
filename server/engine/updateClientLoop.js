@@ -9,6 +9,7 @@ const resetEngine = require('../reducers/engine.js').resetEngine;
 const resetLobby = require('../reducers/lobby.js').resetLobby;
 const playerReducer = require('../reducers/players.js');
  const PLAYER_HEALTH = require('../../client/src/engine/gameConstants.js').PLAYER_HEALTH;
+const {addPlayerToZombieSprites, resetZombies} = require('../reducers/zombies.js');
 
 
 const SERVER_UPDATE_RATE = 1000 / 30;
@@ -61,8 +62,9 @@ const startGame = (ioFromSocketsFile) => {
   console.log('here are the players that were converted: ', players);
     //put on backend state
   players.forEach( (player) => {
-    console.log('adding player to player store: ', player);
     store.dispatch(addPlayer(player));
+    //initialize object to hold this players zombies in zombie state
+    store.dispatch(addPlayerToZombieSprites(player.socketId));
   })
 
   state = store.getState();
@@ -84,6 +86,8 @@ const endGame = () => {
   store.dispatch(resetEngine());
   //reset lobby
   store.dispatch(resetLobby());
+  //reset zombies
+  store.dispatch(resetZombies());
 
   //tell players they can join lobby and play game again
   io.emit('gamePlayingUpdate', false);
@@ -98,6 +102,10 @@ const endGame = () => {
 const broadcastGameState = (io) => {
   broadcastInterval = setInterval(() => {
     let state = store.getState();
+    // console.log('dispatching state: ', state);
+    if (state.zombies){
+      console.log('got zombies: ', state.zombies);
+    }
 
     //TODO: check if win condition is hit and endgame
     if (state.lobby.lobbyers.length <= 0) {

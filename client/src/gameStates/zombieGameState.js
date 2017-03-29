@@ -1,3 +1,4 @@
+/*global remotePlayerSprites*/
 const R = require('ramda');
 import _ from 'lodash';
 const throttle = require('lodash.throttle');
@@ -16,6 +17,8 @@ import { handleInput, tweenCurrentPlayerAssets } from './zgsHelpers/handlePlayer
 import handleRemoteAnimation, { tweenRemoteAssets } from './zgsHelpers/handleRemoteAnimation';
 import { enemyGeneratorInitial, enemyGenerator } from './zgsHelpers/enemyGenerator';
 import {PLAYER_HEALTH, EVENT_LOOP_DELETE_TIME, STARTING_BULLET_SPEED} from '../engine/gameConstants.js';
+
+ import { localZombieSprites, remoteZombieSprites, initializeZombies, createLocalZombie, updateLocalZombie, dispatchZombieUpdate, updateRemoteZombies } from '../engine/manageZombies.js';
 
 //TODO: do we need this?
 // currentPlayerSprite and remotePlayerSprites are on global window
@@ -61,6 +64,9 @@ export default class ZombieGameState extends TiledState {
     //Sockets
     socket.on('destroyCurrentPlayerSprite', this.destroyCurrentPlayerSprite);
     socket.on('playerLeaveGame', this.handleRemotePlayerLeave);
+
+    this.logPreZombie = throttle( () => { console.log('pre Zombie update',  store.getState()) }, 15000);
+    this.logPostZombie = throttle( () => { console.log('post Zombie update', store.getState()) }, 15000);
   }
 
   preload() {
@@ -105,35 +111,6 @@ export default class ZombieGameState extends TiledState {
     //This creates player prefab
     this.loadLevel();
 
-    ///////////TODO: WIP
-    let enemyPrefab = this.createPrefab('zombie',
-      {
-        type: 'enemies',
-        properties: {
-          group: 'enemies',
-          initial: 9,
-          texture: 'zombieSpriteSheet'
-        }
-      }, {x: 200, y: 200});
-
-    // let reloadBar = this.createPrefab('reloadBar', {
-    //   type: 'guns',
-    //   properties: {
-    //     group: 'guns',
-    //     initial: 0,
-    //     texture: 'reloadBarSpriteSheet'
-    //   }
-    // }, {x: this.currentPlayerSprite.world.x, y: this.currentPlayerSprite.world.y + 10});
-
-    // this.reloadBar = reloadBar;
-    this.currentEnemy = enemyPrefab;
-    this.currentEnemy.moveTo = throttle(this.currentEnemy.moveTo, 1000);
-    this.currentEnemy.animations.play('left');
-
-    this.enemyGroup = this.game.add.group();
-    this.enemyGroup.name = 'enemySpriteGroup';
-    this.enemyGroup.add(enemyPrefab);
-
     //Remote Player Movement
     //This gets us the first player from the remote players
     console.log('this is remote player sprites', remotePlayerSprites);
@@ -175,6 +152,28 @@ export default class ZombieGameState extends TiledState {
     }
 
     //Push all sprites in the world onto the child of the mapSpriteOverlay
+
+//TODO: Not sure which set is working
+// <<<<<<< HEAD
+//     //All prefabs created with a pushToOverlay = true
+//
+//     //maybe we can add a showInDarkness property and show things with that property
+//     // put on RPS< butset to true for currentPlayerSprite
+//     this.game.world.children.forEach((layer) => {
+//       // console.log('pushing this layer to overlay', layer);
+//       if (!layer.socketId || layer.socketId === socket.id){
+//         // console.log('layer has no socket id or its not player');
+//         if (typeof layer === 'player' || layer.socketId !== socket.id){
+//           // console.log('layer is type of player');
+//           return;
+//         }
+//         if (layer.pushToOverlay) {
+//           this.lighting.mapSprite.addChild(layer);
+//         }
+//       }
+//     });
+//     //Also push all remote players and their assets onto the lighting layer
+// =======
 		//This is lighting layers done manually
 	  //ADD ALL LIGHTING MANUALLY FOR NOW UNTIL FINAL GROUPS ARE SET
 		this.game.world.children.forEach((layer) => {
@@ -188,6 +187,7 @@ export default class ZombieGameState extends TiledState {
     this.groups.enemies.forEach( (enemy) => {
     	this.lighting.mapSprite.addChild(enemy);
     })
+// === end of cohen commit
 
 	  for (let key in remotePlayerSprites) {
 		  if (remotePlayerSprites.hasOwnProperty(key)) {
@@ -200,6 +200,15 @@ export default class ZombieGameState extends TiledState {
 
     //background music
     this.soundLoop.play();
+	  for (let key in remotePlayerSprites) {
+	    if (remotePlayerSprites.hasOwnProperty(key)) {
+	      this.lighting.mapSprite.addChild(remotePlayerSprites[key])
+		    this.lighting.mapSprite.addChild(remotePlayerSprites[key].healthbar)
+      }
+    }
+
+    this.localZombieSpriteGroup = this.groups.localZombieSpriteGroup;
+    this.remoteZombieSpriteGroup = this.groups.remoteZombieSpriteGroup;
 	  console.log('this is game world', this.game.world)
 	  console.log('this is groups', this.groups)
 
@@ -253,6 +262,15 @@ export default class ZombieGameState extends TiledState {
       // this.throttledUpdateRemotePlayers();
       this.updateRemotePlayers();
     }
+
+    //update zombies
+    //move to one 'updateLocalZombies function'
+    this.logPreZombie();
+    R.forEach(updateLocalZombie, this.localZombieSpriteGroup.children);
+    dispatchZombieUpdate();
+    this.logPostZombie();
+    updateRemoteZombies();
+    //dispatch zombies
   }
 
   render() {
@@ -273,7 +291,7 @@ export default class ZombieGameState extends TiledState {
       currentPlayer = state.players.currentPlayer;
 
       //TODO: make server assign sprite keys
-      let currentPlayerSprite = this.createPrefab(currentPlayer.name,
+      currentPlayerSprite = this.createPrefab(currentPlayer.name,
         {
           type: 'player',
           properties: {
@@ -347,6 +365,13 @@ export default class ZombieGameState extends TiledState {
     R.forEachObjIndexed(this.createRemotePlayerSprite, state.players.playerStates);
 
     console.log('our remote player sprite group: ', this.remotePlayerSpriteGroup.length);
+    console.dir(this.remotePlayerSpriteGroup);
+
+    console.log('initializing zombies....')
+    initializeZombies(this);
+    createLocalZombie(this, 200, 200);
+    createLocalZombie(this, 220, 220);
+
   }
 
   updateCollisions () {
@@ -374,12 +399,28 @@ export default class ZombieGameState extends TiledState {
     //this works
     this.game.physics.arcade.collide(this.remotePlayerSpriteGroup, this.remotePlayerBulletGroup, this.bulletHitPlayer, null, this);
 
+
+    //check collisions on  localZombies which will despatch event objects
     //CP Bullets & ZombieGameState
-    this.game.physics.arcade.collide(this.enemyGroup, this.currentPlayerBulletGroup, this.bulletHitZombie, null, this);
+    // this.game.physics.arcade.collide(this.enemyGroup, this.currentPlayerBulletGroup,  this.bulletHitZombie, null, this);
+
+    //check collisions on remoteZombies and kill the bullets
 
     //RP Bullets & Zombiez
-    this.game.physics.arcade.collide(this.enemyGroup, this.remotePlayerBulletGroup, this.bulletHitZombie, null, this);
+    // this.game.physics.arcade.collide(this.enemyGroup, this.remotePlayerBulletGroup,  this.bulletHitZombie, null, this);
 
+
+    //if current player hits a local or a remote zombie, they should dispatch an event
+
+    //collision for CPS bullets on localZombies (dispatchEvent)
+    this.game.physics.arcade.collide(this.localZombieSpriteGroup, this.currentPlayerBulletGroup, this.bulletHitZombie, null, this);
+    //collision for CPS bullets on remoteZombies (dispatchEvent)
+    this.game.physics.arcade.collide(this.remoteZombieSpriteGroup, this.remotePlayerBulletGroup, this.bulletHitZombie, null, this);
+
+    //collision for RPS bullets on localZombies
+    this.game.physics.arcade.collide(this.localZombieSpriteGroup, this.remotePlayerBulletGroup, this.bulletHitZombie, null, this);
+    //collision for RPS bullets on remoteZombies
+    this.game.physics.arcade.collide(this.remoteZombieSpriteGroup, this.remotePlayerBulletGroup, this.bulletHitZombie, null, this);
   }
 
   dispatchCurrentPlayer() {
@@ -433,7 +474,7 @@ export default class ZombieGameState extends TiledState {
       // playerToUpdate.gun.rotation = playerState.gunRotation;
       playerToUpdate.pointer.x = playerToUpdate.pointerX;
       playerToUpdate.pointer.y = playerToUpdate.pointerY;
-      // console.log('After updating RPS: ', playerState.gunRotation);
+      // console.log('After updating RPS: ', playerToUpdate.gunRotation);
 
       if (playerState.bulletHash && Object.keys(playerState.bulletHash).length > 0) {
         // console.dir(this.bulletHash)
@@ -520,7 +561,7 @@ export default class ZombieGameState extends TiledState {
       this.remotePlayerSpriteGroup.children.push(playerPrefab);
       console.log('RPSG in create remotePlayerSprites ', this.remotePlayerSpriteGroup);
       remotePlayerSprites[playerState.socketId] = playerPrefab;
-      console.dir(playerPrefab, { depth: 4});
+      remoteZombieSprites[playerState.socketId] = {};
     }
   }
 
@@ -539,15 +580,35 @@ export default class ZombieGameState extends TiledState {
     bullet.kill();
   }
 
+  //NOTE: I have may messed this merge up.... pls check
   bulletHitZombie(zombie, bullet){
+    bullet.kill();
+    console.log("ZOMBIE HIT BY BULLET", zombie, bullet);
+    console.log('we need to dispatch an event to let others know');
+    if (zombie.ownerId === socket.id){
+      console.log('my zombie has been shot', zombie);
+      //TODO: update zombie stat
+    }
+    if (bullet.shooterSocketId === socket.id){
+      //TODO: dispatch event and let everyone know its been hit
+      console.log('i hit a zombie so I should let other people know ');
+    }
+    //TODO: move to separate function where zombies take damage and may die
+    zombie.hit = true;
+    zombie.animations.stop();
+    zombie.animations.play('dead')
+    zombie.animations.currentAnim.onComplete.add( () => {
+      zombie.kill();
+    });
+
+    //TODO: if bullet shooterId = socket.id
+        //dispatch event and let everyone know its been hit
+            //if not your zombie, just play damage animation
+            //if you own the zombie thats been hit, you update its health for everyone
     console.log("ZOMBZ", zombie.x, zombie.y);
 
 		const zX =  zombie.x;
 	  const zY =  zombie.y;
-
-	  zombie.hit = true;
-	  bullet.kill();
-	  zombie.kill();
 
 	  let zombieDyingPrefab = this.createPrefab('zombieDead',
 		  {
@@ -569,24 +630,18 @@ export default class ZombieGameState extends TiledState {
 
   bulletHitPlayer(player, bullet) {
     bullet.kill();
-    // console.log('bullet hit player');
-    // console.log('bullet: ', bullet );
-    // console.log('hit player: ', player);
     if (bullet.shooterSocketId === player.socketId) {
       console.log('cant damage self');
       return;
     } else if (bullet.parent.name === 'currentPlayerBulletGroup') {
       //TODO: add damage event
-      // console.log('This is me:', self.currentPlayerSprite);
-      // console.log('&& this is my gun: ', self.currentPlayerSprite);
-      // console.log('I hit player: ', player);
 
       let eventId = socket.id + playerDamageEventCount;
 
-
+      //dmg was set to 10 before, now is it gun damage?
       self.currentPlayerSprite.playerDamageHash[eventId] = {
         damagedPlayerSocketId: player.socketId,
-        damage: 10
+        damage: player.gun.damage
       }
       setTimeout(() => {
         delete self.currentPlayerSprite.playerDamageHash[eventId];
@@ -608,7 +663,7 @@ export default class ZombieGameState extends TiledState {
     }
   }
 
-  //TODO: I can probably scrap this function and just use the other one
+
   handlePlayerDamage(playerSocketId, playerWhoDealtDamage) {
     // console.log('handle player damage');
     // console.log('RPS in HPD: ', remotePlayerSprites);
@@ -658,8 +713,7 @@ export default class ZombieGameState extends TiledState {
       console.error('could not find the id of the player to take damage from event: ', damageEvent);
     }
     //if key is not in our hash map)
-    // console.log('pre damage: ', playerToDamage.stats.health);
-    if (this.playerDamageHash[damageEventId] !== true) {
+    if (this.playerDamageHash[damageEventId] !== true){
       playerToDamage.receiveDamage(damageEvent.damage);
       this.playerDamageHash[damageEventId] = true;
       //set a timeout to remove it from hashmap after the client has taken it off their event loop
@@ -667,7 +721,6 @@ export default class ZombieGameState extends TiledState {
         delete this.playerDamageHash[damageEventId];
       }, EVENT_LOOP_DELETE_TIME * 1.5);
     }
-    // console.log('post damage: ', playerToDamage.stats.health);
     // we make the timeout a little longer than how long the client emits for, in case we
     // getState a delayed server update after weve cleared our bullet process
     // we do not want to process the bullet again
