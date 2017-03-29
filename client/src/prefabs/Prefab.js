@@ -12,13 +12,24 @@ export default class Prefab extends Phaser.Sprite {
 		//Add prefab to its group
 		//Set smoothed to false for crisp pixel rendering
 		//this.gameState.groups[properties.group].add(this);
-		(properties.group ? this.gameState.groups[properties.group].children.push(this) : null);
+		// this.gameState.groups[properties.group].add(this);
+		console.log('game', game);
+		console.log('this', this);
+		console.log('gameState', this.gameState);
+		console.log('properties', properties);
+		console.log('properties.group', properties.group);
+
+		if (properties.group) {
+			this.gameState.groups[properties.group].children.push(this);
+		}
+
 		this.initial = +properties.initial;
 		this.smoothed = false;
 
 		//Add all as children of lighting sprite
 		this.gameState.add.existing(this);
 
+		//TODO: final word from charlie on this?
 		//Push all prefabs to the mapSprite lighting overlay
 		// this.pushToOverlay = true;
 

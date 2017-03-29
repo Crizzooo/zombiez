@@ -11,6 +11,7 @@ const store = require('./store.js');
 //Store Dispatchers
 const {receiveJoinLobby, receiveLobbyerLeave} = require('./reducers/lobby.js');
 const {updatePlayer, removePlayer} = require('./reducers/players.js');
+const {updateZombiesFromClient} = require('./reducers/zombies.js');
 
 //Import helper functions
 const startGame = require('./engine/updateClientLoop.js').startGame;
@@ -88,59 +89,17 @@ io.on('connection', (socket) => {
     startGame(io);
   });
 
-// <<<<<<< HEAD
-//   const throttledStateChange = throttle(emitStateChange, 32);
-//
-// //No longer creating the player in the front end, so we no longer use this
-//
-//
-// //revisit below socket methods
-//   socket.on('getPlayers', () => {
-//     //emiting player.state
-//     console.log("server heard 'getPlayers' ");
-//     socket.emit('playerUpdate', players);
-//   })
-//
-//   socket.on('endGame', (player) => {
-//     socket.broadcast.emit('gameOver', player)
-//   })
-//
-//
-//   socket.on('playerMoving', (playerObj) => {
-//     console.log('looking for ', playerObj);
-//     console.log('in ', players);
-//     var indexToUpdate = findPlayer(playerObj.socketId);
-//     console.log('findPlayer id:', indexToUpdate);
-//
-//     console.log('does server make it here')
-//     var movingPlayer = players[indexToUpdate];
-//     if (!movingPlayer) {
-//       return;
-//     }
-//     console.log('WHAT ABOUT HERE');
-//     movingPlayer.x = playerObj.x;
-//     movingPlayer.y = playerObj.y;
-//     movingPlayer.velocityY = playerObj.velocityY;
-//     movingPlayer.velocityX = playerObj.velocityX;
-//     movingPlayer.dir = playerObj.dir;
-//     movingPlayer.socketId = playerObj.socketId;
-//     movingPlayer.hasMoved = true;
-//     console.log('sending updated player:', players[indexToUpdate]);
-//     // emitStateChange();
-//     throttledStateChange();
-//   });
-//
-//   socket.on('playerScored', (playerId, score) => {
-//     io.emit('updateLeaderboard', playerId, score);
-//   })
-//
-//   socket.on('clientUpdate', (state) => {
-// =======
-  socket.on('clientUpdate', (playerState) => {
+  socket.on('clientUpdate', (clientState) => {
     //TODO: break state down and dispatch to appropriate reducers
     // console.log('server heard client update with: ', playerState);
     // console.log('this client told the server to update: ', socket.id);/
+    let zombies = clientState.zombies;
+    let playerState = clientState.player;
+    // console.log('server received CS: ', clientState);
+    // console.log('server received player: ', clientState.player);
     store.dispatch(updatePlayer(playerState));
+    store.dispatch(updateZombiesFromClient(playerState.socketId, zombies));
+    // console.log('received zombies: ', zombies);
   });
 
 })

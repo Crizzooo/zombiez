@@ -27,7 +27,7 @@ body {
 
 /* Main Container Styles */
 .mainContainer {
-  height: 0.5vh;
+  height: 0vh;
   z-index: 10;
   width: 100%; }
 
@@ -58,7 +58,7 @@ body {
   z-index: 1; }
 
 .gc {
-  height: 99.5vh;
+  height: 100vh;
   background-color: black; }
 
 .buttonHolder {
@@ -84,7 +84,7 @@ body {
   width: 100%; }
 
 canvas {
-  margin: 0; }
+  margin-top: 0; }
 
 .playBtnText {
   font-size: 1em; }

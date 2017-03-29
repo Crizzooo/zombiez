@@ -36,9 +36,7 @@ export let handleInput = (player) => {
       ZG.game.isInChat = true;
     }
 
-    console.log('is it in chat', ZG.game.isInChat)
     if (ZG.game.isInChat) {
-      console.log('WHAT IS THIS', cursors.down)
       if (cursors.down.justPressed()) {
         logWASD('s');
       }
@@ -56,10 +54,8 @@ export let handleInput = (player) => {
       }
     }
     else{
-
-
-      player.pointerX = player.game.input.activePointer.worldX;
-      player.pointerY = player.game.input.activePointer.worldY;
+      player.pointerX = player.game.input.mousePointer.worldX;
+      player.pointerY = player.game.input.mousePointer.worldY;
 
       let cursors = player.cursors;
 
@@ -76,13 +72,12 @@ export let handleInput = (player) => {
       }
 
       if(player.gun.isReloading){
-        console.log('player in reload',player);
         player.reloadBar.visible = true;
         // player.reloadTween.start();
         player.reloadBar.animations.play('playReload');
         if(cursors.reload.justPressed() && player.reloadBar.frame === 22){
-          player.gameState['reloadSuccess'].play();
           console.log("ACTIVE RELOAD ACTIVATED");
+          player.gameState['reloadSuccess'].play();
           player.reloadBar.animations.stop();
           player.reloadBar.frame = 22;
           player.reloadBar.alpha = 0;
