@@ -35,6 +35,8 @@ export default class ZombieGameState extends TiledState {
   }
 
   init(levelData) {
+
+
     //Call super init to load in data;
     super.init.call(this, levelData);
 
@@ -50,6 +52,12 @@ export default class ZombieGameState extends TiledState {
     this.handleRemoteBullet = this.handleRemoteBullet.bind(this);
     this.handleRemotePlayerDamageEvent = this.handleRemotePlayerDamageEvent.bind(this);
 
+    console.log(this.game.onBlur);
+
+    document.getElementsByClassName("container")[0].style.visibility = "hidden";
+
+    //console.log('ay',document.getElementsByClassName("container"))
+    this.isInChat = false;
     //Sockets
     socket.on('destroyCurrentPlayerSprite', this.destroyCurrentPlayerSprite);
     socket.on('playerLeaveGame', this.handleRemotePlayerLeave);
@@ -69,7 +77,7 @@ export default class ZombieGameState extends TiledState {
     super.create.call(this);
 
     //adding sound here?
-    this.soundLoop = this.game.add.audio('soundLoop', 1, true);
+    this.soundLoop = this.game.add.audio('soundLoop',1,true);
     this.shootSound = this.game.add.audio('shootSound');
     this.pistolReload = this.game.add.audio('pistolReload');
     this.lightPistolShot = this.game.add.audio('lightPistolShot');
@@ -78,6 +86,8 @@ export default class ZombieGameState extends TiledState {
     this.heavyPistol = this.game.add.audio('heavyPistol');
     this.levelUp = this.game.add.audio('levelUp');
     this.playerHurt = this.game.add.audio('playerHurt');
+    this.gameWin = this.game.add.audio('gameWin');
+    this.reloadSuccess = this.game.add.audio('reloadSuccess');
     let x = true;
 
     //Create worldGrid and tile dimensions for pathfinding

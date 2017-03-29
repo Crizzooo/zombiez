@@ -12,29 +12,7 @@ export class lobbyControls extends React.Component {
       name: '',
       score: 0
     };
-    this.handleChange = this.handleChange.bind(this);
-    this.handleSubmit = this.handleSubmit.bind(this);
     this.handleLeaveGame = this.handleLeaveGame.bind(this);
-  }
-
-  handleChange(evt) {
-    this.setState({ name: evt.target.value })
-  }
-
-  handleSubmit(evt) {
-    evt.preventDefault();
-    if (this.state.name.length < 1){
-      this.state.name = 'I FORGOT TO PUT IN A NAME';
-    }
-    socket.emit('lobbyerJoinLobby', this.state);
-    let currentLobbyer = this.state;
-    currentLobbyer.socketId = socket.id;
-    console.log('set current lobbyer obj:', currentLobbyer);
-    store.dispatch(dispatchSetCurrentLobbyer(currentLobbyer));
-    console.log('store after player joined');
-    console.log(store.getState());
-    $('#addPlayerModal').modal('hide');
-    $('#playerNameInput').val('');
   }
 
   handleLeaveGame(evt) {
@@ -67,28 +45,6 @@ export class lobbyControls extends React.Component {
           joinGameButton
 
         }
-        <div className="modal fade" id="addPlayerModal" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
-          <div className="modal-dialog" role="document">
-            <div className="modal-content">
-              <div className="modal-header">
-                <h5 className="modal-title" id="exampleModalLabel">New Player Creation</h5>
-                <button type="button" className="close" data-dismiss="modal" aria-label="Close">
-                  <span aria-hidden="true">&times;</span>
-                </button>
-              </div>
-              <div className="modal-body">
-                <form onSubmit={this.handleSubmit}>
-                  <div className="form-group">
-                    <label htmlFor="exampleInputEmail1">Name</label>
-                    <input type="text" name="name" onChange={this.handleChange} className="form-control" id="playerNameInput" aria-describedby="namePlayer" placeholder="insert creative name here" autoFocus />
-                    <small id="namePlayer" className="form-text text-muted">please dont feed the trolls</small>
-                  </div>
-                  <button type="submit" className="btn btn-primary">Submit</button>
-                </form>
-              </div>
-            </div>
-          </div>
-        </div>
       </div>
     );
   }

@@ -73,15 +73,16 @@ export default class Player extends Prefab {
     this.canRoll = true;
   }
 
-  loadControls() {
-    this.cursors = {};
-    this.cursors.up = this.gameState.input.keyboard.addKey(Phaser.Keyboard.W);
-    this.cursors.down = this.gameState.input.keyboard.addKey(Phaser.Keyboard.S);
-    this.cursors.left = this.gameState.input.keyboard.addKey(Phaser.Keyboard.A);
-    this.cursors.right = this.gameState.input.keyboard.addKey(Phaser.Keyboard.D);
+  loadControls () {
+	  this.cursors = {};
+	  this.cursors.up = this.gameState.input.keyboard.addKey(Phaser.Keyboard.W);
+	  this.cursors.down = this.gameState.input.keyboard.addKey(Phaser.Keyboard.S);
+	  this.cursors.left = this.gameState.input.keyboard.addKey(Phaser.Keyboard.A);
+	  this.cursors.right = this.gameState.input.keyboard.addKey(Phaser.Keyboard.D);
+	  this.cursors.jump = this.gameState.input.keyboard.addKey(Phaser.Keyboard.SPACEBAR);
+	  this.cursors.chat = this.gameState.input.keyboard.addKey(Phaser.Keyboard.TAB);
     this.cursors.reload = this.gameState.input.keyboard.addKey(Phaser.Keyboard.R);
-    this.cursors.jump = this.gameState.input.keyboard.addKey(Phaser.Keyboard.SPACEBAR);
-    this.cursors.fire = this.gameState.input.activePointer;
+	  this.cursors.fire = this.gameState.input.activePointer;
   }
 
   loadAnimations() {
@@ -234,7 +235,6 @@ export default class Player extends Prefab {
   }
 
   receiveDamage(damage) {
-    console.log(this);
     //Change healthbar
     this.stats.health -= damage;
 

@@ -109,9 +109,9 @@ export default class TiledState extends Phaser.State {
 	createWorldGrid () {
 		let litObstaclesLayer, obstaclesLayer, rowIndex, columnIndex, worldGrid;
 
+		console.log('layers',this.map.layers)
 		obstaclesLayer = this.map.layers[1];
     litObstaclesLayer = this.map.layers[2];
-
 		worldGrid = [];
 		for (rowIndex = 0; rowIndex < this.map.height; rowIndex += 1) {
 			worldGrid.push([]);

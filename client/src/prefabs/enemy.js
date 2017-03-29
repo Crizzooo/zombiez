@@ -18,7 +18,6 @@ export default class Enemy extends Prefab {
     this.currentTarget = null;
     this.hit = false;
     this.playSound = _.throttle(this.playSound,5000);
-
     this.moveTo = throttle(this.moveTo, 1000)
 	  this.acquireTarget = throttle(this.acquireTarget, 1000)
 
@@ -29,6 +28,7 @@ export default class Enemy extends Prefab {
   }
 
   attackPlayer (player) {
+
     this.playSound(this.game.state.callbackContext, 'zombieHit', 1);
     player.receiveDamage(this.stats.attack);
     
@@ -51,7 +51,6 @@ export default class Enemy extends Prefab {
     const distY = this.position.y - this.game.state.callbackContext.currentPlayerSprite.y;
     const distance = Math.sqrt(Math.pow(distX,2)+Math.pow(distY,2));
     const perc = 1 - ((distance-30)/150) - 0.2;
-
     if (perc > 1) thisplaySound(this.game.state.callbackContext,'zombieSound',0.8);
     else if(perc <= 0);
     else this.playSound(this.game.state.callbackContext,'zombieSound',perc);
