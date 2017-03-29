@@ -13,6 +13,7 @@ let gameObj;
 export default class Gun extends GunPrefab {
   constructor(game, name, position, properties) {
     super(game, name, position, properties);
+    this.enableBody = true;
     this.game.physics.arcade.enable(this);
     this.body.collideWorldBounds = true;
     this.anchor.setTo(0.5);
@@ -25,6 +26,8 @@ export default class Gun extends GunPrefab {
     this.isReloading = false;
     this.pivot.x = -10;
     this.isJammed = false;
+    this.rotation;
+    gameObj = this.game;
     this.minDistanceSound = 30;
     this.maxDistanceSound = 600;
   }
@@ -111,15 +114,5 @@ export default class Gun extends GunPrefab {
         this.reloadSpeed = 2000;
       }
     }, this.reloadSpeed)
-  }
-
-  hitZombie(zombie, bullet, player){
-    console.log("ZOMBZ", zombie);
-	  zombie.hit = true;
-	  bullet.kill();
-		zombie.animations.stop();
-	  zombie.animations.play('dead');
-
-    zombie.zombDeath.onComplete.add(() => zombie.kill(), this);
   }
 }

@@ -12,8 +12,7 @@ export default class Prefab extends Phaser.Sprite {
 		//Add prefab to its group
 		//Set smoothed to false for crisp pixel rendering
 		//this.gameState.groups[properties.group].add(this);
-		//this.gameState.groups[properties.group].add(this);
-    this.gameState.groups[properties.group].children.push(this);
+		(properties.group ? this.gameState.groups[properties.group].children.push(this) : null);
 		this.initial = +properties.initial;
 		this.smoothed = false;
 

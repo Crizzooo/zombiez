@@ -1,8 +1,8 @@
 /**
  * Created by CharlieShi on 3/24/17.
  */
-
-import {handlePlayerRotation} from './handlePlayerInput'
+import { throttle } from 'lodash';
+import { handlePlayerRotation } from './handlePlayerInput'
 
 //TODO: refactor
 export default function handleRemoteAnimation(player) {
@@ -57,20 +57,34 @@ export default function handleRemoteAnimation(player) {
   }
 }
 
+let throttledClog =	throttle(clog, 10000);
+
+function clog(player, context){
+	// console.log('player to tween: ', player);
+	// console.log('context ', context);
+}
+
 export function tweenRemoteAssets(player, context) {
-  //Remote Player Tweens
-  //TODO: refactor for 4 players
-  context.add.tween(player.healthbar).to({
-    x: player.x - 10,
-    y: player.y - 30
-  }, 10, Phaser.Easing.Linear.None, true);
+	//Remote Player Tweens
+	//TODO: refactor for 4 players
+	// throttledClog(player, context);
+	context.add.tween(player.healthbar).to({
+		x: player.x - 10,
+		y: player.y - 30
+	}, 10, Phaser.Easing.Linear.None, true);
 
   context.add.tween(player.gun).to({
     x: player.x,
     y: player.y
   }, 10, Phaser.Easing.Linear.None, true);
 
-  //console.log('player remote tween', player)
-  //TODO: send rotation angle of player to server, server sends it back and we use it to tween
-  player.gun.rotation = player.gunRotation;
+	//console.log('player remote tween', player)
+	//TODO: send rotation angle of player to server, server sends it back and we use it to tween
+	// console.log('player', player);
+	// console.log('gun', player.gun);
+	// console.log('pointer', player.pointer);
+	// console.log('player.gun before: ', player.gun.rotation);
+	player.gun.rotation = context.game.physics.arcade.angleToPointer(player.gun.body, player.pointer);
+	// player.gun.rotation = context.game.physics.arcade.angleToXY(player.gun, player.pointerX, player.pointerY);
+	// console.log('player.gun after', player.gun.rotation);
 }

@@ -1,5 +1,6 @@
 import Prefab from './Prefab';
 import _ from 'lodash';
+import throttle from 'lodash.throttle';
 
 export default class Enemy extends Prefab {
   constructor (game, name, position, properties) {
@@ -12,10 +13,14 @@ export default class Enemy extends Prefab {
       health: 10,
       movement: 10,
       attack: 5
-    }
+    };
 
+    this.currentTarget = null;
     this.hit = false;
     this.playSound = _.throttle(this.playSound,5000);
+
+    this.moveTo = throttle(this.moveTo, 1000)
+	  this.acquireTarget = throttle(this.acquireTarget, 1000)
 
   }
 
@@ -24,7 +29,6 @@ export default class Enemy extends Prefab {
   }
 
   attackPlayer (player) {
-
     this.playSound(this.game.state.callbackContext, 'zombieHit', 1);
     player.receiveDamage(this.stats.attack);
     
@@ -40,8 +44,6 @@ export default class Enemy extends Prefab {
   }
 
   moveTo (position) {
-
-
     //putting sound in here for now, with dropoff
     //sound continues one time after zombie dies...
 
@@ -49,42 +51,53 @@ export default class Enemy extends Prefab {
     const distY = this.position.y - this.game.state.callbackContext.currentPlayerSprite.y;
     const distance = Math.sqrt(Math.pow(distX,2)+Math.pow(distY,2));
     const perc = 1 - ((distance-30)/150) - 0.2;
-    console.log('perc',perc);
 
     if (perc > 1) thisplaySound(this.game.state.callbackContext,'zombieSound',0.8);
     else if(perc <= 0);
     else this.playSound(this.game.state.callbackContext,'zombieSound',perc);
 
-
-
-
     if (this.hit === false) {
-      //console.log('not hit')
       this.gameState.pathfinding.findPath(this.position, position, this.followPath, this);
     }
   }
 
   followPath (path) {
-    // console.log('inside path', path);
+    console.log('inside path', path);
     let movingTween, pathLength
     movingTween = this.game.tweens.create(this);
     pathLength = path.length;
-    //If path is 0, attack the player
-    //TODO: currently hardcoded player
-    if (pathLength <= 0) {
-      this.attackPlayer(this.gameState.groups.player.children[0])
-      } else {
-        path.forEach( (position) => {
-          movingTween.to({x: position.x, y: position.y}, 250);
-        })
-        movingTween.start();
+
+    if (this.hit === false) {
+	    //If path is 0, attack the current target
+	    if (pathLength <= 0) {
+	      this.attackPlayer(this.currentTarget)
+	      } else {
+					console.log(movingTween)
+	        path.forEach( (position) => {
+	          movingTween.to({x: position.x, y: position.y}, 350, Phaser.Easing.LINEAR);
+	        });
+
+	        movingTween.start();
+		    console.log('starting tween', movingTween);
       }
+    }
   }
 
-  acquireTarget () {
-    //Loop through player group and find closest player
-    //console.log("find player", this.gameState.groups.player.children[0].position);
+  acquireTarget (playersAry) {
+  	//console.log('this.x and this.x', this.x, this.y)
+	  let newTarget = playersAry.getFirstAlive()
+	  let distance = 0;
 
-    return this.gameState.groups.player.children[0].position
+	  playersAry.forEachAlive((player) => {
+			  let playerDistance = Math.pow((player.x - this.x), 2) + Math.pow((player.y - this.y), 2);
+
+			  if (distance <= playerDistance) {
+				  distance = playerDistance;
+				  newTarget = player;
+			  }
+		  });
+
+	  this.currentTarget = newTarget;
+    return newTarget
   }
 }

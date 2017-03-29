@@ -146,68 +146,55 @@ export let handleInput = (player) => {
 }
 
 export function handlePlayerRotation(player) {
-  let pointerX = player.game.input.activePointer.worldX;
-  let pointerY = player.game.input.activePointer.worldY;
+	let pointerX = player.pointerX;
+	let pointerY = player.pointerY;
 
 
-  let playerX = player.x;
-  let playerY = player.y;
-  let frame;
-  let animation;
-  let gunScale;
+	let playerX = player.x;
+	let playerY = player.y;
+	let frame;
+	let animation;
+	let gunScale;
 
-  player.scale.setTo(1, 1);
-  if ((pointerY > playerY) && (pointerX < playerX)) {
-    //bottom-left
-    if (player.body.velocity.x === 0 && player.body.velocity.y === 0) frame = 17;
-    player.gun.scale.setTo(1, -1);
-  }
-  if ((pointerY > playerY) && (pointerX > playerX)) {
-    //bottom-right
-    if (player.body.velocity.x === 0 && player.body.velocity.y === 0) frame = 28;
-    animation = 'down';
-    // if(cursors.up.isDown && cursors.right.isDown) {
-    //   animation = "right";
-    // } else if(cursors.down.isDown && this.game.cursors.right.isDown){
-    //   animation = "right";
-    // } else if(this.game.cursors.left.isDown && this.game.cursors.down.isDown){
-    //   animation = "right";
-    // }
-    player.gun.scale.setTo(1, 1);
-  }
-  if ((pointerY < playerY) && (pointerX > playerX)) {
-    //top-right
-    if (player.body.velocity.x === 0 && player.body.velocity.y === 0) frame = 14;
-    animation = 'up';
-    player.gun.scale.setTo(1, 1);
-  }
-  if ((pointerY < playerY) && (pointerX < playerX)) {
-    //top-left
-    if (player.body.velocity.x === 0 && player.body.velocity.y === 0) frame = 14;
-    animation = 'up';
-    player.gun.scale.setTo(1, -1);
-  }
-  return {
-    frame,
-    animation
-  }
+	player.scale.setTo(1, 1);
+	if ((pointerY > playerY) && (pointerX < playerX)) {
+		//bottom-left
+		if(player.body.velocity.x === 0 && player.body.velocity.y === 0) frame = 17;
+		// player.gun.scale.setTo(1, -1);
+	}
+	if ((pointerY > playerY) && (pointerX > playerX)) {
+		//bottom-right
+		if(player.body.velocity.x === 0 && player.body.velocity.y === 0) frame = 28;
+		animation = 'down';
+		// player.gun.scale.setTo(1, 1);
+	}
+	if ((pointerY < playerY) && (pointerX > playerX)) {
+		//top-right
+		if(player.body.velocity.x === 0 && player.body.velocity.y === 0) frame = 14;
+		animation = 'up';
+		// player.gun.scale.setTo(1, 1);
+	}
+	if ((pointerY < playerY) && (pointerX < playerX)) {
+		//top-left
+		if(player.body.velocity.x === 0 && player.body.velocity.y === 0) frame = 14;
+		animation = 'up';
+		// player.gun.scale.setTo(1, -1);
+	}
+	return {
+		frame,
+		animation
+	}
 }
 
 export function tweenCurrentPlayerAssets(player, context) {
-  //gun follow does not work as a child of the player sprite.. had to tween gun to players x, y position
-  context.add.tween(player.gun).to({
-    x: player.x,
-    y: player.y
-  }, 10, Phaser.Easing.Linear.None, true);
+	//gun follow does not work as a child of the player sprite.. had to tween gun to players x, y position
+	context.add.tween(player.gun).to({
+		x: player.x,
+		y: player.y
+	}, 10, Phaser.Easing.Linear.None, true);
 
-  //Add tween for health
-  // context.add.tween(player.healthbar).to({
-  // 	x: player.x - 10,
-  // 	y: player.y - 30
-  // }, 10, Phaser.Easing.Linear.None, true);
-
-  //Gun rotation tween
-  player.gun.rotation = context.game.physics.arcade.angleToPointer(player.gun);
+	//Gun rotation tween
+ player.gun.rotation = context.game.physics.arcade.angleToPointer(player.gun);
 }
 
 function startRoll(player, direction) {
