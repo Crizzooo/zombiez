@@ -689,11 +689,14 @@ export default class ZombieGameState extends TiledState {
       console.error('player not found');
     }
     // console.log(`this player will be hit for ${playerWhoDealtDamage}`, playerToDamage);
-    playerToDamage.receiveDamage(playerWhoDealtDamage.gun.damage);
-    if (playerToDamage.stats.health === 0) {
+    if ( (playerToDamage.stats.health - playerWhoDealtDamage.gun.damage) <= 0 ){
+      console.log('im about to kill a player');
       playerWhoDealtDamage.upgradeGun();
-      playerToDamage.resetHealth();
       playerWhoDealtDamage.checkForRankUp(remotePlayerSprites);
+      playerToDamage.receiveDamage(playerWhoDealtDamage.gun.damage);
+      playerToDamage.resetHealth();
+    } else {
+      playerToDamage.receiveDamage(playerWhoDealtDamage.gun.damage);
     }
   }
 
