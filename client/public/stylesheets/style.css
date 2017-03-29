@@ -28,14 +28,19 @@ body {
 /* Main Container Styles */
 .mainContainer {
   height: 0vh;
-  z-index: 10; }
+  z-index: 10;
+  width: 100%; }
 
 #mainRow {
   height: 100%; }
 
 .leaderboard {
   height: 100%;
-  box-sizing: border-box; }
+  box-sizing: border-box;
+  margin-left: 3%;
+  margin-right: 17%;
+  width: 30%;
+  padding: .2%; }
 
 #buttonHolder {
   height: 5%; }
@@ -99,7 +104,10 @@ Then, give all components a relative height */
 .chatContainer {
   min-height: 210px;
   height: 100%;
-  padding: .5%; }
+  padding: .5%;
+  margin-right: 3%;
+  margin-left: 17%;
+  width: 30%; }
 
 .chatComponents {
   box-sizing: border-box;
