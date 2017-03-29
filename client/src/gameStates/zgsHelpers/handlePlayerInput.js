@@ -49,6 +49,9 @@ export let handleInput = (player) => {
       if (cursors.right.justPressed()) {
         logWASD('d');
       }
+      if (cursors.reload.justPressed()) {
+        logWASD('r');
+      }
       if (cursors.jump.justPressed()) {
         logWASD(' ');
       }
@@ -76,6 +79,7 @@ export let handleInput = (player) => {
           // player.reloadTween.start();
           // player.reloadBar.animations.play('playReload');
           if(cursors.reload.justPressed() && (player.reloadBar.frame < 24 && player.reloadBar.frame > 20)){
+            player.gameState['reloadSuccess'].play();
             player.gun.isReloading = false;
             player.gun.activeReloaded = true;
             player.gun.ammo = player.gun.clip
@@ -99,6 +103,7 @@ export let handleInput = (player) => {
               clearInterval(activeInterval);
             }, 2500)
           } else if(cursors.reload.justPressed() && (player.reloadBar.frame >= 24 || player.reloadBar.frame <= 20)) {
+            player.gameState['reloadFail'].play();
             player.reloadBar.animations.paused = true;
             player.reloadBar.tint = 0xFF0000;
             player.gun.isJammed = true;

@@ -3,6 +3,7 @@ const NEW_MESSAGE = 'NEW_MESSSAGE';
 const PLAYER_JOIN_LOBBY = 'PLAYER_JOIN_LOBBY';
 const LOBBYER_LEAVE_LOBBY = 'LOBBYER_LEAVE_LOBBY';
 const RESET_LOBBY = 'RESET_LOBBY';
+const UPGRADE_GUN = 'UPGRADE_GUN';
 
 
 const receiveNewMessage = (msg, user) => ({
@@ -23,6 +24,12 @@ const receiveLobbyerLeave = (lobbyerId) => ({
 
 const resetLobby = () => ({
   type: RESET_LOBBY
+})
+
+const upgradeGun = (gunLvl, lobbyerId) => ({
+  type: UPGRADE_GUN,
+  gunLvl,
+  lobbyerId,
 })
 
 const initialState = {
@@ -48,6 +55,14 @@ const lobby = (state = initialState, action) => {
         newState.lobbyers = newState.lobbyers.filter(lobbyer => lobbyer.socketId !== action.lobbyerId);
         break;
 
+    case UPGRADE_GUN:
+        let lobbyerToChange = newState.lobbyers.filter(lobbyer => lobbyer.socketId === action.lobbyerId)[0];
+        lobbyerToChange.gunLvl = action.gunLvl;
+        let newLobby = newState.lobbyers;
+        newLobby[lobbyerToChange.playerNumber-1] = lobbyerToChange;
+        newState.lobbyers = newLobby;
+        break;
+
     case RESET_LOBBY:
         console.log('resetting server lobby');
         newState.lobbyers = [];
@@ -59,4 +74,4 @@ const lobby = (state = initialState, action) => {
   return newState;
 }
 
-module.exports = {lobby, receiveJoinLobby, receiveLobbyerLeave, resetLobby}
+module.exports = {lobby, receiveJoinLobby, receiveLobbyerLeave, resetLobby, upgradeGun}
