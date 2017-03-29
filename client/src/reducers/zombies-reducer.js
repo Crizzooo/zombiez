@@ -13,7 +13,7 @@ const REMOVE_EVENT = 'REMOVE_EVENT';
 /* Action Creators */
 export const updateLocalZombies = zombieStates => ({ type: UPDATE_LOCAL_ZOMBIES, zombieStates });
 export const updateRemoteZombies = serverZombieStates => ({ type: UPDATE_REMOTE_ZOMBIES, serverZombieStates});
-export const dispatchZombieHitEvent = eventObj => ({ type: ZOMBIE_SHOT, event: eventObj });
+export const dispatchZombieHitEvent = (eventObj, eventId) => ({ type: ZOMBIE_SHOT, event: eventObj });
 export const removeEvent = (eventType, eventId) => ({ type: REMOVE_EVENT, type: eventType, eventId: eventId});
 // export const updateRemoteZombies =
 
@@ -50,15 +50,16 @@ export default (state = initialState, action) => {
       break;
 
     case ZOMBIE_SHOT:
-      if (!newState.zombieTakeDamage[action.event.eventId]) {
-        newState.zombieTakeDamage[action.event.eventId] = action.event;
-        setTimeout(store.dispatch(removeEvent('zombieTakeDamage', action.event.eventId)), EVENT_LOOP_DELETE_TIME * 1.5);
+      if (!newState.localEvents.zombieTakeDamage[action.event.eventId]) {
+        newState.localEvents.zombieTakeDamage[action.event.eventId] = action.event;
+        // MOVE TO OWN FILE
+        // setTimeout( dispatchRemoveEvent('zombieTakeDamage', action.event.eventId), EVENT_LOOP_DELETE_TIME * 1.5);
       }
       break;
 
     case REMOVE_EVENT:
       let newEvents = Object.assign({}, newState.localEvents);
-      delete newEvents[action.type][action.eventId];
+      delete newEvents.localEvents[action.type][action.eventId];
       newState.localEvents = newEvents;
       break;
 
@@ -68,3 +69,7 @@ export default (state = initialState, action) => {
 
   return newState;
 };
+
+function dispatchRemoveEvent(eventName, eventId){
+  store.dispatch(removeEvent('zombieTakeDamage', eventId));
+}

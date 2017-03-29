@@ -13,11 +13,11 @@ export default class Prefab extends Phaser.Sprite {
 		//Set smoothed to false for crisp pixel rendering
 		//this.gameState.groups[properties.group].add(this);
 		// this.gameState.groups[properties.group].add(this);
-		console.log('game', game);
-		console.log('this', this);
-		console.log('gameState', this.gameState);
-		console.log('properties', properties);
-		console.log('properties.group', properties.group);
+		// console.log('game', game);
+		// console.log('this', this);
+		// console.log('gameState', this.gameState);
+		// console.log('properties', properties);
+		// console.log('properties.group', properties.group);
 
 		if (properties.group) {
 			this.gameState.groups[properties.group].children.push(this);

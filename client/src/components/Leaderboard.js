@@ -28,7 +28,7 @@ function Leaderboard(props) {
   //4 - player count times, create empty rows
   return (
     <div className="row" id="mainRow">
-      <div className="col-md-6 leaderboard">
+      <div className="leaderboard">
         <LobbyControls />
         <table className="table table-striped table-inverse table-hover">
           <thead className="thead-inverse">
@@ -47,7 +47,7 @@ function Leaderboard(props) {
           </tbody>
         </table>
       </div>
-      <div className="col-md-6 chatContainer">
+      <div className="chatContainer">
         <ChatApp />
       </div>
     </div>

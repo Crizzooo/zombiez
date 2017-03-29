@@ -82,6 +82,7 @@ export default class Player extends Prefab {
 	  this.cursors.jump = this.gameState.input.keyboard.addKey(Phaser.Keyboard.SPACEBAR);
 	  this.cursors.chat = this.gameState.input.keyboard.addKey(Phaser.Keyboard.TAB);
     this.cursors.reload = this.gameState.input.keyboard.addKey(Phaser.Keyboard.R);
+    this.cursors.esc = this.gameState.input.keyboard.addKey(Phaser.Keyboard.ESC);
 	  this.cursors.fire = this.gameState.input.activePointer;
   }
 
@@ -122,9 +123,11 @@ export default class Player extends Prefab {
   }
 
   loadReloadBar(){
-    this.reloadBar = this.gameState.game.add.sprite(this.x + 120, this.y - 90, 'reloadBarSpriteSheet', 0);
-    // this.reloadBar.add.tween
-    // console.log("PLAYER?", this);
+    console.log('this', this);
+    console.log('game ', this.game);
+    let canvas = document.getElementsByTagName("canvas")[0];
+    this.reloadBar = this.gameState.game.add.sprite( (canvas.width/2), (canvas.height/2) - 25, 'reloadBarSpriteSheet', 0);
+    this.reloadBar.anchor.setTo(0.5);
     this.gameState.game.add.existing(this.reloadBar);
     this.reloadBar.visible = false;
     this.reloadBar.fixedToCamera = true;
@@ -143,7 +146,7 @@ export default class Player extends Prefab {
   }
 
   clipUpdate() {
-    this.gunUiFrame.gunClip.text = this.gun.clip + '/' + this.gun.ammo;
+    this.gunUiFrame.gunClip.text = this.gun.ammo + '/' + this.gun.clip;
   }
 
   loadHealthbar() {
@@ -165,24 +168,24 @@ export default class Player extends Prefab {
     //this.gameState.add.existing(this.healthbar);
   }
 
-  upgradeGun(player) {
-    player.currentGunLevel++;
-    console.log("INSIDE OF LOAD GUN!!", player);
-    switch (player.currentGunLevel) {
+  upgradeGun() {
+    this.currentGunLevel++;
+    console.log("INSIDE OF LOAD GUN!!", this);
+    switch (this.currentGunLevel) {
       case 1:
-        player.gun.frame = 8;
-        player.gunUiFrame.gunSprite.frame = 8;
+        this.gun.frame = 8;
+        this.gunUiFrame.gunSprite.frame = 8;
         break;
       case 2:
-        player.gun.frame = 6;
-        player.gunUiFrame.gunSprite.frame = 6;
+        this.gun.frame = 6;
+        this.gunUiFrame.gunSprite.frame = 6;
         break;
       case 3:
-        player.gun.frame = 1;
-        player.gunUiFrame.gunSprite.frame = 1;
+        this.gun.frame = 1;
+        this.gunUiFrame.gunSprite.frame = 1;
         break;
       case 4:
-        player.hasWon = true;
+        this.hasWon = true;
         break;
     }
   }
@@ -236,11 +239,14 @@ export default class Player extends Prefab {
 
   receiveDamage(damage) {
     //Change healthbar
+    console.log('this receiving dmg: ', this, damage);
     this.stats.health -= damage;
 
     if (socket.id !== this.socketId){
+      console.log('updating remote player health');
       this.healthbar.text = this.stats.health;
     } else {
+      console.log('cp updating health on dmg event');
       this.health.newHealth(this.stats.health);
     }
     //this.healthbar.text = this.stats.health;
@@ -252,7 +258,7 @@ export default class Player extends Prefab {
       setTimeout(() => {
         this.tint = 0xffffff;
         //Change Health hearts <----- WHY CHARLIE, WHY IN A setTimeout?! I FOUND THIS AFTER 4 HOURS
-        this.health.newHealth(this.stats.health);
+        // this.health.newHealth(this.stats.health);
       }, 250)
     }
   }

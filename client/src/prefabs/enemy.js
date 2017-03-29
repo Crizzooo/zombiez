@@ -31,7 +31,7 @@ export default class Enemy extends Prefab {
 
     this.playSound(this.game.state.callbackContext, 'zombieHit', 1);
     player.receiveDamage(this.stats.attack);
-    
+
     //NOTE: No longer using sockets like this
     // socket.emit('playerReceiveDamage', {
     //   socketId: socket.id,
@@ -61,7 +61,7 @@ export default class Enemy extends Prefab {
   }
 
   followPath (path) {
-    console.log('inside path', path);
+    // console.log('inside path', path);
     let movingTween, pathLength
     movingTween = this.game.tweens.create(this);
     pathLength = path.length;

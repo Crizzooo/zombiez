@@ -37,7 +37,7 @@ export default class HealthHearts extends Phaser.Sprite {
         this.frame = 0;
         break;
     }
-    console.log("FUCKING FULL!!!!");
+    // console.log("FULL!!!!");
   }
 
 
