@@ -56,7 +56,11 @@
       "sourcePNG": "../../assets/images/medals.png",
       "sourceJSON": "../../assets/images/medals.json"
     },
-
+    "reloadBarSpriteSheet": {
+      "type": "spriteSheetAtlas",
+      "sourcePNG": "../../assets/images/reloadBar.png",
+      "sourceJSON": "../../assets/images/reloadBar.json"
+    },
     "soundLoop": {
       "type": "sound",
       "source": "../../assets/sounds/themeLoop.wav"

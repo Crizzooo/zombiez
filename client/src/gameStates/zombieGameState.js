@@ -105,6 +105,17 @@ export default class ZombieGameState extends TiledState {
           texture: 'zombieSpriteSheet'
         }
       }, {x: 200, y: 200});
+
+    // let reloadBar = this.createPrefab('reloadBar', {
+    //   type: 'guns',
+    //   properties: {
+    //     group: 'guns',
+    //     initial: 0,
+    //     texture: 'reloadBarSpriteSheet'
+    //   }
+    // }, {x: this.currentPlayerSprite.world.x, y: this.currentPlayerSprite.world.y + 10});
+
+    // this.reloadBar = reloadBar;
     this.currentEnemy = enemyPrefab;
     this.currentEnemy.moveTo = throttle(this.currentEnemy.moveTo, 1000);
     this.currentEnemy.animations.play('left');
@@ -349,7 +360,7 @@ export default class ZombieGameState extends TiledState {
       pointerY: this.currentPlayerSprite.pointerY,
       gunFrame: this.currentPlayerSprite.gun.frame,
       hasWon: this.currentPlayerSprite.hasWon,
-      currentGunLevel: this.currentPlayerSprite.currentGunLevel
+      currentGunLevel: this.currentPlayerSprite.currentGunLevel,
     }
 
     store.dispatch(updateCurrentPlayer(currentPlayer));

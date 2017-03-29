@@ -55,6 +55,7 @@ export default class Player extends Prefab {
       this.loadGunUi();
       this.loadControls();
       this.loadMedalUi();
+      this.loadReloadBar();
     }
 
     if (socket.id !== properties.socketId) {
@@ -70,7 +71,6 @@ export default class Player extends Prefab {
     //how frequently a player can roll
     this.rateOfRoll = TIME_BETWEEN_ROLLS;
     this.canRoll = true;
-    // this.justRespawned = false;
   }
 
   loadControls() {
@@ -79,6 +79,7 @@ export default class Player extends Prefab {
     this.cursors.down = this.gameState.input.keyboard.addKey(Phaser.Keyboard.S);
     this.cursors.left = this.gameState.input.keyboard.addKey(Phaser.Keyboard.A);
     this.cursors.right = this.gameState.input.keyboard.addKey(Phaser.Keyboard.D);
+    this.cursors.reload = this.gameState.input.keyboard.addKey(Phaser.Keyboard.R);
     this.cursors.jump = this.gameState.input.keyboard.addKey(Phaser.Keyboard.SPACEBAR);
     this.cursors.fire = this.gameState.input.activePointer;
   }
@@ -115,8 +116,18 @@ export default class Player extends Prefab {
       strokeThickness: 3
     };
 
-    this.gunUiFrame.gunClip = this.game.add.text(50, 25, this.gun.clip + '/' + this.gun.ammo, style);
+    this.gunUiFrame.gunClip = this.game.add.text(50, 25, this.gun.ammo + '/' + this.gun.clip, style);
     this.gunUiFrame.gunClip.fixedToCamera = true;
+  }
+
+  loadReloadBar(){
+    this.reloadBar = this.gameState.game.add.sprite(this.x + 120, this.y - 90, 'reloadBarSpriteSheet', 0);
+    // this.reloadBar.add.tween
+    // console.log("PLAYER?", this);
+    this.gameState.game.add.existing(this.reloadBar);
+    this.reloadBar.visible = false;
+    this.reloadBar.fixedToCamera = true;
+    this.reloadBar.animations.add('playReload', [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29], 15, false);
   }
 
   loadMedalUi(){
@@ -236,6 +247,7 @@ export default class Player extends Prefab {
     //TODO: change to a red tint
     if (this.stats.health !== 0) {
       this.tint = PLAYER_DAMAGE_TINT;
+
       setTimeout(() => {
         this.tint = 0xffffff;
         //Change Health hearts <----- WHY CHARLIE, WHY IN A setTimeout?! I FOUND THIS AFTER 4 HOURS

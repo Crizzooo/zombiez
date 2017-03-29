@@ -8,8 +8,8 @@ import _ from 'lodash';
 // }
 //
 // let throttledSound = _.throttle(playSound,50);
-
-export function handleInput(player) {
+let tween;
+export let handleInput = (player) => {
 
 
   if (player) {
@@ -30,6 +30,43 @@ export function handleInput(player) {
     if (cursors.fire.isDown) {
       //Shoot method will add the bullet obj to the hash map on store and then dispatch to server for 1s!
       player.gun.shoot(player);
+    }
+
+    if(player.gun.isReloading){
+      player.reloadBar.visible = true;
+      // player.reloadTween.start();
+      player.reloadBar.animations.play('playReload');
+      if(cursors.reload.justPressed() && player.reloadBar.frame === 22){
+        console.log("ACTIVE RELOAD ACTIVATED");
+        player.reloadBar.animations.stop();
+        player.reloadBar.frame = 22;
+        player.reloadBar.alpha = 0;
+        tween = player.game.add.tween(player.reloadBar).to( { alpha: 1 }, 200, Phaser.Easing.Linear.None, true, 0, 500, true);
+        player.gun.damage += 10;
+        setTimeout(() => {
+          player.gun.damage -= 10;
+          player.reloadBar.animations.resume = true;
+        }, 5000)
+      } else if(cursors.reload.justPressed() && player.reloadBar.frame !== 22) {
+        console.log("YOU MISSED IT");
+        clearInterval(player.gun.reloadInterval);
+        player.reloadBar.animations.paused = true;
+        player.gun.reloadSpeed += 3000;
+        player.gun.isJammed = true;
+        player.gun.reloadGun();
+        // setTimeout(() => {
+        //   player.gun.reloadSpeed -= 5000;
+        //   player.reloadBar.animations.resume = true;
+        // }, 5000)
+      }
+    } else {
+      player.reloadBar.visible = false;
+      player.reloadBar.animations.stop();
+      if(tween) {
+        tween.stop();
+        player.reloadBar.alpha = 1;
+      }
+
     }
 
     //TODO: use onDown instead? Need to set a previous animation
@@ -201,4 +238,8 @@ function startRoll(player, direction) {
   setTimeout(() => {
     player.canRoll = true;
   }, player.rateOfRoll);
+}
+
+function activeReload(player){
+
 }
