@@ -87,10 +87,6 @@ export let handleInput = (player) => {
           player.gun.reloadSpeed += 3000;
           player.gun.isJammed = true;
           player.gun.reloadGun();
-          // setTimeout(() => {
-          //   player.gun.reloadSpeed -= 5000;
-          //   player.reloadBar.animations.resume = true;
-          // }, 5000)
         }
       } else {
         player.reloadBar.visible = false;
@@ -99,7 +95,6 @@ export let handleInput = (player) => {
           tween.stop();
           player.reloadBar.alpha = 1;
         }
-
       }
 
       //TODO: use onDown instead? Need to set a previous animation

@@ -222,8 +222,12 @@ export default class Player extends Prefab {
   }
 
   loadReloadBar(){
-    this.reloadBar = this.gameState.game.add.sprite(this.x + 120, this.y - 90, 'reloadBarSpriteSheet', 0);
+    let canvas = document.getElementsByTagName("canvas")[0];
+    console.log("MY X COORDINATE", this.x);
+    this.reloadBar = this.gameState.game.add.sprite((canvas.width/2), this.top, 'reloadBarSpriteSheet', 0);
+    // this.add(this.reloadBar);
     // this.reloadBar.add.tween
+    this.reloadBar.anchor.setTo(0.5);
     // console.log("PLAYER?", this);
     this.gameState.game.add.existing(this.reloadBar);
     this.reloadBar.visible = false;
