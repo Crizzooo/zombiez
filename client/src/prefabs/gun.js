@@ -108,9 +108,11 @@ export default class Gun extends GunPrefab {
     // console.log(this);
     // console.dir(this.game.currentPlayerSprite, { depth: 3 });
     // console.log(this.game.currentPlayerSprite.reloadBar);
+    console.log('CPS.reloading', this.game.currentPlayerSprite.reloadingAnim);
     this.game.currentPlayerSprite.reloadingAnim = this.game.currentPlayerSprite.reloadBar.animations.play('playReload');
+    console.log('CPS.reloading after', this.game.currentPlayerSprite.reloadingAnim);
 
-    this.game.currentPlayerSprite.reloadingAnim.onComplete.add( () => {
+    this.game.currentPlayerSprite.reloadingAnim.onComplete.addOnce( () => {
       //if active reloaded do something
       if (this.activeReloaded){
         //take off activeReloaded
@@ -121,17 +123,18 @@ export default class Gun extends GunPrefab {
         // this.game.currentPlayerSprite.reloadBar.animations.stop();
         this.game.currentPlayerSprite.reloadBar.visible = false;
         this.game.currentPlayerSprite.reloadBar.tint = 0xffffff;
-        this.game.currentPlayerSprite.reloadBar.animations.stop();
+        // this.game.currentPlayerSprite.reloadBar.animations.stop();
         return;
       } else if (this.isJammed){
         this.ammo = this.clip;
         this.game.currentPlayerSprite.clipUpdate();
         this.isJammed = false;
-        this.isReloading = false; console.log('jammed reload finished');
+        this.isReloading = false;
+         console.log('jammed reload finished');
         //update clip to full
         this.game.currentPlayerSprite.reloadBar.visible = false;
         this.game.currentPlayerSprite.reloadBar.tint = 0xffffff;
-        this.game.currentPlayerSprite.reloadBar.animations.stop();
+        // this.game.currentPlayerSprite.reloadBar.animations.stop();
       } else {
         //let the reload finish
         this.ammo = this.clip;
@@ -140,9 +143,9 @@ export default class Gun extends GunPrefab {
         console.log('reload finished');
         this.game.currentPlayerSprite.reloadBar.visible = false;
         this.game.currentPlayerSprite.reloadBar.tint = 0xffffff;
-        this.game.currentPlayerSprite.reloadBar.animations.stop();
+        // this.game.currentPlayerSprite.reloadBar.animations.stop();
       }
-
+      // this.game.currentPlayerSprite.reloadingAnim.destroy();
       // this.game.currentPlayerSprite.reloadBar.visible = false;
       // this.game.currentPlayerSprite.reloadBar.tint = 0xffffff;
       // this.game.currentPlayerSprite.reloadBar.animations.stop();

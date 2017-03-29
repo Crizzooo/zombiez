@@ -94,12 +94,14 @@ export let handleInput = (player) => {
               console.log('THIS AR SHOULD FINISH BEFORE ANIM');
               player.reloadBar.tint = 0xffffff;
               player.gun.damage -= 10;
+              tween.stop();
+              player.reloadBar.alpha = 1;
               // player.reloadBar.visible = false;
-              player.reloadBar.animations.paused = false;
+              // player.reloadBar.animations.paused = false;
               // player.gun.activeReloaded = false;
               player.reloadingAnim.complete();
               clearInterval(activeInterval);
-            }, 5000)
+            }, 2500)
           } else if(cursors.reload.justPressed() && (player.reloadBar.frame >= 24 || player.reloadBar.frame <= 20)) {
             console.log("YOU MISSED IT");
             player.reloadBar.animations.paused = true;
@@ -107,17 +109,23 @@ export let handleInput = (player) => {
             // player.reloadBar.animations.stop();
             // let jamTime = player.gun.reloadSpeed + 3000;s
             player.gun.isJammed = true;
+            player.reloadBar.alpha = 0;
+            tween = player.game.add.tween(player.reloadBar).to( { alpha: 1 }, 200, Phaser.Easing.Linear.None, true, 0, 500, true);
+            console.log('starting tween...');
             let jamInterval = setTimeout(() => {
               console.log('unpausing jam anim: ')
-              player.reloadBar.animations.paused = false;
+              tween.stop();
+              player.reloadBar.alpha = 1;
+              // player.reloadBar.animations.paused = false;
               player.reloadingAnim.complete();
-            }, 5000)
-        } else if (tween){
-          // player.reloadBar.visible = false;
-          // player.reloadBar.animations.stop();
-          tween.stop();
-          player.reloadBar.alpha = 1;
+              clearInterval(jamInterval); }, 3500)
         }
+        // } else if (tween){
+        //   // player.reloadBar.visible = false;
+        //   // player.reloadBar.animations.stop();
+        //   tween.stop();
+        //   player.reloadBar.alpha = 1;
+        // }
     } else if (cursors.reload.isDown && player.gun.ammo !== player.gun.clip){
       player.gun.reloadGun();
     }
