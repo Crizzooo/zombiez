@@ -19,13 +19,13 @@ import handleRemoteAnimation, { tweenRemoteAssets } from './zgsHelpers/handleRem
 import { enemyGeneratorInitial, enemyGenerator } from './zgsHelpers/enemyGenerator';
 import {PLAYER_HEALTH, EVENT_LOOP_DELETE_TIME, STARTING_BULLET_SPEED} from '../engine/gameConstants.js';
 
- import { localZombieSprites, remoteZombieSprites, initializeZombies, createLocalZombie, updateLocalZombie, dispatchZombieUpdate, updateRemoteZombies } from '../engine/manageZombies.js';}
+ import { localZombieSprites, remoteZombieSprites, initializeZombies, createLocalZombie, updateLocalZombie, dispatchZombieUpdate, updateRemoteZombies } from '../engine/manageZombies.js';
 
 //TODO: do we need this?
 // currentPlayerSprite and remotePlayerSprites are on global window
 var self;
 let playerDamageEventCount = 0;
-
+let zombieHitCount = 0;
 export default class ZombieGameState extends TiledState {
   constructor(game) {
     super(game);
@@ -66,8 +66,8 @@ export default class ZombieGameState extends TiledState {
     socket.on('destroyCurrentPlayerSprite', this.destroyCurrentPlayerSprite);
     socket.on('playerLeaveGame', this.handleRemotePlayerLeave);
 
-    this.logPreZombie = throttle( () => { console.log('pre Zombie update',  store.getState()) }, 15000);
-    this.logPostZombie = throttle( () => { console.log('post Zombie update', store.getState()) }, 15000);
+    // this.logPreZombie = throttle( () => { console.log('pre Zombie update',  store.getState()) }, 15000);
+    // this.logPostZombie = throttle( () => { console.log('post Zombie update', store.getState()) }, 15000);
   }
 
   preload() {
@@ -269,10 +269,10 @@ export default class ZombieGameState extends TiledState {
 
     //update zombies
     //move to one 'updateLocalZombies function'
-    this.logPreZombie();
+    // this.logPreZombie();
     R.forEach(updateLocalZombie, this.localZombieSpriteGroup.children);
     dispatchZombieUpdate();
-    this.logPostZombie();
+    // this.logPostZombie();
     updateRemoteZombies();
     //dispatch zombies
   }
@@ -592,13 +592,15 @@ export default class ZombieGameState extends TiledState {
       //TODO: dispatch event and let everyone know its been hit
       //dispatch event and let everyone know its been hit
       console.log('i hit a zombie so I should let other people know ');
+      let eventId =  'shotZombie' + socket.id + zombieHitCount;
       store.dispatch(dispatchZombieHitEvent({
           zombieId: zombie.id,
           damage: currentPlayerSprite.gun.damage,
           shooterId: socket.id,
           zombieOwnerId: zombie.ownerId
-      }));
-      killZombie(zombie);
+      }, eventId));
+      zombieHitCount++;
+      this.killZombie(zombie);
     }
   }
 

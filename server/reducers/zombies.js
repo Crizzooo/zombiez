@@ -27,6 +27,12 @@ const updateZombiesFromClient = (socketId, zombies) => ({
 //   socketId
 // })
 
+const dispatchZombieHitEvent = (socketId, zombieId, eventObj) => ({
+  //TODO, receive and pull out zombie hit event
+  //TODO: make sure server emits them properly
+  //TODO: receive them, execute, and store in eventObj hash
+})
+
 const addPlayerToZombieSprites = (socketId) => ({
   type: ADD_PLAYER_ID,
   socketId

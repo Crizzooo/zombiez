@@ -11,7 +11,7 @@ export default (socket) => {
     let currentPlayerObj = state.players.currentPlayer;
     if (state.lobby.currentLobbyer.name && state.game.gamePlaying){
       //TODO: emit zombie Events, refactor sercver to take in zombies and the events
-      socket.emit('clientUpdate', {player: currentPlayerObj, zombies: state.zombies.localZombies});
+      socket.emit('clientUpdate', {player: currentPlayerObj, zombies: state.zombies.localZombies, zombieEvents: state.zombies.localEvents});
     }
   }, CLIENT_EMIT_INTERVAL);
   return emitID;
