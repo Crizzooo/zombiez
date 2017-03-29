@@ -101,6 +101,10 @@
       "type": "sound",
       "source": "../../assets/sounds/reloadSuccess.wav"
     },
+    "reloadFail": {
+      "type": "sound",
+      "source": "../../assets/sounds/reloadFail.wav"
+    },
 
     "levelTilemap": {"type": "tilemap", "source": "../../assets/maps/main.json"}
   },

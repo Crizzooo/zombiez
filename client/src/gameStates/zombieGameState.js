@@ -88,6 +88,7 @@ export default class ZombieGameState extends TiledState {
     this.playerHurt = this.game.add.audio('playerHurt');
     this.gameWin = this.game.add.audio('gameWin');
     this.reloadSuccess = this.game.add.audio('reloadSuccess');
+    this.reloadFail = this.game.add.audio('reloadFail');
     let x = true;
 
     //Create worldGrid and tile dimensions for pathfinding

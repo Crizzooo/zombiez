@@ -22,6 +22,13 @@ export let handleInput = (player) => {
     const textInput = document.getElementById("createMessage");
     const gameDiv = document.getElementById("game");
 
+    if(cursors.esc.justPressed()){
+      document.getElementsByClassName("container")[0].style.visibility = "hidden";
+      textInput.blur();
+      gameDiv.focus();
+      ZG.game.isInChat = false;
+    }
+
     if (cursors.chat.isDown) {
       document.getElementsByClassName("container")[0].style.visibility = "visible";
       textInput.focus();
@@ -69,10 +76,12 @@ export let handleInput = (player) => {
       }
 
       if(player.gun.isReloading){
+        console.log('player in reload',player);
         player.reloadBar.visible = true;
         // player.reloadTween.start();
         player.reloadBar.animations.play('playReload');
         if(cursors.reload.justPressed() && player.reloadBar.frame === 22){
+          player.gameState['reloadSuccess'].play();
           console.log("ACTIVE RELOAD ACTIVATED");
           player.reloadBar.animations.stop();
           player.reloadBar.frame = 22;
@@ -85,6 +94,7 @@ export let handleInput = (player) => {
           }, 5000)
         } else if(cursors.reload.justPressed() && player.reloadBar.frame !== 22) {
           console.log("YOU MISSED IT");
+          player.gameState['reloadFail'].play();
           clearInterval(player.gun.reloadInterval);
           player.reloadBar.animations.paused = true;
           player.gun.reloadSpeed += 3000;

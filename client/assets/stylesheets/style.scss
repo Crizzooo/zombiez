@@ -41,6 +41,7 @@ body {
 .mainContainer {
   height: 100 - $gameContainer-height;
   z-index: 10;
+  width: 100%;
 }
 
 #mainRow {
@@ -50,6 +51,10 @@ body {
 .leaderboard {
   height: $container-height;
   box-sizing: border-box;
+  margin-left: 3%;
+  margin-right: 17%;
+  width: 30%;
+  padding: .2%;
 }
 
 #buttonHolder {
@@ -126,7 +131,9 @@ Then, give all components a relative height */
   min-height: 210px;
   height: 100%;
   padding: .5%;
-  // border: 1px solid black;
+  margin-right: 3%;
+  margin-left: 17%;
+  width: 30%;
 }
 
 .chatComponents {

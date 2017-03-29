@@ -82,6 +82,7 @@ export default class Player extends Prefab {
 	  this.cursors.jump = this.gameState.input.keyboard.addKey(Phaser.Keyboard.SPACEBAR);
 	  this.cursors.chat = this.gameState.input.keyboard.addKey(Phaser.Keyboard.TAB);
     this.cursors.reload = this.gameState.input.keyboard.addKey(Phaser.Keyboard.R);
+    this.cursors.esc = this.gameState.input.keyboard.addKey(Phaser.Keyboard.ESC);
 	  this.cursors.fire = this.gameState.input.activePointer;
   }
 
