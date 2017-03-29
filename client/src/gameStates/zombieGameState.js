@@ -5,6 +5,7 @@ const throttle = require('lodash.throttle');
 
 import store from '../store.js';
 import {updateCurrentPlayer, playerLeaveGame} from '../reducers/players-reducer.js';
+import { dispatchZombieHitEvent } from '../reducers/zombies-reducer.js';
 import emitCurrentState from '../engine/emitCurrentState.js';
 
 //Import game plugins and tiledstate
@@ -18,7 +19,7 @@ import handleRemoteAnimation, { tweenRemoteAssets } from './zgsHelpers/handleRem
 import { enemyGeneratorInitial, enemyGenerator } from './zgsHelpers/enemyGenerator';
 import {PLAYER_HEALTH, EVENT_LOOP_DELETE_TIME, STARTING_BULLET_SPEED} from '../engine/gameConstants.js';
 
- import { localZombieSprites, remoteZombieSprites, initializeZombies, createLocalZombie, updateLocalZombie, dispatchZombieUpdate, updateRemoteZombies } from '../engine/manageZombies.js';
+ import { localZombieSprites, remoteZombieSprites, initializeZombies, createLocalZombie, updateLocalZombie, dispatchZombieUpdate, updateRemoteZombies } from '../engine/manageZombies.js';}
 
 //TODO: do we need this?
 // currentPlayerSprite and remotePlayerSprites are on global window
@@ -587,16 +588,21 @@ export default class ZombieGameState extends TiledState {
   bulletHitZombie(zombie, bullet){
     bullet.kill();
     console.log("ZOMBIE HIT BY BULLET", zombie, bullet);
-    console.log('we need to dispatch an event to let others know');
-    if (zombie.ownerId === socket.id){
-      console.log('my zombie has been shot', zombie);
-      //TODO: update zombie stat
-    }
     if (bullet.shooterSocketId === socket.id){
       //TODO: dispatch event and let everyone know its been hit
+      //dispatch event and let everyone know its been hit
       console.log('i hit a zombie so I should let other people know ');
+      store.dispatch(dispatchZombieHitEvent({
+          zombieId: zombie.id,
+          damage: currentPlayerSprite.gun.damage,
+          shooterId: socket.id,
+          zombieOwnerId: zombie.ownerId
+      }));
+      killZombie(zombie);
     }
-    //TODO: move to separate function where zombies take damage and may die
+  }
+
+  killZombie(zombie){
     zombie.hit = true;
     zombie.animations.stop();
     zombie.animations.play('dead')
@@ -604,13 +610,7 @@ export default class ZombieGameState extends TiledState {
       zombie.kill();
     });
 
-    //TODO: if bullet shooterId = socket.id
-        //dispatch event and let everyone know its been hit
-            //if not your zombie, just play damage animation
-            //if you own the zombie thats been hit, you update its health for everyone
-    console.log("ZOMBZ", zombie.x, zombie.y);
-
-		const zX =  zombie.x;
+    const zX =  zombie.x;
 	  const zY =  zombie.y;
 
 	  let zombieDyingPrefab = this.createPrefab('zombieDead',

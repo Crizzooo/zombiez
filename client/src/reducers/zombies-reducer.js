@@ -1,14 +1,20 @@
 import axios from 'axios';
 import R from 'ramda';
+import EVENT_LOOP_DELETE_TIME from '../engine/gameConstants.js';
+import store from '../store.js';
 
 /* Action Types */
 const UPDATE_LOCAL_ZOMBIES = 'UPDATE_LOCAL_ZOMBIES';
 const UPDATE_REMOTE_ZOMBIES = 'UPDATE_REMOTE_ZOMBIES';
+const ZOMBIE_SHOT = 'ZOMBIE_SHOT';
+const REMOVE_EVENT = 'REMOVE_EVENT';
 
 
 /* Action Creators */
 export const updateLocalZombies = zombieStates => ({ type: UPDATE_LOCAL_ZOMBIES, zombieStates });
 export const updateRemoteZombies = serverZombieStates => ({ type: UPDATE_REMOTE_ZOMBIES, serverZombieStates});
+export const dispatchZombieHitEvent = eventObj => ({ type: ZOMBIE_SHOT, event: eventObj });
+export const removeEvent = (eventType, eventId) => ({ type: REMOVE_EVENT, type: eventType, eventId: eventId});
 // export const updateRemoteZombies =
 
 
@@ -16,7 +22,7 @@ export const updateRemoteZombies = serverZombieStates => ({ type: UPDATE_REMOTE_
 const initialState = {
   localZombies: {},
   remote: {},
-  events: {
+  localEvents: {
     zombieTakeDamage: {},
     zombieGiveDamage: {}
   }
@@ -41,6 +47,19 @@ export default (state = initialState, action) => {
     case UPDATE_REMOTE_ZOMBIES:
       let newRemoteZombies = Object.assign({}, action.serverZombieStates);
       newState.remote = newRemoteZombies;
+      break;
+
+    case ZOMBIE_SHOT:
+      if (!newState.zombieTakeDamage[action.event.eventId]) {
+        newState.zombieTakeDamage[action.event.eventId] = action.event;
+        setTimeout(store.dispatch(removeEvent('zombieTakeDamage', action.event.eventId)), EVENT_LOOP_DELETE_TIME * 1.5);
+      }
+      break;
+
+    case REMOVE_EVENT:
+      let newEvents = Object.assign({}, newState.localEvents);
+      delete newEvents[action.type][action.eventId];
+      newState.localEvents = newEvents;
       break;
 
     default:
