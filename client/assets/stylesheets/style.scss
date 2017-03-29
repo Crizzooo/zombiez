@@ -1,7 +1,7 @@
 /* Variables */
 $button-height: 40px;
 $container-height: 100%;
-$gameContainer-height: 100vh;
+$gameContainer-height: 99.5vh;
 
 * {
   box-sizing: border-box;
@@ -63,7 +63,8 @@ body {
   display: block;
   // padding-top: calc(100% - $button-height);
   padding: 0px;
-  background-color: pink;
+  background-image: url('../../assets/images/splashScreen.jpg');
+  background-size: 100%;
   box-sizing: border-box;
   margin-bottom: -220px;
   z-index: 1;

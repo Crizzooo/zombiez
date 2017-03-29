@@ -27,7 +27,7 @@ body {
 
 /* Main Container Styles */
 .mainContainer {
-  height: 0vh;
+  height: 0.5vh;
   z-index: 10; }
 
 #mainRow {
@@ -46,13 +46,14 @@ body {
   margin: auto;
   display: block;
   padding: 0px;
-  background-color: pink;
+  background-image: url("../../assets/images/splashScreen.jpg");
+  background-size: 100%;
   box-sizing: border-box;
   margin-bottom: -220px;
   z-index: 1; }
 
 .gc {
-  height: 100vh;
+  height: 99.5vh;
   background-color: black; }
 
 .buttonHolder {

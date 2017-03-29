@@ -87,6 +87,10 @@
       "type": "sound",
       "source": "../../assets/sounds/gameWin.wav"
     },
+    "reloadSuccess": {
+      "type": "sound",
+      "source": "../../assets/sounds/reloadSuccess.wav"
+    },
 
     "levelTilemap": {"type": "tilemap", "source": "../../assets/maps/main.json"}
   },
