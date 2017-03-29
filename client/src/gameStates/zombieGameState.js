@@ -249,8 +249,6 @@ export default class ZombieGameState extends TiledState {
       this.dispatchCurrentPlayer();
       if (this.currentPlayerSprite.stats.health <= 0) {
         //could be random spots on map for now it's here for debugging
-        this.currentPlayerSprite.x = 250;
-        this.currentPlayerSprite.y = 250;
         this.currentPlayerSprite.resetHealth();
       }
       //not ideal, but gets the job done, will refactor later
