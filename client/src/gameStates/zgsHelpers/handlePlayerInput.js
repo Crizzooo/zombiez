@@ -71,7 +71,6 @@ export let handleInput = (player) => {
         player.gun.shoot(player);
       }
 
-<<<<<<< HEAD
       if(player.gun.isReloading && !player.gun.isJammed){
           player.reloadBar.visible = true;
           // player.reloadTween.start();
