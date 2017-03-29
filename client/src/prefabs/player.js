@@ -357,13 +357,11 @@ export default class Player extends Prefab {
 
     //Set tint to show damage
     //TODO: change to a red tint
-    if (this.stats.health <= 0) {
       this.tint = PLAYER_DAMAGE_TINT;
       setTimeout(() => {
         this.tint = 0xffffff;
         //Change Health hearts <----- WHY CHARLIE, WHY IN A setTimeout?! I FOUND THIS AFTER 4 HOURS
-        // this.health.newHealth(this.stats.health);
+        this.health.newHealth(this.stats.health);
       }, 250)
-    }
   }
 }
