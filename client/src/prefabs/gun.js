@@ -27,9 +27,11 @@ export default class Gun extends GunPrefab {
     this.pivot.x = -10;
     this.isJammed = false;
     this.rotation;
+    this.activeReloaded = false;
     gameObj = this.game;
     this.minDistanceSound = 30;
     this.maxDistanceSound = 600;
+    this.player = this.game.currentPlayerSprite;
   }
 
   playSound (player, whatSound, volume)  {
@@ -45,9 +47,8 @@ export default class Gun extends GunPrefab {
       if(this.isReloading) {
         return null;
       } else if (this.ammo === 0 && !this.isReloading){
-        this.isReloading = true;
         this.reloadGun();
-        this.playSound(player, 'pistolReload', 1);
+        if (player.socketId === socket.id)  this.playSound(player, 'pistolReload', 1);
       }
       return;
     }
@@ -103,15 +104,38 @@ export default class Gun extends GunPrefab {
 
 
   reloadGun(){
-    this.reloadInterval = setTimeout(() => {
-      this.ammo = this.clip;
-      this.isReloading = false;
-      this.game.currentPlayerSprite.clipUpdate();
-      if(this.isJammed) {
+    this.isReloading = true;
+    // console.log(this);
+    // console.dir(this.game.currentPlayerSprite, { depth: 3 });
+    // console.log(this.game.currentPlayerSprite.reloadBar);
+    this.game.currentPlayerSprite.reloadingAnim = this.game.currentPlayerSprite.reloadBar.animations.play('playReload');
+
+    this.game.currentPlayerSprite.reloadingAnim.onComplete.addOnce( () => {
+      //if active reloaded do something
+      if (this.activeReloaded){
+        //take off activeReloaded
+        this.activeReloaded = false;
+        this.game.currentPlayerSprite.reloadBar.visible = false;
+        this.game.currentPlayerSprite.reloadBar.tint = 0xffffff;
+        // this.game.currentPlayerSprite.reloadBar.animations.stop();
+        return;
+      } else if (this.isJammed){
+        this.ammo = this.clip;
+        this.game.currentPlayerSprite.clipUpdate();
         this.isJammed = false;
-        this.reloadSpeed = 2000;
+        this.isReloading = false;
+        //update clip to full
+        this.game.currentPlayerSprite.reloadBar.visible = false;
+        this.game.currentPlayerSprite.reloadBar.tint = 0xffffff;
+      } else {
+        //let the reload finish
+        this.ammo = this.clip;
+        this.game.currentPlayerSprite.clipUpdate();
+        this.isReloading = false;
+        this.game.currentPlayerSprite.reloadBar.visible = false;
+        this.game.currentPlayerSprite.reloadBar.tint = 0xffffff;
       }
-    }, this.reloadSpeed)
+    });
   }
 // <<<<<<< HEAD
 

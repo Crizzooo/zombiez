@@ -82,6 +82,7 @@ export default class Player extends Prefab {
 	  this.cursors.jump = this.gameState.input.keyboard.addKey(Phaser.Keyboard.SPACEBAR);
 	  this.cursors.chat = this.gameState.input.keyboard.addKey(Phaser.Keyboard.TAB);
     this.cursors.reload = this.gameState.input.keyboard.addKey(Phaser.Keyboard.R);
+    this.cursors.esc = this.gameState.input.keyboard.addKey(Phaser.Keyboard.ESC);
 	  this.cursors.fire = this.gameState.input.activePointer;
   }
 
@@ -222,13 +223,11 @@ export default class Player extends Prefab {
   }
 
   loadReloadBar(){
+    console.log('this', this);
+    console.log('game ', this.game);
     let canvas = document.getElementsByTagName("canvas")[0];
-    console.log("MY X COORDINATE", this.x);
-    this.reloadBar = this.gameState.game.add.sprite((canvas.width/2), this.top, 'reloadBarSpriteSheet', 0);
-    // this.add(this.reloadBar);
-    // this.reloadBar.add.tween
+    this.reloadBar = this.gameState.game.add.sprite( (canvas.width/2), (canvas.height/2) - 25, 'reloadBarSpriteSheet', 0);
     this.reloadBar.anchor.setTo(0.5);
-    // console.log("PLAYER?", this);
     this.gameState.game.add.existing(this.reloadBar);
     this.reloadBar.visible = false;
     this.reloadBar.fixedToCamera = true;
@@ -247,7 +246,7 @@ export default class Player extends Prefab {
   }
 
   clipUpdate() {
-    this.gunUiFrame.gunClip.text = this.gun.clip + '/' + this.gun.ammo;
+    this.gunUiFrame.gunClip.text = this.gun.ammo + '/' + this.gun.clip;
   }
 
   loadHealthbar() {
