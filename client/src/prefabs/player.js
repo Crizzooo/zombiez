@@ -101,24 +101,26 @@ export default class Player extends Prefab {
 
   loadGunUi() {
     //TODO: Should base entire ui off gunFrame in order to center sprites
-    this.gunUiFrame = this.gameState.game.add.sprite(0, 25, 'gunUiFrame', 8);
+    console.log('rendering canvas at: ', $('canvas').width-50)
+    this.gunUiFrame = this.gameState.game.add.sprite($('canvas')[0].width - 210, -20, 'gunUiFrame', 8);
     this.gameState.game.add.existing(this.gunUiFrame);
     this.gunUiFrame.fixedToCamera = true;
     this.gunUiFrame.alpha = 0.5;
-    this.gunUiFrame.gunSprite = this.gameState.game.add.sprite(90, 70, 'pistolSpriteSheet', this.gun.frame);
+    this.gunUiFrame.gunSprite = this.gameState.game.add.sprite($('canvas')[0].width-120, 25, 'pistolSpriteSheet', this.gun.frame);
     this.gameState.game.add.existing(this.gunUiFrame.gunSprite);
     this.gunUiFrame.gunSprite.scale.setTo(3, 3);
     this.gunUiFrame.gunSprite.smoothed = false;
     this.gunUiFrame.gunSprite.fixedToCamera = true;
 
     const style = {
-      font: "bold 30px Arial",
+      font: "bold 21px Arial",
       fill: "#FFF",
       stroke: "#000",
       strokeThickness: 3
     };
 
-    this.gunUiFrame.gunClip = this.game.add.text(50, 25, this.gun.ammo + '/' + this.gun.clip, style);
+    this.gunUiFrame.gunClip = this.game.add.text($('canvas')[0].width-176, 50, this.gun.ammo + '/' + this.gun.clip, style);
+    // this.gunUiFrame.gunClip.setScale(0.8, 0.8);
     this.gunUiFrame.gunClip.fixedToCamera = true;
   }
 
@@ -169,6 +171,7 @@ export default class Player extends Prefab {
   }
 
   upgradeGun() {
+    console.log('called upgrade gun for: ', this);
     this.currentGunLevel++;
     //console.log("INSIDE OF LOAD GUN!!", this);
     switch (this.currentGunLevel) {
@@ -200,6 +203,7 @@ export default class Player extends Prefab {
         group: 'ui'
       }
     );
+    // this.health.scale.setTo(0.75, 0.75);
 
     for (let i = 0; i < 10; i++) {
       this.health.addHearts(this.game.add.existing(new Heart(this.gameState, 'playerHeart' + i, {x: (32 * i), y: 0},
@@ -213,7 +217,7 @@ export default class Player extends Prefab {
   }
 
   resetHealth() {
-    this.stats.health += 100;
+    this.stats.health = 100;
     if (socket.id !== this.socketId) {
       this.healthbar.text = this.stats.health;
     } else {
@@ -256,13 +260,16 @@ export default class Player extends Prefab {
 
     //Set tint to show damage
     //TODO: change to a red tint
-    if (this.stats.health <= 0) {
       this.tint = PLAYER_DAMAGE_TINT;
       setTimeout(() => {
         this.tint = 0xffffff;
         //Change Health hearts <----- WHY CHARLIE, WHY IN A setTimeout?! I FOUND THIS AFTER 4 HOURS
         // this.health.newHealth(this.stats.health);
       }, 250)
+    if (this.stats.health <= 0){
+      this.x = 200;
+      this.y = 200;
+      this.resetHealth();
     }
   }
 }
