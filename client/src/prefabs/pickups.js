@@ -1,5 +1,7 @@
 import Prefab from './Prefab';
 import store from '../store.js';
+import {PICKUP_RESPAWN_RATE} from '../engine/gameConstants.js';
+import {createCreateEvent} from '../engine/managePickups.js';
 
 export default class Pickup extends Prefab {
 
@@ -34,27 +36,26 @@ export default class Pickup extends Prefab {
       //send destroy event to reducer
       //set timeout to remove from reducer
 
-    //set timeout to create
-        //create pickup yourself
-        //dispatch pickup event
-        // send create event to reducer
-        //set timeout to remove event from reducer
 
-    if(pickupType === 'healthPickup'){
+
+    if(pickupType === 'health'){
       if(player.stats.health >= 70) player.stats.health = 100;
       else player.stats.health += 30;
       player.setHealth(player.stats.health);
     }
 
 
-    else if (pickupType === 'speedPickup') {
+    else if (pickupType === 'speed') {
       player.stats.movement += 100;
       console.log('PICKED UP SPEEED BOOOST', player)
       setTimeout(()=>{player.stats.movement -= 100}, 5000);
     }
 
-    this.kill();
+    this.destroy();
 
+    setTimeout(()=>{
+      createCreateEvent(pickupType);
+    }, PICKUP_RESPAWN_RATE)
   }
 
 

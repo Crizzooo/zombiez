@@ -366,7 +366,7 @@ export default class ZombieGameState extends TiledState {
 
   pickupCollision(player, pickup){
     console.log('colliding ', player, 'with', pickup);
-    pickup.onCollide(player, pickup.key, pickup.id)
+    pickup.onCollide(player, pickup.type, pickup.id)
     console.log('PICKED UP PICKUP WITH ID: ', pickup.id);
     //TODO: pickups - pull off pickupId
       //dispatch Destroy for that type and id

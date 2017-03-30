@@ -1,8 +1,9 @@
-import addPickupEvent from '../reducers/players-reducer.js';
+import {addPickupEvent, removePickupEvent} from '../reducers/players-reducer.js';
+import store from '../store.js';
+import {EVENT_LOOP_DELETE_TIME} from './gameConstants.js';
 
 
-//counter variable to generate id
-let eventPickupCount = 0;
+
 
 let healthPickupObj = {
   type: 'pickup',
@@ -22,22 +23,30 @@ let speedPickupObj = {
   }
 };
 
+let spawnLocations = [ [ 320, 64 ],
+  [ 576, 256 ],
+  [ 832, 64 ],
+  [ 64, 640 ],
+  [ 544, 512 ],
+  [ 576, 512 ],
+  [ 544, 544 ],
+  [ 576, 544 ],
+  [ 1024, 640 ],
+  [ 448, 1056 ],
+  [ 640, 1056 ] ];
 
-let healthPickupSprites = {
 
-}
+let healthPickupSprites = {};
 
-let speedPickupSprites = {
+let speedPickupSprites = {};
 
-}
-
-let pickupEventHash = {
-
-}
+let pickupEventHash = {};
 
 let healthCount = 0;
 let speedCount = 0;
 
+//counter variable to generate id
+let eventPickupCount = 0;
 
 let gameState;
 //init pickups function on load
@@ -45,11 +54,9 @@ export const initPickups = (receivedState) => {
   gameState = receivedState;
   initHealth();
   initSpeed();
-
 }
 
 function initHealth(){
-  //TODO: change starting locations
   placePickupOnMap('health', healthPickupObj, 320, 64);
   placePickupOnMap('health', healthPickupObj, 640, 1056);
 }
@@ -75,6 +82,7 @@ function placePickupOnMap(pickupType, pickupObj, x, y){
 
   //attach the id
   pickupSprite.id = id;
+  pickupSprite.type = pickupType;
 
   //store in correct hashMap
   if (pickupType === 'health') {
@@ -82,6 +90,46 @@ function placePickupOnMap(pickupType, pickupObj, x, y){
   } else if (pickupType == 'speed') {
     speedPickupSprites[id] = pickupSprite;
   }
+}
+
+//handleCreateEvent
+export const createCreateEvent = (type) => {
+  let spawnLocation = spawnLocations[Math.floor(Math.random() * 11)];
+  let x = spawnLocation[0];
+  let y = spawnLocation[1];
+
+  let eventId = socket.id + eventPickupCount++;
+
+  let eventObj = {
+    event: 'create',
+    type,
+    x,
+    y
+  }
+
+  store.dispatch(addPickupEvent(eventObj));
+  if (type === '')
+
+  setTimeout( () => {
+    store.dispatch(removePickupEvent(eventId));
+  }, EVENT_LOOP_DELETE_TIME * 1.5);
+}
+
+export const createDestroyEvent = (type, pickupSpriteId) => {
+  let eventId = socket.id + eventPickupCount++;
+
+  let eventObj = {
+    event: 'destroy',
+    type,
+    pickupSpriteId,
+    id: eventId
+  }
+
+  store.dispatch(addPickupEvent(eventObj));
+
+  setTimeout( () => {
+        store.dispatch(removePickupEvent(eventId));
+  }, EVENT_LOOP_DELETE_TIME * 1.5);
 }
 
 //createHealth

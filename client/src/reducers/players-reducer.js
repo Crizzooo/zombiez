@@ -12,6 +12,7 @@ const PLAYER_LEAVE_GAME = 'PLAYER_LEAVE_GAME';
 const RESET_PLAYERS = 'RESET_PLAYERS';
 const REMOVE_CURRENT_PLAYER = 'REMOVE_CURRENT_PLAYER';
 const ADD_PICKUP_EVENT = 'ADD_PICKUP_EVENT';
+const REMOVE_PICKUP_EVENT = 'REMOVE_PICKUP_EVENT';
 
 /* Action Creators */
 export const loadMessage = message => ({ type: CHANGE_MESSAGE, message });
@@ -40,6 +41,11 @@ export const removeCurrentPlayer = () => ({
 export const addPickupEvent = (eventInfo) => ({
   type: ADD_PICKUP_EVENT,
   eventInfo
+})
+
+export const removePickupEvent = (eventId) => ({
+  type: REMOVE_PICKUP_EVENT,
+  eventId
 })
 //will look like this on the front end
 //addPickupEvent({type: 'speed', event:'create', x: 100, y: 100})
@@ -79,9 +85,12 @@ export default (state = initialState, action) => {
 
     case ADD_PICKUP_EVENT:
       newState.currentPlayer = Object.assign({}, newState.currentPlayer, {playerPickupHash: state.currentPlayer.playerPickupHash})
-
       break;
 
+    case REMOVE_PICKUP_EVENT:
+      newState.currentPlayer = Object.assign({}, newState.currentPlayer, {playerPickupHash: state.currentPlayer.playerPickupHash});
+      delete newState.currentPlayer.playerPickupHash[action.eventId];
+      break;
 
     case UPDATE_PLAYERS:
       //filter through players and make sure no undefined
