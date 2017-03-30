@@ -44,17 +44,15 @@ export default class HealthBar extends Phaser.Sprite {
     let numHearts = Math.floor((health / 10) % 10);
     let halfHeart = health % 10 > 5 ? true : false;
 
-    if (health < 0) {
-      return;
-    }
+  
+
+
     //Loops through hearts and sets them appropriately
     for (let i = this.currentHeart; i >= numHearts; i--) {
       if (i > numHearts) {
         this.hearts[i].changeHeart('empty');
-        // console.log("WHY AMI I BEING CALLED");
       } else {
         (halfHeart ? this.hearts[i].changeHeart('half') : this.hearts[i].changeHeart('empty'))
-        // console.log("WHY AM I");
       }
     }
   }
