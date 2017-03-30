@@ -115,7 +115,7 @@ export let handleInput = (player) => {
               player.reloadingAnim.complete();
               clearInterval(jamInterval); }, 3500)
         }
-    } else if (cursors.reload.isDown && player.gun.ammo !== player.gun.clip){
+    } else if (cursors.reload.isDown && player.gun.ammo !== player.gun.clip && !player.gun.activeReloaded){
       player.gun.reloadGun();
     }
 
