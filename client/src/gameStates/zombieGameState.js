@@ -81,13 +81,6 @@ export default class ZombieGameState extends TiledState {
     //load assets that are specific for this level
     this.load.bitmapFont('carrier_command', '../../assets/fonts/carrier_command.png', '../../assets/fonts/carrier_command.xml');
 
-  }
-
-  create() {
-    //Create game set up through tiled state by calling super
-    //Loads level tilemap
-    super.create.call(this);
-
     //adding sound here?
     this.soundLoop = this.game.add.audio('soundLoop',1,true);
     this.shootSound = this.game.add.audio('shootSound');
@@ -101,7 +94,12 @@ export default class ZombieGameState extends TiledState {
     this.gameWin = this.game.add.audio('gameWin');
     this.reloadSuccess = this.game.add.audio('reloadSuccess');
     this.reloadFail = this.game.add.audio('reloadFail');
-    let x = true;
+  }
+
+  create() {
+    //Create game set up through tiled state by calling super
+    //Loads level tilemap
+    super.create.call(this);
 
     //Create worldGrid and tile dimensions for pathfinding
     //Load light plugin
@@ -702,6 +700,7 @@ export default class ZombieGameState extends TiledState {
 
     if (!playerToDamage) {
       console.error('could not find the id of the player to take damage from event: ', damageEvent);
+      this.playerDamageHash[damageEventId] = true;
     }
     //if key is not in our hash map)
     if (this.playerDamageHash[damageEventId] !== true){

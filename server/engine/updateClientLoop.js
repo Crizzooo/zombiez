@@ -92,7 +92,7 @@ const endGame = () => {
   //reset game
   store.dispatch(resetEngine());
   //reset lobby
-  // store.dispatch(resetLobby());
+  store.dispatch(resetLobby());
   //reset zombies
   store.dispatch(resetZombies());
 

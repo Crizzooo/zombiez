@@ -28,7 +28,6 @@ export let handleInput = (player) => {
       gameDiv.focus();
       ZG.game.isInChat = false;
     }
-
     if (cursors.chat.isDown) {
       document.getElementsByClassName("container")[0].style.visibility = "visible";
       textInput.focus();
