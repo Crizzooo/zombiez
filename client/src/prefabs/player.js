@@ -137,8 +137,6 @@ export default class Player extends Prefab {
   }
 
   loadReloadBar(){
-    console.log('this', this);
-    console.log('game ', this.game);
     let canvas = document.getElementsByTagName("canvas")[0];
     this.reloadBar = this.gameState.game.add.sprite( (canvas.width/2), (canvas.height/2) - 25, 'reloadBarSpriteSheet', 0);
     this.reloadBar.anchor.setTo(0.5);
@@ -201,14 +199,23 @@ export default class Player extends Prefab {
       case 1:
         this.gun.frame = 8;
         this.gunUiFrame.gunSprite.frame = 8;
+        this.gun.spread = 0;
         break;
       case 2:
         this.gun.frame = 6;
         this.gunUiFrame.gunSprite.frame = 6;
+        this.gun.damage -= 5;
+        this.gun.rateOfFire -= 200;
+        this.gun.clip = 30;
+        this.gun.spread = 0.1;
         break;
       case 3:
         this.gun.frame = 1;
         this.gunUiFrame.gunSprite.frame = 1;
+        this.gun.rateOfFire += 600;
+        this.stats.movement += 100;
+        this.gun.damage += 45;
+        this.gun.spread = 0;
         break;
       case 4:
         this.hasWon = true;
@@ -284,26 +291,25 @@ export default class Player extends Prefab {
     }
   }
 
+
   receiveDamage(damage) {
     //Change healthbar
-    console.log('this receiving dmg: ', this, damage);
     this.stats.health -= damage;
 
     if (socket.id !== this.socketId){
-      console.log('updating remote player health');
       this.healthbar.text = this.stats.health;
     } else {
-      console.log('cp updating health on dmg event');
       this.health.newHealth(this.stats.health);
     }
       this.tint = PLAYER_DAMAGE_TINT;
       setTimeout(() => {
         this.tint = 0xffffff;
       }, 250)
+
     if (this.stats.health <= 0){
       let index = Math.floor(Math.random() * 8);
-      this.x = this.spawnLocations[index].x;
-      this.y = this.spawnLocations[index].y;
+      this.x = this.x = this.spawnLocations[index].x;
+      this.y = this.y = this.spawnLocations[index].y;
       this.resetHealth();
     }
   }

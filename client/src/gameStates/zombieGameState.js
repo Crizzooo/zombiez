@@ -83,7 +83,7 @@ export default class ZombieGameState extends TiledState {
     this.load.bitmapFont('carrier_command', '../../assets/fonts/carrier_command.png', '../../assets/fonts/carrier_command.xml');
 
     //adding sound here?
-    this.soundLoop = this.game.add.audio('soundLoop',1,true);
+    this.soundLoop = this.game.add.audio('soundLoop', 1, true);
     this.shootSound = this.game.add.audio('shootSound');
     this.pistolReload = this.game.add.audio('pistolReload');
     this.lightPistolShot = this.game.add.audio('lightPistolShot');
@@ -116,6 +116,38 @@ export default class ZombieGameState extends TiledState {
     //create game set up
     //This creates player prefab
     this.loadLevel();
+// <<<<<<< HEAD
+//
+//     ///////////TODO: WIP
+//     let enemyPrefab = this.createPrefab('zombie',
+//       {
+//         type: 'enemies',
+//         properties: {
+//           group: 'enemies',
+//           initial: 9,
+//           texture: 'zombieSpriteSheet'
+//         }
+//       }, {x: 200, y: 200});
+//
+//     // let reloadBar = this.createPrefab('reloadBar', {
+//     //   type: 'guns',
+//     //   properties: {
+//     //     group: 'guns',
+//     //     initial: 0,
+//     //     texture: 'reloadBarSpriteSheet'
+//     //   }
+//     // }, {x: this.currentPlayerSprite.world.x, y: this.currentPlayerSprite.world.y + 10});
+//
+//     // this.reloadBar = reloadBar;
+//     this.currentEnemy = enemyPrefab;
+//     this.currentEnemy.moveTo = throttle(this.currentEnemy.moveTo, 1000);
+//     this.currentEnemy.animations.play('left');
+//
+//     this.enemyGroup = this.game.add.group();
+//     this.enemyGroup.name = 'enemySpriteGroup';
+//     this.enemyGroup.add(enemyPrefab);
+// =======
+// >>>>>>> origin/master
 
     //Remote Player Movement
     //This gets us the first player from the remote players
@@ -223,18 +255,15 @@ export default class ZombieGameState extends TiledState {
       //every 32ms send package to server with position
       handleInput(this.currentPlayerSprite);
       this.dispatchCurrentPlayer();
-      // if (this.currentPlayerSprite.stats.health === 0) {
-      //   let index = Math.floor(Math.random() * 8);
-      //   this.currentPlayerSprite.x = this.spawnLocations[index].x;
-      //   this.currentPlayerSprite.y = this.spawnLocations[index].y;
-      //   this.currentPlayerSprite.resetHealth();
-      // }
+      if (this.currentPlayerSprite.stats.health <= 0) {
+        this.currentPlayerSprite.resetHealth();
+      }
       //not ideal, but gets the job done, will refactor later
       this.currentPlayerSprite.checkForRankUp(remotePlayerSprites);
       //Tween all player assets
       //Remote and current
       tweenCurrentPlayerAssets(this.currentPlayerSprite, this);
-
+      // if(this.currentPlayerSprite.currentGunLevel === 3) this.currentPlayerSprite.checkKnifeDistance();
       //check to see if current player won
       if (this.currentPlayerSprite.hasWon) {
         this.displayEndGameText('You');
@@ -330,7 +359,7 @@ export default class ZombieGameState extends TiledState {
         playerDamageHash: currentPlayerSprite.playerDamageHash
         //NOTE: pointerX and pointerY are attached in dispatch CP
         //TODO: gun, bullets, frame? etc
-      }
+      };
 
       //add it to the world
       this.game.add.existing(currentPlayerSprite);
@@ -563,7 +592,7 @@ export default class ZombieGameState extends TiledState {
   // }
 
   bulletHitWall(bullet, layer) {
-    // console.log('this bullet has hit a wall: ', bullet);
+    console.log('this bullet has hit a wall: ', bullet);
     if (bullet.parent.name === 'currentPlayerBulletGroup') {
       // console.log('i just hit a fucking wall, I suck');
     } else if (bullet.parent.name === 'remotePlayerBulletGroup') {
@@ -622,7 +651,10 @@ export default class ZombieGameState extends TiledState {
   }
 
   bulletHitPlayer(player, bullet) {
+    // console.log("PLAYER X AND Y", player.x, player.y);
+    // console.log("DISTANCE!!!!!!!!!", Math.sqrt(Math.pow((this.currentPlayerSprite.x - player.x), 2) + Math.pow((this.currentPlayerSprite.y - player.y), 2) ));
     bullet.kill();
+    console.log('this bullet has hit a player: ', player);
     if (bullet.shooterSocketId === player.socketId) {
       console.log('cant damage self');
       return;
@@ -655,7 +687,6 @@ export default class ZombieGameState extends TiledState {
       }
     }
   }
-
 
   handlePlayerDamage(playerSocketId, playerWhoDealtDamage) {
     // console.log('handle player damage');
