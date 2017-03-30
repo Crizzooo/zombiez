@@ -68,6 +68,8 @@ export default class ZombieGameState extends TiledState {
     socket.on('destroyCurrentPlayerSprite', this.destroyCurrentPlayerSprite);
     socket.on('playerLeaveGame', this.handleRemotePlayerLeave);
 
+
+
     // this.logPreZombie = throttle( () => { console.log('pre Zombie update',  store.getState()) }, 15000);
     // this.logPostZombie = throttle( () => { console.log('post Zombie update', store.getState()) }, 15000);
   }
@@ -248,7 +250,6 @@ export default class ZombieGameState extends TiledState {
       handleInput(this.currentPlayerSprite);
       this.dispatchCurrentPlayer();
       if (this.currentPlayerSprite.stats.health <= 0) {
-        //could be random spots on map for now it's here for debugging
         this.currentPlayerSprite.resetHealth();
       }
       //not ideal, but gets the job done, will refactor later
@@ -256,7 +257,7 @@ export default class ZombieGameState extends TiledState {
       //Tween all player assets
       //Remote and current
       tweenCurrentPlayerAssets(this.currentPlayerSprite, this);
-
+      // if(this.currentPlayerSprite.currentGunLevel === 3) this.currentPlayerSprite.checkKnifeDistance();
       //check to see if current player won
       if (this.currentPlayerSprite.hasWon) {
         this.displayEndGameText('You');
@@ -303,6 +304,7 @@ export default class ZombieGameState extends TiledState {
     if (state.players.currentPlayer.name) {
       currentPlayer = state.players.currentPlayer;
 
+
       //TODO: make server assign sprite keys
       currentPlayerSprite = this.createPrefab(currentPlayer.name,
         {
@@ -313,7 +315,7 @@ export default class ZombieGameState extends TiledState {
             texture: 'playerSpriteSheet',
             socketId: socket.id
           },
-        }, {x: 225, y: 225}); //change to new location from server
+        }, {x: currentPlayer.x, y: currentPlayer.y}); //change to new location from server
 
 
       //NOTE: Add bulletGroup to current player sprite
@@ -350,7 +352,7 @@ export default class ZombieGameState extends TiledState {
         playerDamageHash: currentPlayerSprite.playerDamageHash
         //NOTE: pointerX and pointerY are attached in dispatch CP
         //TODO: gun, bullets, frame? etc
-      }
+      };
 
       //add it to the world
       this.game.add.existing(currentPlayerSprite);
@@ -582,7 +584,7 @@ export default class ZombieGameState extends TiledState {
   // }
 
   bulletHitWall(bullet, layer) {
-    // console.log('this bullet has hit a wall: ', bullet);
+    console.log('this bullet has hit a wall: ', bullet);
     if (bullet.parent.name === 'currentPlayerBulletGroup') {
       // console.log('i just hit a fucking wall, I suck');
     } else if (bullet.parent.name === 'remotePlayerBulletGroup') {
@@ -641,7 +643,10 @@ export default class ZombieGameState extends TiledState {
   }
 
   bulletHitPlayer(player, bullet) {
+    // console.log("PLAYER X AND Y", player.x, player.y);
+    // console.log("DISTANCE!!!!!!!!!", Math.sqrt(Math.pow((this.currentPlayerSprite.x - player.x), 2) + Math.pow((this.currentPlayerSprite.y - player.y), 2) ));
     bullet.kill();
+    console.log('this bullet has hit a player: ', player);
     if (bullet.shooterSocketId === player.socketId) {
       console.log('cant damage self');
       return;

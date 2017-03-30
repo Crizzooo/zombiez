@@ -17,9 +17,21 @@ export default class Player extends Prefab {
       movement: 100
     };
 
+    this.spawnLocations = [
+      {x: 160, y: 128},
+      {x: 480, y: 544},
+      {x: 608, y: 1088},
+      {x: 224, y: 1440},
+      {x: 1376, y: 1408},
+      {x: 1120, y: 1088},
+      {x: 1088, y: 576},
+      {x: 1376, y: 160}
+    ];
+
     //TODO: make it only visible to the current player
     //Load Hearts, Healthbar, Animations
     this.socketId = properties.socketId;
+
 
 
     this.loadAnimations();
@@ -122,111 +134,9 @@ export default class Player extends Prefab {
     this.gunUiFrame.gunClip = this.game.add.text($('canvas')[0].width-176, 50, this.gun.ammo + '/' + this.gun.clip, style);
     // this.gunUiFrame.gunClip.setScale(0.8, 0.8);
     this.gunUiFrame.gunClip.fixedToCamera = true;
-// <<<<<<< HEAD
-//   }
-//
-//   loadReloadBar(){
-//     this.reloadBar = this.gameState.game.add.sprite(this.x + 120, this.y - 90, 'reloadBarSpriteSheet', 0);
-//     // this.reloadBar.add.tween
-//     // console.log("PLAYER?", this);
-//     this.gameState.game.add.existing(this.reloadBar);
-//     this.reloadBar.visible = false;
-//     this.reloadBar.fixedToCamera = true;
-//     this.reloadBar.animations.add('playReload', [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29], 15, false);
-//   }
-//
-//   loadMedalUi(){
-//     let canvas = document.getElementsByTagName("canvas")[0];
-//     this.medal = this.gameState.game.add.sprite((canvas.width/2), 0, 'medalSpriteSheet', 3);
-//     this.gameState.game.add.existing(this.medal);
-//     this.medal.fixedToCamera = true;
-//   }
-//
-//   loadGunIntoUi(gunName) {
-//     this.gunUiFrame.gunSprite = this.gameState.game.add.sprite(0, 25, gunName + 'SpriteSheet', 1);
-//   }
-//
-//   clipUpdate() {
-//     this.gunUiFrame.gunClip.text = this.gun.clip + '/' + this.gun.ammo;
-//   }
-//
-//   loadHealthbar() {
-//     //Health text, to be replaced by healthbar
-//     const style = {
-//       font: "bold 16px Arial",
-//       fill: "#FFF",
-//       stroke: "#000",
-//       strokeThickness: 3
-//     };
-//
-//     this.healthbar = this.game.add.text(
-//       this.position.x - 10,
-//       this.position.y - 10,
-//       this.stats.health, style);
-//
-//     //TODO: bullets collide with health?
-//     //Add to existing
-//     //this.gameState.add.existing(this.healthbar);
-//   }
-//
-//   upgradeGun(player) {
-//     player.currentGunLevel++;
-//     console.log("INSIDE OF LOAD GUN!!", player);
-//     switch (player.currentGunLevel) {
-//       case 1:
-//         player.gun.frame = 8;
-//         player.gunUiFrame.gunSprite.frame = 8;
-//         break;
-//       case 2:
-//         player.gun.frame = 6;
-//         player.gunUiFrame.gunSprite.frame = 6;
-//         break;
-//       case 3:
-//         player.gun.frame = 1;
-//         player.gunUiFrame.gunSprite.frame = 1;
-//         break;
-//       case 4:
-//         player.hasWon = true;
-//         break;
-//     }
-//   }
-//
-//   loadHearts() {
-//     //Health hearts, top left hearts
-//     this.health = new HealthHeart(this.gameState, 'playerHealthHearts', {x: 0, y: 0},
-//       {
-//         group: 'ui'
-//       }
-//     );
-//
-//     for (let i = 0; i < 10; i++) {
-//       this.health.addHearts(this.game.add.existing(new Heart(this.gameState, 'playerHeart' + i, {x: (32 * i), y: 0},
-//         {
-//           texture: 'playerHearts',
-//           group: 'ui',
-//           initial: 2
-//         })
-//       ))
-//     }
-//   }
-//
-//   resetHealth() {
-//     this.stats.health += 100;
-//     if (socket.id !== this.socketId) {
-//       this.healthbar.text = this.stats.health;
-//     } else {
-//       this.health.hearts.forEach((heartSprite) => {
-//         heartSprite.changeHeart("full");
-//       })
-//     }
-//   }
-//
-// =======
   }
 
   loadReloadBar(){
-    console.log('this', this);
-    console.log('game ', this.game);
     let canvas = document.getElementsByTagName("canvas")[0];
     this.reloadBar = this.gameState.game.add.sprite( (canvas.width/2), (canvas.height/2) - 25, 'reloadBarSpriteSheet', 0);
     this.reloadBar.anchor.setTo(0.5);
@@ -271,28 +181,34 @@ export default class Player extends Prefab {
   }
 
   upgradeGun() {
-    console.log('called upgrade gun for: ', this);
     this.currentGunLevel++;
     //console.log("INSIDE OF LOAD GUN!!", this);
     switch (this.currentGunLevel) {
       case 1:
         this.gun.frame = 8;
         this.gunUiFrame.gunSprite.frame = 8;
+        this.gun.spread = 0;
         break;
       case 2:
         this.gun.frame = 6;
         this.gunUiFrame.gunSprite.frame = 6;
+        this.gun.damage -= 5;
+        this.gun.rateOfFire -= 200;
+        this.gun.clip = 30;
+        this.gun.spread = 0.1;
         break;
       case 3:
         this.gun.frame = 1;
         this.gunUiFrame.gunSprite.frame = 1;
+        this.gun.rateOfFire += 600;
+        this.stats.movement += 100;
+        this.gun.damage += 45;
+        this.gun.spread = 0;
         break;
       case 4:
         this.hasWon = true;
         break;
     }
-
-    console.log('should be emitting gun to the back end with ',this.currentGunLevel);
     socket.emit('upgradeGun', this.currentGunLevel);
   }
 
@@ -327,7 +243,6 @@ export default class Player extends Prefab {
     }
   }
 
-// >>>>>>> origin/master
   checkForRankUp(remotePlayers){
     //sort by gun level
     let arr = [{id: socket.id, num: this.currentGunLevel}];
@@ -345,16 +260,14 @@ export default class Player extends Prefab {
     })
   }
 
+
   receiveDamage(damage) {
     //Change healthbar
-    console.log('this receiving dmg: ', this, damage);
     this.stats.health -= damage;
 
     if (socket.id !== this.socketId){
-      console.log('updating remote player health');
       this.healthbar.text = this.stats.health;
     } else {
-      console.log('cp updating health on dmg event');
       this.health.newHealth(this.stats.health);
     }
     //this.healthbar.text = this.stats.health;
@@ -364,12 +277,13 @@ export default class Player extends Prefab {
       this.tint = PLAYER_DAMAGE_TINT;
       setTimeout(() => {
         this.tint = 0xffffff;
-        //Change Health hearts <----- WHY CHARLIE, WHY IN A setTimeout?! I FOUND THIS AFTER 4 HOURS
-        // this.health.newHealth(this.stats.health);
       }, 250);
     if (this.stats.health <= 0){
-      this.x = 200;
-      this.y = 200;
+      let index = Math.floor(Math.random() * 8);
+      // this.x = this.spawnLocations[index].x;
+      // this.y = this.spawnLocations[index].y;
+      this.x = 250;
+      this.y = 250;
       this.resetHealth();
     }
   }

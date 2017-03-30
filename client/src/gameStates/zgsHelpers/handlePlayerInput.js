@@ -82,21 +82,17 @@ export let handleInput = (player) => {
             player.gameState['reloadSuccess'].play();
             player.gun.isReloading = false;
             player.gun.activeReloaded = true;
-            player.gun.ammo = player.gun.clip
+            player.gun.ammo = player.gun.clip;
             player.clipUpdate();
             player.reloadBar.frame = 22;
             player.reloadBar.tint = 0x00FF7F;
             player.reloadBar.alpha = 0;
             tween = player.game.add.tween(player.reloadBar).to( { alpha: 1 }, 200, Phaser.Easing.Linear.None, true, 0, 500, true);
-            console.log('gun dmg pre AR: ', player.gun.damage);
             player.gun.damage += 10;
-            console.log('gun dmg post AR: ', player.gun.damage);
             player.reloadBar.animations.paused = true;
             let activeInterval = setTimeout(() => {
               player.reloadBar.tint = 0xffffff;
-              console.log('gun dmg pre AR finish: ', player.gun.damage);
               player.gun.damage -= 10;
-              console.log('gun dmg post AR finish: ', player.gun.damage);  
               tween.stop();
               player.reloadBar.alpha = 1;
               player.reloadingAnim.complete();
