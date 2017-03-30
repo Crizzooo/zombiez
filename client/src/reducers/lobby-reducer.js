@@ -30,7 +30,7 @@ export default (state = initialState, action) => {
       break;
 
     case RESET_LOBBY:
-      newState.lobbyers = initialState.lobbyers;
+      newState = initialState;
       break;
 
     default:

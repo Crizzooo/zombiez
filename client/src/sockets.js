@@ -113,7 +113,7 @@ function dispatchReducerReset(){
   store.dispatch(resetPlayers());
   store.dispatch(dispatchGamePlaying(false));
   store.dispatch(dispatchZombiesReset());
-  // store.dispatch(resetLobby());
+  store.dispatch(resetLobby());
   const textInput = document.getElementById("createMessage");
   const gameDiv = document.getElementById("game");
 
