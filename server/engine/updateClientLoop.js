@@ -10,6 +10,7 @@ const resetLobby = require('../reducers/lobby.js').resetLobby;
 const playerReducer = require('../reducers/players.js');
  const PLAYER_HEALTH = require('../../client/src/engine/gameConstants.js').PLAYER_HEALTH;
 const {addPlayerToZombieSprites, resetZombies} = require('../reducers/zombies.js');
+const {dispatchLogReset} = require('../reducers/logs.js');
 
 
 const SERVER_UPDATE_RATE = 1000 / 30;
@@ -55,6 +56,7 @@ const startGame = (ioFromSocketsFile) => {
   //reset all reducers related to game
   store.dispatch(resetPlayers());
   store.dispatch(resetZombies());
+  store.dispatch(dispatchLogReset());
   store.dispatch(gamePlaying(true));
   io = ioFromSocketsFile;
   let state = store.getState();

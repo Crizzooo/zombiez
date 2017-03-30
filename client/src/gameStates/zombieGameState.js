@@ -19,8 +19,9 @@ import handleRemoteAnimation, { tweenRemoteAssets } from './zgsHelpers/handleRem
 import { enemyGeneratorInitial, enemyGenerator } from './zgsHelpers/enemyGenerator';
 import {PLAYER_HEALTH, EVENT_LOOP_DELETE_TIME, STARTING_BULLET_SPEED} from '../engine/gameConstants.js';
 
+//Manager Functions
 import { localZombieSprites, remoteZombieSprites, initializeZombies, createLocalZombie, updateLocalZombie, dispatchZombieUpdate, updateRemoteZombies } from '../engine/manageZombies.js';
-
+import { updateGameLog, initializeGameLog, createNewGameLogMessage } from '../engine/gameLogManager.js';
 
 //TODO: do we need this?
 // currentPlayerSprite and remotePlayerSprites are on global window
@@ -197,6 +198,10 @@ export default class ZombieGameState extends TiledState {
 	  console.log('this is groups', this.groups)
 
 	  this.game.time.advancedTiming = true;
+
+
+    // Game Log
+    let canvas = document.getElementsByTagName("canvas")[0];
   }
 
 
@@ -204,6 +209,7 @@ export default class ZombieGameState extends TiledState {
   update() {
     //Check collisions
     //NOTE: only check CPS collissions if we do have a CPS
+    updateGameLog(this);
 
     if (this.currentPlayerSprite){
       this.pointer.x = this.game.input.mousePointer.worldX;
@@ -271,7 +277,7 @@ export default class ZombieGameState extends TiledState {
 
     //create a current player
     let currentPlayer;
-
+    initializeGameLog(this);
     if (state.players.currentPlayer.name) {
       currentPlayer = state.players.currentPlayer;
 
@@ -625,6 +631,7 @@ export default class ZombieGameState extends TiledState {
       let eventId = socket.id + playerDamageEventCount;
       console.log('bullet hit player for X damage: ', currentPlayerSprite.gun.damage);
       //dmg was set to 10 before, now is it gun damage?
+      //TODO: MSG - I kill a player
       self.currentPlayerSprite.playerDamageHash[eventId] = {
         damagedPlayerSocketId: player.socketId,
         damage: currentPlayerSprite.gun.damage
@@ -637,9 +644,9 @@ export default class ZombieGameState extends TiledState {
 
       //get the remote player sprite and invoke its damage function
       this.handlePlayerDamage(player.socketId, self.currentPlayerSprite);
+
       //increment playerDamageCount
       playerDamageEventCount++;
-
     } else if (bullet.parent.name === 'remotePlayerBulletGroup') {
       if (player.socketId === socket.id) {
         // console.log(' I GOT HIT');
@@ -662,9 +669,11 @@ export default class ZombieGameState extends TiledState {
       }
       console.error('player not found');
     }
-    // console.log(`this player will be hit for ${playerWhoDealtDamage}`, playerToDamage);
     if ( (playerToDamage.stats.health - playerWhoDealtDamage.gun.damage) <= 0 ){
       console.log('im about to kill a player');
+      if (playerWhoDealtDamage.socketId === socket.id){
+        createNewGameLogMessage(`${currentPlayerSprite.name} has slain ${playerToDamage.name}`)
+      }
       playerWhoDealtDamage.upgradeGun();
       playerWhoDealtDamage.checkForRankUp(remotePlayerSprites);
       playerToDamage.receiveDamage(playerWhoDealtDamage.gun.damage);

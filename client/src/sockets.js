@@ -12,6 +12,7 @@ import { dispatchLobbyUpdate, dispatchSetCurrentLobbyer, resetLobby } from './re
 import { dispatchGamePlaying } from './reducers/gameState-reducer';
 import { updateRemoteZombies, dispatchZombiesReset } from './reducers/zombies-reducer';
 import { stopClientBroadcast } from './engine/emitCurrentState';
+import { dispatchServerLogs } from './reducers/gameLog-reducer';
 
 
 //We attach all functions to a socket in here
@@ -50,26 +51,20 @@ function startClientGame(playersFromServer) {
 }
 
 
-const throttledLog = throttle(logReceivedState, 30000);
+const throttledLog = throttle(logReceivedState, 3000);
 function logReceivedState() {
   // console.log('state after server update: ', store.getState());
+  console.log('state: ', store.getState());
 }
 function dispatchServerState(serverState) {
   //break out data from server - send to appropriate stores
+  throttledLog();
   let state = store.getState();
   //store.dispatch(dispatchLobbyUpdate(serverState.lobby.lobbyers));
   if (state.game.gamePlaying){
     let playerStateUpdate = serverState.players.playerStates;
     // console.log('update pre-remove CP: ', playerStateUpdate);
     if (playerStateUpdate[socket.id]){
-      //If server has a different health for yourself, correct it
-      //You will then update the server with the correct health on next broadcast
-
-
-      //NOTE: reimplement if health issues
-      // if( currentPlayerSprite.stats && (playerStateUpdate[socket.id].health !== serverState.players.playerHealths[socket.id])){
-      //     currentPlayerSprite.stats.health = serverState.players.playerHealths[socket.id];
-      // }
       delete playerStateUpdate[socket.id];
     }
 
@@ -85,9 +80,10 @@ function dispatchServerState(serverState) {
         store.dispatch(updatePlayers(playerStateUpdate));
     }
 
-    //TODO: pull off zombies and dispatch to local store
-    //TODO: filter out zombies under player socket Id
-
+    if (serverState.logs.serverLogs){
+        // console.log('received serverLogs from server: ', serverState.logs.serverLogs)
+        store.dispatch(dispatchServerLogs(serverState.logs.serverLogs));
+    }
 
   }
   throttledLog();

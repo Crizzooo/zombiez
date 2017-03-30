@@ -15,7 +15,7 @@ export default (socket) => {
         return;
       }
       //TODO: emit zombie Events, refactor sercver to take in zombies and the events
-      socket.emit('clientUpdate', {player: currentPlayerObj, zombies: state.zombies.localZombies, zombieEvents: state.zombies.localEvents});
+      socket.emit('clientUpdate', {player: currentPlayerObj, zombies: state.zombies.localZombies, zombieEvents: state.zombies.localEvents, logs: state.logs.logsToSend});
     }
   }, CLIENT_EMIT_INTERVAL);
   return emitID;
