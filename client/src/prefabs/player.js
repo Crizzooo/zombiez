@@ -17,16 +17,17 @@ export default class Player extends Prefab {
       movement: 100
     };
 
+
     this.spawnLocations = [
-      {x: 160, y: 128},
-      {x: 480, y: 544},
-      {x: 608, y: 1088},
-      {x: 224, y: 1440},
-      {x: 1376, y: 1408},
-      {x: 1120, y: 1088},
-      {x: 1088, y: 576},
-      {x: 1376, y: 160}
-    ];
+      {x: 128, y: 128},
+      {x: 992, y: 128},
+      {x: 384, y: 416},
+      {x: 736, y: 416},
+      {x: 224, y: 704},
+      {x: 896, y: 704},
+      {x: 96, y: 992},
+      {x: 992, y: 992}
+    ]
 
     //TODO: make it only visible to the current player
     //Load Hearts, Healthbar, Animations

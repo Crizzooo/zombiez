@@ -16,7 +16,7 @@ export default class Lighting extends Phaser.Plugin {
 		this.gameState.lighting = {};
 
 		//Lighting layers
-		this.gameState.lighting.wallsBitmap =  this.gameState.game.make.bitmapData(3200, 3200);
+		this.gameState.lighting.wallsBitmap =  this.gameState.game.make.bitmapData(1120, 1120);
 		this.gameState.lighting.wallsBitmap.draw('mapBitmap');
 		this.gameState.lighting.wallsBitmap.update();
 		this.gameState.game.add.sprite(0, 0, this.gameState.wallsBitmap);
@@ -27,7 +27,7 @@ export default class Lighting extends Phaser.Plugin {
 		this.gameState.lighting.mapSprite = this.gameState.game.add.sprite(0,0,'mapOverlay');
 		this.gameState.lighting.mapSprite.blendMode = PIXI.blendModes.SCREEN
 		this.gameState.lighting.blackness.alpha = 0.7;
-	  this.gameState.lighting.blackness.scale.setTo(50,50);
+	  this.gameState.lighting.blackness.scale.setTo(35,35);
 	}
 
 	update () {
