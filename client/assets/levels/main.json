@@ -26,6 +26,16 @@
       "spacing": 0
     },
 
+    "gunUiFrame": {
+      "type": "spriteSheet",
+      "source": "../../assets/images/ui/gunContainer.png",
+      "frameWidth": 231,
+      "frameHeight": 128,
+      "frames": 1,
+      "margin": 0,
+      "spacing": 0
+    },
+
     "playerSpriteSheet": {
       "type": "spriteSheetAtlas",
       "sourcePNG": "../../assets/images/playerRolls.png",
