@@ -213,7 +213,7 @@ export default class Player extends Prefab {
         this.gun.frame = 1;
         this.gunUiFrame.gunSprite.frame = 1;
         this.gun.rateOfFire += 600;
-        this.stats.movement += 100;
+        this.stats.movement += 30;
         this.gun.damage += 45;
         this.gun.spread = 0;
         break;
