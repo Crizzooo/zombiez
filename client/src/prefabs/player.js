@@ -254,8 +254,7 @@ export default class Player extends Prefab {
   setHealth(newHealth){
     if (socket.id !== this.socketId) {
       this.healthbar.text = newHealth;
-    }
-    else{
+  }  else {
       this.health.newHealth(newHealth);
     }
 
