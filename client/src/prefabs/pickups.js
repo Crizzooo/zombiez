@@ -19,21 +19,26 @@ export default class Pickup extends Prefab {
         break;
     }
 
-
-
-
     super(game, name, position, properties);
-
     if(properties.type === 'speed') this.scale.setTo(0.5);
-
     this.enableBody = true;
     //this.properties = properties;
-
 
   }
 
 
-  onCollide (player, pickupType){
+  onCollide (player, pickupType, pickupId){
+
+    //dispatch a destroy event to all players, it should
+      //call destroy ourselves with the pickupType.id
+      //send destroy event to reducer
+      //set timeout to remove from reducer
+
+    //set timeout to create
+        //create pickup yourself
+        //dispatch pickup event
+        // send create event to reducer
+        //set timeout to remove event from reducer
 
     if(pickupType === 'healthPickup'){
       if(player.stats.health >= 70) player.stats.health = 100;
@@ -43,12 +48,13 @@ export default class Pickup extends Prefab {
 
 
     else if (pickupType === 'speedPickup') {
-      player.stats.movement = 200;
+      player.stats.movement += 100;
       console.log('PICKED UP SPEEED BOOOST', player)
-      setTimeout(()=>{player.stats.movement = 100}, 5000);
+      setTimeout(()=>{player.stats.movement -= 100}, 5000);
     }
 
     this.kill();
+
   }
 
 

@@ -11,6 +11,7 @@ const UPDATE_CURRENT_PLAYER = 'UPDATE_CURRENT_PLAYER';
 const PLAYER_LEAVE_GAME = 'PLAYER_LEAVE_GAME';
 const RESET_PLAYERS = 'RESET_PLAYERS';
 const REMOVE_CURRENT_PLAYER = 'REMOVE_CURRENT_PLAYER';
+const ADD_PICKUP_EVENT = 'ADD_PICKUP_EVENT';
 
 /* Action Creators */
 export const loadMessage = message => ({ type: CHANGE_MESSAGE, message });
@@ -36,6 +37,12 @@ export const resetPlayers = () => ({
 export const removeCurrentPlayer = () => ({
   type: REMOVE_CURRENT_PLAYER
 })
+export const addPickupEvent = (eventInfo) => ({
+  type: ADD_PICKUP_EVENT,
+  eventInfo
+})
+//will look like this on the front end
+//addPickupEvent({type: 'speed', event:'create', x: 100, y: 100})
 
 //Note: addPlayer can probably be removed from file but will keep for now in case we change structure
 const initialState = {
@@ -43,7 +50,8 @@ const initialState = {
   playerStates: {},
   currentPlayer: {
     bulletHash: {},
-    playerDamageHash: {}
+    playerDamageHash: {},
+    playerPickupHash: {}
   }
 };
 
@@ -68,6 +76,12 @@ export default (state = initialState, action) => {
     case SET_GAME_PLAYING_BOOL:
       newState.gamePlaying = action.gameStatus;
       break;
+
+    case ADD_PICKUP_EVENT:
+      newState.currentPlayer = Object.assign({}, newState.currentPlayer, {playerPickupHash: state.currentPlayer.playerPickupHash})
+
+      break;
+
 
     case UPDATE_PLAYERS:
       //filter through players and make sure no undefined

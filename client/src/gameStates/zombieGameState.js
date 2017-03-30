@@ -8,6 +8,8 @@ import {updateCurrentPlayer, playerLeaveGame} from '../reducers/players-reducer.
 import { dispatchZombieHitEvent } from '../reducers/zombies-reducer.js';
 import emitCurrentState from '../engine/emitCurrentState.js';
 
+import { initPickups } from '../engine/managePickups.js';
+
 //Import game plugins and tiledstate
 import TiledState from './tiledState';
 import Pathfinding from '../plugins/Pathfinding';
@@ -100,7 +102,6 @@ export default class ZombieGameState extends TiledState {
     //Create game set up through tiled state by calling super
     //Loads level tilemap
     super.create.call(this);
-
     //Create worldGrid and tile dimensions for pathfinding
     //Load light plugin
     let worldGrid = this.createWorldGrid();
@@ -359,34 +360,16 @@ export default class ZombieGameState extends TiledState {
     createLocalZombie(this, 200, 200);
     createLocalZombie(this, 220, 220);
 
-    //initialize pickup locations
-    this.healthPickup = this.createPrefab('healthPickup', {
-      type: 'pickup',
-      properties: {
-        name: 'healthPickup',
-        group: 'pickups',
-        type: 'health'
-      }
-    }, {x:560, y:528});
 
-    this.speedPickup = this.createPrefab('speedPickup', {
-      type: 'pickup',
-      properties: {
-        name: 'speedPickup',
-        group: 'pickups',
-        type: 'speed'
-      }
-    }, {x:935, y:552});
-
-
-
-
+    initPickups(this);
   }
 
   pickupCollision(player, pickup){
     console.log('colliding ', player, 'with', pickup);
-    pickup.onCollide(player, pickup.key)
-
+    pickup.onCollide(player, pickup.key, pickup.id)
+    console.log('PICKED UP PICKUP WITH ID: ', pickup.id);
+    //TODO: pickups - pull off pickupId
+      //dispatch Destroy for that type and id
   }
 
   updateCollisions () {
@@ -492,6 +475,10 @@ export default class ZombieGameState extends TiledState {
       playerToUpdate.pointer.x = playerToUpdate.pointerX;
       playerToUpdate.pointer.y = playerToUpdate.pointerY;
       // console.log('After updating RPS: ', playerToUpdate.gunRotation);
+
+      if (playerState.health !== playerToUpdate.health){
+        playerToUpdate.setHealth(playerState.health);
+      }
 
       if (playerState.bulletHash && Object.keys(playerState.bulletHash).length > 0) {
         // console.dir(this.bulletHash)

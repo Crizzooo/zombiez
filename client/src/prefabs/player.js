@@ -253,9 +253,12 @@ export default class Player extends Prefab {
 
   setHealth(newHealth){
     if (socket.id !== this.socketId) {
-      this.healthbar.text = this.stats.health;
+      this.healthbar.text = newHealth;
     }
-    this.health.newHealth(newHealth);
+    else{
+      this.health.newHealth(newHealth);
+    }
+
   }
 
   checkForRankUp(remotePlayers){
