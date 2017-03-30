@@ -297,4 +297,6 @@ export default class Player extends Prefab {
       this.resetHealth();
     }
   }
+
 }
+

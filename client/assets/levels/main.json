@@ -5,6 +5,8 @@
     "mapOverlay": {"type": "image", "source": "../../assets/images/mapTiles/map.png"},
     "mapBitmap": {"type": "image", "source": "../../assets/images/mapTiles/mapbitmap.png"},
     "blackTile": {"type": "image", "source": "../../assets/images/mapTiles/blacktile.jpg"},
+    "healthPickup": {"type": "image", "source": "../../assets/images/heart.png"},
+    "speedPickup": {"type": "image", "source": "../../assets/images/speed.png"},
 
     "playerHearts": {
       "type": "spriteSheet",
@@ -125,7 +127,8 @@
     "guns",
     "ui",
     "localZombieSpriteGroup",
-    "remoteZombieSpriteGroup"
+    "remoteZombieSpriteGroup",
+    "pickups"
   ],
   "map": {
     "key": "levelTilemap",

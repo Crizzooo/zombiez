@@ -359,6 +359,27 @@ export default class ZombieGameState extends TiledState {
     createLocalZombie(this, 200, 200);
     createLocalZombie(this, 220, 220);
 
+    //initialize pickup locations
+    this.healthPickup = this.createPrefab('healthPickup', {
+      type: 'pickup',
+      properties: {
+        name: 'healthPickup',
+        group: 'pickups',
+        type: 'health'
+      }
+    }, {x:560, y:528});
+
+    this.speedPickup = this.createPrefab('speedPickup', {
+      type: 'pickup',
+      properties: {
+        name: 'speedPickup',
+        group: 'pickups',
+        type: 'speed'
+      }
+    }, {x:935, y:552});
+
+
+
   }
 
   updateCollisions () {
@@ -367,6 +388,7 @@ export default class ZombieGameState extends TiledState {
 	  this.game.physics.arcade.collide(this.currentPlayerSprite, this.layers.waterCollision);
 	  this.game.physics.arcade.collide(this.currentPlayerSprite, this.layers.wallCollision);
 	  this.game.physics.arcade.collide(this.currentPlayerSprite, this.layers.litWallCollision);
+	  //this.game.physics.arcade.collide(this.currentPlayerSprite, this.groups.pickups, );
 
     //Note: not sure why this doesnt work - remotePlayerSpriteGroup?
     this.game.physics.arcade.collide(this.remotePlayerSpriteGroup, this.currentPlayerSprite);
