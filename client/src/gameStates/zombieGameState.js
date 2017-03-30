@@ -380,6 +380,13 @@ export default class ZombieGameState extends TiledState {
 
 
 
+
+  }
+
+  pickupCollision(player, pickup){
+    console.log('colliding ', player, 'with', pickup);
+    pickup.onCollide(player, pickup.key)
+
   }
 
   updateCollisions () {
@@ -388,7 +395,8 @@ export default class ZombieGameState extends TiledState {
 	  this.game.physics.arcade.collide(this.currentPlayerSprite, this.layers.waterCollision);
 	  this.game.physics.arcade.collide(this.currentPlayerSprite, this.layers.wallCollision);
 	  this.game.physics.arcade.collide(this.currentPlayerSprite, this.layers.litWallCollision);
-	  //this.game.physics.arcade.collide(this.currentPlayerSprite, this.groups.pickups, );
+
+	  this.game.physics.arcade.overlap(this.currentPlayerSprite, this.groups.pickups.children, this.pickupCollision);
 
     //Note: not sure why this doesnt work - remotePlayerSpriteGroup?
     this.game.physics.arcade.collide(this.remotePlayerSpriteGroup, this.currentPlayerSprite);

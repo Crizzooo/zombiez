@@ -35,14 +35,17 @@ export default class Pickup extends Prefab {
 
   onCollide (player, pickupType){
 
-    if(pickupType === 'health'){
+    if(pickupType === 'healthPickup'){
       if(player.stats.health >= 70) player.stats.health = 100;
       else player.stats.health += 30;
+      player.setHealth(player.stats.health);
     }
 
-    else if (pickupType === 'speed') {
-      player.movement = 200;
-      setTimeout(()=>{player.movement = 100}, 5000);
+
+    else if (pickupType === 'speedPickup') {
+      player.stats.movement = 200;
+      console.log('PICKED UP SPEEED BOOOST', player)
+      setTimeout(()=>{player.stats.movement = 100}, 5000);
     }
 
     this.kill();

@@ -251,6 +251,13 @@ export default class Player extends Prefab {
     }
   }
 
+  setHealth(newHealth){
+    if (socket.id !== this.socketId) {
+      this.healthbar.text = this.stats.health;
+    }
+    this.health.newHealth(newHealth);
+  }
+
   checkForRankUp(remotePlayers){
     //sort by gun level
     let arr = [{id: socket.id, num: this.currentGunLevel}];
