@@ -493,6 +493,10 @@ export default class ZombieGameState extends TiledState {
       playerToUpdate.pointer.y = playerToUpdate.pointerY;
       // console.log('After updating RPS: ', playerToUpdate.gunRotation);
 
+      if(playerState.health !== playerToUpdate.health){
+        playerToUpdate.setHealth(playerState.health)
+      }
+
       if (playerState.bulletHash && Object.keys(playerState.bulletHash).length > 0) {
         // console.dir(this.bulletHash)
         playerToUpdate.pointerX = playerState.pointerX;
