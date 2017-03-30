@@ -10,6 +10,7 @@ const resetLobby = require('../reducers/lobby.js').resetLobby;
 const playerReducer = require('../reducers/players.js');
  const PLAYER_HEALTH = require('../../client/src/engine/gameConstants.js').PLAYER_HEALTH;
 const {addPlayerToZombieSprites, resetZombies} = require('../reducers/zombies.js');
+const {dispatchLogReset} = require('../reducers/logs.js');
 
 
 const SERVER_UPDATE_RATE = 1000 / 30;
@@ -21,14 +22,14 @@ let broadcastInterval;
 
 //TODO: Implement actual spawn positions from map
 let playerPositions = [
-  {x: 160, y: 128},
-  {x: 480, y: 544},
-  {x: 608, y: 1088},
-  {x: 224, y: 1440},
-  {x: 1376, y: 1408},
-  {x: 1120, y: 1088},
-  {x: 1088, y: 576},
-  {x: 1376, y: 160}
+  {x: 128, y: 128},
+  {x: 992, y: 128},
+  {x: 384, y: 416},
+  {x: 736, y: 416},
+  {x: 224, y: 704},
+  {x: 896, y: 704},
+  {x: 96, y: 992},
+  {x: 992, y: 992}
 ]
 //TODO: Implement correct sprite keys for ZOMBIE GUN GAME
 let playerSpriteKeys = [ 'playerSpriteSheet', 'playerSpriteSheet'];
@@ -38,11 +39,9 @@ const convertLobbyers = (lobbyers) => {
   return lobbyers.map( (lobbyObj, index) => {
     let spriteKey = playerSpriteKeys[index % 2];
     let zeroOrOne = Math.round(Math.random());
-    // playerPositions[(index*2) + zeroOrOne].x
-    // playerPositions[(index*2) + zeroOrOne].y
     return {
-      x: 250,
-      y: 250,
+      x: playerPositions[(index*2) + zeroOrOne].x,
+      y: playerPositions[(index*2) + zeroOrOne].y,
       animationDirection: 'still',
       spriteKey,
       socketId: lobbyObj.socketId,
@@ -56,6 +55,8 @@ const startGame = (ioFromSocketsFile) => {
 
   //reset all reducers related to game
   store.dispatch(resetPlayers());
+  store.dispatch(resetZombies());
+  store.dispatch(dispatchLogReset());
   store.dispatch(gamePlaying(true));
   io = ioFromSocketsFile;
   let state = store.getState();
@@ -87,6 +88,7 @@ const startGame = (ioFromSocketsFile) => {
 
 const endGame = () => {
 
+  console.log('server is ending the game');
   //reset players
   store.dispatch(resetPlayers());
   //reset game

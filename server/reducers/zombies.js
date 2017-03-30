@@ -73,32 +73,15 @@ const zombieReducer = (state = initialState, action) => {
     }
 
     case UPDATE_ZOMBIES_FROM_CLIENT: {
-      console.log('pre server update zombies: ', newZombieState);
       newZombieState[action.socketId] = action.zombies;
       newState.zombieSprites = newZombieState;
-      console.log('post server update zombies: ', newState.zombieSprites);
       break;
     }
 
     case RESET_ZOMBIES: {
       newState = initialState;
       break;
-    }
-
-    // case RESET_PLAYERS: {
-    //   newState.playerStates = {};
-    //   break;
-    // }
-    //
-    // case REMOVE_PLAYER: {
-    //   break;
-    // }
-    //
-    // case DAMAGE_PLAYER: {
-    //   let newPlayerHealths = Object.assign({}, state.playerHealths);
-    //   newPlayerHealths[action.socketId].health -= action.amount;
-    //   newState.playerHealths = newPlayerHealths;
-    // }
+    } 
 
     default:
       return state;

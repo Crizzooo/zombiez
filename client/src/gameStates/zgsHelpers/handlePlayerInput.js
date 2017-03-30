@@ -28,7 +28,6 @@ export let handleInput = (player) => {
       gameDiv.focus();
       ZG.game.isInChat = false;
     }
-
     if (cursors.chat.isDown) {
       document.getElementsByClassName("container")[0].style.visibility = "visible";
       textInput.focus();
@@ -87,7 +86,8 @@ export let handleInput = (player) => {
             player.reloadBar.frame = 22;
             player.reloadBar.tint = 0x00FF7F;
             player.reloadBar.alpha = 0;
-            tween = player.game.add.tween(player.reloadBar).to( { alpha: 1 }, 200, Phaser.Easing.Linear.None, true, 0, 500, true);
+            tween = player.game.add.tween(player.reloadBar).to( { alpha: 1 }, 250, Phaser.Easing.Linear.None, true, 0, 500, true);
+            console.log('gun dmg pre AR: ', player.gun.damage);
             player.gun.damage += 10;
             player.reloadBar.animations.paused = true;
             let activeInterval = setTimeout(() => {
@@ -104,7 +104,7 @@ export let handleInput = (player) => {
             player.reloadBar.tint = 0xFF0000;
             player.gun.isJammed = true;
             player.reloadBar.alpha = 0;
-            tween = player.game.add.tween(player.reloadBar).to( { alpha: 1 }, 200, Phaser.Easing.Linear.None, true, 0, 500, true);
+            tween = player.game.add.tween(player.reloadBar).to( { alpha: 1 }, 250, Phaser.Easing.Linear.None, true, 0, 500, true);
             let jamInterval = setTimeout(() => {
               tween.stop();
               player.reloadBar.alpha = 1;

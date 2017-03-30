@@ -69,14 +69,19 @@ export function tweenRemoteAssets(player, context) {
 	//TODO: refactor for 4 players
 	// throttledClog(player, context);
 	context.add.tween(player.healthbar).to({
-		x: player.x - 10,
-		y: player.y - 30
-	}, 10, Phaser.Easing.Linear.None, true);
+		x: player.x - 7,
+		y: player.top - 10
+	}, 1, Phaser.Easing.Linear.None, true);
 
   context.add.tween(player.gun).to({
     x: player.x,
     y: player.y
-  }, 10, Phaser.Easing.Linear.None, true);
+  }, 1, Phaser.Easing.Linear.None, true);
+
+  context.add.tween(player.namebar).to({
+    x: player.x - 12,
+    y: player.top - 24,
+  }, 1, Phaser.Easing.Linear.None, true);
 
 	//console.log('player remote tween', player)
 	//TODO: send rotation angle of player to server, server sends it back and we use it to tween

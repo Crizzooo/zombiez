@@ -8,13 +8,14 @@ const UPDATE_LOCAL_ZOMBIES = 'UPDATE_LOCAL_ZOMBIES';
 const UPDATE_REMOTE_ZOMBIES = 'UPDATE_REMOTE_ZOMBIES';
 const ZOMBIE_SHOT = 'ZOMBIE_SHOT';
 const REMOVE_EVENT = 'REMOVE_EVENT';
-
+const RESET = 'RESET';
 
 /* Action Creators */
 export const updateLocalZombies = zombieStates => ({ type: UPDATE_LOCAL_ZOMBIES, zombieStates });
 export const updateRemoteZombies = serverZombieStates => ({ type: UPDATE_REMOTE_ZOMBIES, serverZombieStates});
 export const dispatchZombieHitEvent = (eventObj, eventId) => ({ type: ZOMBIE_SHOT, event: eventObj });
 export const removeEvent = (eventType, eventId) => ({ type: REMOVE_EVENT, type: eventType, eventId: eventId});
+export const dispatchZombiesReset = () => ({type: RESET});
 // export const updateRemoteZombies =
 
 
@@ -61,6 +62,10 @@ export default (state = initialState, action) => {
       let newEvents = Object.assign({}, newState.localEvents);
       delete newEvents.localEvents[action.type][action.eventId];
       newState.localEvents = newEvents;
+      break;
+
+    case RESET:
+      newState = initialState;
       break;
 
     default:

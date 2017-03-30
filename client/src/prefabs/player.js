@@ -1,6 +1,7 @@
 import Prefab from './Prefab';
 import HealthHeart from './healthbar';
 import Heart from './healthHearts';
+import { createNewGameLogMessage } from '../engine/gameLogManager.js';
 
 const {PLAYER_HEALTH, PLAYER_DAMAGE_TINT, TIME_BETWEEN_ROLLS} = require('../engine/gameConstants.js');
 
@@ -17,16 +18,17 @@ export default class Player extends Prefab {
       movement: 100
     };
 
+
     this.spawnLocations = [
-      {x: 160, y: 128},
-      {x: 480, y: 544},
-      {x: 608, y: 1088},
-      {x: 224, y: 1440},
-      {x: 1376, y: 1408},
-      {x: 1120, y: 1088},
-      {x: 1088, y: 576},
-      {x: 1376, y: 160}
-    ];
+      {x: 128, y: 128},
+      {x: 992, y: 128},
+      {x: 384, y: 416},
+      {x: 736, y: 416},
+      {x: 224, y: 704},
+      {x: 896, y: 704},
+      {x: 96, y: 992},
+      {x: 992, y: 992}
+    ]
 
     //TODO: make it only visible to the current player
     //Load Hearts, Healthbar, Animations
@@ -43,6 +45,7 @@ export default class Player extends Prefab {
     this.body.collideWorldBounds = true;
     this.body.immovable = true;
     this.game.physics.arcade.enable(this);
+    this.name = properties.name;
     //flag for telling whether or not the player has won
     this.hasWon = false;
     //Setup player's gun
@@ -112,8 +115,6 @@ export default class Player extends Prefab {
   }
 
   loadGunUi() {
-    //TODO: Should base entire ui off gunFrame in order to center sprites
-    console.log('rendering canvas at: ', $('canvas').width-50)
     this.gunUiFrame = this.gameState.game.add.sprite($('canvas')[0].width - 210, -20, 'gunUiFrame', 8);
     this.gameState.game.add.existing(this.gunUiFrame);
     this.gunUiFrame.fixedToCamera = true;
@@ -132,7 +133,6 @@ export default class Player extends Prefab {
     };
 
     this.gunUiFrame.gunClip = this.game.add.text($('canvas')[0].width-176, 50, this.gun.ammo + '/' + this.gun.clip, style);
-    // this.gunUiFrame.gunClip.setScale(0.8, 0.8);
     this.gunUiFrame.gunClip.fixedToCamera = true;
   }
 
@@ -164,25 +164,37 @@ export default class Player extends Prefab {
   loadHealthbar() {
     //Health text, to be replaced by healthbar
     const style = {
-      font: "bold 16px Arial",
+      font: "9px Arial",
+      fill: "#FFF",
+      stroke: "#000",
+      strokeThickness: 3
+    };
+
+    const style2 = {
+      font: "11px Arial",
       fill: "#FFF",
       stroke: "#000",
       strokeThickness: 3
     };
 
     this.healthbar = this.game.add.text(
-      this.position.x - 10,
-      this.position.y - 10,
+      this.position.x - 12,
+      this.top - 15,
       this.stats.health, style);
 
-    //TODO: bullets collide with health?
-    //Add to existing
-    //this.gameState.add.existing(this.healthbar);
+    this.namebar = this.game.add.text(
+      this.position.x - 20,
+      this.top - 24,
+      this.name, style2
+    );
+
   }
 
   upgradeGun() {
     this.currentGunLevel++;
-    //console.log("INSIDE OF LOAD GUN!!", this);
+    if (this.socketId = socket.id){
+      createNewGameLogMessage(`${this.name} has advanced to Gun Level: ${this.currentGunLevel}`)
+    }
     switch (this.currentGunLevel) {
       case 1:
         this.gun.frame = 8;
@@ -219,8 +231,6 @@ export default class Player extends Prefab {
         group: 'ui'
       }
     );
-    // this.health.scale.setTo(0.75, 0.75);
-
     for (let i = 0; i < 10; i++) {
       this.health.addHearts(this.game.add.existing(new Heart(this.gameState, 'playerHeart' + i, {x: (32 * i), y: 0},
         {
@@ -245,6 +255,7 @@ export default class Player extends Prefab {
 
   checkForRankUp(remotePlayers){
     //sort by gun level
+    let oldMedalFrame = this.medal.frame;
     let arr = [{id: socket.id, num: this.currentGunLevel}];
     for(let key in remotePlayers){
       arr.push({id: key, num: remotePlayers[key].currentGunLevel})
@@ -256,8 +267,28 @@ export default class Player extends Prefab {
       if(obj.id === socket.id) {
         this.medal.frame = i;
       }
-      //else possibly dispatch and update all other medals?
     })
+    if (socket.id && this.medal.frame > oldMedalFrame){
+      let place;
+      switch(this.medal.frame){
+        case 0:
+        place = '1st';
+        break;
+
+        case 1:
+        place = '2nd';
+        break;
+
+        case 2:
+        place = '3rd';
+        break;
+
+        case 3:
+        place = '4th';
+        break;
+      }
+      createNewGameLogMessage( `${currentPlayerSprite.name} has taken ${place} place`);
+    }
   }
 
 
@@ -270,20 +301,15 @@ export default class Player extends Prefab {
     } else {
       this.health.newHealth(this.stats.health);
     }
-    //this.healthbar.text = this.stats.health;
-
-    //Set tint to show damage
-    //TODO: change to a red tint
       this.tint = PLAYER_DAMAGE_TINT;
       setTimeout(() => {
         this.tint = 0xffffff;
-      }, 250);
+      }, 250)
+
     if (this.stats.health <= 0){
       let index = Math.floor(Math.random() * 8);
-      // this.x = this.spawnLocations[index].x;
-      // this.y = this.spawnLocations[index].y;
-      this.x = 250;
-      this.y = 250;
+      this.x = this.x = this.spawnLocations[index].x;
+      this.y = this.y = this.spawnLocations[index].y;
       this.resetHealth();
     }
   }
