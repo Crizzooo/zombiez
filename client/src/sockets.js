@@ -10,7 +10,8 @@ import { loadPlayers, changeGamePlaying, updatePlayers, playerLeaveGame, resetPl
 import { loadMessages, addMessage } from './reducers/chatApp-reducer.js';
 import { dispatchLobbyUpdate, dispatchSetCurrentLobbyer, resetLobby } from './reducers/lobby-reducer.js';
 import { dispatchGamePlaying } from './reducers/gameState-reducer';
-import { updateRemoteZombies } from './reducers/zombies-reducer';
+import { updateRemoteZombies, dispatchZombiesReset } from './reducers/zombies-reducer';
+import { stopClientBroadcast } from './engine/emitCurrentState';
 
 
 //We attach all functions to a socket in here
@@ -110,12 +111,20 @@ function dispatchReducerReset(){
   //game reducer has already been set to true
   //reset local reducers
   store.dispatch(resetPlayers());
-  store.dispatch(resetLobby());
+  store.dispatch(dispatchGamePlaying(false));
+  store.dispatch(dispatchZombiesReset());
+  // store.dispatch(resetLobby());
+  const textInput = document.getElementById("createMessage");
+  const gameDiv = document.getElementById("game");
 
   //Stop game, remove the canvas, and return the cursor
   ZG.game.destroy();
   $('canvas').remove();
   document.body.style.cursor = 'default';
+
+  console.log('bring back lobby stuff ');
+  document.getElementsByClassName("container")[0].style.visibility = "visible";
+  textInput.focus();
   //TODO: reset zombies and other game related reducers
 }
 

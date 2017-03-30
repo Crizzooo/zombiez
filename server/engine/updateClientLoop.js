@@ -54,6 +54,7 @@ const startGame = (ioFromSocketsFile) => {
 
   //reset all reducers related to game
   store.dispatch(resetPlayers());
+  store.dispatch(resetZombies());
   store.dispatch(gamePlaying(true));
   io = ioFromSocketsFile;
   let state = store.getState();
@@ -85,12 +86,13 @@ const startGame = (ioFromSocketsFile) => {
 
 const endGame = () => {
 
+  console.log('server is ending the game');
   //reset players
   store.dispatch(resetPlayers());
   //reset game
   store.dispatch(resetEngine());
   //reset lobby
-  store.dispatch(resetLobby());
+  // store.dispatch(resetLobby());
   //reset zombies
   store.dispatch(resetZombies());
 

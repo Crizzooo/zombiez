@@ -14,7 +14,7 @@ const {updatePlayer, removePlayer} = require('./reducers/players.js');
 const {updateZombiesFromClient} = require('./reducers/zombies.js');
 
 //Import helper functions
-const startGame = require('./engine/updateClientLoop.js').startGame;
+const {startGame, endGame} = require('./engine/updateClientLoop.js');
 
 
 const server = app.listen(3000, () => {
@@ -94,6 +94,7 @@ io.on('connection', (socket) => {
 
   socket.on('gameIsStarting', () => {
     startGame(io);
+    console.log('state at start of game: ', store.getState());
   });
 
   socket.on('clientUpdate', (clientState) => {
@@ -102,12 +103,24 @@ io.on('connection', (socket) => {
     // console.log('this client told the server to update: ', socket.id);/
     let zombies = clientState.zombies;
     let playerState = clientState.player;
-    // console.log('server received CS: ', clientState);
+    if (store.getState().game.gamePlaying !== true){
+      console.log('server received this but is rejecting it :', clientState);
+      return;
+    }
     // console.log('server received player: ', clientState.player);
     store.dispatch(updatePlayer(playerState));
     store.dispatch(updateZombiesFromClient(playerState.socketId, zombies));
     // console.log('received zombies: ', zombies);
   });
+
+  socket.on('endOfGame', () => {
+    // if (!state.game.gamePlaying){
+    //   return;
+    // }
+    endGame();
+    let state = store.getState();
+    console.log('STATE AT END OF GAME: ', state);
+  })
 
 })
 

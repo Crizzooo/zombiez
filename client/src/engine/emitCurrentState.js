@@ -10,6 +10,10 @@ export default (socket) => {
     let state = store.getState();
     let currentPlayerObj = state.players.currentPlayer;
     if (state.lobby.currentLobbyer.name && state.game.gamePlaying){
+      if (!currentPlayerSprite){
+        stopClientBroadcast;
+        return;
+      }
       //TODO: emit zombie Events, refactor sercver to take in zombies and the events
       socket.emit('clientUpdate', {player: currentPlayerObj, zombies: state.zombies.localZombies, zombieEvents: state.zombies.localEvents});
     }
@@ -18,5 +22,7 @@ export default (socket) => {
 }
 
 export const stopClientBroadcast = () => {
+  console.log('client broadcast stopped');
   clearInterval(emitID);
+  console.log(store.getState());
 }

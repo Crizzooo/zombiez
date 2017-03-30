@@ -19,7 +19,8 @@ import handleRemoteAnimation, { tweenRemoteAssets } from './zgsHelpers/handleRem
 import { enemyGeneratorInitial, enemyGenerator } from './zgsHelpers/enemyGenerator';
 import {PLAYER_HEALTH, EVENT_LOOP_DELETE_TIME, STARTING_BULLET_SPEED} from '../engine/gameConstants.js';
 
- import { localZombieSprites, remoteZombieSprites, initializeZombies, createLocalZombie, updateLocalZombie, dispatchZombieUpdate, updateRemoteZombies } from '../engine/manageZombies.js';
+import { localZombieSprites, remoteZombieSprites, initializeZombies, createLocalZombie, updateLocalZombie, dispatchZombieUpdate, updateRemoteZombies } from '../engine/manageZombies.js';
+
 
 //TODO: do we need this?
 // currentPlayerSprite and remotePlayerSprites are on global window
@@ -717,9 +718,15 @@ export default class ZombieGameState extends TiledState {
   }
 
   displayEndGameText(name){
+    if (!name) name = 'hi';
+    console.log('in end game text');
     this.bmpText = this.game.add.bitmapText(100, 100, 'carrier_command', name + ' won!!', 34);
     this.bmpText.fixedToCamera = true;
     document.body.style.cursor = 'pointer';
+    setTimeout( () => {
+      console.log('resetting game!');
+      socket.emit('endOfGame');
+    }, 10000);
   }
 
 }
