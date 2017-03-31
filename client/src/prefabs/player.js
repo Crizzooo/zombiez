@@ -276,6 +276,15 @@ export default class Player extends Prefab {
     }
   }
 
+  setHealth(newHealth){
+    if (socket.id !== this.socketId) {
+      this.healthbar.text = newHealth;
+  }  else {
+      this.health.newHealth(newHealth);
+    }
+
+  }
+
   checkForRankUp(remotePlayers){
     //sort by gun level
     let oldMedalFrame = this.medal.frame;
@@ -336,4 +345,6 @@ export default class Player extends Prefab {
       this.resetHealth();
     }
   }
+
 }
+
