@@ -458,8 +458,10 @@ export default class ZombieGameState extends TiledState {
     store.dispatch(playerLeaveGame(playerSocketId));
     //Kill Remote Player Sprite
     if (remotePlayerSprites[playerSocketId]) {
+      createNewGameLogMessage(`${remotePlayerSprites[playerSocketId].name} has left the game!`);
       remotePlayerSprites[playerSocketId].destroy();
       remotePlayerSprites[playerSocketId].healthbar.destroy();
+      remotePlayerSprites[playerSocketId].namebar.destroy();
       remotePlayerSprites[playerSocketId].gun.destroy();
       delete remotePlayerSprites[playerSocketId];
     }
@@ -583,18 +585,6 @@ export default class ZombieGameState extends TiledState {
       console.error('player not found');
     }
     playerToDamage.receiveDamage(playerWhoDealtDamage.gun.damage, playerWhoDealtDamage);
-    if ( (playerToDamage.stats.health) <= 0 ){
-      if (playerWhoDealtDamage.socketId === socket.id){
-        createNewGameLogMessage(`${currentPlayerSprite.name} has slain ${playerToDamage.name}`)
-      }
-      // playerWhoDealtDamage.upgradeGun();
-      // playerWhoDealtDamage.checkForRankUp(remotePlayerSprites);
-      // playerToDamage.receiveDamage(playerWhoDealtDamage.gun.damage);
-      // playerToDamage.resetHealth();
-    }
-    /*else {
-      playerToDamage.receiveDamage(playerWhoDealtDamage.gun.damage);
-    }*/
   }
 
   handleRemoteBullet(bulletEvent, bulletId) {

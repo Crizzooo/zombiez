@@ -362,6 +362,7 @@ export default class Player extends Prefab {
       this.resetHealth();
       console.log('playerWhoDealtDamage: ', playerWhoDealtDamage);
       if (playerWhoDealtDamage && playerWhoDealtDamage.socketId === socket.id){
+        createNewGameLogMessage(`${playerWhoDealtDamage.name} has slain ${this.name}`);
         console.log(playerWhoDealtDamage + ' should upgrade their gun');
         playerWhoDealtDamage.upgradeGun();
         playerWhoDealtDamage.checkForRankUp(remotePlayerSprites);
