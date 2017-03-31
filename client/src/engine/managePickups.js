@@ -23,7 +23,7 @@ let speedPickupObj = {
   }
 };
 
-let spawnLocations = [ [ 320, 64 ],
+let spawnLocations = [ [ 320, 75 ],
   [ 576, 256 ],
   [ 832, 64 ],
   [ 64, 640 ],
@@ -33,7 +33,7 @@ let spawnLocations = [ [ 320, 64 ],
   [ 576, 544 ],
   [ 1024, 640 ],
   [ 448, 1056 ],
-  [ 640, 1056 ] ];
+  [ 650, 1056 ] ];
 
 
 let healthPickupSprites = {};
