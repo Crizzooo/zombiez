@@ -386,12 +386,6 @@ export default class ZombieGameState extends TiledState {
     // this.remotePlayerSpriteGroup.enableBody = true;
     // this.remotePlayerSpriteGroup.physicsBodyType = Phaser.Physics.ARCADE;
     R.forEachObjIndexed(this.createRemotePlayerSprite, state.players.playerStates);
-
-    initializeZombies(this);
-    createLocalZombie(this, 200, 200);
-    createLocalZombie(this, 220, 220);
-
-
     initPickups(this);
   }
 

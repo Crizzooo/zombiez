@@ -23,17 +23,17 @@ let speedPickupObj = {
   }
 };
 
-let spawnLocations = [ [ 320, 75 ],
-  [ 576, 256 ],
-  [ 832, 64 ],
+let spawnLocations = [ [ 320, 78 ],
+  [ 575, 275 ],
+  [ 816, 78 ],
   [ 64, 640 ],
-  [ 544, 512 ],
-  [ 576, 512 ],
-  [ 544, 544 ],
-  [ 576, 544 ],
-  [ 1024, 640 ],
-  [ 448, 1056 ],
-  [ 650, 1056 ] ];
+  [ 544, 514 ],
+  [ 607, 514 ],
+  [ 544, 573 ],
+  [ 607, 573 ],
+  [ 1056, 670 ],
+  [ 481, 1056 ],
+  [ 670, 1056 ] ];
 
 
 let healthPickupSprites = {};
@@ -63,13 +63,13 @@ export const initPickups = (receivedState) => {
 }
 
 function initHealth(){
-  createPowerupSprite('health', 0);
-  createPowerupSprite('health', 10);
+  createPowerupSprite('health', getRandomSpawnLocation());
+  createPowerupSprite('health', getRandomSpawnLocation());
 }
 
 function initSpeed(){
-  createPowerupSprite('speed', 3);
-  createPowerupSprite('speed', 4);
+  createPowerupSprite('speed', getRandomSpawnLocation());
+  createPowerupSprite('speed', getRandomSpawnLocation());
 }
 
 export const playerCollidePowerup = (player, pickup, pickupId) => {
@@ -132,6 +132,7 @@ function createPowerupSprite(powerupType, spawnPos){
     healthPickupSprites[id] = powerupSprite;
     console.log('after placing pickup', healthPickupSprites);
   } else if (powerupType === 'speed') {
+    powerupSprite.scale.setTo(0.5);
     speedPickupSprites[id] = powerupSprite;
     console.log('after placing pickup', speedPickupSprites);
   }
