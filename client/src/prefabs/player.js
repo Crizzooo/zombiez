@@ -1,6 +1,7 @@
 import Prefab from './Prefab';
 import HealthHeart from './healthbar';
 import Heart from './healthHearts';
+import { createNewGameLogMessage } from '../engine/gameLogManager.js';
 
 const {PLAYER_HEALTH, PLAYER_DAMAGE_TINT, TIME_BETWEEN_ROLLS} = require('../engine/gameConstants.js');
 
@@ -55,7 +56,7 @@ export default class Player extends Prefab {
       properties: {
         group: 'guns',
         name: 'pistol',
-        initial: 8,
+        initial: 6,
         texture: 'pistolSpriteSheet',
         rateOfFire: 350,
         reloadSpeed: 2000,
@@ -114,8 +115,6 @@ export default class Player extends Prefab {
   }
 
   loadGunUi() {
-    //TODO: Should base entire ui off gunFrame in order to center sprites
-    console.log('rendering canvas at: ', $('canvas').width-50)
     this.gunUiFrame = this.gameState.game.add.sprite($('canvas')[0].width - 210, -20, 'gunUiFrame', 8);
     this.gameState.game.add.existing(this.gunUiFrame);
     this.gunUiFrame.fixedToCamera = true;
@@ -134,13 +133,10 @@ export default class Player extends Prefab {
     };
 
     this.gunUiFrame.gunClip = this.game.add.text($('canvas')[0].width-176, 50, this.gun.ammo + '/' + this.gun.clip, style);
-    // this.gunUiFrame.gunClip.setScale(0.8, 0.8);
     this.gunUiFrame.gunClip.fixedToCamera = true;
   }
 
   loadReloadBar(){
-    console.log('this', this);
-    console.log('game ', this.game);
     let canvas = document.getElementsByTagName("canvas")[0];
     this.reloadBar = this.gameState.game.add.sprite( (canvas.width/2), (canvas.height/2) - 25, 'reloadBarSpriteSheet', 0);
     this.reloadBar.anchor.setTo(0.5);
@@ -195,28 +191,59 @@ export default class Player extends Prefab {
   }
 
   upgradeGun() {
-    console.log('called upgrade gun for: ', this);
     this.currentGunLevel++;
-    //console.log("INSIDE OF LOAD GUN!!", this);
+    if (this.socketId = socket.id){
+      createNewGameLogMessage(`${this.name} has advanced to Gun Level: ${this.currentGunLevel}`)
+    }
     switch (this.currentGunLevel) {
       case 1:
-        this.gun.frame = 8;
-        this.gunUiFrame.gunSprite.frame = 8;
-        break;
-      case 2:
         this.gun.frame = 6;
         this.gunUiFrame.gunSprite.frame = 6;
+        this.gun.spread = 0;
+        break;
+      case 2:
+        this.gun.frame = 5;
+        this.gunUiFrame.gunSprite.frame = 5;
+        this.gun.damage = 5;
+        this.gun.rateOfFire -= 200;
+        this.gun.clip = 30;
+        this.gun.ammo = 30;
+        this.gun.spread = 0.1;
+        this.clipUpdate()
         break;
       case 3:
         this.gun.frame = 1;
         this.gunUiFrame.gunSprite.frame = 1;
+        this.gun.rateOfFire += 900;
+        this.gun.damage = 60;
+        this.gun.clip = 5;
+        this.gun.ammo = 5;
+        this.gun.spread = 0;
+        this.clipUpdate()
         break;
       case 4:
+        this.gun.frame = 3;
+        this.gunUiFrame.gunSprite.frame = 3;
+        this.gun.rateOfFire += 500;
+        this.gun.damage = 80;
+        this.gun.spread = 0;
+        this.gun.clip = 2;
+        this.gun.ammo = 2;
+        this.clipUpdate()
+        break;
+      case 5:
+        this.gun.frame = 4;
+        this.gunUiFrame.gunSprite.frame = 4;
+        this.gun.rateOfFire += 600;
+        this.stats.movement += 36;
+        this.gun.damage = 50;
+        this.gun.spread = 0;
+        this.clipUpdate();
+        break;
+      case 6:
         this.hasWon = true;
         break;
     }
-
-    console.log('should be emitting gun to the back end with ',this.currentGunLevel);
     socket.emit('upgradeGun', this.currentGunLevel);
   }
 
@@ -227,8 +254,6 @@ export default class Player extends Prefab {
         group: 'ui'
       }
     );
-    // this.health.scale.setTo(0.75, 0.75);
-
     for (let i = 0; i < 10; i++) {
       this.health.addHearts(this.game.add.existing(new Heart(this.gameState, 'playerHeart' + i, {x: (32 * i), y: 0},
         {
@@ -262,6 +287,7 @@ export default class Player extends Prefab {
 
   checkForRankUp(remotePlayers){
     //sort by gun level
+    let oldMedalFrame = this.medal.frame;
     let arr = [{id: socket.id, num: this.currentGunLevel}];
     for(let key in remotePlayers){
       arr.push({id: key, num: remotePlayers[key].currentGunLevel})
@@ -273,36 +299,49 @@ export default class Player extends Prefab {
       if(obj.id === socket.id) {
         this.medal.frame = i;
       }
-      //else possibly dispatch and update all other medals?
     })
+    if (socket.id && this.medal.frame > oldMedalFrame){
+      let place;
+      switch(this.medal.frame){
+        case 0:
+        place = '1st';
+        break;
+
+        case 1:
+        place = '2nd';
+        break;
+
+        case 2:
+        place = '3rd';
+        break;
+
+        case 3:
+        place = '4th';
+        break;
+      }
+      createNewGameLogMessage( `${currentPlayerSprite.name} has taken ${place} place`);
+    }
   }
+
 
   receiveDamage(damage) {
     //Change healthbar
-    console.log('this receiving dmg: ', this, damage);
     this.stats.health -= damage;
 
     if (socket.id !== this.socketId){
-      console.log('updating remote player health');
       this.healthbar.text = this.stats.health;
     } else {
-      console.log('cp updating health on dmg event');
       this.health.newHealth(this.stats.health);
     }
-    //this.healthbar.text = this.stats.health;
-
-    //Set tint to show damage
-    //TODO: change to a red tint
       this.tint = PLAYER_DAMAGE_TINT;
       setTimeout(() => {
         this.tint = 0xffffff;
-        //Change Health hearts <----- WHY CHARLIE, WHY IN A setTimeout?! I FOUND THIS AFTER 4 HOURS
-        // this.health.newHealth(this.stats.health);
       }, 250)
+
     if (this.stats.health <= 0){
       let index = Math.floor(Math.random() * 8);
-      this.x = this.spawnLocations[index].x;
-      this.y = this.spawnLocations[index].y;
+      this.x = this.x = this.spawnLocations[index].x;
+      this.y = this.y = this.spawnLocations[index].y;
       this.resetHealth();
     }
   }

@@ -12,7 +12,7 @@ const store = require('./store.js');
 const {receiveJoinLobby, receiveLobbyerLeave, upgradeGun} = require('./reducers/lobby.js');
 const {updatePlayer, removePlayer} = require('./reducers/players.js');
 const {updateZombiesFromClient} = require('./reducers/zombies.js');
-
+const {updateLogsFromClient} = require('./reducers/logs.js');
 //Import helper functions
 const {startGame, endGame} = require('./engine/updateClientLoop.js');
 
@@ -110,6 +110,9 @@ io.on('connection', (socket) => {
     // console.log('server received player: ', clientState.player);
     store.dispatch(updatePlayer(playerState));
     store.dispatch(updateZombiesFromClient(playerState.socketId, zombies));
+    if (clientState.logs) {
+      store.dispatch(updateLogsFromClient(socket.id, clientState.logs));
+    }
     // console.log('received zombies: ', zombies);
   });
 

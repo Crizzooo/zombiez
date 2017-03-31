@@ -81,7 +81,7 @@ body {
 }
 
 .buttonHolder {
-  padding-top: calc((66vh / 2) - 70px);
+  padding-top: 49vh;
   width: 300px;
   margin: auto;
 }
@@ -98,6 +98,19 @@ body {
   display: block;
   box-sizing: border-box;
   padding: 5px;
+  background-color: #b80000;
+  border-color: #b70000;
+  width: 200px;
+}
+
+.playButton:disabled{
+  background-color: #b70000;
+  border-color: #b70000;
+}
+
+.playButton:hover{
+  background-color: rgba(#b80000, 0.64);
+  border-color: rgba(#b80000, 0.64);
 }
 
 #game {
@@ -123,7 +136,15 @@ canvas {
 #joinGame {
   margin-top: 5px;
   margin-bottom: 5px;
+  background-color: #b70000;
+  border-color: #b70000;
 }
+
+#joinGame:hover{
+  background-color: rgba(#b80000, 0.64);
+  border-color: rgba(#b80000, 0.64);
+}
+
 /* Chat App Styles */
 /* TODO: Resize Leaderboard Components by wrapping in Div with same VH as gameContainer
 Then, give all components a relative height */

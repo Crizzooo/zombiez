@@ -81,7 +81,7 @@ export let handleInput = (player) => {
             player.gameState['reloadSuccess'].play();
             player.gun.isReloading = false;
             player.gun.activeReloaded = true;
-            player.gun.ammo = player.gun.clip
+            player.gun.ammo = player.gun.clip;
             player.clipUpdate();
             player.reloadBar.frame = 22;
             player.reloadBar.tint = 0x00FF7F;
@@ -89,13 +89,10 @@ export let handleInput = (player) => {
             tween = player.game.add.tween(player.reloadBar).to( { alpha: 1 }, 250, Phaser.Easing.Linear.None, true, 0, 500, true);
             console.log('gun dmg pre AR: ', player.gun.damage);
             player.gun.damage += 10;
-            console.log('gun dmg post AR: ', player.gun.damage);
             player.reloadBar.animations.paused = true;
             let activeInterval = setTimeout(() => {
               player.reloadBar.tint = 0xffffff;
-              console.log('gun dmg pre AR finish: ', player.gun.damage);
               player.gun.damage -= 10;
-              console.log('gun dmg post AR finish: ', player.gun.damage);
               tween.stop();
               player.reloadBar.alpha = 1;
               player.reloadingAnim.complete();
@@ -115,7 +112,7 @@ export let handleInput = (player) => {
               player.reloadingAnim.complete();
               clearInterval(jamInterval); }, 3500)
         }
-    } else if (cursors.reload.isDown && player.gun.ammo !== player.gun.clip){
+    } else if (cursors.reload.isDown && player.gun.ammo !== player.gun.clip && !player.gun.activeReloaded){
       player.gun.reloadGun();
     }
 
@@ -211,25 +208,25 @@ export function handlePlayerRotation(player) {
 	if ((pointerY > playerY) && (pointerX < playerX)) {
 		//bottom-left
 		if(player.body.velocity.x === 0 && player.body.velocity.y === 0) frame = 17;
-		// player.gun.scale.setTo(1, -1);
+		player.gun.scale.setTo(1, -1);
 	}
 	if ((pointerY > playerY) && (pointerX > playerX)) {
 		//bottom-right
 		if(player.body.velocity.x === 0 && player.body.velocity.y === 0) frame = 28;
 		animation = 'down';
-		// player.gun.scale.setTo(1, 1);
+		player.gun.scale.setTo(1, 1);
 	}
 	if ((pointerY < playerY) && (pointerX > playerX)) {
 		//top-right
 		if(player.body.velocity.x === 0 && player.body.velocity.y === 0) frame = 14;
 		animation = 'up';
-		// player.gun.scale.setTo(1, 1);
+		player.gun.scale.setTo(1, 1);
 	}
 	if ((pointerY < playerY) && (pointerX < playerX)) {
 		//top-left
 		if(player.body.velocity.x === 0 && player.body.velocity.y === 0) frame = 14;
 		animation = 'up';
-		// player.gun.scale.setTo(1, -1);
+		player.gun.scale.setTo(1, -1);
 	}
 	return {
 		frame,

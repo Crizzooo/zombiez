@@ -1,0 +1,76 @@
+{"frames": {
+
+"New Piskel (11).png":
+{
+	"frame": {"x":2,"y":23,"w":4,"h":4},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":8,"y":6,"w":4,"h":4},
+	"sourceSize": {"w":17,"h":17}
+},
+"New Piskel (15).png":
+{
+	"frame": {"x":35,"y":2,"w":30,"h":15},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":0,"y":6,"w":30,"h":15},
+	"sourceSize": {"w":30,"h":30}
+},
+"New Piskel (16).png":
+{
+	"frame": {"x":8,"y":23,"w":15,"h":3},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":2,"y":6,"w":15,"h":3},
+	"sourceSize": {"w":17,"h":17}
+},
+"New Piskel (17).png":
+{
+	"frame": {"x":2,"y":2,"w":18,"h":19},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":3,"y":3,"w":18,"h":19},
+	"sourceSize": {"w":25,"h":25}
+},
+"New Piskel (6).png":
+{
+	"frame": {"x":22,"y":2,"w":11,"h":17},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":3,"y":0,"w":11,"h":17},
+	"sourceSize": {"w":17,"h":17}
+},
+"ak5 (1).png":
+{
+	"frame": {"x":40,"y":19,"w":24,"h":8},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":0,"y":2,"w":24,"h":8},
+	"sourceSize": {"w":40,"h":10}
+},
+"pistol.png":
+{
+	"frame": {"x":67,"y":2,"w":17,"h":13},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":17,"h":13},
+	"sourceSize": {"w":17,"h":13}
+},
+"pistolBullet.png":
+{
+	"frame": {"x":25,"y":21,"w":13,"h":6},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":2,"y":2,"w":13,"h":6},
+	"sourceSize": {"w":17,"h":13}
+}},
+"meta": {
+	"app": "http://www.codeandweb.com/texturepacker",
+	"version": "1.0",
+	"image": "finalGunSheet.png",
+	"format": "RGBA8888",
+	"size": {"w":86,"h":29},
+	"scale": "1",
+	"smartupdate": "$TexturePacker:SmartUpdate:9784bd7e536d512325261b9aa00b583c:ed21919b28c14fcde90bb0f090826459:425346fc6c1a0680c70f5e951a33d47e$"
+}
+}
