@@ -20,21 +20,18 @@ export const initializeGameLog = (receivedState) => {
   gameState.gameLogMessagesHolder = {}
   let canvas = $('canvas')[0];
   gameState.gameLog = receivedState.game.add.text(
-    (canvas.width - 200),
+    (canvas.width - 225),
     90,
     'starting text', gameLogStyle);
   gameState.gameLog.fixedToCamera = true;
   gameState.gameLog.align = 'left';
   gameState.gameLog.wordWrap = true;
-  gameState.gameLog.wordWrapWidth = 200;
+  gameState.gameLog.wordWrapWidth = 225;
   gameState.gameLog.lineSpacing = 0.2;
 }
 
 export const updateGameLog = (gameState) => {
   let logs = store.getState().logs.receivedLogs;
-  // console.log('i received gameState!', gameState);
-  // console.log('&& My logs from server: ', store.getState().logs.receivedLogs);
-  // console.log('updating game log with', logs);
   R.forEachObjIndexed(handlePlayerLogs, logs);
   renderLogsInGame();
 }

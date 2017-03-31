@@ -1,7 +1,7 @@
 import {addPickupEvent, removePickupEvent} from '../reducers/players-reducer.js';
 import store from '../store.js';
 import {EVENT_LOOP_DELETE_TIME, PICKUP_RESPAWN_RATE} from './gameConstants.js';
-
+import { createNewGameLogMessage } from '../engine/gameLogManager.js';
 
 
 
@@ -81,6 +81,9 @@ export const playerCollidePowerup = (player, pickup, pickupId) => {
 
   createDestroyEvent(pickup.type, pickup.id);
 
+  let item = pickup.type === 'health' ? 'health pack' : 'speed boost';
+  createNewGameLogMessage(`${player.name} has picked up a ${item}!`);
+
   let pickupType = pickup.type;
 
   if(pickupType === 'health'){
@@ -119,24 +122,22 @@ function createPowerupSprite(powerupType, spawnPos){
   powerupSprite.spawnPosition = spawnPos;
   gameState.powerupGroup.children.push(powerupSprite);
   gameState.game.add.existing(powerupSprite);
-  // console.log('powerup Sprite: ', powerupSprite);
-  console.log('powerup sprite:x', powerupSprite.x);
-  console.log('powerup sprite:y', powerupSprite.y);
 
-  console.log('adding powerupSprite to the occupied location hash', powerupSprite);
-  console.log('Hash pre-add: ', occupiedLocationHash);
   occupiedLocationHash[powerupSprite.spawnPosition] = true;
-  console.log('Hash post-add: ', occupiedLocationHash);
+
+  powerupSprite.existing = false;
+  let existInterval = setTimeout( () => {
+    powerupSprite.existing = true;
+    clearInterval(existInterval);
+  }, 100);
+
 
   if (powerupType === 'health') {
     healthPickupSprites[id] = powerupSprite;
-    console.log('after placing pickup', healthPickupSprites);
   } else if (powerupType === 'speed') {
     powerupSprite.scale.setTo(0.5);
     speedPickupSprites[id] = powerupSprite;
-    console.log('after placing pickup', speedPickupSprites);
   }
-  console.log('gamestate group: ', gameState.powerupGroup);
   return powerupSprite;
 }
 
@@ -165,21 +166,14 @@ export const createCreateEvent = (type) => {
   }
 
   //tell others to create it
-  // store.dispatch(addPickupEvent(eventObj));
   currentPlayerSprite.playerPickupHash[eventId] = eventObj;
-  console.log('currentPlayerSprite after create event: ', currentPlayerSprite);
-  console.log('creating with this spawnPosition: ', spawnPosition)
 
   //we create it
   if (type === 'health') {
-    // createHealth(x, y);
-    //TODO: a speed pack has been placed on the map
-    console.log('calling create health');
+    createNewGameLogMessage(`A new health pack has been placed!`);
     createHealth(spawnPosition);
   } else if (type === 'speed') {
-    // createSpeed(x, y);
-    console.log('calling create speed');
-    //TODO: a speed pack has been placed on the map
+    createNewGameLogMessage(`A new speed boost has been placed!`);
     createSpeed(spawnPosition);
   }
 
@@ -201,8 +195,6 @@ export const createDestroyEvent = (type, pickupSpriteId) => {
   }
 
   //tell others to destroy the sprite
-  // store.dispatch(addPickupEvent(eventObj));
-  console.log('currentPlayerSprite: ', currentPlayerSprite);
   currentPlayerSprite.playerPickupHash[eventId] = eventObj;
 
   if (type === 'speed'){
@@ -223,29 +215,23 @@ export const createDestroyEvent = (type, pickupSpriteId) => {
 
 //createHealth
 function createHealth(spawnPos){
-  console.log('creating pickup at spawn pos: ', spawnPos, gameState.powerupGroup);
   createPowerupSprite('health', spawnPos);
 }
 
 
 //createSpeed
 function createSpeed(spawnPos){
-  console.log('creating pickup at spawn pos: ', spawnPos, gameState.powerupGroup);
   createPowerupSprite('speed', spawnPos);
 }
 
 //destroyHealth
 function destroyHealth(pickupId){
   //find sprite in hash, destroy and remove it
-  console.log('entered destroy health for this id: ', pickupId);
   let pickUpToDestroy = healthPickupSprites[pickupId];
-  console.log('pickuptoDestroy: ', pickUpToDestroy);
-  console.log('currnet locations pre destroy: ', occupiedLocationHash);
   if (pickUpToDestroy){
     occupiedLocationHash[pickUpToDestroy.spawnPosition] = false;
     pickUpToDestroy.destroy();
   }
-  console.log('current locations post destroy: ', occupiedLocationHash);
   delete healthPickupSprites[pickupId];
 }
 
@@ -268,10 +254,6 @@ function destroySpeed(pickupId){
 
 //handle event
 export const handlePickupEvent = (event, eventId) => {
-  // console.log('received a pickup event');
-  // console.log('event: ', event);
-  // console.log('eventId: ', eventId);
-  // console.log('pickupo hash map: ', pickupEventHash);
   if(pickupEventHash[eventId] !== true){
     console.log('got in to handlePickup event: ', event);
     console.log('event.event', event.event);
