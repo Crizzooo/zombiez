@@ -85,7 +85,6 @@ export default class TiledState extends Phaser.State {
       this.layers[layer.name] = this.map.createLayer(layer.name);
 
       if (layer.properties.collision) {
-      	console.log('collision layer', layer.name);
         this.map.setCollisionByExclusion([], true, layer.name);
       }
     });
@@ -95,9 +94,6 @@ export default class TiledState extends Phaser.State {
 	//Use this method to create prefabs
 	createPrefab(prefabName, prefabData, position) {
 		let prefab;
-
-    console.log('self in createPrefab', self);
-    console.log('in createPrefab, creating at: ', position);
 		//Pass prefab data into the constructor of that type defined in this constructor
 		if (self.prefabClasses.hasOwnProperty(prefabData.type)) {
 			prefab = new self.prefabClasses[prefabData.type](self, prefabName, position, prefabData.properties);
@@ -111,8 +107,6 @@ export default class TiledState extends Phaser.State {
 	//This creates the obstacles pathfinding will need to path around
 	createWorldGrid () {
 		let litObstaclesLayer, obstaclesLayer, rowIndex, columnIndex, worldGrid;
-
-		console.log('layers',this.map.layers)
 		obstaclesLayer = this.map.layers[1];
     litObstaclesLayer = this.map.layers[2];
 		worldGrid = [];

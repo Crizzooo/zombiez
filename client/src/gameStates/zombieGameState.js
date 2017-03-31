@@ -8,7 +8,7 @@ import {updateCurrentPlayer, playerLeaveGame} from '../reducers/players-reducer.
 import { dispatchZombieHitEvent } from '../reducers/zombies-reducer.js';
 import emitCurrentState from '../engine/emitCurrentState.js';
 
-import { initPickups, handlePickupEvent } from '../engine/managePickups.js';
+import { initPickups, handlePickupEvent, playerCollidePowerup } from '../engine/managePickups.js';
 
 //Import game plugins and tiledstate
 import TiledState from './tiledState';
@@ -125,12 +125,6 @@ export default class ZombieGameState extends TiledState {
     //this.camera.view = new Phaser.Rectangle(0, 0, this.currentPlayer.position.x, this.currentPlayer.position.y);
     this.game.world.setBounds(-250, -250, 3200 + 250, 3200 + 250);
 
-		//Enemy Generator Initial
-	  // enemyGeneratorInitial(this,  10);
-		console.log('enemy group', this.groups.enemies);
-
-    // this.game = game;
-
 
     //set interval to emit currentPlayer to server
     //if we have a current player
@@ -175,7 +169,7 @@ export default class ZombieGameState extends TiledState {
 
 	  for (let key in remotePlayerSprites) {
 		  if (remotePlayerSprites.hasOwnProperty(key)) {
-			  console.log('remote player sprite of key', remotePlayerSprites[key])
+			  // console.log('remote player sprite of key', remotePlayerSprites[key])
 			  this.lighting.mapSprite.addChild(remotePlayerSprites[key])
 			  this.lighting.mapSprite.addChild(remotePlayerSprites[key].healthbar)
 			  this.lighting.mapSprite.addChild(remotePlayerSprites[key].gun)
@@ -194,8 +188,8 @@ export default class ZombieGameState extends TiledState {
 
     this.localZombieSpriteGroup = this.groups.localZombieSpriteGroup;
     this.remoteZombieSpriteGroup = this.groups.remoteZombieSpriteGroup;
-	  console.log('this is game world', this.game.world)
-	  console.log('this is groups', this.groups)
+	  // console.log('this is game world', this.game.world)
+	  // console.log('this is groups', this.groups)
 
 	  this.game.time.advancedTiming = true;
   }
@@ -205,6 +199,10 @@ export default class ZombieGameState extends TiledState {
   update() {
     //Check collisions
     //NOTE: only check CPS collissions if we do have a CPS
+    this.powerupGroup.forEach( (powerupSprite) => {
+      powerupSprite.x = powerupSprite.startingX;
+      powerupSprite.y = powerupSprite.startingY;
+    });
 
     if (this.currentPlayerSprite){
       this.pointer.x = this.game.input.mousePointer.worldX;
@@ -354,10 +352,6 @@ export default class ZombieGameState extends TiledState {
     // this.remotePlayerSpriteGroup.physicsBodyType = Phaser.Physics.ARCADE;
     R.forEachObjIndexed(this.createRemotePlayerSprite, state.players.playerStates);
 
-    console.log('our remote player sprite group: ', this.remotePlayerSpriteGroup.length);
-    console.dir(this.remotePlayerSpriteGroup);
-
-    console.log('initializing zombies....')
     initializeZombies(this);
     createLocalZombie(this, 200, 200);
     createLocalZombie(this, 220, 220);
@@ -367,7 +361,6 @@ export default class ZombieGameState extends TiledState {
   }
 
   pickupCollision(player, pickup){
-    console.log('colliding ', player, 'with', pickup);
     pickup.onCollide(player, pickup.type, pickup.id)
     console.log('PICKED UP PICKUP WITH ID: ', pickup.id);
     //TODO: pickups - pull off pickupId
@@ -382,7 +375,7 @@ export default class ZombieGameState extends TiledState {
 	  this.game.physics.arcade.collide(this.currentPlayerSprite, this.layers.litWallCollision);
 
 	  this.game.physics.arcade.overlap(this.currentPlayerSprite, this.groups.pickups.children, this.pickupCollision);
-
+     this.game.physics.arcade.overlap(this.currentPlayerSprite, this.powerupGroup.children, playerCollidePowerup);
     //Note: not sure why this doesnt work - remotePlayerSpriteGroup?
     this.game.physics.arcade.collide(this.remotePlayerSpriteGroup, this.currentPlayerSprite);
 

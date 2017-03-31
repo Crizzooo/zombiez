@@ -47,9 +47,9 @@ export default class HealthBar extends Phaser.Sprite {
 
 
 
-    console.log('newhealth should be', health);
-	  console.log('hearts', numHearts);
-	  console.log('half hearts', halfHeart);
+    // console.log('newhealth should be', health);
+	  // console.log('hearts', numHearts);
+	  // console.log('half hearts', halfHeart);
 
     //Loops through hearts and sets them appropriately
     for (let i = 0; i < 10; i++) {

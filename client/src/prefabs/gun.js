@@ -67,7 +67,6 @@ export default class Gun extends GunPrefab {
       bullet.reset(x, y);
     }
     bullet.rotation = this.game.physics.arcade.moveToXY(bullet, player.pointerX, player.pointerY, bulletGroup.bulletSpeed);
-    console.log('bullet rotation', bullet.rotation);
     bullet.shooterSocketId = player.socketId;
     this.ammo--;
     let bulletId;
@@ -96,7 +95,6 @@ export default class Gun extends GunPrefab {
       const distY = y - player.gameState.currentPlayerSprite.y;
       const distance = Math.sqrt(Math.pow(distX,2)+Math.pow(distY,2));
       const perc = 1 - ((distance-this.minDistanceSound)/this.maxDistanceSound);
-      console.log('perc',perc)
       if (perc > 1) this.playSound(player,'heavyPistol',1);
       else if(perc <= 0);
       else this.playSound(player,'heavyPistol',perc);
