@@ -29,7 +29,12 @@ let playerPositions = [
   {x: 224, y: 704},
   {x: 896, y: 704},
   {x: 96, y: 992},
-  {x: 992, y: 992}
+  {x: 992, y: 992},
+  {x: 501, y: 430},
+  {x: 402, y: 440},
+  {x: 300, y: 70},
+  {x: 1080, y: 620},
+  {x: 1020, y: 420}
 ]
 //TODO: Implement correct sprite keys for ZOMBIE GUN GAME
 let playerSpriteKeys = [ 'playerSpriteSheet', 'playerSpriteSheet'];
