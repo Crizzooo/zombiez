@@ -17,17 +17,17 @@ class gameContainer extends Component {
 
       if(this.props.gamePlaying === false){
         if(this.props.currentPlayer.name) {
-          console.log('game not playing, and we have current player');
+          // console.log('game not playing, and we have current player');
           return(
               <div className="gameContainer"><div className="buttonHolder"><button type="button" className="btn btn-lg btn-info playButton" onClick={this.startGame}><span className="playBtnText">Start Battle</span></button></div></div>
           );
         } else {
-          console.log('game not playing, and we have no player');
+          // console.log('game not playing, and we have no player');
           return (<div className="gameContainer"><div className="buttonHolder"><button type="button" className="btn btn-lg btn-info playButton" onClick={this.startGame} disabled><span className="playBtnText">Start Battle</span></button><div className="minPlayerText">Require Minimum Players: 1</div></div></div>);
         }
       } else {
         //Game is Currently Playing
-        console.log('game playing, rendering game component');
+        // console.log('game playing, rendering game component');
         return (
           <div className="gameContainer">
             <div id="game">

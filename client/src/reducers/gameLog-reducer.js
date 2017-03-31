@@ -44,12 +44,8 @@ export default (state = initialState, action) => {
       break;
 
     case ADD_LOG:
-      console.log('adding log to store');
-      console.log('newState.logsToSend old: ', newState.logsToSend);
-      console.log('trying to add action: ', action);
       newLogsToSend[action.logId] = { message: action.logMessage, logId: action.logId}
       newState.logsToSend = newLogsToSend;
-      console.log('newState.LTS', newState.logsToSend);
       break;
 
     case REMOVE_LOG:

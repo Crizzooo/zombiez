@@ -62,7 +62,6 @@ const handleLogEvent = (logObj) => {
 function renderLogsInGame() {
   let messagesArray = [];
   R.forEachObjIndexed( (obj) => {
-    console.log('what can I do to push this obj to messages Array?', obj);
     messagesArray.push(obj);
   }, gameState.gameLogMessagesHolder)
   if (messagesArray.length){
@@ -75,12 +74,8 @@ function renderLogsInGame() {
 
 export function createNewGameLogMessage(msg){
   let logId = socket.id + sentLogCount++ + '';
-  console.log('dispatching log msg: ', msg);
   store.dispatch(dispatchNewLog(msg, logId));
   setTimeout( () => {
-    console.log('removing log msg from local store');
     store.dispatch(removeLogFromStore(logId));
   }, EVENT_LOOP_DELETE_TIME * 1.5);
-  console.log('store after adding log: ');
-  console.dir(store.getState(), { depth: 5 });
 }

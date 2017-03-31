@@ -44,7 +44,6 @@ function dispatchGamePlayingUpdate(isItPlaying){
 //game starts here
 function startClientGame(playersFromServer) {
   let state = store.getState();
-  console.log('client is starting game with this from server: ', playersFromServer);
   ZG.game = new GenZed('100', '100', Phaser.AUTO, 'game');
   store.dispatch(loadPlayers(playersFromServer));
   ZG.game.startGame('BootState', true, false, "../assets/levels/main.json");
@@ -58,7 +57,7 @@ function logReceivedState() {
 }
 function dispatchServerState(serverState) {
   //break out data from server - send to appropriate stores
-  throttledLog();
+  // throttledLog();
   let state = store.getState();
   //store.dispatch(dispatchLobbyUpdate(serverState.lobby.lobbyers));
   if (state.game.gamePlaying){
@@ -86,7 +85,7 @@ function dispatchServerState(serverState) {
     }
 
   }
-  throttledLog();
+  // throttledLog();
 }
 
 function dispatchPlayerUpdates(players) {
@@ -94,9 +93,9 @@ function dispatchPlayerUpdates(players) {
 }
 
 function dispatchLobbyState(lobbyersFromServer){
-  console.log('received lobby from server: ', lobbyersFromServer);
+  // console.log('received lobby from server: ', lobbyersFromServer);
   store.dispatch(dispatchLobbyUpdate(lobbyersFromServer));
-  console.log('store after receiving lobby: ', store.getState());
+  // console.log('store after receiving lobby: ', store.getState());
 }
 
 function dispatchScoreUpdate(playerId, score){

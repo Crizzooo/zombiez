@@ -74,11 +74,6 @@ function initSpeed(){
 
 export const playerCollidePowerup = (player, pickup, pickupId) => {
   //dispatch a destroy event to all players, it should
-  console.log('player: ', player);
-  console.log('pickup: ', pickup);
-  console.log('pickup-type: ', pickup.type);
-  console.log('pickupId: ', pickup.id);
-
   createDestroyEvent(pickup.type, pickup.id);
 
   let item = pickup.type === 'health' ? 'health pack' : 'speed boost';
@@ -92,7 +87,6 @@ export const playerCollidePowerup = (player, pickup, pickupId) => {
     player.setHealth(player.stats.health);
   }  else if (pickupType === 'speed') {
     player.stats.movement += 100;
-    console.log('PICKED UP SPEEED BOOOST', player)
     let intervalId = setTimeout(()=>{player.stats.movement -= 100; clearInterval();}, 5000);
   }
 
@@ -103,15 +97,11 @@ export const playerCollidePowerup = (player, pickup, pickupId) => {
 }
 
 function createPowerupSprite(powerupType, spawnPos){
-  console.log('in create power up sprite')
-  console.log('looking at spwnLocations with this spawnPos: ', spawnPos);
   let x = spawnLocations[spawnPos][0];
   let y = spawnLocations[spawnPos][1];
-  console.log('trying to create at these x and y now: ', x, y);
   let powerupSprite = gameState.game.add.sprite(x, y, powerupType+'Pickup');
   let id =  powerupType === 'health' ? 'healthPickup' + ++healthCount : 'speedPickup' + ++speedCount;
   gameState.game.physics.arcade.enable(powerupSprite);
-  console.log('powerupSprite? ', powerupSprite);
   powerupSprite.enableBody = true;
   powerupSprite.body.immovable = true;
   powerupSprite.anchor.setTo(0.5);
@@ -150,7 +140,6 @@ function getRandomSpawnLocation(){
     randomPosition = Math.floor(Math.random() * spawnLocations.length);
     }while(occupiedLocationHash[randomPosition] === true)
   }
-  console.log('random spawn position chosen: ', randomPosition);
   return randomPosition;
 }
 //handleCreateEvent
@@ -178,7 +167,6 @@ export const createCreateEvent = (type) => {
   }
 
   let intervalId = setTimeout( () => {
-    console.log(store.getState().players.currentPlayer.playerPickupHash[eventId]);
     store.dispatch(removePickupEvent(eventId));
     clearInterval(intervalId);
   }, EVENT_LOOP_DELETE_TIME * 1.5);
@@ -238,12 +226,7 @@ function destroyHealth(pickupId){
 //destroySpeed
 function destroySpeed(pickupId){
   //find sprite in speed hash and remove it
-  console.log('entered destroy speed for this id: ', pickupId);
   let pickUpToDestroy = speedPickupSprites[pickupId];
-  console.log('pickupToDestroy from pickup hashes: ', pickUpToDestroy);
-  console.log('pickuptodestroy.spawnPos: ', pickUpToDestroy);
-  console.log('currnet locations pre destroy: ', occupiedLocationHash);
-  console.log('current locations post destroy: ', occupiedLocationHash);
   if (pickUpToDestroy){
     occupiedLocationHash[pickUpToDestroy.spawnPosition] = false;
     pickUpToDestroy.destroy();
@@ -255,12 +238,8 @@ function destroySpeed(pickupId){
 //handle event
 export const handlePickupEvent = (event, eventId) => {
   if(pickupEventHash[eventId] !== true){
-    console.log('got in to handlePickup event: ', event);
-    console.log('event.event', event.event);
     if (event.event == "create"){
-      console.log('received create event')
       if (event.type === "health"){
-        console.log('received new create event');
         createHealth(event.spawnPosition)
         pickupEventHash[eventId] = true;
       } else {
@@ -268,7 +247,6 @@ export const handlePickupEvent = (event, eventId) => {
         pickupEventHash[eventId] = true;
       }
     } else if (event.event === "destroy"){
-      console.log('received destroy event');
       if(event.type === 'health'){
         destroyHealth(event.pickupSpriteId);
         pickupEventHash[eventId] = true;

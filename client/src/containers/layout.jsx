@@ -53,10 +53,7 @@ class Layout extends Component {
     socket.emit('lobbyerJoinLobby', this.state);
     let currentLobbyer = this.state;
     currentLobbyer.socketId = socket.id;
-    console.log('set current lobbyer obj:', currentLobbyer);
     store.dispatch(dispatchSetCurrentLobbyer(currentLobbyer));
-    console.log('store after player joined');
-    console.log(store.getState());
     $('#addPlayerModal').modal('hide');
     $('#playerNameInput').val('');
   }

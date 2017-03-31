@@ -62,8 +62,6 @@ export default class ZombieGameState extends TiledState {
 
     this.displayEndGameText = R.once(this.displayEndGameText.bind(this));
 
-    console.log(this.game.onBlur);
-
     document.getElementsByClassName("container")[0].style.visibility = "hidden";
 
     //console.log('ay',document.getElementsByClassName("container"))
@@ -114,10 +112,6 @@ export default class ZombieGameState extends TiledState {
     //create game set up
     //This creates player prefab
     this.loadLevel();
-
-    //Remote Player Movement
-    //This gets us the first player from the remote players
-    console.log('this is remote player sprites', remotePlayerSprites);
 
     //Set camera to follow, then make world big to allow camera to pan off
     //this.camera.view = new Phaser.Rectangle(0, 0, this.currentPlayer.position.x, this.currentPlayer.position.y);

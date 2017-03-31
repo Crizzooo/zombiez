@@ -83,7 +83,6 @@ export default (state = initialState, action) => {
         delete action.players[socket.id];
       }
       newState.playerStates = action.players;
-      console.log('State after loading players: ', action.players);
       break;
 
     case SET_GAME_PLAYING_BOOL:
@@ -91,12 +90,8 @@ export default (state = initialState, action) => {
       break;
 
     case ADD_PICKUP_EVENT:
-      console.log('client reducer received a pickup event');
-      console.log('old client state: ', state.currentPlayer.playerPickupHash);
       let eventId = action.eventInfo.eventId;
       newState.currentPlayer = Object.assign({}, newState.currentPlayer)
-      console.log(typeof newState.currentPlayer.playerPickupHash);
-      console.dir(newState.currentPlayer.playerPickupHash);
       if (Object.keys(newState.currentPlayer.playerPickupHash).length < 1){
         newState.currentPlayer.playerPickupHash = {
           eventId: action.eventInfo
@@ -104,7 +99,6 @@ export default (state = initialState, action) => {
       } else {
         newState.currentPlayer.playerPickupHash[action.eventInfo.eventId] = action.eventInfo;
       }
-      console.log('new client state: ', newState.currentPlayer);
       break;
 
     case REMOVE_PICKUP_EVENT:
