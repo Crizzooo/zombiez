@@ -63,13 +63,13 @@ export const initPickups = (receivedState) => {
 }
 
 function initHealth(){
-  createPowerupSprite('health', getRandomSpawnLocation());
-  createPowerupSprite('health', getRandomSpawnLocation());
+  createPowerupSprite('health', 4);
+  createPowerupSprite('health', 1);
 }
 
 function initSpeed(){
-  createPowerupSprite('speed', getRandomSpawnLocation());
-  createPowerupSprite('speed', getRandomSpawnLocation());
+  createPowerupSprite('speed', 6);
+  createPowerupSprite('speed', 8);
 }
 
 export const playerCollidePowerup = (player, pickup, pickupId) => {
