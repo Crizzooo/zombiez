@@ -421,10 +421,7 @@ export default class ZombieGameState extends TiledState {
       playerToUpdate.pointer.x = playerToUpdate.pointerX;
       playerToUpdate.pointer.y = playerToUpdate.pointerY;
       playerToUpdate.health = playerState.health;
-
-      if (playerState.health !== playerToUpdate.health){
-        playerToUpdate.setHealth(playerState.health);
-      }
+      playerToUpdate.setHealth(playerState.health);
 
       if (playerState.bulletHash && Object.keys(playerState.bulletHash).length > 0) {
         playerToUpdate.pointerX = playerState.pointerX;
@@ -585,17 +582,19 @@ export default class ZombieGameState extends TiledState {
       }
       console.error('player not found');
     }
-    if ( (playerToDamage.stats.health - playerWhoDealtDamage.gun.damage) <= 0 ){
+    playerToDamage.receiveDamage(playerWhoDealtDamage.gun.damage, playerWhoDealtDamage);
+    if ( (playerToDamage.stats.health) <= 0 ){
       if (playerWhoDealtDamage.socketId === socket.id){
         createNewGameLogMessage(`${currentPlayerSprite.name} has slain ${playerToDamage.name}`)
       }
-      playerWhoDealtDamage.upgradeGun();
-      playerWhoDealtDamage.checkForRankUp(remotePlayerSprites);
-      playerToDamage.receiveDamage(playerWhoDealtDamage.gun.damage);
-      playerToDamage.resetHealth();
-    } else {
-      playerToDamage.receiveDamage(playerWhoDealtDamage.gun.damage);
+      // playerWhoDealtDamage.upgradeGun();
+      // playerWhoDealtDamage.checkForRankUp(remotePlayerSprites);
+      // playerToDamage.receiveDamage(playerWhoDealtDamage.gun.damage);
+      // playerToDamage.resetHealth();
     }
+    /*else {
+      playerToDamage.receiveDamage(playerWhoDealtDamage.gun.damage);
+    }*/
   }
 
   handleRemoteBullet(bulletEvent, bulletId) {

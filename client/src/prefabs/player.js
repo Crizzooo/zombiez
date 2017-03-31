@@ -48,6 +48,7 @@ export default class Player extends Prefab {
     this.name = properties.name;
     //flag for telling whether or not the player has won
     this.hasWon = false;
+    this.immune = false;
     //Setup player's gun
     //Load starting gun pistol
 
@@ -324,7 +325,10 @@ export default class Player extends Prefab {
   }
 
 
-  receiveDamage(damage) {
+  receiveDamage(damage, playerWhoDealtDamage) {
+    if (this.immune){
+      return;
+    }
     //Change healthbar
     this.stats.health -= damage;
 
@@ -339,10 +343,24 @@ export default class Player extends Prefab {
       }, 250)
 
     if (this.stats.health <= 0){
+      console.log('took player below 0: ', this);
+      this.immune = true;
+      console.log('making them immune: ', this);
+      let immuneInterval = setTimeout( () => {
+        this.immune = false;
+        console.log('player no longer immune');
+        clearInterval(immuneInterval);
+      }, 1000);
       let index = Math.floor(Math.random() * 8);
       this.x = this.x = this.spawnLocations[index].x;
       this.y = this.y = this.spawnLocations[index].y;
       this.resetHealth();
+      console.log('playerWhoDealtDamage: ', playerWhoDealtDamage);
+      if (playerWhoDealtDamage && playerWhoDealtDamage.socketId === socket.id){
+        console.log(playerWhoDealtDamage + ' should upgrade their gun');
+        playerWhoDealtDamage.upgradeGun();
+        playerWhoDealtDamage.checkForRankUp(remotePlayerSprites);
+      }
     }
   }
 
