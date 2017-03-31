@@ -81,6 +81,8 @@ export default class Gun extends GunPrefab {
       bulletGroup.bulletSpeed = 200;
     }
 
+    bullet.rotation = this.game.physics.arcade.moveToXY(bullet, player.pointerX, player.pointerY, bulletGroup.bulletSpeed);
+
     if (player.currentGunLevel === 5) {
       bullet.frame = 4;
       setTimeout(() => {
@@ -88,7 +90,7 @@ export default class Gun extends GunPrefab {
       }, 50)
     }
 
-      bullet.rotation = this.game.physics.arcade.moveToXY(bullet, player.pointerX, player.pointerY, bulletGroup.bulletSpeed);
+
 
     bullet.shooterSocketId = player.socketId;
     this.ammo--;
