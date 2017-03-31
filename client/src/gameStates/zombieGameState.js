@@ -8,7 +8,7 @@ import {updateCurrentPlayer, playerLeaveGame} from '../reducers/players-reducer.
 import { dispatchZombieHitEvent } from '../reducers/zombies-reducer.js';
 import emitCurrentState from '../engine/emitCurrentState.js';
 
-import { initPickups } from '../engine/managePickups.js';
+import { initPickups, handlePickupEvent } from '../engine/managePickups.js';
 
 //Import game plugins and tiledstate
 import TiledState from './tiledState';
@@ -308,6 +308,7 @@ export default class ZombieGameState extends TiledState {
       // Attach event hashes to the CPS obj
       currentPlayerSprite.bulletHash = {};
       currentPlayerSprite.playerDamageHash = {};
+      currentPlayerSprite.playerPickupHash = {};
 
       // Store on game Object
       this.currentPlayerSprite = currentPlayerSprite;
@@ -322,7 +323,8 @@ export default class ZombieGameState extends TiledState {
         socketId: socket.id,
         health: PLAYER_HEALTH,
         bulletHash: currentPlayerSprite.bulletHash,
-        playerDamageHash: currentPlayerSprite.playerDamageHash
+        playerDamageHash: currentPlayerSprite.playerDamageHash,
+        playerPickupHash: currentPlayerSprite.playerPickupHash
         //NOTE: pointerX and pointerY are attached in dispatch CP
         //TODO: gun, bullets, frame? etc
       }
@@ -439,6 +441,7 @@ export default class ZombieGameState extends TiledState {
       gunFrame: this.currentPlayerSprite.gun.frame,
       hasWon: this.currentPlayerSprite.hasWon,
       currentGunLevel: this.currentPlayerSprite.currentGunLevel,
+      playerPickupHash: this.currentPlayerSprite.playerPickupHash
     }
 
     store.dispatch(updateCurrentPlayer(currentPlayer));
@@ -493,6 +496,10 @@ export default class ZombieGameState extends TiledState {
       }
       if (playerState.playerDamageHash && Object.keys(playerState.playerDamageHash).length > 0) {
         R.forEachObjIndexed(this.handleRemotePlayerDamageEvent, playerState.playerDamageHash);
+      }
+      if (playerState.playerPickupHash && (Object.keys(playerState.playerPickupHash).length > 0)){
+        // console.log('found stuff in player pickup events: ', playerState.playerPickupHash);
+        R.forEachObjIndexed(handlePickupEvent, playerState.playerPickupHash);
       }
       handleRemoteAnimation(playerToUpdate);
       tweenRemoteAssets(playerToUpdate, self);
@@ -656,13 +663,6 @@ export default class ZombieGameState extends TiledState {
       this.handlePlayerDamage(player.socketId, self.currentPlayerSprite);
       //increment playerDamageCount
       playerDamageEventCount++;
-
-    } else if (bullet.parent.name === 'remotePlayerBulletGroup') {
-      if (player.socketId === socket.id) {
-        // console.log(' I GOT HIT');
-      } else {
-        // console.log('eh someone else hit someone');
-      }
     }
   }
 

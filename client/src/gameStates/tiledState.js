@@ -97,6 +97,7 @@ export default class TiledState extends Phaser.State {
 		let prefab;
 
     console.log('self in createPrefab', self);
+    console.log('in createPrefab, creating at: ', position);
 		//Pass prefab data into the constructor of that type defined in this constructor
 		if (self.prefabClasses.hasOwnProperty(prefabData.type)) {
 			prefab = new self.prefabClasses[prefabData.type](self, prefabName, position, prefabData.properties);

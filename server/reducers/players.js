@@ -74,8 +74,10 @@ const playerReducers = (state = initialState, action) => {
       newPlayerStates[action.playerToUpdate.socketId] = action.playerToUpdate;
       if (
         (action.playerToUpdate.bulletHash && (Object.keys(action.playerToUpdate.bulletHash).length) > 0)
-         || 
-        ( action.playerToUpdate.playerDamageHash && Object.keys(action.playerToUpdate.playerDamageHash).length > 0)){
+         ||
+        ( action.playerToUpdate.playerDamageHash && Object.keys(action.playerToUpdate.playerDamageHash).length > 0)
+        || (action.playerToUpdate.playerPickupHash &&
+        (Object.keys(action.playerToUpdate.playerPickupHash).length>0))){
         //we've received an event
         throttleReceiveEventHash(newPlayerStates);
       } else {

@@ -1,5 +1,6 @@
 import axios from 'axios';
 import R from 'ramda';
+const throttle = require('lodash.throttle');
 
 /* Action Types */
 // const ADD_PLAYER = 'ADD_PLAYER';
@@ -57,15 +58,21 @@ const initialState = {
   currentPlayer: {
     bulletHash: {},
     playerDamageHash: {},
-    playerPickupHash: {}
+    playerPickupHash: {
+      'fakeId': 'fakeEvent'
+    }
   }
 };
 
+
+
+// const throttleLog = throttle( (cpState) => console.log('newState: ', cpState), 5000);
 /* Reducer */
 export default (state = initialState, action) => {
 
   let newPlayerStates = Object.assign({}, state.playerStates);
-  let newState = Object.assign({}, state, {playerStates: newPlayerStates});
+  let newState = Object.assign({}, state, {playerStates: newPlayerStates}, {currentPlayer: state.currentPlayer});
+  // throttleLog(newState.currentPlayer);
 
   switch (action.type) {
 
@@ -84,7 +91,20 @@ export default (state = initialState, action) => {
       break;
 
     case ADD_PICKUP_EVENT:
-      newState.currentPlayer = Object.assign({}, newState.currentPlayer, {playerPickupHash: state.currentPlayer.playerPickupHash})
+      console.log('client reducer received a pickup event');
+      console.log('old client state: ', state.currentPlayer.playerPickupHash);
+      let eventId = action.eventInfo.eventId;
+      newState.currentPlayer = Object.assign({}, newState.currentPlayer)
+      console.log(typeof newState.currentPlayer.playerPickupHash);
+      console.dir(newState.currentPlayer.playerPickupHash);
+      if (Object.keys(newState.currentPlayer.playerPickupHash).length < 1){
+        newState.currentPlayer.playerPickupHash = {
+          eventId: action.eventInfo
+        }
+      } else {
+        newState.currentPlayer.playerPickupHash[action.eventInfo.eventId] = action.eventInfo;
+      }
+      console.log('new client state: ', newState.currentPlayer);
       break;
 
     case REMOVE_PICKUP_EVENT:
