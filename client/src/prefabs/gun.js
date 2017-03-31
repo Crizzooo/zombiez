@@ -27,7 +27,7 @@ export default class Gun extends GunPrefab {
     this.pivot.x = -10;
     this.isJammed = false;
     this.rotation;
-    this.bulletFrame = 9;
+    this.bulletFrame = 7;
     this.activeReloaded = false;
     gameObj = this.game;
     this.minDistanceSound = 30;
@@ -73,9 +73,17 @@ export default class Gun extends GunPrefab {
     }
 
     if (player.currentGunLevel === 2) bullet.frame = 0;
-
     if (player.currentGunLevel === 3) {
-      bullet.frame = 1;
+      bullet.frame = 2;
+      bulletGroup.bulletSpeed = 1000;
+    }
+    if (player.currentGunLevel === 4) {
+      bullet.frame = 3;
+      bulletGroup.bulletSpeed = 200;
+    }
+
+    if (player.currentGunLevel === 5) {
+      bullet.frame = 4;
       setTimeout(() => {
         bullet.kill();
       }, 50)

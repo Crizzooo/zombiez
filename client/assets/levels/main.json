@@ -57,8 +57,8 @@
 
     "pistolSpriteSheet": {
       "type": "spriteSheetAtlas",
-      "sourcePNG": "../../assets/images/updatedGunSheet.png",
-      "sourceJSON": "../../assets/images/updatedGunSheet.json"
+      "sourcePNG": "../../assets/images/finalGunSheet.png",
+      "sourceJSON": "../../assets/images/finalGunSheet.json"
     },
 
     "medalSpriteSheet": {

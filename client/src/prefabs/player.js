@@ -56,7 +56,7 @@ export default class Player extends Prefab {
       properties: {
         group: 'guns',
         name: 'pistol',
-        initial: 8,
+        initial: 6,
         texture: 'pistolSpriteSheet',
         rateOfFire: 350,
         reloadSpeed: 2000,
@@ -197,27 +197,50 @@ export default class Player extends Prefab {
     }
     switch (this.currentGunLevel) {
       case 1:
-        this.gun.frame = 8;
-        this.gunUiFrame.gunSprite.frame = 8;
+        this.gun.frame = 6;
+        this.gunUiFrame.gunSprite.frame = 6;
         this.gun.spread = 0;
         break;
       case 2:
-        this.gun.frame = 6;
-        this.gunUiFrame.gunSprite.frame = 6;
-        this.gun.damage -= 5;
+        this.gun.frame = 5;
+        this.gunUiFrame.gunSprite.frame = 5;
+        this.gun.damage = 5;
         this.gun.rateOfFire -= 200;
         this.gun.clip = 30;
+        this.gun.ammo = 30;
         this.gun.spread = 0.1;
+        this.clipUpdate()
         break;
       case 3:
         this.gun.frame = 1;
         this.gunUiFrame.gunSprite.frame = 1;
-        this.gun.rateOfFire += 600;
-        this.stats.movement += 100;
-        this.gun.damage += 45;
+        this.gun.rateOfFire += 900;
+        this.gun.damage = 60;
+        this.gun.clip = 5;
+        this.gun.ammo = 5;
         this.gun.spread = 0;
+        this.clipUpdate()
         break;
       case 4:
+        this.gun.frame = 3;
+        this.gunUiFrame.gunSprite.frame = 3;
+        this.gun.rateOfFire += 500;
+        this.gun.damage = 80;
+        this.gun.spread = 0;
+        this.gun.clip = 2;
+        this.gun.ammo = 2;
+        this.clipUpdate()
+        break;
+      case 5:
+        this.gun.frame = 4;
+        this.gunUiFrame.gunSprite.frame = 4;
+        this.gun.rateOfFire += 600;
+        this.stats.movement += 36;
+        this.gun.damage = 50;
+        this.gun.spread = 0;
+        this.clipUpdate();
+        break;
+      case 6:
         this.hasWon = true;
         break;
     }
