@@ -159,7 +159,11 @@ export default class Player extends Prefab {
   }
 
   clipUpdate() {
-    this.gunUiFrame.gunClip.text = this.gun.ammo + '/' + this.gun.clip;
+    if (this.gun.clip === Infinity){
+      this.gunUiFrame.gunClip.text = '∞/∞';
+    } else {
+      this.gunUiFrame.gunClip.text = this.gun.ammo + '/' + this.gun.clip;
+    }
   }
 
   loadHealthbar() {
@@ -239,6 +243,7 @@ export default class Player extends Prefab {
         this.stats.movement += 36;
         this.gun.damage -= 20;
         this.gun.spread = 0;
+        this.gun.clip = Infinity;
         this.clipUpdate();
         break;
       case 6:
