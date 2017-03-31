@@ -125,11 +125,8 @@ export function handleRemoteZombie(zombie, zombieId){
   // console.log('for zombieId: ', zombieId);
   let zombieToUpdate = remoteZombieSprites[clientId][zombieId];
   if (!zombieToUpdate){
-    // console.log('no zombie to update, we shall create him!');
-    console.log(remoteZombieSprites);
     let newZombie = gameState.remoteZombieSpriteGroup.getFirstExists(false);
     if (!newZombie){
-      console.log('have to create a new zombie')
       createRemoteZombie(zombie, clientId, zombieId);
     } else {
       newZombie.x = zombie.x;

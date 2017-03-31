@@ -56,7 +56,7 @@ export default class Player extends Prefab {
       properties: {
         group: 'guns',
         name: 'pistol',
-        initial: 8,
+        initial: 6,
         texture: 'pistolSpriteSheet',
         rateOfFire: 350,
         reloadSpeed: 2000,
@@ -276,6 +276,15 @@ export default class Player extends Prefab {
     }
   }
 
+  setHealth(newHealth){
+    if (socket.id !== this.socketId) {
+      this.healthbar.text = newHealth;
+  }  else {
+      this.health.newHealth(newHealth);
+    }
+
+  }
+
   checkForRankUp(remotePlayers){
     //sort by gun level
     let oldMedalFrame = this.medal.frame;
@@ -336,4 +345,5 @@ export default class Player extends Prefab {
       this.resetHealth();
     }
   }
+
 }
