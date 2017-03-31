@@ -420,6 +420,7 @@ export default class ZombieGameState extends TiledState {
       playerToUpdate.gun.rotation = playerState.gunRotation;
       playerToUpdate.pointer.x = playerToUpdate.pointerX;
       playerToUpdate.pointer.y = playerToUpdate.pointerY;
+      playerToUpdate.health = playerState.health;
 
       if (playerState.health !== playerToUpdate.health){
         playerToUpdate.setHealth(playerState.health);
