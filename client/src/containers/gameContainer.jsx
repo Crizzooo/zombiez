@@ -16,7 +16,7 @@ class gameContainer extends Component {
     //TODO: REIMPLEMENT DISABLED ATTRIB ON FALSY RETURN AND PLAYERS <= 2
 
       if(this.props.gamePlaying === false){
-        if(this.props.currentPlayer.name && this.props.lobbyers && this.props.lobbyers.length >= 2) {
+        if(this.props.currentPlayer.name && this.props.lobbyers && this.props.lobbyers.length >= 1) {
           // console.log('game not playing, and we have current player');
           return(
               <div className="gameContainer"><div className="buttonHolder"><button type="button" className="btn btn-lg btn-info playButton" onClick={this.startGame}><span className="playBtnText">Start Battle</span></button></div></div>

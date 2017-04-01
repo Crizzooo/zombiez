@@ -113,11 +113,11 @@ export default class TiledState extends Phaser.State {
 		for (rowIndex = 0; rowIndex < this.map.height; rowIndex += 1) {
 			worldGrid.push([]);
 			for (columnIndex = 0; columnIndex < this.map.width; columnIndex += 1) {
-			  if (obstaclesLayer.data[rowIndex][columnIndex].collides || litObstaclesLayer.data[rowIndex][columnIndex].collides){
+			  //if (obstaclesLayer.data[rowIndex][columnIndex].collides || litObstaclesLayer.data[rowIndex][columnIndex].collides){
 			  	//|| litObstaclesLayer.data[rowIndex][columnIndex].collides
-          worldGrid[rowIndex].push(1);
-			  	//worldGrid[rowIndex].push((obstaclesLayer.data[rowIndex][columnIndex].index));
-        }
+          //worldGrid[rowIndex].push(1);
+			  	worldGrid[rowIndex].push((obstaclesLayer.data[rowIndex][columnIndex].index));
+        //}
 			}
 		}
 

@@ -6,15 +6,21 @@
 export function enemyGeneratorInitial (gameState, numEnemies, enemyType) {
 	let spawnLocations = [
 		{x: 200, y: 200},
+		{x: 350, y: 350},
+		{x: 360, y: 360},
+		{x: 380, y: 380},
 		{x: 400, y: 400},
-		{x: 600, y: 600},
-		{x: 250, y: 250},
-		{x: 250, y: 250},
-		{x: 500, y: 500},
-		{x: 600, y: 600},
-		{x: 700, y: 700},
-		{x: 800, y: 800},
-		{x: 900, y: 900}
+		{x: 420, y: 420},
+		{x: 400, y: 400},
+		{x: 400, y: 400},
+		// {x: 600, y: 600},
+		// {x: 250, y: 250},
+		// {x: 250, y: 250},
+		// {x: 500, y: 500},
+		// {x: 600, y: 600},
+		// {x: 700, y: 700},
+		// {x: 800, y: 800},
+		// {x: 900, y: 900}
 	];
 
 	//TODO: right animation for walking

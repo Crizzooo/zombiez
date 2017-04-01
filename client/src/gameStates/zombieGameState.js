@@ -30,6 +30,7 @@ import { updateGameLog, initializeGameLog, createNewGameLogMessage } from '../en
 var self;
 let playerDamageEventCount = 0;
 let zombieHitCount = 0;
+
 export default class ZombieGameState extends TiledState {
   constructor(game) {
     super(game);
@@ -181,12 +182,12 @@ export default class ZombieGameState extends TiledState {
 
 	  this.game.time.advancedTiming = true;
 
+	  //Enemy Generator Initial
+	  enemyGeneratorInitial(this,  1);
 
     // Game Log
     let canvas = document.getElementsByTagName("canvas")[0];
   }
-
-
 
   update() {
     //Check collisions
@@ -224,9 +225,10 @@ export default class ZombieGameState extends TiledState {
       }
     }
 
-    //Pathfinding
+	  //Pathfinding
 	  this.groups.enemies.forEachExists((enemy) => {
-	  	enemy.moveTo(enemy.acquireTarget(this.groups.player));
+		  enemy.move();
+		  //enemy.moveTo(enemy.acquireTarget(this.groups.player));
 	  });
 
     //Server & Input
@@ -394,7 +396,6 @@ export default class ZombieGameState extends TiledState {
     store.dispatch(updateCurrentPlayer(currentPlayer));
   }
 
-
   updateRemotePlayers() {
     //fetch updated player states
     this.players = store.getState().players.playerStates;
@@ -402,7 +403,6 @@ export default class ZombieGameState extends TiledState {
     //then update each player from the server individually
     R.forEachObjIndexed(this.updateRemotePlayer, this.players);
   }
-
 
   updateRemotePlayer(playerState) {
 

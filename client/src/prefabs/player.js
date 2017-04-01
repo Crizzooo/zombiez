@@ -21,13 +21,13 @@ export default class Player extends Prefab {
 
     this.spawnLocations = [
       {x: 128, y: 128},
-      {x: 992, y: 128},
-      {x: 384, y: 416},
-      {x: 736, y: 416},
-      {x: 224, y: 704},
-      {x: 896, y: 704},
-      {x: 96, y: 992},
-      {x: 992, y: 992}
+      // {x: 992, y: 128},
+      // {x: 384, y: 416},
+      // {x: 736, y: 416},
+      // {x: 224, y: 704},
+      // {x: 896, y: 704},
+      // {x: 96, y: 992},
+      // {x: 992, y: 992}
     ]
 
     //TODO: make it only visible to the current player
