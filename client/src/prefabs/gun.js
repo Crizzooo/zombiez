@@ -44,10 +44,10 @@ export default class Gun extends GunPrefab {
     //NOTE: shoot gets called with currentPlayerSprite.gun.gunBullets OR game.remoteBulletGroup, if shoot is being called due to a server 'remoteFire' emit
     let bulletGroup = player.bulletGroup;
     if (socket.id === player.socketId){
-      console.log('shoot methoodd called for current player: ', player);
+      // console.log('shoot methoodd called for current player: ', player);
     }
     if (bulletEvent){
-      console.log('in shoot method for bullet event & player: ', bulletEvent, player);
+      // console.log('in shoot method for bullet event & player: ', bulletEvent, player);
     }
 
     if (player.socketId === socket.id) {
@@ -62,7 +62,7 @@ export default class Gun extends GunPrefab {
       }
     }
     let bullet = bulletGroup.getFirstExists(false);
-    if (bullet && bulletEvent) console.log('recycled bullet');
+    // if (bullet && bulletEvent) console.log('recycled bullet');
     this.nextFire = this.game.time.time + this.rateOfFire;
 
     // if(bullet) bullet.destroy();
@@ -70,13 +70,13 @@ export default class Gun extends GunPrefab {
     let x = player.x;
     let y = player.y;
     if (!bullet) {
-      if (bullet && bulletEvent) console.log('no bullet found, creating: ');
+      // if (bullet && bulletEvent) console.log('no bullet found, creating: ');
       bullet = new Bullet(this.game, 'bullet', {x: this.x, y: this.y}, {
         //NOTE: we can reimplement 'group' here if needed
         initial: this.bulletFrame,
         texture: 'pistolSpriteSheet'
       });
-      if (bullet && bulletEvent) console.log('created bullet: ', bullet);
+      // if (bullet && bulletEvent) console.log('created bullet: ', bullet);
       bulletGroup.add(bullet);
     } else {
       bullet.reset(x, y);
@@ -93,7 +93,7 @@ export default class Gun extends GunPrefab {
     }
 
     bullet.rotation = this.game.physics.arcade.moveToXY(bullet, player.pointerX, player.pointerY, bulletGroup.bulletSpeed);
-    if (bullet.rotation) { console.log('bullet has been fired with rotation: ', bullet.rotation)};
+    // if (bullet.rotation) { console.log('bullet has been fired with rotation: ', bullet.rotation)};
 
     if (player.currentGunLevel === 5) {
       bullet.frame = 4;
@@ -120,7 +120,7 @@ export default class Gun extends GunPrefab {
         bulletId: bulletId
       }
       bulletCount++;
-      console.log('created bullet event: ', bulletId);
+      // console.log('created bullet event: ', bulletId);
 
       setTimeout(() => {
         delete this.game.currentPlayerSprite.bulletHash[bulletId];

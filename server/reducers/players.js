@@ -91,8 +91,8 @@ const playerReducers = (state = initialState, action) => {
       if (action.playerToUpdate.bulletHash && (Object.keys(action.playerToUpdate.bulletHash).length > 0)){
         R.forEachObjIndexed( (bulletEvent, hashEventId) => {
           if(receivedBulletEvents[hashEventId] !== true){
-            console.log('hashEventId: ', hashEventId);
-            console.dir(bulletEvent);
+            // console.log('hashEventId: ', hashEventId);
+            // console.dir(bulletEvent);
             receivedBulletEvents[hashEventId] = true;
           }
         }, action.playerToUpdate.bulletHash);

@@ -87,7 +87,6 @@ export let handleInput = (player) => {
             player.reloadBar.tint = 0x00FF7F;
             player.reloadBar.alpha = 0;
             tween = player.game.add.tween(player.reloadBar).to( { alpha: 1 }, 250, Phaser.Easing.Linear.None, true, 0, 500, true);
-            console.log('gun dmg pre AR: ', player.gun.damage);
             player.gun.damage += 10;
             player.reloadBar.animations.paused = true;
             let activeInterval = setTimeout(() => {

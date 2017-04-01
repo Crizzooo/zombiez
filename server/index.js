@@ -43,6 +43,7 @@ io.on('connection', (socket) => {
 
   //TODO: Call function that attaches all functions to socket
   socket.on('disconnect', () => {
+    console.log('a user disconnected with socketID', socket.id);
     handleLobbyerLeave(socket);
   })
 
