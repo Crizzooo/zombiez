@@ -50,6 +50,7 @@
     "build-sass": "node-sass -w client/assets/stylesheets/style.scss -o client/public/stylesheets",
     "build-dev": "npm run build -- --watch & npm run build-sass",
     "test": "react-scripts test --env=jsdom",
+    "heroku-postbuild": "webpack",
     "eject": "react-scripts eject"
   }
 }
