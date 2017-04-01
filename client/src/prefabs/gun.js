@@ -43,7 +43,9 @@ export default class Gun extends GunPrefab {
   shoot(player, bulletEvent) {
     //NOTE: shoot gets called with currentPlayerSprite.gun.gunBullets OR game.remoteBulletGroup, if shoot is being called due to a server 'remoteFire' emit
     let bulletGroup = player.bulletGroup;
-
+    if (socket.id === player.socketId){
+      console.log('shoot method called for current player: ', player);
+    }
     if (bulletEvent){
       console.log('in shoot method for bullet event & player: ', bulletEvent, player);
     }

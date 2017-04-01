@@ -113,7 +113,7 @@ export default (state = initialState, action) => {
           if (playerState.bulletHash && Object.keys(playerState.bulletHash).length > 0){
             R.forEachObjIndexed( (bulletEvent, bulletEventId) => {
               if (remoteBulletEvents[bulletEventId] !== true){
-                console.log('hashEventId: ', bulletEventId);
+                console.log('hashEventId we will process: ', bulletEventId);
                 console.dir(bulletEvent);
                 remoteBulletEvents[bulletEventId] = true;
               }
