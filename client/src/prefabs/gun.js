@@ -40,8 +40,7 @@ export default class Gun extends GunPrefab {
   }
 
   //TODO: move bullet speed to the gun, and have shoot method go off of player.gun.bulletSpeed
-  shoot(player, bulletEvent) {
-    //NOTE: shoot gets called with currentPlayerSprite.gun.gunBullets OR game.remoteBulletGroup, if shoot is being called due to a server 'remoteFire' emit
+  shoot(player, bulletEvent) 
     let bulletGroup = player.bulletGroup;
     if (socket.id === player.socketId){
       console.log('shoot method called for current player: ', player);
@@ -125,7 +124,6 @@ export default class Gun extends GunPrefab {
       setTimeout(() => {
         delete this.game.currentPlayerSprite.bulletHash[bulletId];
       }, EVENT_LOOP_DELETE_TIME)
-      // store.dispatch(playerFired(player.pointerX, player.pointerY, socket.id, bulletId));
       //Change bullet ui for current player
       player.clipUpdate();
     } else {
@@ -142,9 +140,6 @@ export default class Gun extends GunPrefab {
 
   reloadGun() {
     this.isReloading = true;
-    // console.log(this);
-    // console.dir(this.game.currentPlayerSprite, { depth: 3 });
-    // console.log(this.game.currentPlayerSprite.reloadBar);
     this.game.currentPlayerSprite.reloadingAnim = this.game.currentPlayerSprite.reloadBar.animations.play('playReload');
 
     this.game.currentPlayerSprite.reloadingAnim.onComplete.addOnce(() => {
@@ -181,7 +176,6 @@ export default class Gun extends GunPrefab {
     bullet.kill();
     zombie.animations.stop();
     zombie.animations.play('dead');
-
     zombie.zombDeath.onComplete.add(() => zombie.kill(), this);
   }
 }
