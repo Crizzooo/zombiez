@@ -4,6 +4,7 @@ import playersReducer from './players-reducer';
 import game from './gameState-reducer';
 import zombies from './zombies-reducer.js';
 import logs from './gameLog-reducer.js'
+import lobbies from './lobbies-reducer.js';
 
 import lobby from './lobby-reducer.js';
 
@@ -13,7 +14,8 @@ export default combineReducers({
   players: playersReducer,
   lobby,
   zombies,
-  logs
+  logs,
+  lobbies
 });
 
 //sad

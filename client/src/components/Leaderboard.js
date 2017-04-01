@@ -30,7 +30,7 @@ function Leaderboard(props) {
     <div className="row" id="mainRow">
       <div className="leaderboard">
         <LobbyControls />
-        <table className="table table-striped table-inverse table-hover">
+        <table className="table table-striped table-inverse table-hover leaderboard">
           <thead className="thead-inverse">
             <tr>
               <th>#</th>

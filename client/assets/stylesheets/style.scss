@@ -3,6 +3,13 @@ $button-height: 40px;
 $container-height: 100%;
 $gameContainer-height: 100vh;
 
+$modeButtons-height: 38px;
+$modeButtons-width: 150px;
+$modeButtons-separation: 650px;
+
+$lobbySelectTable-width: 30vw;
+$lobbySelectTable-paddingTop: 28vh;
+
 * {
   box-sizing: border-box;
 }
@@ -31,9 +38,15 @@ body {
   font-size: large;
 }
 
-.table {
+.table.leaderboard {
   margin-bottom: 10px;
   height: 40%;
+}
+
+.lobbies >tbody>tr>td{
+  height:25px;
+  padding:8.5px;
+  border-top: 0px;
 }
 
 /* Main Container Styles */
@@ -76,15 +89,72 @@ body {
 }
 
 .gc {
+  background-image:url('../../assets/images/splash/genZedHomeSplash.png');
+  background-size: 100%;
   height: $gameContainer-height;
   background-color: black;
 }
+
+/* Mode Selection */
+.modeButtonHolder {
+  width: 100vw;
+  padding-top: calc( 55vh - #{$modeButtons-height});
+  padding-left: calc( (100vw / 2) - (#{$modeButtons-width} + (#{$modeButtons-separation} / 2) ));
+}
+
+.modeButtons {
+  height: $modeButtons-height;
+  width: $modeButtons-width;
+}
+
+.selectMultiplayer {
+  margin-right: calc(#{$modeButtons-separation} / 2);
+}
+
+.selectSinglePlayer {
+  // margin-left: $modeButtons-separation;
+  margin-left: calc(#{$modeButtons-separation} / 2 - 35px);
+}
+
+/* Lobby Selection */
+.lobbyTableHolder {
+  width: $lobbySelectTable-width;
+  margin: auto;
+  padding-top: $lobbySelectTable-paddingTop;
+}
+
+.lobbyTableRow {
+  border-top: 1px solid white;
+}
+
+.lobbyName {
+  width: 50%;
+  border: none !important;
+  margin: none;
+}
+
+.joinLobbyButton {
+  width: 90%;
+  display: inline-block;
+  margin: none;
+}
+
+.lobbyTableRow td {
+  vertical-align: middle;
+}
+.table.lobbies {
+  padding: .5rem;
+}
+
+
+
 
 .buttonHolder {
   padding-top: 49vh;
   width: 300px;
   margin: auto;
 }
+
 
 .minPlayerText{
   margin: auto;
@@ -214,12 +284,12 @@ Then, give all components a relative height */
   height: 20%;
 }
 
-/* Table Style */
-.table td, .table th {
+/* Leaderboard Style */
+.table.leaderboard td , .table.leaderboard th {
   background: rgba(0,0,0,0.2);
   padding: 5px;
 }
 
-.table-inverse {
+.table-inverse.leaderboard {
   background-color: transparent;
 }

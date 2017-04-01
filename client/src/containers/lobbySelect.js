@@ -1,15 +1,14 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
-import { Link } from 'react-router';
 import store from '../store.js'
 import Header from '../components/Header';
+import LobbyTable from '../components/LobbyTable';
 import { dispatchSetCurrentLobbyer } from '../reducers/lobby-reducer.js';
 
 import Leaderboard from '../components/Leaderboard';
-import lobbyView from './lobbyView.js';
 import GameContainer from './gameContainer.jsx';
 
-class Layout extends Component {
+class LobbyView extends Component {
 
   constructor(props) {
     super(props);
@@ -64,18 +63,11 @@ class Layout extends Component {
     return (
       <div className="siteContainer">
         <div className="gc">
-          <div className="modeButtonHolder">
-            <Link to='/multiplayer' >
-              <button type="submit" className="btn btn-primary modeButtons selectMultiplayer">Multiplayer
-              </button>
-            </Link>
-            <Link to='/singleplayer' >
-              <button type="submit" className="btn btn-danger modeButtons selectSinglePlayer" disabled>Single Player</button>
-            </Link>
-          </div>
-          }
+          <div>
+              <LobbyTable />
         </div>
       </div>
+    </div>
     );
   }
 }
@@ -84,4 +76,4 @@ class Layout extends Component {
   // const mapProps = state => ({})
   // const mapDispatch = {}
 
-export default connect()(Layout);
+export default connect()(LobbyView);

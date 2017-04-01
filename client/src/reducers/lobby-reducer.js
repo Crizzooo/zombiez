@@ -2,6 +2,7 @@
 const UPDATE_LOBBY = 'UPDATE_LOBBY';
 const SET_CURRENT_LOBBYER = 'SET_CURRENT_LOBBYER';
 const RESET_LOBBY = 'RESET_LOBBY';
+//TODO: Set Current Lobby
 
 /* Action Creators */
 export const dispatchLobbyUpdate = lobbyers => ({ type: UPDATE_LOBBY, lobbyers });

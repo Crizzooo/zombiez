@@ -5,6 +5,8 @@ import axios from 'axios';
 //Containers
 import Layout from './containers/layout';
 import Leaderboard from './components/Leaderboard';
+import LobbyView from './containers/lobbyView.js';
+import MultiplayerLobbySelect from './containers/lobbySelect.js';
 
 import {Provider} from 'react-redux';
 import{ Router, Route, browserHistory, IndexRoute } from 'react-router';
@@ -29,6 +31,9 @@ ReactDOM.render(
     <Router history={browserHistory}>
       <Route path="/" component={Layout} onEnter={getLobby} >
       </Route>
+      <Route path="/lobbyView" component={LobbyView}></Route>
+      <Route path="/multiplayer" component={MultiplayerLobbySelect}></Route>
+      <Route path='/singleplayer' component={LobbyView}></Route>
     </Router>
   </Provider>,
   document.getElementById('root')

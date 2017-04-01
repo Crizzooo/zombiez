@@ -21,9 +21,14 @@ body {
 .App-intro {
   font-size: large; }
 
-.table {
+.table.leaderboard {
   margin-bottom: 10px;
   height: 40%; }
+
+.lobbies > tbody > tr > td {
+  height: 25px;
+  padding: 8.5px;
+  border-top: 0px; }
 
 /* Main Container Styles */
 .mainContainer {
@@ -58,8 +63,51 @@ body {
   z-index: 1; }
 
 .gc {
+  background-image: url("../../assets/images/splash/genZedHomeSplash.png");
+  background-size: 100%;
   height: 100vh;
   background-color: black; }
+
+/* Mode Selection */
+.modeButtonHolder {
+  width: 100vw;
+  padding-top: calc( 55vh - 38px);
+  padding-left: calc( (100vw / 2) - (150px + (650px / 2) )); }
+
+.modeButtons {
+  height: 38px;
+  width: 150px; }
+
+.selectMultiplayer {
+  margin-right: calc(650px / 2); }
+
+.selectSinglePlayer {
+  margin-left: calc(650px / 2 - 35px); }
+
+/* Lobby Selection */
+.lobbyTableHolder {
+  width: 30vw;
+  margin: auto;
+  padding-top: 28vh; }
+
+.lobbyTableRow {
+  border-top: 1px solid white; }
+
+.lobbyName {
+  width: 50%;
+  border: none !important;
+  margin: none; }
+
+.joinLobbyButton {
+  width: 90%;
+  display: inline-block;
+  margin: none; }
+
+.lobbyTableRow td {
+  vertical-align: middle; }
+
+.table.lobbies {
+  padding: .5rem; }
 
 .buttonHolder {
   padding-top: 49vh;
@@ -174,10 +222,10 @@ Then, give all components a relative height */
   margin-top: 2px;
   height: 20%; }
 
-/* Table Style */
-.table td, .table th {
+/* Leaderboard Style */
+.table.leaderboard td, .table.leaderboard th {
   background: rgba(0, 0, 0, 0.2);
   padding: 5px; }
 
-.table-inverse {
+.table-inverse.leaderboard {
   background-color: transparent; }
