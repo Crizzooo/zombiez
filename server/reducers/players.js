@@ -52,6 +52,8 @@ const throttleReceiveEventHash = throttle( (action) => {
   console.log('at :', new Date());
 }, EVENT_LOOP_DELETE_TIME / 10)
 
+const receivedBulletEvents = {};
+
 const playerReducers = (state = initialState, action) => {
   let newState = Object.assign({}, state);
   switch (action.type) {
@@ -72,19 +74,28 @@ const playerReducers = (state = initialState, action) => {
       // console.log('Update received this action: ', action);
       let newPlayerStates = Object.assign({}, state.playerStates);
       newPlayerStates[action.playerToUpdate.socketId] = action.playerToUpdate;
-      if (
-        (action.playerToUpdate.bulletHash && (Object.keys(action.playerToUpdate.bulletHash).length) > 0)
-         ||
-        ( action.playerToUpdate.playerDamageHash && Object.keys(action.playerToUpdate.playerDamageHash).length > 0)
-        || (action.playerToUpdate.playerPickupHash &&
-        (Object.keys(action.playerToUpdate.playerPickupHash).length>0))){
-        //we've received an event
-        throttleReceiveEventHash(newPlayerStates);
-      } else {
-        throttleLog();
-      }
-      if (!action.playerToUpdate.socketId){
-        return state;
+      // if (
+      //   (action.playerToUpdate.bulletHash && (Object.keys(action.playerToUpdate.bulletHash).length) > 0)
+      //    ||
+      //   ( action.playerToUpdate.playerDamageHash && Object.keys(action.playerToUpdate.playerDamageHash).length > 0)
+      //   || (action.playerToUpdate.playerPickupHash &&
+      //   (Object.keys(action.playerToUpdate.playerPickupHash).length>0))){
+      //   //we've received an event
+      //   throttleReceiveEventHash(newPlayerStates);
+      // } else {
+      //   throttleLog();
+      // }
+      // if (!action.playerToUpdate.socketId){
+      //   return state;
+      // }
+      if (action.playerToUpdate.bulletHash && (Object.keys(action.playerToUpdate.bulletHash).length > 0)){
+        R.forEachObjIndexed( (bulletEvent, hashEventId) => {
+          if(receivedBulletEvents[hashEventId] !== true){
+            console.log('hashEventId: ', hashEventId);
+            console.dir(bulletEvent);
+            receivedBulletEvents[hashEventId] = true;
+          }
+        }, action.playerToUpdate.bulletHash);
       }
       newState.playerStates = newPlayerStates;
       break;

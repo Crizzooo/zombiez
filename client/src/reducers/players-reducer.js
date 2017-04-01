@@ -64,7 +64,7 @@ const initialState = {
   }
 };
 
-
+const remoteBulletEvents = {};
 
 // const throttleLog = throttle( (cpState) => console.log('newState: ', cpState), 5000);
 /* Reducer */
@@ -109,6 +109,17 @@ export default (state = initialState, action) => {
     case UPDATE_PLAYERS:
       //filter through players and make sure no undefined
       newState.playerStates = action.players;
+      R.forEachObjIndexed( (playerState) => {
+          if (playerState.bulletHash && Object.keys(playerState.bulletHash).length > 0){
+            R.forEachObjIndexed( (bulletEvent, bulletEventId) => {
+              if (remoteBulletEvents[bulletEventId] !== true){
+                console.log('hashEventId we will process: ', bulletEventId);
+                console.dir(bulletEvent);
+                remoteBulletEvents[bulletEventId] = true;
+              }
+            }, playerState.bulletHash);
+          }
+        }, action.players);
       break;
 
     case UPDATE_CURRENT_PLAYER:
