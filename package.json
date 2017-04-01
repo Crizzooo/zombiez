@@ -31,7 +31,18 @@
     "webpack-livereload-plugin": "^0.10.0"
   },
   "devDependencies": {
-    "react-scripts": "0.9.4"
+    "react-scripts": "0.9.4",
+    "babel-register": "^6.16.3",
+    "mocha": "^2.2.5",
+    "chai": "^3.2.0",
+    "chai-enzyme": "^0.5.2",
+    "chai-properties": "^1.2.1",
+    "chai-things": "^0.2.0",
+    "enzyme": "^2.5.0",
+    "sinon": "^1.17.2",
+    "sinon-chai": "^2.8.0",
+    "supertest": "^1.2.0",
+    "supertest-as-promised": "^3.1.0"
   },
   "scripts": {
     "start": "nodemon server/index.js --watch server",
