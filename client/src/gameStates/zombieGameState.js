@@ -591,7 +591,9 @@ export default class ZombieGameState extends TiledState {
     let playerWhoFired = remotePlayerSprites[bulletEvent.socketId];
     //if key is not in our hash map
     if (this.bulletHash[bulletId] !== true) {
-      playerWhoFired.gun.shoot(playerWhoFired);
+      console.log('handling bullet event for the first time: ', bulletId);
+      console.log('firing gun for: ', playerWhoFird);
+      playerWhoFired.gun.shoot(playerWhoFired, bulletEvent);
       this.bulletHash[bulletId] = true;
       //set a timeout to remove it from hashmap after the client has taken it off their event loop
       setTimeout(() => {
