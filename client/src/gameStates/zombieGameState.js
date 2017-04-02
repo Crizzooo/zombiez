@@ -145,7 +145,7 @@ export default class ZombieGameState extends TiledState {
     }
 
 	  //Enemy Generator Initial
-	  enemyGeneratorInitial(this,  1);
+	  enemyGeneratorInitial(this,  25);
 
     //Push all sprites in the world onto the child of the mapSpriteOverlay
 
@@ -158,10 +158,10 @@ export default class ZombieGameState extends TiledState {
 		})
 
 	  //Loop through enemies group and add manually, adding by group fails
-    this.groups.enemies.children.forEach( (enemy) => {
-      console.log('HIDING ENEMY', enemy)
-    	this.lighting.mapSprite.addChild(enemy);
-    })
+	  // this.groups.enemies.children.forEach( (enemy) => {
+     //  console.log('HIDING ENEMY', enemy)
+    	// this.lighting.mapSprite.addChild(enemy);
+	  // })
 
 	  for (let key in remotePlayerSprites) {
 		  if (remotePlayerSprites.hasOwnProperty(key)) {

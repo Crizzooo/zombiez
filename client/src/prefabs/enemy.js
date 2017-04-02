@@ -41,7 +41,7 @@ export default class Enemy extends Prefab {
 		//Find current target
 		this.currentTarget = this.acquireTarget(this.gameState.groups.player);
 
-		console.log(this.path.length, this.path)
+		// console.log(this.path.length, this.path)
 
 		if (this.path.length > 0 && !this.path[0].isRunning) {
 			console.log('WHY ISNT THIS RUNNING', this.path)
@@ -75,6 +75,7 @@ export default class Enemy extends Prefab {
 		movingTween.properties = [];
 
 		// path = this.smoothPath(path);
+		// path = path.splice(0, 1); //Needed if on child complete
 
 		if (pathLength <= 0) {
 			this.attackPlayer(this.currentTarget)
@@ -84,7 +85,7 @@ export default class Enemy extends Prefab {
 
 			path.forEach((position) => {
 				movingTween.to({x: position.x, y: position.y}, 350, Phaser.Easing.LINEAR);
-				//this.gameState.pathfinding.addTileTemp(position);
+				// this.gameState.pathfinding.addTileTemp(position);
 
 				let firstBezierPointX = (position.x + startX) / 2;
 				let firstBezierPointY = (position.y + startY) / 2;
@@ -115,21 +116,25 @@ export default class Enemy extends Prefab {
 		}
 	}
 
+	//Path smoothing Algorithms
 	smoothPath (path) {
 		if (path.length <= 1) {
 			return path;
 		}
 
-
 		let checkPoint = 0;
 		let currentPoint = 1;
 
 		while (path[currentPoint + 1] !== null) {
-
+			if (isPathWalkable(path[checkPoint], path[currentPoint + 1])) {
+				path.splice(path[checkPoint], 1)
+			}
 		}
 	}
 
-	isPathWalkable (x, y) {
+	isPathWalkable (beginning, end) {
+
+
 
 	}
 
@@ -143,6 +148,27 @@ export default class Enemy extends Prefab {
 		}
 	}
 
+	//Target Acqusition Algos
+	acquireTarget (playersAry) {
+		//TODO: add aggro distance
+		//TODO: should add the attack player function here, if playerDistance < X
+		let newTarget = playersAry.getFirstAlive()
+		let distance = 0;
+
+		playersAry.forEachAlive((player) => {
+			let playerDistance = Math.pow((player.x - this.x), 2) + Math.pow((player.y - this.y), 2);
+
+			if (distance <= playerDistance) {
+				distance = playerDistance;
+				newTarget = player;
+			}
+		});
+
+		this.currentTarget = newTarget;
+		return newTarget
+	}
+
+	//OLD FUNCTIONS, DONT TOUCH
 	moveTo (position) {
 		//putting sound in here for now, with dropoff
 		//sound continues one time after zombie dies...
@@ -177,24 +203,5 @@ export default class Enemy extends Prefab {
 			movingTween.start();
 			console.log('starting tween', movingTween);
 		}
-	}
-
-	acquireTarget (playersAry) {
-		//TODO: add aggro distance
-		//TODO: should add the attack player function here, if playerDistance < X
-		let newTarget = playersAry.getFirstAlive()
-		let distance = 0;
-
-		playersAry.forEachAlive((player) => {
-			let playerDistance = Math.pow((player.x - this.x), 2) + Math.pow((player.y - this.y), 2);
-
-			if (distance <= playerDistance) {
-				distance = playerDistance;
-				newTarget = player;
-			}
-		});
-
-		this.currentTarget = newTarget;
-		return newTarget
 	}
 }
