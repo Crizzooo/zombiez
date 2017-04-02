@@ -347,8 +347,8 @@ export default class Player extends Prefab {
         this.tint = 0xffffff;
       }, 250)
 
-    console.log("INSIDE RECEIVE DAMAGE PLAYER HEALTH", this.health)
-    console.log("INSIDE RECEIVE DAMAGE PLAYER.STATS.HEALTH", this.stats.health)
+    // console.log("INSIDE RECEIVE DAMAGE PLAYER HEALTH", this.health)
+    // console.log("INSIDE RECEIVE DAMAGE PLAYER.STATS.HEALTH", this.stats.health)
     if (this.stats.health <= 0){
       // console.log('took player below 0: ', this);
       this.immune = true;
