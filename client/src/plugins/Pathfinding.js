@@ -8,6 +8,7 @@ export default class Pathfinding extends Phaser.Plugin {
     constructor (game, parent) {
       super (game, parent);
       this.easyStar = new EasyStar.js();
+	    this.easyStar.enableDiagonals();
     }
 
   init (worldGrid, acceptableTiles, tileDimensions) {

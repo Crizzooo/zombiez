@@ -21,8 +21,8 @@ export default class Enemy extends Prefab {
 		this.lastPathPosition = {};
 
 		this.playSound = _.throttle(this.playSound,5000);
-		this.moveTo = throttle(this.moveTo, 2000)
-		this.acquireTarget = throttle(this.acquireTarget, 2000)
+		this.moveTo = throttle(this.moveTo, 650)
+		this.acquireTarget = throttle(this.acquireTarget, 650)
 
 		this.move = throttle(this.move, 300)
 
@@ -89,7 +89,7 @@ export default class Enemy extends Prefab {
 			let startY = this.position.y;
 
 			path.forEach((position) => {
-				movingTween.to({x: position.x, y: position.y}, randomDuration, Phaser.Easing.Linear.In);
+				movingTween.to({x: position.x, y: position.y}, randomDuration, Phaser.Easing.Linear);
 				// this.gameState.pathfinding.addTileTemp(position);
 
 				let firstBezierPointX = (position.x + startX) / 2;
@@ -261,6 +261,9 @@ export default class Enemy extends Prefab {
 		pathLength = path.length;
 
 
+		// console.log('OLD PATH IS', path);
+		// path = this.smoothPath(path);
+		// console.log('NEW PATH IS', path);
 
 		//If path is 0, attack the current target
 		if (pathLength <= 0) {
@@ -268,7 +271,7 @@ export default class Enemy extends Prefab {
 		} else {
 			console.log(movingTween)
 			path.forEach( (position) => {
-				movingTween.to({x: position.x, y: position.y}, 250, Phaser.Easing.LINEAR);
+				movingTween.to({x: position.x, y: position.y}, 400, Phaser.Easing.Linear.In);
 				// movingTween.properties.unshift(position);
 			});
 
