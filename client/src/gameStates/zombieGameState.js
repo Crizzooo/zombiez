@@ -388,7 +388,8 @@ export default class ZombieGameState extends TiledState {
       gunFrame: this.currentPlayerSprite.gun.frame,
       hasWon: this.currentPlayerSprite.hasWon,
       currentGunLevel: this.currentPlayerSprite.currentGunLevel,
-      playerPickupHash: this.currentPlayerSprite.playerPickupHash
+      playerPickupHash: this.currentPlayerSprite.playerPickupHash,
+      stats: {health: this.currentPlayerSprite.stats.health}
     }
 
     store.dispatch(updateCurrentPlayer(currentPlayer));
@@ -421,6 +422,7 @@ export default class ZombieGameState extends TiledState {
       playerToUpdate.pointer.x = playerToUpdate.pointerX;
       playerToUpdate.pointer.y = playerToUpdate.pointerY;
       playerToUpdate.health = playerState.health;
+      playerToUpdate.stats = {health: playerState.health};
       playerToUpdate.setHealth(playerState.health);
 
       if (playerState.bulletHash && Object.keys(playerState.bulletHash).length > 0) {
@@ -584,7 +586,12 @@ export default class ZombieGameState extends TiledState {
       }
       console.error('player not found');
     }
+
+    // console.log("-----PLAYER HEALTH IN DAMAGE BEFORE DAMAGE-----", playerToDamage); //does not update even after health pickup?
+
     playerToDamage.receiveDamage(playerWhoDealtDamage.gun.damage, playerWhoDealtDamage);
+
+    // console.log("PLAYER HEALTH IN DAMAGE AFTER DAMAGE", playerToDamage.stats.health); //does not update even after health pickup?
   }
 
   handleRemoteBullet(bulletEvent, bulletId) {
@@ -621,6 +628,7 @@ export default class ZombieGameState extends TiledState {
     //if key is not in our hash map)
     if (this.playerDamageHash[damageEventId] !== true){
       playerToDamage.receiveDamage(damageEvent.damage);
+      // console.log("PLAYER TO DAMAGE", playerToDamage.stats.health);
       this.playerDamageHash[damageEventId] = true;
       //set a timeout to remove it from hashmap after the client has taken it off their event loop
       setTimeout(() => {

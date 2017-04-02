@@ -4,8 +4,10 @@ import LobbyControls from './lobbyControls';
 import ChatApp from './chatApp.jsx';
 
 function Leaderboard(props) {
+
   let lobbyers = props.lobbyers ? props.lobbyers.sort((a, b) => b.score - a.score) : [];
   let playerRows = [];
+
   //loop through player count - create player objects
   let livePlayers = lobbyers.map( (player, index) => {
     return (<tr key={'player' + (index + 1)}>

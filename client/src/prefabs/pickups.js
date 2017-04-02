@@ -40,6 +40,7 @@ console.log('created prefab position', position)
       if(player.stats.health >= 70) player.stats.health = 100;
       else player.stats.health += 30;
       player.setHealth(player.stats.health);
+      console.log("PLAYER HEALTH STATS", player.stats.health);
     }  else if (pickupType === 'speed') {
       player.stats.movement += 100;
       console.log('PICKED UP SPEEED BOOOST', player)

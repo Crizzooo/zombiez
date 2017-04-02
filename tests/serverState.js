@@ -22,6 +22,7 @@ describe('Redux store on the server', () => {
       let currentState = testStore.getState();
       expect(currentState).to.deep.equal({gamePlaying: true});
     });
+
     it('resetting it will return it to false', () => {
       testStore.dispatch(gamePlaying(true));
       testStore.dispatch(resetEngine());
