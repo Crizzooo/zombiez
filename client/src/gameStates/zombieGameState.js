@@ -228,8 +228,8 @@ export default class ZombieGameState extends TiledState {
 
 	  //Pathfinding
 	  this.groups.enemies.forEachExists((enemy) => {
-		  enemy.move();
-		  //enemy.moveTo(enemy.acquireTarget(this.groups.player));
+		  // enemy.move();
+		  enemy.moveTo(enemy.acquireTarget(this.groups.player));
 	  });
 
     //Server & Input

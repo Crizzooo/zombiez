@@ -15,13 +15,14 @@ export default class Enemy extends Prefab {
 			attack: 5
 		};
 
+		this.current = 0;
 		this.currentTarget = null;
 		this.path = []
 		this.lastPathPosition = {};
 
 		this.playSound = _.throttle(this.playSound,5000);
-		this.moveTo = throttle(this.moveTo, 1000)
-		this.acquireTarget = throttle(this.acquireTarget, 1000)
+		this.moveTo = throttle(this.moveTo, 2000)
+		this.acquireTarget = throttle(this.acquireTarget, 2000)
 
 		this.move = throttle(this.move, 300)
 
@@ -79,7 +80,7 @@ export default class Enemy extends Prefab {
 
 		// path = path.splice(0, 1); //Needed if on child complete
 
-		let randomDuration = Math.round((Math.random() * 450) + 350);
+		let randomDuration = Math.round((Math.random() * 150) + 350);
 
 		if (pathLength <= 0) {
 			this.attackPlayer(this.currentTarget)
@@ -88,8 +89,8 @@ export default class Enemy extends Prefab {
 			let startY = this.position.y;
 
 			path.forEach((position) => {
-				movingTween.to({x: position.x, y: position.y}, randomDuration, Phaser.Easing.LINEAR);
-				this.gameState.pathfinding.addTileTemp(position);
+				movingTween.to({x: position.x, y: position.y}, randomDuration, Phaser.Easing.Linear.In);
+				// this.gameState.pathfinding.addTileTemp(position);
 
 				let firstBezierPointX = (position.x + startX) / 2;
 				let firstBezierPointY = (position.y + startY) / 2;
@@ -118,6 +119,36 @@ export default class Enemy extends Prefab {
 
 			this.path.push(movingTween);
 		}
+	}
+
+	randomEase() {
+		let rand = Math.floor(Math.random() * 18);
+
+		let tweenList = [
+			Phaser.Easing.Back.In,               // 0
+			Phaser.Easing.Back.Out,              // 1
+			Phaser.Easing.Back.InOut,            // 2
+			Phaser.Easing.Bounce.In,             // 3
+			Phaser.Easing.Bounce.Out,            // 4
+			Phaser.Easing.Bounce.InOut,          // 5
+			Phaser.Easing.Circular.In,           // 6
+			Phaser.Easing.Circular.Out,          // 7
+			Phaser.Easing.Circular.InOut,        // 8
+			Phaser.Easing.Cubic.In,              // 9
+			Phaser.Easing.Cubic.Out,             // 10
+			Phaser.Easing.Cubic.InOut,           // 11
+			Phaser.Easing.Elastic.In,            // 12
+			Phaser.Easing.Elastic.Out,           // 13
+			Phaser.Easing.Elastic.InOut,         // 14
+			Phaser.Easing.Exponential.In,        // 15
+			Phaser.Easing.Exponential.Out,       // 16
+			Phaser.Easing.Exponential.InOut,     // 17
+			Phaser.Easing.Linear.In,             // 18
+		];
+
+		console.log('TWEEN LIST', tweenList[rand]);
+
+		return tweenList[rand];
 	}
 
 	//Path smoothing Algorithms
@@ -208,7 +239,7 @@ export default class Enemy extends Prefab {
 	}
 
 	//OLD FUNCTIONS, DONT TOUCH
-	moveTo (position) {
+	moveTo () {
 		//putting sound in here for now, with dropoff
 		//sound continues one time after zombie dies...
 
@@ -219,6 +250,8 @@ export default class Enemy extends Prefab {
 		if (perc > 1) thisplaySound(this.game.state.callbackContext,'zombieSound',0.8);
 		else if(perc <= 0);
 		else this.playSound(this.game.state.callbackContext,'zombieSound',perc);
+
+		this.gameState.pathfinding.findPath(this.position, this.currentTarget, this.followPath, this);
 	}
 
 	followPath (path) {
@@ -227,20 +260,22 @@ export default class Enemy extends Prefab {
 		movingTween = this.game.tweens.create(this);
 		pathLength = path.length;
 
-		movingTween.properties = [];
+
 
 		//If path is 0, attack the current target
 		if (pathLength <= 0) {
-			this.attackPlayer(this.currentTarget)
+			// this.attackPlayer(this.currentTarget)
 		} else {
 			console.log(movingTween)
 			path.forEach( (position) => {
-				movingTween.to({x: position.x, y: position.y}, 350, Phaser.Easing.LINEAR);
-				movingTween.properties.unshift(position);
+				movingTween.to({x: position.x, y: position.y}, 250, Phaser.Easing.LINEAR);
+				// movingTween.properties.unshift(position);
 			});
 
+			if (this.path.length) this.path[0].stop();
 			movingTween.start();
-			console.log('starting tween', movingTween);
+			this.path.unshift(movingTween);
+			// console.log('starting tween', movingTween);
 		}
 	}
 }
