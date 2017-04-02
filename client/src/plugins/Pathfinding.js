@@ -58,16 +58,20 @@ export default class Pathfinding extends Phaser.Plugin {
 
 	addTileTemp(origin) {
 		let originCoord = this.getCoordFromPoint(origin);
-		this.worldGrid[originCoord.x][originCoord.y] = 1;
+		// console.log('ADD TEMP TILE 0', originCoord);
+		// console.log('ADD TEMP TILE 1', this.worldGrid);
+		this.worldGrid[originCoord.row][originCoord.column] = 1;
+
 
 		this.easyStar.setGrid(this.worldGrid);
 		console.log()
 		// console.log('ORIGIN COORD COLLISION', origin, originCoord);
 
 		setTimeout( () => {
-			this.worldGrid[originCoord.x][originCoord.y] = -1
+			this.worldGrid[originCoord.row][originCoord.column] = -1
 			this.easyStar.setGrid(this.worldGrid);
-		}, 1000);
+			console.log('RELEASING WORLD GRID');
+		}, 2000);
 	}
 
 

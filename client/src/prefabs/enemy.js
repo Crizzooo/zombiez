@@ -77,6 +77,8 @@ export default class Enemy extends Prefab {
 		// path = this.smoothPath(path);
 		// path = path.splice(0, 1); //Needed if on child complete
 
+		let randomDuration = Math.round((Math.random() * 450) + 350);
+
 		if (pathLength <= 0) {
 			this.attackPlayer(this.currentTarget)
 		} else {
@@ -84,8 +86,8 @@ export default class Enemy extends Prefab {
 			let startY = this.position.y;
 
 			path.forEach((position) => {
-				movingTween.to({x: position.x, y: position.y}, 350, Phaser.Easing.LINEAR);
-				// this.gameState.pathfinding.addTileTemp(position);
+				movingTween.to({x: position.x, y: position.y}, randomDuration, Phaser.Easing.LINEAR);
+				this.gameState.pathfinding.addTileTemp(position);
 
 				let firstBezierPointX = (position.x + startX) / 2;
 				let firstBezierPointY = (position.y + startY) / 2;
