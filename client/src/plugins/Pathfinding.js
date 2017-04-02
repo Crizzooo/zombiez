@@ -14,6 +14,8 @@ export default class Pathfinding extends Phaser.Plugin {
     this.gridDimensions = {row: worldGrid.length, column: worldGrid[0].length};
     this.worldGrid = worldGrid;
 
+    console.log('WORLD GRID', this.worldGrid);
+
     this.easyStar.setGrid(this.worldGrid);
     this.easyStar.setAcceptableTiles(acceptableTiles);
 

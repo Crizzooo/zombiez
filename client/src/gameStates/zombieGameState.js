@@ -144,6 +144,9 @@ export default class ZombieGameState extends TiledState {
       this.camera.follow(remotePlayerSprites[remotePlayerOneId]);
     }
 
+	  //Enemy Generator Initial
+	  enemyGeneratorInitial(this,  1);
+
     //Push all sprites in the world onto the child of the mapSpriteOverlay
 
 		//This is lighting layers done manually
@@ -155,7 +158,8 @@ export default class ZombieGameState extends TiledState {
 		})
 
 	  //Loop through enemies group and add manually, adding by group fails
-    this.groups.enemies.forEach( (enemy) => {
+    this.groups.enemies.children.forEach( (enemy) => {
+      console.log('HIDING ENEMY', enemy)
     	this.lighting.mapSprite.addChild(enemy);
     })
 
@@ -181,9 +185,6 @@ export default class ZombieGameState extends TiledState {
     this.remoteZombieSpriteGroup = this.groups.remoteZombieSpriteGroup;
 
 	  this.game.time.advancedTiming = true;
-
-	  //Enemy Generator Initial
-	  enemyGeneratorInitial(this,  1);
 
     // Game Log
     let canvas = document.getElementsByTagName("canvas")[0];
@@ -351,7 +352,7 @@ export default class ZombieGameState extends TiledState {
 	  this.game.physics.arcade.collide(this.currentPlayerSprite, this.layers.litWallCollision);
 
 	  this.game.physics.arcade.overlap(this.currentPlayerSprite, this.groups.pickups.children, this.pickupCollision);
-     this.game.physics.arcade.overlap(this.currentPlayerSprite, this.powerupGroup.children, playerCollidePowerup);
+    this.game.physics.arcade.overlap(this.currentPlayerSprite, this.powerupGroup.children, playerCollidePowerup);
     //Note: not sure why this doesnt work - remotePlayerSpriteGroup?
     this.game.physics.arcade.collide(this.remotePlayerSpriteGroup, this.currentPlayerSprite);
 
@@ -361,6 +362,9 @@ export default class ZombieGameState extends TiledState {
     this.game.physics.arcade.collide(this.currentPlayerSprite, this.remotePlayerBulletGroup, this.bulletHitPlayer, null, this);
     this.game.physics.arcade.collide(this.remotePlayerSpriteGroup, this.currentPlayerBulletGroup, this.bulletHitPlayer, null, this);
     this.game.physics.arcade.collide(this.remotePlayerSpriteGroup, this.remotePlayerBulletGroup, this.bulletHitPlayer, null, this);
+
+    //Bullet and Zombie
+	  this.game.physics.arcade.collide(this.currentPlayerBulletGroup, this.groups.enemies.children, this.bulletHitZombie, null, this);
 
     //if current player hits a local or a remote zombie, they should dispatch an event
     //collision for CPS bullets on localZombies (dispatchEvent)
@@ -525,10 +529,11 @@ export default class ZombieGameState extends TiledState {
   killZombie(zombie){
     zombie.hit = true;
     zombie.animations.stop();
-    zombie.animations.play('dead')
-    zombie.animations.currentAnim.onComplete.add( () => {
-      zombie.kill();
-    });
+	  zombie.kill();
+    // zombie.animations.play('dead')
+    // zombie.animations.currentAnim.onComplete.add( () => {
+    //   zombie.kill();
+    // });
 
     const zX =  zombie.x;
 	  const zY =  zombie.y;

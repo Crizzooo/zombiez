@@ -23,6 +23,8 @@ export default class Enemy extends Prefab {
 		this.moveTo = throttle(this.moveTo, 1000)
 		this.acquireTarget = throttle(this.acquireTarget, 1000)
 
+		this.move = throttle(this.move, 300)
+
 	}
 
 	playSound (game, whatSound, volume)  {
@@ -39,24 +41,25 @@ export default class Enemy extends Prefab {
 		//Find current target
 		this.currentTarget = this.acquireTarget(this.gameState.groups.player);
 
-		if (this.path[0] && !this.path[0].isRunning) {
-			console.log('WHY ISNT THIS RUNNING')
+		console.log(this.path.length, this.path)
+
+		if (this.path.length > 0 && !this.path[0].isRunning) {
+			console.log('WHY ISNT THIS RUNNING', this.path)
 			this.path.shift();
 		}
 
 		if (this.path.length < 2) {
 			//If there's no path start one
 			if (!this.path.length) {
+				console.log('ORIGINAL POSITION', this.position)
 				this.gameState.pathfinding.findPath(this.position, this.currentTarget, this.addTweenToPath, this);
 			}
 
 			//If there's a current path, create another one to be chained to it
 			//This path should start at the last path's end tween position
 			if (this.path.length === 1) {
-				//let originPosition = (this.path[0].properties[0] || this.path[0].properties)
-
 				let originPosition = this.position;
-				console.log('PATH 1 ORIGIN', this.lastPathPosition);
+				console.log('PATH 1 ORIGIN', this.lastPathPosition, this.currentTarget);
 				console.log('PATH 1', this.path)
 				this.gameState.pathfinding.findPath(this.lastPathPosition, this.currentTarget, this.addTweenToPath, this);
 			}
@@ -64,35 +67,80 @@ export default class Enemy extends Prefab {
 	}
 
 	addTweenToPath (path) {
-		console.log('inside path', path);
+		console.log('INSIDE PATH', path);
 		let movingTween, pathLength
 		movingTween = this.game.tweens.create(this);
 		pathLength = path.length;
 
 		movingTween.properties = [];
 
+		// path = this.smoothPath(path);
+
 		if (pathLength <= 0) {
 			this.attackPlayer(this.currentTarget)
 		} else {
-			path.forEach( (position) => {
+			let startX = this.position.x;
+			let startY = this.position.y;
+
+			path.forEach((position) => {
 				movingTween.to({x: position.x, y: position.y}, 350, Phaser.Easing.LINEAR);
 				//this.gameState.pathfinding.addTileTemp(position);
-			});
 
-			//Can delete one
-			this.lastPathPosition = path[path.length - 1];
-			movingTween.properties = path[path.length - 1];
+				let firstBezierPointX = (position.x + startX) / 2;
+				let firstBezierPointY = (position.y + startY) / 2;
+
+				// movingTween.to({
+				// 	x: [startX, position.x],
+				// 	y: [startY, position.y]
+				// }, 1000, Phaser.Easing.Quadratic.Out).interpolation((v, k) => {
+				// 	return Phaser.Math.bezierInterpolation(v, k)
+				// });
+
+				startX = position.x;
+				startY = position.y;
+
+				//Can delete one
+				this.lastPathPosition = path[path.length - 1];
+				movingTween.properties = path[path.length - 1];
+			})
+
+			if (!this.path.length) movingTween.start();
+			if (this.path[0]) this.path[0].chain(movingTween);
+
+			movingTween.onComplete.add(() => {
+				this.path.shift();
+			})
+
+			this.path.push(movingTween);
+		}
+	}
+
+	smoothPath (path) {
+		if (path.length <= 1) {
+			return path;
 		}
 
-		if (!this.path.length) movingTween.start();
 
-		if (this.path[0]) this.path[0].chain(movingTween);
+		let checkPoint = 0;
+		let currentPoint = 1;
 
-		movingTween.onComplete.add(() => {
-			this.path.shift();
-		})
+		while (path[currentPoint + 1] !== null) {
 
-		this.path.push(movingTween);
+		}
+	}
+
+	isPathWalkable (x, y) {
+
+	}
+
+	isTileWalkable (x, y) {
+		let collisionGrid = this.gameState.pathfinding.worldGrid;
+
+		if (collisionGrid[y][x] !== -1) {
+			return false
+		} else {
+			return true
+		}
 	}
 
 	moveTo (position) {
