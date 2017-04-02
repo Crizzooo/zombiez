@@ -71,7 +71,7 @@ export default class Pathfinding extends Phaser.Plugin {
 			this.worldGrid[originCoord.row][originCoord.column] = -1
 			this.easyStar.setGrid(this.worldGrid);
 			console.log('RELEASING WORLD GRID');
-		}, 2000);
+		}, 600);
 	}
 
 
@@ -82,6 +82,9 @@ export default class Pathfinding extends Phaser.Plugin {
 
   getCoordFromPoint (point) {
     let row, column;
+
+    // console.log('IN COORD', point);
+
     row = Math.floor(point.y / this.tileDimensions.y);
     column = Math.floor(point.x / this.tileDimensions.x);
 

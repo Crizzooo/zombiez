@@ -145,7 +145,7 @@ export default class ZombieGameState extends TiledState {
     }
 
 	  //Enemy Generator Initial
-	  enemyGeneratorInitial(this,  25);
+	  enemyGeneratorInitial(this,  1);
 
     //Push all sprites in the world onto the child of the mapSpriteOverlay
 

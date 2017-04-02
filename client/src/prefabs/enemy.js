@@ -67,14 +67,16 @@ export default class Enemy extends Prefab {
 	}
 
 	addTweenToPath (path) {
-		console.log('INSIDE PATH', path);
 		let movingTween, pathLength
 		movingTween = this.game.tweens.create(this);
 		pathLength = path.length;
 
 		movingTween.properties = [];
 
-		// path = this.smoothPath(path);
+		console.log('OLD PATH IS', path);
+		path = this.smoothPath(path);
+		console.log('NEW PATH IS', path);
+
 		// path = path.splice(0, 1); //Needed if on child complete
 
 		let randomDuration = Math.round((Math.random() * 450) + 350);
@@ -127,17 +129,52 @@ export default class Enemy extends Prefab {
 		let checkPoint = 0;
 		let currentPoint = 1;
 
-		while (path[currentPoint + 1] !== null) {
-			if (isPathWalkable(path[checkPoint], path[currentPoint + 1])) {
+		while (path[currentPoint + 1] !== undefined) {
+			// console.log('SMOOTH PATH', checkPoint, path[checkPoint]);
+
+			let tileCheckpoint = this.gameState.pathfinding.getCoordFromPoint(path[checkPoint]);
+			let tileCurrentPoint = this.gameState.pathfinding.getCoordFromPoint(path[currentPoint + 1]);
+
+			if (!this.isPathWalkable(tileCheckpoint, tileCurrentPoint)) {
 				path.splice(path[checkPoint], 1)
 			}
+
+			currentPoint = currentPoint + 1
+			checkPoint = currentPoint
 		}
+
+		return path;
 	}
 
 	isPathWalkable (beginning, end) {
+		let dx = Math.abs(end.row - beginning.row);
+		let dy = Math.abs(end.column - beginning.column);
+		let x = beginning.row;
+		let y = beginning.column;
 
+		let n = 1 + dx + dy;
 
+		let xInc = (end.row > beginning.row) ? 1 : -1;
+		let yInc = (end.column > beginning.column) ? 1 : -1;
 
+		//Might not need to scale it;
+		let error = dx - dy;
+		// dx *= 2;
+		// dy *= 2;
+
+		for (; n > 0; n--) {
+			if (!this.isTileWalkable(x, y)) return false;
+
+			if (error > 0) {
+				x += xInc;
+				error -= dy;
+			} else {
+				y += yInc;
+				error += dx;
+			}
+		}
+
+		return true;
 	}
 
 	isTileWalkable (x, y) {
