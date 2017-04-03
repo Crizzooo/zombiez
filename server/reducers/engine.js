@@ -1,7 +1,8 @@
 const TIMER_TICK = 'TIMER_TICK';
 const ADD_PLAYER = 'ADD_PLAYER';
 const GAME_PLAYING = 'GAME_PLAYING';
-const RESET_ENGINE = 'RESET_ENGINE'
+const RESET_ENGINE = 'RESET_ENGINE';
+const INITIALIZE_LOBBY = 'INITIALIZE_LOBBY';;
 
 
 const resetEngine = () => ({
@@ -13,14 +14,20 @@ const gamePlaying = (gamePlaying) => ({
   gamePlaying
 });
 
-const initialState = {
+const initialLobbyState = {
   gamePlaying: false
 }
+const initialState = {}
 
 const engineReducers = (state = initialState, action) => {
   let newState = Object.assign({}, state);
 
   switch (action.type) {
+
+    case INITIALIZE_LOBBY:
+      console.log('initializing lobby in game state');
+      newState[action.lobbyName] = initialLobbyState;
+      break;
 
     case GAME_PLAYING:
       newState.gamePlaying = action.gamePlaying;

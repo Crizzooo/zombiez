@@ -5,7 +5,8 @@
 body {
   margin: 0;
   padding: 0;
-  font-family: sans-serif; }
+  font-family: sans-serif;
+  background-color: black; }
 
 html,
 body {
@@ -22,7 +23,6 @@ body {
   font-size: large; }
 
 .table.leaderboard {
-  margin-bottom: 10px;
   height: 40%; }
 
 .lobbies > tbody > tr > td {
@@ -31,21 +31,16 @@ body {
   border-top: 0px; }
 
 /* Main Container Styles */
+.topContainer {
+  height: 70vh; }
+
 .mainContainer {
-  height: 0vh;
+  height: 30vh;
   z-index: 10;
   width: 100%; }
 
-#mainRow {
+#componentRow {
   height: 100%; }
-
-.leaderboard {
-  height: 100%;
-  box-sizing: border-box;
-  margin-left: 3%;
-  margin-right: 17%;
-  width: 30%;
-  padding: .2%; }
 
 #buttonHolder {
   height: 5%; }
@@ -79,9 +74,13 @@ body {
   width: 150px; }
 
 .selectMultiplayer {
-  margin-right: calc(650px / 2); }
+  margin-right: calc(650px / 2);
+  background-color: #b80000;
+  border-color: #b80000; }
 
 .selectSinglePlayer {
+  background-color: #b80000;
+  border-color: #b80000;
   margin-left: calc(650px / 2 - 35px); }
 
 /* Lobby Selection */
@@ -98,10 +97,26 @@ body {
   border: none !important;
   margin: none; }
 
+.leaderboard {
+  height: 100%;
+  box-sizing: border-box;
+  width: 100%;
+  padding: 1rem; }
+
 .joinLobbyButton {
   width: 90%;
   display: inline-block;
-  margin: none; }
+  margin: none;
+  background-color: #b80000;
+  border-color: #b80000; }
+
+.createLobbyButton {
+  background-color: #00c41f;
+  border-color: #00c41f; }
+
+.createLobbyButton:hover {
+  background-color: #00c41f;
+  border-color: #00c41f; }
 
 .lobbyTableRow td {
   vertical-align: middle; }
@@ -170,14 +185,13 @@ Then, give all components a relative height */
   min-height: 210px;
   height: 100%;
   padding: .5%;
-  margin-right: 3%;
-  margin-left: 17%;
   width: 30%; }
 
 .chatComponents {
   box-sizing: border-box;
   border-radius: 10px;
-  height: 100%; }
+  height: 100%;
+  padding: 1rem; }
 
 .messageForm {
   padding: 1.5px;

@@ -9,6 +9,7 @@ const UPDATE_REMOTE_ZOMBIES = 'UPDATE_REMOTE_ZOMBIES';
 const ZOMBIE_SHOT = 'ZOMBIE_SHOT';
 const REMOVE_EVENT = 'REMOVE_EVENT';
 const RESET = 'RESET';
+const INITIALIZE_LOBBY = 'INITIALIZE_LOBBY';
 
 /* Action Creators */
 export const updateLocalZombies = zombieStates => ({ type: UPDATE_LOCAL_ZOMBIES, zombieStates });
@@ -20,7 +21,7 @@ export const dispatchZombiesReset = () => ({type: RESET});
 
 
 //Note: addPlayer can probably be removed from file but will keep for now in case we change structure
-const initialState = {
+const initialLobbyState = {
   localZombies: {},
   remote: {},
   localEvents: {
@@ -28,6 +29,8 @@ const initialState = {
     zombieGiveDamage: {}
   }
 };
+
+const initialState = {};
 
 //NOTE: create action creators to create events and attach them
 
@@ -38,6 +41,11 @@ export default (state = initialState, action) => {
   let newLocalZombies = Object.assign({}, state.localZombies);
 
   switch (action.type) {
+
+    case INITIALIZE_LOBBY:
+      console.log('initializing lobby in player state');
+      newState[action.lobbyName] = initialLobbyState;
+      break;
 
     case UPDATE_LOCAL_ZOMBIES:
       //if there is a socket id, make it current player and remove him from playerStates

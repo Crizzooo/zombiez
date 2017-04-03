@@ -4,6 +4,7 @@ import LobbyControls from './lobbyControls';
 import ChatApp from './chatApp.jsx';
 
 function Leaderboard(props) {
+  console.log('leaderboard recieved props', props);
   let lobbyers = props.lobbyers ? props.lobbyers.sort((a, b) => b.score - a.score) : [];
   let playerRows = [];
   //loop through player count - create player objects
@@ -27,8 +28,8 @@ function Leaderboard(props) {
 
   //4 - player count times, create empty rows
   return (
-    <div className="row" id="mainRow">
-      <div className="leaderboard">
+    <div className="row" id="componentRow">
+      <div className="col-md-4 leaderboard">
         <LobbyControls />
         <table className="table table-striped table-inverse table-hover leaderboard">
           <thead className="thead-inverse">
@@ -47,7 +48,9 @@ function Leaderboard(props) {
           </tbody>
         </table>
       </div>
-      <div className="chatContainer">
+      <div className="col-md-4">
+      </div>
+      <div className="col-md-4 chatContainer">
         <ChatApp />
       </div>
     </div>

@@ -15,31 +15,10 @@ class LobbyView extends Component {
     this.state = {
       name: ''
     }
-    this.handleChange = this.handleChange.bind(this);
-    this.handleSubmit = this.handleSubmit.bind(this);
-    this.modalJSX =
-      <div className="modal fade" id="addPlayerModal" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
-      <div className="modal-dialog" role="document">
-        <div className="modal-content">
-          <div className="modal-header">
-            <h5 className="modal-title" id="exampleModalLabel">New Player Creation</h5>
-            <button type="button" className="close" data-dismiss="modal" aria-label="Close">
-              <span aria-hidden="true">&times;</span>
-            </button>
-          </div>
-          <div className="modal-body">
-            <form onSubmit={this.handleSubmit}>
-              <div className="form-group">
-                <label htmlFor="exampleInputEmail1">Name</label>
-                <input type="text" name="name" onChange={this.handleChange} className="form-control" id="playerNameInput" aria-describedby="namePlayer" placeholder="insert creative name here" autoFocus />
-                <small id="namePlayer" className="form-text text-muted">please dont feed the trolls</small>
-              </div>
-              <button type="submit" className="btn btn-primary">Submit</button>
-            </form>
-          </div>
-        </div>
-      </div>
-    </div>
+  }
+
+  componentWillMount(){
+    socket.emit('getLobbies');
   }
 
   handleChange(evt) {
@@ -47,16 +26,16 @@ class LobbyView extends Component {
   }
 
   handleSubmit(evt) {
-    evt.preventDefault();
-    if (this.state.name.length < 1){
-      this.state.name = 'I FORGOT TO PUT IN A NAME';
-    }
-    socket.emit('lobbyerJoinLobby', this.state);
-    let currentLobbyer = this.state;
-    currentLobbyer.socketId = socket.id;
-    store.dispatch(dispatchSetCurrentLobbyer(currentLobbyer));
-    $('#addPlayerModal').modal('hide');
-    $('#playerNameInput').val('');
+    // evt.preventDefault();
+    // if (this.state.name.length < 1){
+    //   return;
+    // }
+    // socket.emit('lobbyerJoinLobby', this.state);
+    // let currentLobbyer = this.state;
+    // currentLobbyer.socketId = socket.id;
+    // store.dispatch(dispatchSetCurrentLobbyer(currentLobbyer));
+    // $('#addPlayerModal').modal('hide');
+    // $('#playerNameInput').val('');
   }
 
   render () {

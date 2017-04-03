@@ -9,7 +9,7 @@ const throttle = require('lodash.throttle');
 const store = require('./store.js');
 
 //Store Dispatchers
-const {receiveJoinLobby, receiveLobbyerLeave, upgradeGun} = require('./reducers/lobby.js');
+const {initializeLobby, receiveJoinLobby, receiveLobbyerLeave, upgradeGun} = require('./reducers/lobby.js');
 const {updatePlayer, removePlayer} = require('./reducers/players.js');
 const {updateZombiesFromClient} = require('./reducers/zombies.js');
 const {updateLogsFromClient} = require('./reducers/logs.js');
@@ -47,16 +47,53 @@ io.on('connection', (socket) => {
     handleLobbyerLeave(socket);
   })
 
+  socket.on('getLobbies', () => {
+      let lobbies = store.getState().lobbies;
+      console.log('server lobbies: ', lobbies);
+      // pull out all lobbies from lobby Reducer
+      // map them to just be a name and playerCount
+      let lobbyArray = [];
+      R.forEachObjIndexed( (lobby, lobbyName) => {
+        let name = lobbyName;
+        let playerCount = lobby.lobbyers.length;
+        lobbyArray.push({
+          name,
+          playerCount
+        });
+      }, lobbies);
+      socket.emit('lobbiesUpdate', lobbyArray);
+  });
+
+  socket.on('createLobby', (lobbyName) => {
+    //join the given room
+    socket.room = lobbyName;
+    socket.join(lobbyName.toString(), () => {
+      store.dispatch(initializeLobby(lobbyName));
+      io.to(lobbyName).emit('newLobby', 'hi');
+    });
+
+    socket.roomName = lobbyName;
+    //NOTE: you can leave the channel with socket.leave(socket.roomName);
+    io.emit('lobbiesUpdate')
+    //sockets can broadcast specifically to users in a room using their unique room ids
+    //socket.broadcast.to(id).emit('my message', msg);
+  });
+
   socket.on('lobbyerJoinLobby', (lobbyObj) => {
     //TODO: Customize Player Obj for server purposes
     lobbyObj.socketId = socket.id;
+    // console.log('server recieved lobbyObj: ', lobbyObj);
+    store.dispatch(receiveJoinLobby(lobbyObj));
     let state = store.getState();
-    lobbyObj.playerNumber = state.lobby.lobbyers.length + 1;
+    console.log('lobbyObj to work with: ', lobbyObj);
+    console.log('state after lobbyerJoin: ');
+    console.dir(state, {depth: 4});
+    lobbyObj.playerNumber = state.lobbies[lobbyObj.lobby].lobbyers.length + 1;
     lobbyObj.host = lobbyObj.playerNumber === 1 ? true : false;
     lobbyObj.gunLvl = 1;
-    store.dispatch(receiveJoinLobby(lobbyObj));
     state = store.getState();
-    io.emit('lobbyUpdate', state.lobby.lobbyers);
+    io.emit('lobbiesUpdate');
+    io.to(socket.roomName).emit('lobbyUpdate', state.lobbies[lobbyObj.lobby].lobbyers);
   });
 
   socket.on('lobbyerLeaveLobby', () => {
@@ -65,7 +102,7 @@ io.on('connection', (socket) => {
     let state = store.getState();
     if (state.game.gamePlaying){
       socket.emit('destroyCurrentPlayerSprite');
-      io.emit('playerLeaveGame', socket.id);
+      io.to(socket.roomName).emit('playerLeaveGame', socket.id);
     }
   });
 
@@ -136,17 +173,22 @@ function findPlayer(socketId){
 
 function handleLobbyerLeave(socket){
   let state = store.getState();
-  let userWhoLeft = state.lobby.lobbyers.filter(lobbyer => lobbyer.socketId === socket.id)[0];
+  let userRoom = state.lobbies[socket.roomName];
+  if (!userRoom) {
+    return;
+  }
+  let userWhoLeft = state.lobbies[socket.roomName].lobbyers.filter(lobbyer => lobbyer.socketId === socket.id)[0];
   if (userWhoLeft){
-    store.dispatch(receiveLobbyerLeave(userWhoLeft.socketId));
+    store.dispatch(receiveLobbyerLeave(userWhoLeft.socketId, socket.roomName));
     state = store.getState();
-    io.emit('lobbyUpdate', state.lobby.lobbyers);
-    store.dispatch(removePlayer(socket.id));
-    if (state.game.gamePlaying){
+    io.to(socket.roomName).emit('lobbyUpdate', state.lobbies[socket.roomName].lobbyers);
+    if (state.game[socket.roomName].gamePlaying){
+      store.dispatch(removePlayer(socket.id));
       io.emit('playerLeaveGame', socket.id);
-      state = store.getState();
       socket.emit('destroyCurrentPlayerSprite');
     }
+    //TODO: if no one is left in the lobby, leave it and send the socket back to lobby select screen
+    //TODO: have people automatically join lobbies with their names
   }
 }
 

@@ -66,7 +66,7 @@ class Layout extends Component {
         <div className="gc">
           <div className="modeButtonHolder">
             <Link to='/multiplayer' >
-              <button type="submit" className="btn btn-primary modeButtons selectMultiplayer">Multiplayer
+              <button type="submit" className="btn btn-danger modeButtons selectMultiplayer">Multiplayer
               </button>
             </Link>
             <Link to='/singleplayer' >

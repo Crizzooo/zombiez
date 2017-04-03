@@ -1,5 +1,8 @@
 import React from 'react';
+import { browserHistory } from 'react-router';
 import { connect } from 'react-redux'
+import { dispatchSetLobby } from '../reducers/lobby-reducer.js';
+import store from '../store.js';
 import LobbyControls from './lobbyControls';
 import ChatApp from './chatApp.jsx';
 
@@ -14,16 +17,34 @@ class LobbyTable extends React.Component {
 
 
     this.lobbies = this.props.lobbies;
-    this.lobbyRows = [];
     this.state = {
-      lobbyName: ''
+      lobbyName: '',
+      lobbyRows: []
     }
     this.createModal = this.createModal.bind(this);
     this.handleChange = this.handleChange.bind(this);
     this.handleSubmit = this.handleSubmit.bind(this);
+    this.renderLobbyRows();
 
+    this.modalJSX = this.createModal();
+
+    $('#createLobbyModal').on('shown.bs.modal', function () {
+      $('#lobbyNameInput').focus()
+        // $(document).off('focusin.modal');
+    });
+
+    console.log('lobby table received this.props: ', this.props);
+  }
+
+  componentWillReceiveProps(props){
+    console.log('lobbyTable is receiving props: ', props);
+    this.lobbies = props.lobbies;
+    this.renderLobbyRows();
+  }
+
+  renderLobbyRows(){
     //create active lobbies
-    let activeLobbies = this.props.lobbies.map( (lobby) => {
+    let activeLobbies = this.lobbies.map( (lobby) => {
       if(lobby.playerCount < 4){
         return (
           (<tr className="lobbyTableRow">
@@ -44,19 +65,12 @@ class LobbyTable extends React.Component {
     });
 
     //create empty lobbies
-    let emptyLobbies = this.createEmptyLobbies(activeLobbies.length);
+    let emptyLobby = this.createEmptyLobby();
 
-    this.lobbyRows.push(activeLobbies);
-    this.lobbyRows.push(emptyLobbies);
-
-    this.modalJSX = this.createModal();
-    console.log('got modal JSX', this.modalJSX);
-
-    $('#createLobbyModal').on('shown.bs.modal', function () {
-      $('#lobbyNameInput').focus()
-    });
-
-    console.log('lobby table received this.props: ', this.props);
+    let newLobbyRows = [...activeLobbies, emptyLobby];
+    this.setState({ lobbyRows: newLobbyRows});
+    console.log('comp state after renderLobbyRows: ', this.state);
+    this.render();
   }
 
   render () {
@@ -68,7 +82,7 @@ class LobbyTable extends React.Component {
       <table className="table table-hover table-inverse text-center lobbies">
       <tbody>
       {
-        this.lobbyRows && this.lobbyRows.map((lobbyRowElement) => {
+        this.state.lobbyRows && this.state.lobbyRows.map((lobbyRowElement) => {
           return lobbyRowElement;
         })
       }
@@ -88,32 +102,29 @@ class LobbyTable extends React.Component {
   handleSubmit(evt){
     evt.preventDefault();
     console.log('ill get back to this: ', this.state.lobbyName);
+    console.log('evt data: ', evt);
+    console.dir(evt);
+    socket.emit('createLobby', this.state.lobbyName);
+    socket.lobbyName = this.state.lobbyName;
+    socket.on('newLobby', (msg)=> {
+      console.log('hey we got this: ', msg)
+    });
+    console.dir(socket);
     $('#lobbyNameInput').val("");
+    $('#createLobbyModal').modal('hide');
+    browserHistory.push('/multiplayer/'+this.state.lobbyName);
+    console.log('client side socket', socket);
   }
 
-  createEmptyLobbies(activeLobbyCount) {
-    let emptyLobbyAmount = 10 - activeLobbyCount;
-    let emptyLobbies = [];
-    for (var i = 0; i < emptyLobbyAmount; i++){
-      if (i === 0){
-        emptyLobbies.push(
+  createEmptyLobby() {
+    return (
             (<tr className="lobbyTableRow">
             <td scope="row" className="lobbyName col-md-6"> -- Empty Lobby --</td>
-            <td className="col-md-6"><button className="button btn-info btn-sm joinLobbyButton"
+            <td className="col-md-6"><button className="button btn-sm createLobbyButton"
             data-target="#createLobbyModal"
             data-toggle="modal">Create Lobby!</button></td>
             </tr>)
           );
-      } else {
-        emptyLobbies.push(
-            (<tr className="lobbyTableRow">
-            <td scope="row" className="lobbyName col-md-6">-- Empty Lobby --</td>
-            <td className="col-md-6"><button className="button btn-info btn-sm joinLobbyButton" disabled>Create Lobby!</button></td>
-            </tr>)
-        );
-      }
-    }
-    return emptyLobbies;
   }
 
   createModal(){

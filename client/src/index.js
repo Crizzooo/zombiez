@@ -25,14 +25,16 @@ const getLobby = () => {
   socket.emit('getLobby');
   socket.emit('getGameState');
 }
+//onEnter={getLobby}
 
 ReactDOM.render(
   <Provider store={store}>
     <Router history={browserHistory}>
-      <Route path="/" component={Layout} onEnter={getLobby} >
+      <Route path="/" component={Layout} >
       </Route>
       <Route path="/lobbyView" component={LobbyView}></Route>
       <Route path="/multiplayer" component={MultiplayerLobbySelect}></Route>
+      <Route path="/multiplayer/:lobbyName" component={LobbyView}></Route>
       <Route path='/singleplayer' component={LobbyView}></Route>
     </Router>
   </Provider>,

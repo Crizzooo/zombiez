@@ -9,6 +9,7 @@ import {throttle} from 'lodash';
 import { loadPlayers, changeGamePlaying, updatePlayers, playerLeaveGame, resetPlayers, updateCurrentPlayer } from './reducers/players-reducer.js';
 import { loadMessages, addMessage } from './reducers/chatApp-reducer.js';
 import { dispatchLobbyUpdate, dispatchSetCurrentLobbyer, resetLobby } from './reducers/lobby-reducer.js';
+import { dispatchLobbiesUpdate } from './reducers/lobbies-reducer.js';
 import { dispatchGamePlaying } from './reducers/gameState-reducer';
 import { updateRemoteZombies, dispatchZombiesReset } from './reducers/zombies-reducer';
 import { stopClientBroadcast } from './engine/emitCurrentState';
@@ -23,6 +24,7 @@ const attachFunctions = (socket) => {
   socket.on('startGame', startClientGame);
   socket.on('updateLeaderboard', dispatchScoreUpdate);
   socket.on('lobbyUpdate', dispatchLobbyState);
+  socket.on('lobbiesUpdate', dispatchLobbiesState);
   socket.on('serverUpdate', dispatchServerState);
   socket.on('gamePlayingUpdate', dispatchGamePlayingUpdate);
   socket.on('resetGame', dispatchReducerReset);
@@ -94,8 +96,14 @@ function dispatchPlayerUpdates(players) {
 
 function dispatchLobbyState(lobbyersFromServer){
   // console.log('received lobby from server: ', lobbyersFromServer);
+  console.log('received lobby from server: ', lobbyersFromServer);
   store.dispatch(dispatchLobbyUpdate(lobbyersFromServer));
   // console.log('store after receiving lobby: ', store.getState());
+}
+
+function dispatchLobbiesState(lobbiesFromServer){
+  console.log('received lobbies from server: ', lobbiesFromServer);
+  store.dispatch(dispatchLobbiesUpdate(lobbiesFromServer));
 }
 
 function dispatchScoreUpdate(playerId, score){

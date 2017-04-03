@@ -10,6 +10,7 @@ const RECEIVE_CLIENT_DATA = 'RECEIVE_CLIENT_DATA';
 const RESET_PLAYERS = 'RESET_PLAYERS';
 const UPDATE_PLAYER = 'UPDATE_PLAYER';
 const DAMAGE_PLAYER = 'DAMAGE_PLAYER';
+const INITIALIZE_LOBBY = 'INITIALIZE_LOBBY';
 
 // Action Creators
 const addPlayer = playerState => ({
@@ -17,9 +18,10 @@ const addPlayer = playerState => ({
   playerState
 });
 
-const removePlayer = id => ({
+const removePlayer = (id, room) => ({
   type: REMOVE_PLAYER,
-  id
+  id,
+  room
 });
 
 const receiveClientData = (id, data) => ({
@@ -44,7 +46,8 @@ const damagePlayer = (dmgToTake, socketId) => ({
 })
 
 
-const initialState = { playerStates: {}, playerHealths: {} };
+const initialLobbyState = { playerStates: {}, playerHealths: {} };
+const initialState = {};
 
 const throttleLog = throttle( () => console.log('did not recieve a hash'), 1000);
 const throttleReceiveEventHash = throttle( (action) => {
@@ -57,6 +60,11 @@ const receivedBulletEvents = {};
 const playerReducers = (state = initialState, action) => {
   let newState = Object.assign({}, state);
   switch (action.type) {
+
+    case INITIALIZE_LOBBY:
+      console.log('initializing lobby in player state');
+      newState[action.lobbyName] = initialLobbyState;
+      break;
 
     case ADD_PLAYER: {
       // console.log("Server is adding a player from: ", action.playerState);
@@ -107,7 +115,7 @@ const playerReducers = (state = initialState, action) => {
     }
 
     case REMOVE_PLAYER: {
-      let newPlayerStates = Object.assign({}, state.playerStates);
+      let newPlayerStates = Object.assign({}, state[action.room].playerStates);
       // console.log('server received remove player: ', action.id);
       if (newPlayerStates['undefined']){
         delete newPlayerStates['undefined'];
@@ -115,7 +123,7 @@ const playerReducers = (state = initialState, action) => {
       if (newPlayerStates[action.id]){
         delete newPlayerStates[action.id];
       }
-      newState.playerStates = newPlayerStates;
+      newState[action.room].playerStates = newPlayerStates;
       break;
     }
 

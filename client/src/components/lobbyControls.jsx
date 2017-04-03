@@ -50,11 +50,13 @@ export class lobbyControls extends React.Component {
   }
 }
 
-const mapProps = state => ({
+const mapProps = state => {
+  console.log('state in map props of lobby control: ', state)
+  return {
   currentLobbyer: state.lobby.currentLobbyer,
   lobbyers: state.lobby.lobbyers,
   gamePlaying: state.game.gamePlaying
-});
+};};
 
 export default connect(mapProps)(lobbyControls);
 
@@ -101,15 +103,15 @@ function renderJoinGameButton(props, handleLeaveGame){
     } else {
       jsxButton = renderGameInProgress();
     }
-  } else if (props.lobbyers.length >= 4 && !props.currentLobbyer.name) {
+  } else if (props.lobbyers && props.lobbyers.length >= 4 && !props.currentLobbyer.name) {
     //render game full
     jsxButton = renderFullJoinGame();
-  } else if ((props.lobbyers && props.lobbyers.length < 4) && !props.currentLobbyer.name){
-      //no current Lobbyer, lobby length is small enough
-      jsxButton = renderNormalJoinGame();
   } else if (props.currentLobbyer.name) {
       //render leave game button
       jsxButton = renderLeaveGame(handleLeaveGame, 'Leave Lobby!');
+  } else {
+    //no current lobbyer, and lobby is not full
+    jsxButton = renderNormalJoinGame();
   }
   return jsxButton;
 }

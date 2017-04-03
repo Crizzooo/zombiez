@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import store from '../store.js'
 import Header from '../components/Header';
-import { dispatchSetCurrentLobbyer } from '../reducers/lobby-reducer.js';
+import { dispatchSetCurrentLobbyer, dispatchSetLobby } from '../reducers/lobby-reducer.js';
 
 import Leaderboard from '../components/Leaderboard';
 import GameContainer from './gameContainer.jsx';
@@ -11,9 +11,12 @@ class LobbyView extends Component {
 
   constructor(props) {
     super(props);
+    console.log('what are props in lobbyView: ', props);
     this.state = {
-      name: ''
+      name: '',
+      lobby: props.routeParams.lobbyName
     }
+    console.log('this.state: ', this.state);
     this.handleChange = this.handleChange.bind(this);
     this.handleSubmit = this.handleSubmit.bind(this);
     this.modalJSX =
@@ -53,7 +56,9 @@ class LobbyView extends Component {
     socket.emit('lobbyerJoinLobby', this.state);
     let currentLobbyer = this.state;
     currentLobbyer.socketId = socket.id;
+    currentLobbyer.currentLobby = this.state.lobby;
     store.dispatch(dispatchSetCurrentLobbyer(currentLobbyer));
+    store.dispatch(dispatchSetLobby(currentLobbyer.currentLobby));
     $('#addPlayerModal').modal('hide');
     $('#playerNameInput').val('');
   }
@@ -65,7 +70,7 @@ class LobbyView extends Component {
           { this.modalJSX }
           <GameContainer />
           <div className="container mainContainer">
-            <Leaderboard />
+            <Leaderboard props={this.state}/>
             { this.props.children }
           </div>
         </div>
@@ -75,7 +80,25 @@ class LobbyView extends Component {
 }
 
 //map functions if needed, remove at end if not used
-  // const mapProps = state => ({})
+  const mapState = state => ({
+    lobbyName: state.lobby.currentLobby
+  });
   // const mapDispatch = {}
 
-export default connect()(LobbyView);
+export default connect(mapState)(LobbyView);
+
+
+//old render  // render () {
+  //   return (
+  //     <div className="siteContainer">
+  //       <div className="gc">
+  //         { this.modalJSX }
+  //         <GameContainer />
+  //         <div className="container mainContainer">
+  //           <Leaderboard />
+  //           { this.props.children }
+  //         </div>
+  //       </div>
+  //     </div>
+  //   );
+  // }

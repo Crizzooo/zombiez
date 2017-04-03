@@ -8,6 +8,7 @@ const throttle = require('lodash').throttle;
 const ADD_PLAYER_ID = 'ADD_PLAYER_ID';
 const UPDATE_ZOMBIES_FROM_CLIENT = 'UPDATE_ZOMBIES_FROM_CLIENT';
 const RESET_ZOMBIES = 'RESET_ZOMBIES';
+const INITIALIZE_LOBBY = 'INITIALIZE_LOBBY';
 
 // Action Creators
 // const removePlayer = id => ({
@@ -49,7 +50,7 @@ const throttleReceiveEventHash = throttle( (action) => {
 }, EVENT_LOOP_DELETE_TIME / 10)
 
 
-const initialState = {
+const initialLobbyState = {
   zombieSprites: {},
   zombieGiveDamageEvents: {
 
@@ -59,10 +60,17 @@ const initialState = {
   }
 }
 
+const initialState = {};
+
 const zombieReducer = (state = initialState, action) => {
   let newState = Object.assign({}, state);
   let newZombieState = Object.assign({}, state.zombieSprites);
   switch (action.type) {
+
+    case INITIALIZE_LOBBY:
+      console.log('initializing lobby in zombie state');
+      newState[action.lobbyName] = initialLobbyState;
+      break;
 
     case ADD_PLAYER_ID: {
       //TODO: add player Id to zombieSprites object
@@ -81,7 +89,7 @@ const zombieReducer = (state = initialState, action) => {
     case RESET_ZOMBIES: {
       newState = initialState;
       break;
-    } 
+    }
 
     default:
       return state;

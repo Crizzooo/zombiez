@@ -3,6 +3,10 @@ $button-height: 40px;
 $container-height: 100%;
 $gameContainer-height: 100vh;
 
+$genZed-red: #b80000;
+$genZed-accent-red: rgba(#c60707, 0.82);
+$genZed-green: #00c41f;
+
 $modeButtons-height: 38px;
 $modeButtons-width: 150px;
 $modeButtons-separation: 650px;
@@ -18,6 +22,7 @@ body {
   margin: 0;
   padding: 0;
   font-family: sans-serif;
+  background-color: black;
 }
 
 html,
@@ -39,7 +44,6 @@ body {
 }
 
 .table.leaderboard {
-  margin-bottom: 10px;
   height: 40%;
 }
 
@@ -50,24 +54,18 @@ body {
 }
 
 /* Main Container Styles */
+.topContainer {
+  height: 70vh;
+}
 
 .mainContainer {
-  height: 100 - $gameContainer-height;
+  height: 30vh;
   z-index: 10;
   width: 100%;
 }
 
-#mainRow {
+#componentRow {
   height: 100%;
-}
-
-.leaderboard {
-  height: $container-height;
-  box-sizing: border-box;
-  margin-left: 3%;
-  margin-right: 17%;
-  width: 30%;
-  padding: .2%;
 }
 
 #buttonHolder {
@@ -109,10 +107,19 @@ body {
 
 .selectMultiplayer {
   margin-right: calc(#{$modeButtons-separation} / 2);
+  background-color: $genZed-red;
+  border-color: $genZed-red;
 }
+// .selectMultiplayer:hover {
+//   background-color:$genZed-accent-red;
+//   border-color:$genZed-accent-red;
+// }
+
 
 .selectSinglePlayer {
   // margin-left: $modeButtons-separation;
+  background-color: $genZed-red;
+  border-color: $genZed-red;
   margin-left: calc(#{$modeButtons-separation} / 2 - 35px);
 }
 
@@ -133,10 +140,28 @@ body {
   margin: none;
 }
 
+.leaderboard {
+  height: $container-height;
+  box-sizing: border-box;
+  width: 100%;
+  padding: 1rem;
+}
+
 .joinLobbyButton {
   width: 90%;
   display: inline-block;
   margin: none;
+  background-color: $genZed-red;
+  border-color: $genZed-red;
+}
+
+.createLobbyButton {
+  background-color: $genZed-green;
+  border-color: $genZed-green;
+}
+.createLobbyButton:hover   {
+  background-color: $genZed-green;
+  border-color: $genZed-green;
 }
 
 .lobbyTableRow td {
@@ -145,9 +170,6 @@ body {
 .table.lobbies {
   padding: .5rem;
 }
-
-
-
 
 .buttonHolder {
   padding-top: 49vh;
@@ -222,8 +244,6 @@ Then, give all components a relative height */
   min-height: 210px;
   height: 100%;
   padding: .5%;
-  margin-right: 3%;
-  margin-left: 17%;
   width: 30%;
 }
 
@@ -231,6 +251,7 @@ Then, give all components a relative height */
   box-sizing: border-box;
   border-radius: 10px;
   height: 100%;
+  padding: 1rem;
 }
 
 .messageForm {

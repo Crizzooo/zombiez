@@ -8,11 +8,7 @@ export const resetLobbies = () => ({ type: RESET_LOBBIES });
 
 
 const initialState = {
-  lobbies: [ {
-    name: 'Lobby One',
-    playerCount: 2
-    }
-  ]
+  lobbies: []
 };
 
 /* Reducer */
@@ -24,6 +20,7 @@ export default (state = initialState, action) => {
 
     case UPDATE_LOBBIES:
       newState.lobbies = action.lobbies;
+      console.log('client store updated lobbies: ', newState.lobbies);
       break;
 
     case RESET_LOBBIES:

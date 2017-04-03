@@ -1,10 +1,16 @@
 const R = require('ramda');
+const INITIALIZE_LOBBY = 'INITIALIZE_LOBBY';
 const NEW_MESSAGE = 'NEW_MESSSAGE';
 const PLAYER_JOIN_LOBBY = 'PLAYER_JOIN_LOBBY';
 const LOBBYER_LEAVE_LOBBY = 'LOBBYER_LEAVE_LOBBY';
 const RESET_LOBBY = 'RESET_LOBBY';
 const UPGRADE_GUN = 'UPGRADE_GUN';
 
+
+const initializeLobby = (lobbyName) => ({
+  type: INITIALIZE_LOBBY,
+  lobbyName
+});
 
 const receiveNewMessage = (msg, user) => ({
   type: NEW_MESSAGE,
@@ -14,12 +20,14 @@ const receiveNewMessage = (msg, user) => ({
 
 const receiveJoinLobby =  (lobbyObj) => ({
   type: PLAYER_JOIN_LOBBY,
-  lobbyer: lobbyObj
+  lobbyer: lobbyObj,
+  lobby
 })
 
-const receiveLobbyerLeave = (lobbyerId) => ({
+const receiveLobbyerLeave = (lobbyerId, lobby) => ({
   type: LOBBYER_LEAVE_LOBBY,
-  lobbyerId
+  lobbyerId,
+  lobby
 })
 
 const resetLobby = () => ({
@@ -32,15 +40,24 @@ const upgradeGun = (gunLvl, lobbyerId) => ({
   lobbyerId,
 })
 
-const initialState = {
+const initialLobbyState = {
   lobbyers: [],
   messages: []
+}
+const initialState = {
 };
 
 const lobby = (state = initialState, action) => {
   let newState = Object.assign({}, state);
+  let newLobbies = Object.assign({}, state);
+  newState = newLobbies;
 
   switch (action.type) {
+
+    case INITIALIZE_LOBBY:
+        newState[action.lobbyName] = initialLobbyState;
+        console.log('new state after new lobby will be: ', newState);
+        break;
 
     case NEW_MESSAGE:
         //TODO: we probably arent doing anything with this. Server should just be emitting the message to local clients
@@ -48,11 +65,19 @@ const lobby = (state = initialState, action) => {
         break;
 
     case PLAYER_JOIN_LOBBY:
-        newState.lobbyers = [...state.lobbyers, action.lobbyer];
+        let lobbyToUpdate = Object.assign({},
+          newState[action.lobbyer.lobby]
+        )
+        if (lobbyToUpdate.lobbyers && lobbyToUpdate.lobbyers.length){
+          lobbyToUpdate.lobbyers = [...lobbyersToUpdate, action.lobbyer];
+          newState[action.lobbyer.lobby] = lobbyToUpdate;
+        } else {
+          newState[action.lobbyer.lobby].lobbyers = [action.lobbyer];
+        }
         break;
 
     case LOBBYER_LEAVE_LOBBY:
-        newState.lobbyers = newState.lobbyers.filter(lobbyer => lobbyer.socketId !== action.lobbyerId);
+        newState[action.lobby].lobbyers = newState[action.lobby].lobbyers.filter(lobbyer => lobbyer.socketId !== action.lobbyerId);
         break;
 
     case UPGRADE_GUN:
@@ -74,4 +99,4 @@ const lobby = (state = initialState, action) => {
   return newState;
 }
 
-module.exports = {lobby, receiveJoinLobby, receiveLobbyerLeave, resetLobby, upgradeGun}
+module.exports = {lobby, initializeLobby, receiveJoinLobby, receiveLobbyerLeave, resetLobby, upgradeGun}
