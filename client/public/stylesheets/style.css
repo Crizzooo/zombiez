@@ -85,15 +85,12 @@ body {
 
 /* Lobby Selection */
 .lobbyTableHolder {
-  width: 30vw;
-  margin: auto;
-  padding-top: 28vh; }
+  margin: auto; }
 
 .lobbyTableRow {
   border-top: 1px solid white; }
 
 .lobbyName {
-  width: 50%;
   border: none !important;
   margin: none; }
 

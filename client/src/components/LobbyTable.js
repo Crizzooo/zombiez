@@ -48,17 +48,24 @@ class LobbyTable extends React.Component {
       if(lobby.playerCount < 4){
         return (
           (<tr className="lobbyTableRow">
-          <td scope="row" className="lobbyName col-md-6">{lobby.name + ' ' + lobby.playerCount +
-          ' / 4'}</td>
-          <td className="col-md-6"><button className="button btn-danger btn-sm joinLobbyButton">Join Lobby!</button></td>
+          <td scope="row" className="lobbyName col-md-5">{lobby.name}</td>
+          <td scope="row" className="lobbyName col-md-3">
+            {''+lobby.playerCount + ' / 4'}
+          </td>
+          <td className="col-md-4"><button className="button btn-danger btn-sm joinLobbyButton" onClick={ () => {
+              browserHistory.push('/multiplayer/'+lobby.name);
+              console.log('loghing: ', lobby.name);
+            }}>Join Lobby!</button></td>
           </tr>)
         );
       } else {
         return (
           (<tr className="lobbyTableRow">
-          <td scope="row" className="lobbyName col-md-6">{lobby.name + ' ' + lobby.playerCount +
-          ' / 4'}</td>
-          <td className="col-md-6"><button className="button btn btn-sm joinLobbyButton" disabled>Lobby Full!</button></td>
+          <td scope="row" className="lobbyName col-md-5">{lobby.name}</td>
+          <td scope="row" className="lobbyName col-md-3">
+            {''+lobby.playerCount + ' / 4'}
+          </td>
+          <td className="col-md-4"><button className="button btn btn-sm joinLobbyButton" disabled>Lobby Full!</button></td>
           </tr>)
         );
       }
@@ -80,6 +87,13 @@ class LobbyTable extends React.Component {
       <div className="lobbyTableHolder">
       <div className="lobbyTable">
       <table className="table table-hover table-inverse text-center lobbies">
+        <thead>
+          <tr>
+            <th className="col-md-5">Lobby</th>
+            <th className="col-md-3">Player Count</th>
+            <th className="col-md-4"></th>
+          </tr>
+        </thead>
       <tbody>
       {
         this.state.lobbyRows && this.state.lobbyRows.map((lobbyRowElement) => {
@@ -119,8 +133,9 @@ class LobbyTable extends React.Component {
   createEmptyLobby() {
     return (
             (<tr className="lobbyTableRow">
-            <td scope="row" className="lobbyName col-md-6"> -- Empty Lobby --</td>
-            <td className="col-md-6"><button className="button btn-sm createLobbyButton"
+            <td scope="row" className="lobbyName col-md-5"> -- Empty Lobby --</td>
+            <td className="col-md-3"></td>
+            <td className="col-md-4"><button className="button btn-sm createLobbyButton"
             data-target="#createLobbyModal"
             data-toggle="modal">Create Lobby!</button></td>
             </tr>)

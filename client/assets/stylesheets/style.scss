@@ -125,9 +125,9 @@ body {
 
 /* Lobby Selection */
 .lobbyTableHolder {
-  width: $lobbySelectTable-width;
+  // width: $lobbySelectTable-width;
   margin: auto;
-  padding-top: $lobbySelectTable-paddingTop;
+  // padding-top: $lobbySelectTable-paddingTop;
 }
 
 .lobbyTableRow {
@@ -135,7 +135,6 @@ body {
 }
 
 .lobbyName {
-  width: 50%;
   border: none !important;
   margin: none;
 }

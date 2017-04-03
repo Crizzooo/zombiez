@@ -42,10 +42,18 @@ class LobbyView extends Component {
     return (
       <div className="siteContainer">
         <div className="gc">
-          <div>
-              <LobbyTable />
+          <div className="topContainer">
+          </div>
+          <div className="row">
+            <div className="col-md-4">
+            </div>
+            <div className="col-md-4">
+                <LobbyTable />
+            </div>
+            <div className="col-md-4">
+            </div>
+          </div>
         </div>
-      </div>
     </div>
     );
   }
