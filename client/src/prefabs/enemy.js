@@ -21,8 +21,8 @@ export default class Enemy extends Prefab {
 		this.lastPathPosition = {};
 
 		this.playSound = _.throttle(this.playSound,5000);
-		this.moveTo = throttle(this.moveTo, 645)
-		this.acquireTarget = throttle(this.acquireTarget, 645)
+		this.moveTo = throttle(this.moveTo, 700)
+		this.acquireTarget = throttle(this.acquireTarget, 700)
 
 		this.move = throttle(this.move, 300)
 
@@ -272,7 +272,7 @@ export default class Enemy extends Prefab {
 			console.log(movingTween)
 			path.forEach( (position) => {
 				// movingTween.to({x: position.x, y: position.y}, 300, Phaser.Easing.Quartic.In);
-				movingTween.to({x: position.x, y: position.y}, 400, Phaser.Easing.Linear.InOut);
+				movingTween.to({x: position.x, y: position.y}, 400, Phaser.Easing.LINEAR);
 				// movingTween.properties.unshift(position);
 			});
 
