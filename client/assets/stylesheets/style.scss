@@ -5,7 +5,10 @@ $gameContainer-height: 100vh;
 
 $genZed-red: #b80000;
 $genZed-accent-red: rgba(#c60707, 0.82);
-$genZed-green: #00c41f;
+// $genZed-green: #00c41f;
+$genZed-green: #0a9f22;
+// $genZed-accent-green: #017013;
+$genZed-accent-green: #16b32e;
 
 $modeButtons-height: 38px;
 $modeButtons-width: 150px;
@@ -87,10 +90,15 @@ body {
 }
 
 .gc {
-  background-image:url('../../assets/images/splash/genZedHomeSplash.png');
   background-size: 100%;
   height: $gameContainer-height;
   background-color: black;
+}
+
+.componentContainer {
+  width: 100%;
+  height: 100%;
+  background-color: pink;
 }
 
 /* Mode Selection */
@@ -132,6 +140,7 @@ body {
 
 .lobbyTableRow {
   border-top: 1px solid white;
+  line-height: 15%;
 }
 
 .lobbyName {
@@ -146,21 +155,43 @@ body {
   padding: 1rem;
 }
 
+.lobbyTable td#lobbyNameCell {
+  // background-color: pink;
+  // width: 33%;
+}
+
+.lobbyTable td#lobbyCountCell {
+  // background-color: pink;
+  // width: 17%;
+}
+
+.lobbyTable td#lobbyButtonCell {
+  // background-color: pink;
+}
+
+.lobbyTable th {
+  width: 33%;
+  text-align: center;
+}
+
 .joinLobbyButton {
-  width: 90%;
   display: inline-block;
   margin: none;
   background-color: $genZed-red;
   border-color: $genZed-red;
+  width: 100%;
+  padding: 12px;
 }
 
 .createLobbyButton {
   background-color: $genZed-green;
   border-color: $genZed-green;
+  width: 100%;
+  padding: 12px;
 }
 .createLobbyButton:hover   {
-  background-color: $genZed-green;
-  border-color: $genZed-green;
+  background-color: $genZed-accent-green;
+  border-color: $genZed-accent-green;
 }
 
 .lobbyTableRow td {

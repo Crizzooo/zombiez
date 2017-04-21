@@ -58,10 +58,14 @@ body {
   z-index: 1; }
 
 .gc {
-  background-image: url("../../assets/images/splash/genZedHomeSplash.png");
   background-size: 100%;
   height: 100vh;
   background-color: black; }
+
+.componentContainer {
+  width: 100%;
+  height: 100%;
+  background-color: pink; }
 
 /* Mode Selection */
 .modeButtonHolder {
@@ -88,7 +92,8 @@ body {
   margin: auto; }
 
 .lobbyTableRow {
-  border-top: 1px solid white; }
+  border-top: 1px solid white;
+  line-height: 15%; }
 
 .lobbyName {
   border: none !important;
@@ -100,20 +105,27 @@ body {
   width: 100%;
   padding: 1rem; }
 
+.lobbyTable th {
+  width: 33%;
+  text-align: center; }
+
 .joinLobbyButton {
-  width: 90%;
   display: inline-block;
   margin: none;
   background-color: #b80000;
-  border-color: #b80000; }
+  border-color: #b80000;
+  width: 100%;
+  padding: 12px; }
 
 .createLobbyButton {
-  background-color: #00c41f;
-  border-color: #00c41f; }
+  background-color: #0a9f22;
+  border-color: #0a9f22;
+  width: 100%;
+  padding: 12px; }
 
 .createLobbyButton:hover {
-  background-color: #00c41f;
-  border-color: #00c41f; }
+  background-color: #16b32e;
+  border-color: #16b32e; }
 
 .lobbyTableRow td {
   vertical-align: middle; }

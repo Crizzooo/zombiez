@@ -64,15 +64,8 @@ class Layout extends Component {
     return (
       <div className="siteContainer">
         <div className="gc">
-          <div className="modeButtonHolder">
-            <Link to='/multiplayer' >
-              <button type="submit" className="btn btn-danger modeButtons selectMultiplayer">Multiplayer
-              </button>
-            </Link>
-            <Link to='/singleplayer' >
-              <button type="submit" className="btn btn-danger modeButtons selectSinglePlayer" disabled>Single Player</button>
-            </Link>
-          </div>
+          {
+            this.props.children
           }
         </div>
       </div>

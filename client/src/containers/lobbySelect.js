@@ -40,18 +40,16 @@ class LobbyView extends Component {
 
   render () {
     return (
-      <div className="siteContainer">
-        <div className="gc">
-          <div className="topContainer">
-          </div>
-          <div className="row">
-            <div className="col-md-4">
+      <div>
+        <div className="topContainer">
+        </div>
+        <div className="row">
+            <div className="col-md-3">
             </div>
-            <div className="col-md-4">
+            <div className="col-md-6">
                 <LobbyTable />
             </div>
-            <div className="col-md-4">
-            </div>
+            <div className="col-md-3">
           </div>
         </div>
     </div>

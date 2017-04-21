@@ -48,24 +48,25 @@ class LobbyTable extends React.Component {
       if(lobby.playerCount < 4){
         return (
           (<tr className="lobbyTableRow">
-          <td scope="row" className="lobbyName col-md-5">{lobby.name}</td>
-          <td scope="row" className="lobbyName col-md-3">
+          <td scope="row" className="lobbyName" id="lobbyNameCell" colSpan="4">{lobby.name}</td>
+          <td scope="row" className="lobbyName" id="lobbyCountCell" colSpan="3">
             {''+lobby.playerCount + ' / 4'}
           </td>
-          <td className="col-md-4"><button className="button btn-danger btn-sm joinLobbyButton" onClick={ () => {
+          <td className="" id="lobbyButtonCell" colSpan="3"><button className="button btn-danger btn-sm joinLobbyButton" onClick={ () => {
+              console.log('enter: '+lobby.name);
+              store.dispatch(dispatchSetLobby(lobby.name));
               browserHistory.push('/multiplayer/'+lobby.name);
-              console.log('loghing: ', lobby.name);
-            }}>Join Lobby!</button></td>
+            }}>Enter Lobby</button></td>
           </tr>)
         );
       } else {
         return (
           (<tr className="lobbyTableRow">
-          <td scope="row" className="lobbyName col-md-5">{lobby.name}</td>
-          <td scope="row" className="lobbyName col-md-3">
+          <td scope="row" className="lobbyName" id="lobbyNameCell" colSpan="4">{lobby.name}</td>
+          <td scope="row" className="lobbyName" id="lobbyCountCell" colSpan="3">
             {''+lobby.playerCount + ' / 4'}
           </td>
-          <td className="col-md-4"><button className="button btn btn-sm joinLobbyButton" disabled>Lobby Full!</button></td>
+          <td className="col-md-4" id="lobbyButtonCell" colSpan="3"><button className="button btn btn-sm joinLobbyButton" disabled>Lobby Full!</button></td>
           </tr>)
         );
       }
@@ -89,9 +90,9 @@ class LobbyTable extends React.Component {
       <table className="table table-hover table-inverse text-center lobbies">
         <thead>
           <tr>
-            <th className="col-md-5">Lobby</th>
-            <th className="col-md-3">Player Count</th>
-            <th className="col-md-4"></th>
+            <th className="lobbyTableHeaderCell" colSpan="4">Lobby Name</th>
+            <th className="lobbyTableHeaderCell" colSpan="3">Player Count</th>
+            <th className="lobbyTableHeaderCell" colSpan="3"></th>
           </tr>
         </thead>
       <tbody>
@@ -133,9 +134,8 @@ class LobbyTable extends React.Component {
   createEmptyLobby() {
     return (
             (<tr className="lobbyTableRow">
-            <td scope="row" className="lobbyName col-md-5"> -- Empty Lobby --</td>
-            <td className="col-md-3"></td>
-            <td className="col-md-4"><button className="button btn-sm createLobbyButton"
+            <td scope="row" className="lobbyName col-md-5" colSpan="7"> -- Empty Lobby --</td>
+            <td className="col-md-4" colSpan="3"><button className="button btn-sm btn-danger createLobbyButton"
             data-target="#createLobbyModal"
             data-toggle="modal">Create Lobby!</button></td>
             </tr>)
